@@ -13,6 +13,7 @@ targets:
     platform: iOS
     sources:
       - path: StatScout
+      - path: StatScout/Assets.xcassets
     settings:
       base:
         DEVELOPMENT_TEAM: YXG4MP6W39
@@ -25,3 +26,5 @@ targets:
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
         INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
+        TARGETED_DEVICE_FAMILY: "1"
