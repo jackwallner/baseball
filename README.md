@@ -1,0 +1,71 @@
+# StatScout
+
+StatScout is a native SwiftUI iOS app for fans and media to view mobile-friendly Baseball Savant-style player percentile pages from a nightly refreshed Statcast data feed.
+
+## Stack
+
+- **iOS app:** SwiftUI, iOS 17+
+- **Project generation:** XcodeGen
+- **Database/API:** Supabase Postgres + generated REST API
+- **Nightly refresh:** GitHub Actions scheduled Python job
+- **Ingestion:** Python + `pybaseball` Baseball Savant percentile rankings
+
+## Project layout
+
+```text
+StatScout/                  SwiftUI source
+backend/                    Nightly ingestion job
+supabase/schema.sql         Supabase database schema and RLS policy
+.github/workflows/          Scheduled refresh workflow
+project.yml                 XcodeGen project definition
+```
+
+## Run the iOS app
+
+1. Install XcodeGen if needed:
+
+   ```bash
+   brew install xcodegen
+   ```
+
+2. Generate the Xcode project:
+
+   ```bash
+   xcodegen generate
+   ```
+
+3. Open `StatScout.xcodeproj` in Xcode.
+
+4. Run the `StatScout` scheme on an iPhone simulator.
+
+The app currently loads production-shaped sample data through `PreviewStatcastAPI`. To connect Supabase, initialize `DashboardViewModel` with `StatcastAPI(baseURL:apiKey:)` and use your Supabase project URL plus anon key.
+
+## Set up Supabase
+
+1. Create a free Supabase project.
+2. Open the SQL editor.
+3. Run `supabase/schema.sql`.
+4. Copy your project URL, anon key, and service role key.
+
+The table is `public.player_snapshots`. Public read access is enabled through RLS for app consumption. Writes should use only the service role key from GitHub Actions secrets.
+
+## Configure GitHub Actions
+
+Add these repository secrets:
+
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+
+Optional repository variable:
+
+- `STATCAST_SEASON`
+
+The workflow runs daily at `09:15 UTC` and can also be run manually from GitHub Actions.
+
+## Next production steps
+
+- Add team/position enrichment to the Savant percentile snapshot rows.
+- Add dedicated player search/profile navigation around Savant-style percentile cards.
+- Add cached local persistence in the iOS app.
+- Add push alerts for major percentile movers.
+- Add share cards for media-friendly player insights.

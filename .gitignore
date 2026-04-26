@@ -1,0 +1,13 @@
+DerivedData/
+.build/
+.swiftpm/
+*.xcuserstate
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+.env
+.env.*
+!.env.example
+__pycache__/
+*.pyc
+.DS_Store
