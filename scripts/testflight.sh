@@ -11,22 +11,15 @@ OPTIONS_PLIST="$PROJECT_DIR/AppStoreUploadOptions.plist"
 
 cd "$PROJECT_DIR"
 
-# Clean
 echo "==> Cleaning..."
 xcodebuild -project StatScout.xcodeproj -scheme "$SCHEME" clean
 
-# Archive
 echo "==> Archiving..."
-xcodebuild -project StatScout.xcodeproj -scheme "$SCHEME" -configuration Release archive -archivePath "$ARCHIVE_PATH" -destination "generic/platform=iOS"
+xcodebuild -project StatScout.xcodeproj -scheme "$SCHEME" -configuration Release archive -archivePath "$ARCHIVE_PATH" -destination "generic/platform=iOS" -allowProvisioningUpdates
 
-# Export
-echo "==> Exporting..."
+echo "==> Exporting & Uploading..."
 rm -rf "$EXPORT_PATH"
 mkdir -p "$EXPORT_PATH"
-xcodebuild -exportArchive -archivePath "$ARCHIVE_PATH" -exportPath "$EXPORT_PATH" -exportOptionsPlist "$OPTIONS_PLIST"
+xcodebuild -exportArchive -archivePath "$ARCHIVE_PATH" -exportPath "$EXPORT_PATH" -exportOptionsPlist "$OPTIONS_PLIST" -allowProvisioningUpdates
 
-# Upload
-echo "==> Uploading to TestFlight..."
-"$DIR/upload-testflight.sh" "$EXPORT_PATH/StatScout.ipa"
-
-echo "==> Done!"
+echo "==> Done! IPA at $EXPORT_PATH/StatScout.ipa"

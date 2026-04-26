@@ -130,6 +130,9 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
+					FD9EADD62D769B0B5687AC9A = {
+						DevelopmentTeam = YXG4MP6W39;
+					};
 				};
 			};
 			buildConfigurationList = 90D550D9543C303546D60074 /* Build configuration list for PBXProject "StatScout" */;
