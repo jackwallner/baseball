@@ -1,8 +1,12 @@
 import SwiftUI
 
 struct DashboardView: View {
-    @State private var viewModel = DashboardViewModel()
+    @State private var viewModel: DashboardViewModel
     @State private var selectedPlayer: Player?
+
+    init(viewModel: DashboardViewModel) {
+        _viewModel = State(initialValue: viewModel)
+    }
 
     var body: some View {
         NavigationStack {
@@ -63,5 +67,5 @@ struct DashboardView: View {
 }
 
 #Preview {
-    DashboardView()
+    DashboardView(viewModel: DashboardViewModel())
 }
