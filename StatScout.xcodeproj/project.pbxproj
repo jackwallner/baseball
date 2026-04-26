@@ -7,7 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		189D1222312FEE374CFA4DEE /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147A7B626DB00162FDED79EA /* SettingsView.swift */; };
 		53AAA361EDCCDA0BB2681CD8 /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28F7C1A7CADA7CA917C9B9BF /* Components.swift */; };
+		5ADC10C15D1FF7D02AD7E9F4 /* MetricLeadersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91414B3D597831487B630032 /* MetricLeadersView.swift */; };
+		648F3040D95418DB26BE2EE1 /* TeamView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCF08005AEA98F7CFF7919C6 /* TeamView.swift */; };
 		6F02D50458D1CB07ABF1E446 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3472ECB1AEDAC645F39334C8 /* Assets.xcassets */; };
 		97ADF393CE14DE856A50A0B5 /* StatScoutApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECB59368024F23FBC63D833E /* StatScoutApp.swift */; };
 		A6741F572242D827B65EF326 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64CFDB4111B83AFFDDABB591 /* DashboardView.swift */; };
@@ -19,6 +22,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		147A7B626DB00162FDED79EA /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		15914E954BD86B91C09E5C88 /* StatcastAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatcastAPI.swift; sourceTree = "<group>"; };
 		1E4FF70B13A65617E39C4E75 /* DashboardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardViewModel.swift; sourceTree = "<group>"; };
 		28F7C1A7CADA7CA917C9B9BF /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
@@ -27,8 +31,10 @@
 		64CFDB4111B83AFFDDABB591 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		7617277D84B90249653F8ED5 /* StatScout.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = StatScout.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7B12DA38BF60E2D7C4CC7DFF /* Player.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
+		91414B3D597831487B630032 /* MetricLeadersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetricLeadersView.swift; sourceTree = "<group>"; };
 		9AD97C159FCE484C7AA9DDDF /* PlayerProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerProfileView.swift; sourceTree = "<group>"; };
 		ECB59368024F23FBC63D833E /* StatScoutApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatScoutApp.swift; sourceTree = "<group>"; };
+		FCF08005AEA98F7CFF7919C6 /* TeamView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -99,7 +105,10 @@
 			children = (
 				28F7C1A7CADA7CA917C9B9BF /* Components.swift */,
 				64CFDB4111B83AFFDDABB591 /* DashboardView.swift */,
+				91414B3D597831487B630032 /* MetricLeadersView.swift */,
 				9AD97C159FCE484C7AA9DDDF /* PlayerProfileView.swift */,
+				147A7B626DB00162FDED79EA /* SettingsView.swift */,
+				FCF08005AEA98F7CFF7919C6 /* TeamView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -177,11 +186,14 @@
 				53AAA361EDCCDA0BB2681CD8 /* Components.swift in Sources */,
 				A6741F572242D827B65EF326 /* DashboardView.swift in Sources */,
 				B254FB702E1FD23611E5472B /* DashboardViewModel.swift in Sources */,
+				5ADC10C15D1FF7D02AD7E9F4 /* MetricLeadersView.swift in Sources */,
 				B4DCC3A1E6B450909ED5F5DC /* Player.swift in Sources */,
 				B56324087E4F4F901D6586E5 /* PlayerProfileView.swift in Sources */,
 				F9CFA1F577A94864AB624B41 /* SampleData.swift in Sources */,
+				189D1222312FEE374CFA4DEE /* SettingsView.swift in Sources */,
 				97ADF393CE14DE856A50A0B5 /* StatScoutApp.swift in Sources */,
 				C5718F0C8435928CBF995DE5 /* StatcastAPI.swift in Sources */,
+				648F3040D95418DB26BE2EE1 /* TeamView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -193,7 +205,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = YXG4MP6W39;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Baseball Savvy StatScout";
@@ -281,7 +293,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = YXG4MP6W39;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Baseball Savvy StatScout";

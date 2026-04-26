@@ -4,39 +4,55 @@ struct PlayerProfileView: View {
     let player: Player
     @Environment(\.dismiss) private var dismiss
 
+    private var groupedMetrics: [(category: MetricCategory, metrics: [Metric])] {
+        let grouped = Dictionary(grouping: player.metrics) { $0.category }
+        return MetricCategory.allCases.compactMap { cat in
+            guard let m = grouped[cat], !m.isEmpty else { return nil }
+            return (category: cat, metrics: m.sorted { $0.percentile > $1.percentile })
+        }
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
-                    VStack(alignment: .leading, spacing: 12) {
-                        PercentileBadge(percentile: player.overallPercentile)
-                        Text(player.name)
-                            .font(.system(size: 36, weight: .black, design: .rounded))
-                            .foregroundStyle(.white)
-                        Text("\(player.team) · \(player.position) · \(player.handedness)")
-                            .font(.headline.weight(.semibold))
-                            .foregroundStyle(.white.opacity(0.62))
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(22)
-                    .background(StatScoutTheme.card, in: RoundedRectangle(cornerRadius: 28))
-                    .overlay(RoundedRectangle(cornerRadius: 28).stroke(StatScoutTheme.stroke))
+                    SavantPlayerHeader(player: player)
 
-                    SectionHeader(title: "Percentile profile", subtitle: "How the underlying tools stack up right now")
+                    ForEach(groupedMetrics, id: \.category) { group in
+                        VStack(alignment: .leading, spacing: 12) {
+                            HStack {
+                                Text(group.category.rawValue)
+                                    .font(.title3.weight(.black))
+                                    .foregroundStyle(.white)
+                                Spacer()
+                                if let avg = player.percentile(for: group.category) {
+                                    Text("Avg \(avg)")
+                                        .font(.caption.weight(.black))
+                                        .foregroundStyle(avg > 75 ? StatScoutTheme.savantRed : (avg < 25 ? StatScoutTheme.savantBlue : .white.opacity(0.6)))
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 5)
+                                        .background(Color.white.opacity(0.06), in: Capsule())
+                                }
+                            }
 
-                    VStack(spacing: 14) {
-                        ForEach(player.metrics) { metric in
-                            MetricBar(metric: metric)
-                                .padding(16)
-                                .background(Color.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 18))
+                            VStack(spacing: 10) {
+                                ForEach(group.metrics) { metric in
+                                    MetricBar(metric: metric)
+                                        .padding(.horizontal, 14)
+                                        .padding(.vertical, 12)
+                                        .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 12))
+                                }
+                            }
                         }
                     }
 
-                    SectionHeader(title: "Game-to-game notes", subtitle: "Short-form context built for quick nightly reads")
+                    if !player.games.isEmpty {
+                        SectionHeader(title: "Recent Games", subtitle: "Game-to-game trends and context")
 
-                    VStack(spacing: 12) {
-                        ForEach(player.games) { game in
-                            GameTrendCard(game: game)
+                        VStack(spacing: 12) {
+                            ForEach(player.games) { game in
+                                GameTrendCard(game: game)
+                            }
                         }
                     }
                 }
