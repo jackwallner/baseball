@@ -16,6 +16,9 @@ struct DashboardView: View {
                     leaderboardSection
                 }
             }
+            .refreshable {
+                await viewModel.load()
+            }
             if viewModel.isLoading && viewModel.players.isEmpty {
                 ProgressView()
                     .scaleEffect(1.5)

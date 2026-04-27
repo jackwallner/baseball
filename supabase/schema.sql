@@ -11,6 +11,7 @@ create table if not exists public.player_snapshots (
   player_type text not null default 'unknown',
   source text not null default 'baseball_savant_percentile_rankings',
   metrics jsonb not null default '[]'::jsonb,
+  standard_stats jsonb not null default '[]'::jsonb,
   games jsonb not null default '[]'::jsonb
 );
 

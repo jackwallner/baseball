@@ -22,8 +22,9 @@ struct TeamsView: View {
 
                 LazyVGrid(columns: columns, spacing: 8) {
                     ForEach(Self.allTeams, id: \.self) { abbr in
+                        let count = viewModel.players(forTeam: abbr).count
                         NavigationLink(value: TeamDestination(abbr: abbr)) {
-                            TeamTile(abbr: abbr)
+                            TeamTile(abbr: abbr, playerCount: count)
                         }
                         .buttonStyle(.plain)
                     }
@@ -37,6 +38,7 @@ struct TeamsView: View {
 
 struct TeamTile: View {
     let abbr: String
+    var playerCount: Int = 0
 
     var body: some View {
         VStack(spacing: 8) {
@@ -47,6 +49,17 @@ struct TeamTile: View {
                 Text(abbr)
                     .font(SavantType.statSmall)
                     .foregroundStyle(.white)
+            }
+            .overlay(alignment: .topTrailing) {
+                if playerCount > 0 {
+                    Text("\(playerCount)")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundStyle(.white)
+                        .frame(minWidth: 16, minHeight: 16)
+                        .background(SavantPalette.savantRed)
+                        .clipShape(Circle())
+                        .offset(x: 4, y: -4)
+                }
             }
             Text(teamFullName(abbr))
                 .font(SavantType.smallBold)

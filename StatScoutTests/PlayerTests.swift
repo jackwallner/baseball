@@ -11,7 +11,7 @@ final class PlayerTests: XCTestCase {
         let player = Player(
             id: 1, name: "Test", team: "NYY", position: "RF",
             handedness: "R/R", imageURL: nil,
-            updatedAt: Date(), metrics: metrics, games: []
+            updatedAt: Date(), metrics: metrics, standardStats: [], games: []
         )
         XCTAssertEqual(player.overallPercentile, 76) // 75.9 rounded
     }
@@ -21,7 +21,7 @@ final class PlayerTests: XCTestCase {
         let player = Player(
             id: 1, name: "Aaron Judge", team: "NYY", position: "RF",
             handedness: "R/R", imageURL: nil,
-            updatedAt: Date(), metrics: [metric], games: []
+            updatedAt: Date(), metrics: [metric], standardStats: [], games: []
         )
         let summary = player.shareSummary
         XCTAssertTrue(summary.contains("Aaron Judge"))
@@ -34,7 +34,7 @@ final class PlayerTests: XCTestCase {
         let player = Player(
             id: 1, name: "Test", team: "NYY", position: "RF",
             handedness: "R/R", imageURL: nil,
-            updatedAt: now, metrics: [],
+            updatedAt: now, metrics: [], standardStats: [],
             games: [
                 GameTrend(id: "recent-up", date: now.addingTimeInterval(-24 * 3600), opponent: "BOS", summary: "", percentileDelta: 5, keyMetric: "xwOBA"),
                 GameTrend(id: "recent-down", date: now.addingTimeInterval(-2 * 24 * 3600), opponent: "TOR", summary: "", percentileDelta: -2, keyMetric: "Barrel%"),

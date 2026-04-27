@@ -85,9 +85,13 @@ struct MetricLeadersView: View {
                                         .font(SavantType.smallBold)
                                         .foregroundStyle(SavantPalette.ink)
                                         .lineLimit(1)
-                                    Text("\(best.value)")
-                                        .font(SavantType.statSmall)
-                                        .foregroundStyle(SavantPalette.pctlHot)
+                                    HStack(spacing: 4) {
+                                        TeamColorDot(abbr: best.player.team, size: 5)
+                                        Text(best.player.team)
+                                            .font(SavantType.micro)
+                                            .tracking(0.4)
+                                            .foregroundStyle(SavantPalette.inkTertiary)
+                                    }
                                 }
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -109,9 +113,13 @@ struct MetricLeadersView: View {
                                         .font(SavantType.smallBold)
                                         .foregroundStyle(SavantPalette.ink)
                                         .lineLimit(1)
-                                    Text("\(worst.value)")
-                                        .font(SavantType.statSmall)
-                                        .foregroundStyle(SavantPalette.pctlCold)
+                                    HStack(spacing: 4) {
+                                        TeamColorDot(abbr: worst.player.team, size: 5)
+                                        Text(worst.player.team)
+                                            .font(SavantType.micro)
+                                            .tracking(0.4)
+                                            .foregroundStyle(SavantPalette.inkTertiary)
+                                    }
                                 }
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)

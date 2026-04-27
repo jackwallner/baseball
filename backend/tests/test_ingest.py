@@ -91,8 +91,9 @@ def test_safe_player_id_nan():
 def test_build_snapshot_rows_handles_empty_dataframe():
     with patch("ingest.statcast_batter_percentile_ranks", return_value=pd.DataFrame()):
         with patch("ingest.statcast_pitcher_percentile_ranks", return_value=pd.DataFrame()):
-            with pytest.raises(SystemExit):
-                ingest.main()
+            with patch("ingest._fetch_standard_stats", return_value=(pd.DataFrame(), pd.DataFrame())):
+                with pytest.raises(SystemExit):
+                    ingest.main()
 
 
 def test_batching():

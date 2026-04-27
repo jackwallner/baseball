@@ -44,7 +44,7 @@ struct OverallPercentileBadge: View {
             Text("\(percentile)")
                 .font(SavantType.statHero)
                 .foregroundStyle(.white)
-            Text("PCTL")
+            Text(percentile.ordinal)
                 .font(SavantType.micro)
                 .tracking(0.6)
                 .foregroundStyle(.white.opacity(0.85))
@@ -70,35 +70,40 @@ struct MetricBar: View {
     var showValue: Bool = true
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack(spacing: 12) {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 8) {
                 Text(metric.label)
                     .font(SavantType.smallBold)
                     .foregroundStyle(SavantPalette.ink)
-                Spacer(minLength: 8)
+
+                Spacer(minLength: 4)
+
                 if showValue && !metric.value.isEmpty {
                     Text(metric.value)
                         .font(SavantType.statSmall)
                         .foregroundStyle(SavantPalette.inkSecondary)
-                        .frame(minWidth: 64, alignment: .trailing)
                 }
+
+                Text("\(metric.percentile)")
+                    .font(SavantType.statSmall.weight(.bold))
+                    .foregroundStyle(SavantPalette.color(forPercentile: metric.percentile))
+                    .frame(minWidth: 32, alignment: .trailing)
             }
+
             GeometryReader { proxy in
                 let p = max(0, min(100, metric.percentile))
-                let x = max(6, min(proxy.size.width - 6, proxy.size.width * CGFloat(p) / 100.0))
+                let fillWidth = proxy.size.width * CGFloat(p) / 100.0
                 ZStack(alignment: .leading) {
-                    RoundedRectangle(cornerRadius: 2)
+                    RoundedRectangle(cornerRadius: 3)
                         .fill(SavantPalette.hairline)
-                        .frame(height: SavantGeo.barTrack)
-                        .frame(maxHeight: .infinity)
-                    Circle()
+                        .frame(height: 8)
+
+                    RoundedRectangle(cornerRadius: 3)
                         .fill(SavantPalette.color(forPercentile: p))
-                        .frame(width: SavantGeo.barMarker, height: SavantGeo.barMarker)
-                        .overlay(Circle().stroke(.white, lineWidth: 2))
-                        .position(x: x, y: proxy.size.height / 2)
+                        .frame(width: max(2, fillWidth), height: 8)
                 }
             }
-            .frame(height: 12)
+            .frame(height: 8)
         }
     }
 }
@@ -213,11 +218,6 @@ struct LeaderboardTableHeader: View {
                 .tracking(0.5)
                 .foregroundStyle(SavantPalette.inkTertiary)
                 .frame(maxWidth: .infinity, alignment: .leading)
-            Text("VAL")
-                .font(SavantType.micro)
-                .tracking(0.5)
-                .foregroundStyle(SavantPalette.inkTertiary)
-                .frame(width: 56, alignment: .trailing)
             Text("PCTL")
                 .font(SavantType.micro)
                 .tracking(0.5)
@@ -273,17 +273,6 @@ struct LeaderboardTableRow: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            if let metric = displayMetric {
-                Text(metric.value)
-                    .font(SavantType.statMed)
-                    .foregroundStyle(SavantPalette.ink)
-                    .frame(width: 56, alignment: .trailing)
-            } else {
-                Text("—")
-                    .font(SavantType.statMed)
-                    .foregroundStyle(SavantPalette.inkTertiary)
-                    .frame(width: 56, alignment: .trailing)
-            }
             PercentileBarMini(percentile: displayPercentile)
                 .frame(width: 120, alignment: .leading)
         }
@@ -301,17 +290,16 @@ struct PercentileBarMini: View {
     var body: some View {
         GeometryReader { proxy in
             let p = max(0, min(100, percentile))
-            let x = max(5, min(proxy.size.width - 5, proxy.size.width * CGFloat(p) / 100.0))
+            let fillWidth = proxy.size.width * CGFloat(p) / 100.0
             ZStack(alignment: .leading) {
                 RoundedRectangle(cornerRadius: 2)
                     .fill(SavantPalette.hairline)
                     .frame(height: 4)
                     .position(x: proxy.size.width / 2, y: proxy.size.height / 2)
-                Circle()
+                RoundedRectangle(cornerRadius: 2)
                     .fill(SavantPalette.color(forPercentile: p))
-                    .frame(width: 10, height: 10)
-                    .overlay(Circle().stroke(.white, lineWidth: 1.5))
-                    .position(x: x, y: proxy.size.height / 2)
+                    .frame(width: max(2, fillWidth), height: 4)
+                    .position(x: max(2, fillWidth) / 2, y: proxy.size.height / 2)
             }
         }
         .frame(height: 18)
@@ -347,7 +335,7 @@ struct FeaturedTile: View {
                         .foregroundStyle(SavantPalette.inkTertiary)
                 }
                 if let metric = player.headlineMetric {
-                    Text("\(metric.label) \(metric.value) · \(metric.percentile) PCTL")
+                    Text("\(metric.label) \(metric.value) · \(metric.percentile.ordinal)")
                         .font(SavantType.smallBold)
                         .foregroundStyle(SavantPalette.color(forPercentile: metric.percentile))
                         .lineLimit(1)

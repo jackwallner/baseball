@@ -12,6 +12,7 @@ struct Player: Identifiable, Codable, Hashable, Sendable {
     let playerType: String? = nil
     let source: String? = nil
     let metrics: [Metric]
+    let standardStats: [StandardStat]
     let games: [GameTrend]
 
     enum CodingKeys: String, CodingKey {
@@ -26,6 +27,7 @@ struct Player: Identifiable, Codable, Hashable, Sendable {
         case playerType = "player_type"
         case source
         case metrics
+        case standardStats = "standard_stats"
         case games
     }
 
@@ -77,6 +79,12 @@ struct Metric: Identifiable, Codable, Hashable, Sendable {
     let percentile: Int
     let direction: MetricDirection
     let category: MetricCategory
+}
+
+struct StandardStat: Identifiable, Codable, Hashable, Sendable {
+    let id: String
+    let label: String
+    let value: String
 }
 
 enum MetricDirection: String, Codable, Hashable, Sendable {

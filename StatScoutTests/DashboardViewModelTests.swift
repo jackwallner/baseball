@@ -11,6 +11,7 @@ final class DashboardViewModelTests: XCTestCase {
                 metrics: [
                     Metric(id: "m1", label: "xwOBA", value: ".400", percentile: 90, direction: .flat, category: .hitting)
                 ],
+                standardStats: [],
                 games: []
             ),
             Player(
@@ -19,6 +20,7 @@ final class DashboardViewModelTests: XCTestCase {
                 metrics: [
                     Metric(id: "m2", label: "xwOBA", value: ".350", percentile: 85, direction: .flat, category: .pitching)
                 ],
+                standardStats: [],
                 games: []
             )
         ]
@@ -54,6 +56,7 @@ final class DashboardViewModelTests: XCTestCase {
             id: 1, name: "Aaron Judge", team: "NYY", position: "RF", handedness: "R/R", imageURL: nil,
             updatedAt: Date(),
             metrics: [],
+            standardStats: [],
             games: []
         )
         let vm = DashboardViewModel(provider: MockProvider(players: [player]))
@@ -84,6 +87,7 @@ final class DashboardViewModelTests: XCTestCase {
             id: id, name: "Player \(id)", team: "NYY", position: "RF", handedness: "R/R", imageURL: nil,
             updatedAt: date,
             metrics: [],
+            standardStats: [],
             games: [
                 GameTrend(id: "\(id)-game", date: date, opponent: "BOS", summary: "", percentileDelta: delta, keyMetric: "xwOBA")
             ]

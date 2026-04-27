@@ -6,7 +6,12 @@ from typing import Any, Iterator, Optional
 
 import pandas as pd
 from dotenv import load_dotenv
-from pybaseball import statcast_batter_percentile_ranks, statcast_pitcher_percentile_ranks
+from pybaseball import (
+    batting_stats,
+    pitching_stats,
+    statcast_batter_percentile_ranks,
+    statcast_pitcher_percentile_ranks,
+)
 from supabase import create_client
 
 load_dotenv()
@@ -74,6 +79,47 @@ PITCHER_METRICS = [
     ("curve_spin", "Curve Spin", "Pitching"),
 ]
 
+# Standard (traditional) stats from FanGraphs leaderboards
+HITTER_STANDARD_STATS = [
+    ("AVG", "AVG"),
+    ("OBP", "OBP"),
+    ("SLG", "SLG"),
+    ("OPS", "OPS"),
+    ("HR", "HR"),
+    ("RBI", "RBI"),
+    ("R", "R"),
+    ("H", "H"),
+    ("2B", "2B"),
+    ("3B", "3B"),
+    ("BB", "BB"),
+    ("SO", "SO"),
+    ("SB", "SB"),
+    ("CS", "CS"),
+    ("PA", "PA"),
+    ("AB", "AB"),
+]
+
+PITCHER_STANDARD_STATS = [
+    ("ERA", "ERA"),
+    ("WHIP", "WHIP"),
+    ("W", "W"),
+    ("L", "L"),
+    ("SV", "SV"),
+    ("IP", "IP"),
+    ("H", "H"),
+    ("R", "R"),
+    ("ER", "ER"),
+    ("HR", "HR"),
+    ("BB", "BB"),
+    ("SO", "SO"),
+    ("K/9", "K/9"),
+    ("BB/9", "BB/9"),
+    ("K/BB", "K/BB"),
+    ("QS", "QS"),
+    ("G", "G"),
+    ("GS", "GS"),
+]
+
 
 def _all_metric_defs(player_type: str) -> list[tuple[str, str, str]]:
     if player_type == "batter":
@@ -106,9 +152,9 @@ def percentile_value(value: Any) -> Optional[int]:
 def raw_stat_value(row: pd.Series, key: str) -> Optional[str]:
     """Attempt to extract a raw stat value from the row.
 
-    The percentile-rank DataFrames from pybaseball primarily contain percentiles (0-100).
-    Real raw values live in separate leaderboards. For now, return None so the iOS
-    client can hide the value label until raw-stat ingestion is added.
+    Percentile-rank DataFrames from pybaseball primarily contain percentiles (0-100).
+    Some versions also include raw values in companion columns or the same column.
+    We try multiple heuristics to find the actual baseball number.
     """
     # If a companion raw column exists (e.g. 'xwoba_value'), use it.
     raw_key = f"{key}_value"
@@ -116,16 +162,30 @@ def raw_stat_value(row: pd.Series, key: str) -> Optional[str]:
         raw = row[raw_key]
         if pd.notna(raw):
             return str(raw)
-    # Also try a column named exactly like the key but that might contain the raw value.
-    # In some pybaseball versions the percentile column has a '_percentile' suffix
-    # and the bare key is the raw value. If the value is already > 100 or < 0 it's raw.
+
+    # If the key itself has a '_percentile' suffix, the bare key might be raw.
+    base_key = key.replace("_percentile", "")
+    if base_key != key and base_key in row:
+        raw = row[base_key]
+        if pd.notna(raw):
+            return str(raw)
+
+    # Heuristic: if the value in the key column has a decimal component,
+    # it's almost certainly a raw stat, not an integer percentile.
     if key in row:
         val = row[key]
         if pd.notna(val):
             try:
                 f = float(val)
+                # Percentiles are integers 0-100. If it has decimals, it's raw.
+                if f != int(f):
+                    return str(val)
+                # If outside 0-100, it's definitely raw.
                 if f < 0 or f > 100:
                     return str(val)
+                # For known raw-stat columns where values can legitimately be 0-100
+                # (like exit_velocity ~96, bat_speed ~70), we still might miss them.
+                # We accept that limitation here; standard stats fill the gap.
             except (ValueError, TypeError):
                 pass
     return None
@@ -194,7 +254,53 @@ def handedness_from_row(row: pd.Series) -> str:
     return bats or throws or ""
 
 
-def merge_player_row(players: dict[int, dict[str, Any]], row: pd.Series, player_type: str, metric_defs: list[tuple[str, str, str]], now: str) -> None:
+def _normalize_name(name: str) -> str:
+    """Normalize a player name for cross-source matching."""
+    return str(name).strip().lower().replace(".", "").replace("'", "")
+
+
+def _build_standard_stats(row: pd.Series, stat_defs: list[tuple[str, str]]) -> list[dict[str, Any]]:
+    """Build standard_stats JSON from a FanGraphs stats row."""
+    stats: list[dict[str, Any]] = []
+    for col, label in stat_defs:
+        if col in row and pd.notna(row[col]):
+            val = row[col]
+            # Format numbers nicely
+            if isinstance(val, (int, float)):
+                if label in ("AVG", "OBP", "SLG", "OPS", "ERA", "WHIP"):
+                    val_str = f"{float(val):.3f}"
+                elif label in ("K/9", "BB/9", "K/BB"):
+                    val_str = f"{float(val):.2f}"
+                else:
+                    val_str = str(int(val)) if float(val).is_integer() else str(float(val))
+            else:
+                val_str = str(val)
+            stats.append({"id": f"std-{label}", "label": label, "value": val_str})
+    return stats
+
+
+def _fetch_standard_stats(season: int) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Fetch FanGraphs standard stats for hitters and pitchers."""
+    logger.info("Fetching standard batting stats for season %s", season)
+    try:
+        bat = batting_stats(season, qual=1)
+        logger.info("Standard batting rows: %d", len(bat))
+    except Exception:
+        logger.exception("Failed to fetch standard batting stats")
+        bat = pd.DataFrame()
+
+    logger.info("Fetching standard pitching stats for season %s", season)
+    try:
+        pitch = pitching_stats(season, qual=1)
+        logger.info("Standard pitching rows: %d", len(pitch))
+    except Exception:
+        logger.exception("Failed to fetch standard pitching stats")
+        pitch = pd.DataFrame()
+
+    return bat, pitch
+
+
+def merge_player_row(players: dict[int, dict[str, Any]], row: pd.Series, player_type: str, metric_defs: list[tuple[str, str, str]], now: str, standard_lookup: Optional[dict[str, pd.Series]] = None) -> None:
     player_id = safe_player_id(row)
     if player_id is None:
         logger.warning("Skipping row with missing or invalid player_id: %s", row.to_dict())
@@ -205,9 +311,16 @@ def merge_player_row(players: dict[int, dict[str, Any]], row: pd.Series, player_
         return
 
     if player_id not in players:
+        player_name = display_name(row.get("player_name", ""))
+        norm_name = _normalize_name(player_name)
+        standard_stats: list[dict[str, Any]] = []
+        if standard_lookup and norm_name in standard_lookup:
+            stat_defs = PITCHER_STANDARD_STATS if player_type == "pitcher" else HITTER_STANDARD_STATS
+            standard_stats = _build_standard_stats(standard_lookup[norm_name], stat_defs)
+
         players[player_id] = {
             "id": player_id,
-            "name": display_name(row.get("player_name", "")),
+            "name": player_name,
             "team": team_from_row(row),
             "position": position_from_row(row, player_type),
             "handedness": handedness_from_row(row),
@@ -217,6 +330,7 @@ def merge_player_row(players: dict[int, dict[str, Any]], row: pd.Series, player_
             "player_type": player_type,
             "source": "baseball_savant_percentile_rankings",
             "metrics": metrics,
+            "standard_stats": standard_stats,
             "games": [],
         }
         return
@@ -267,32 +381,60 @@ def build_snapshot_rows() -> list[dict[str, Any]]:
     if missing_pitcher:
         logger.warning("Missing pitcher columns: %s", missing_pitcher)
 
+    # Fetch standard stats and build name-keyed lookups
+    bat_std, pitch_std = _fetch_standard_stats(STATCAST_SEASON)
+    batter_lookup: dict[str, pd.Series] = {}
+    pitcher_lookup: dict[str, pd.Series] = {}
+    if not bat_std.empty and "Name" in bat_std.columns:
+        for _, row in bat_std.iterrows():
+            key = _normalize_name(row["Name"])
+            batter_lookup[key] = row
+    if not pitch_std.empty and "Name" in pitch_std.columns:
+        for _, row in pitch_std.iterrows():
+            key = _normalize_name(row["Name"])
+            pitcher_lookup[key] = row
+
+    logger.info("Standard stat lookups: batters=%d, pitchers=%d", len(batter_lookup), len(pitcher_lookup))
+
     batter_metrics = _all_metric_defs("batter")
     pitcher_metrics = _all_metric_defs("pitcher")
 
     skipped = 0
     for _, row in batter_rows.iterrows():
         try:
-            merge_player_row(players, row, "batter", batter_metrics, now)
+            merge_player_row(players, row, "batter", batter_metrics, now, batter_lookup)
         except Exception:
             skipped += 1
             logger.exception("Failed to process batter row")
 
     for _, row in pitcher_rows.iterrows():
         try:
-            merge_player_row(players, row, "pitcher", pitcher_metrics, now)
+            merge_player_row(players, row, "pitcher", pitcher_metrics, now, pitcher_lookup)
         except Exception:
             skipped += 1
             logger.exception("Failed to process pitcher row")
 
+    # For two-way players, try to attach the opposite standard stats if missing
+    for p in players.values():
+        if p.get("player_type") == "two_way":
+            norm = _normalize_name(p["name"])
+            if not p.get("standard_stats"):
+                # Prefer hitter stats for two-way unless they have only pitching metrics
+                if norm in batter_lookup:
+                    p["standard_stats"] = _build_standard_stats(batter_lookup[norm], HITTER_STANDARD_STATS)
+                elif norm in pitcher_lookup:
+                    p["standard_stats"] = _build_standard_stats(pitcher_lookup[norm], PITCHER_STANDARD_STATS)
+
     two_way = sum(1 for p in players.values() if p.get("player_type") == "two_way")
+    with_std = sum(1 for p in players.values() if p.get("standard_stats"))
     logger.info(
-        "Total players: %d (batters: %d, pitchers: %d, two-way: %d, skipped rows: %d)",
+        "Total players: %d (batters: %d, pitchers: %d, two-way: %d, skipped rows: %d, with standard stats: %d)",
         len(players),
         sum(1 for p in players.values() if p.get("player_type") == "batter"),
         sum(1 for p in players.values() if p.get("player_type") == "pitcher"),
         two_way,
         skipped,
+        with_std,
     )
 
     return list(players.values())
