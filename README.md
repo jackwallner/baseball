@@ -38,7 +38,7 @@ project.yml                 XcodeGen project definition
 
 4. Run the `StatScout` scheme on an iPhone simulator.
 
-The app currently loads production-shaped sample data through `PreviewStatcastAPI`. To connect Supabase, initialize `DashboardViewModel` with `StatcastAPI(baseURL:apiKey:)` and use your Supabase project URL plus anon key.
+The app loads real data through `StatcastAPI` using Supabase REST. Previews and unit tests use `PreviewStatcastAPI` with sample data. Set `SUPABASE_URL` and `SUPABASE_ANON_KEY` as build settings or in `Info.plist` variables.
 
 ## Set up Supabase
 
@@ -55,12 +55,13 @@ Add these repository secrets:
 
 - `SUPABASE_URL`
 - `SUPABASE_SERVICE_ROLE_KEY`
+- `SUPABASE_ANON_KEY` (used by iOS build; rotate the old key immediately if it was ever committed)
 
 Optional repository variable:
 
 - `STATCAST_SEASON`
 
-The workflow runs daily at `09:15 UTC` and can also be run manually from GitHub Actions.
+The workflow runs daily at `14:00 UTC` (10:00 EDT) and can also be run manually from GitHub Actions.
 
 ## Next production steps
 

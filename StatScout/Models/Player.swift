@@ -8,6 +8,9 @@ struct Player: Identifiable, Codable, Hashable, Sendable {
     let handedness: String
     let imageURL: URL?
     let updatedAt: Date
+    let season: Int?
+    let playerType: String?
+    let source: String?
     let metrics: [Metric]
     let games: [GameTrend]
 
@@ -19,13 +22,17 @@ struct Player: Identifiable, Codable, Hashable, Sendable {
         case handedness
         case imageURL = "image_url"
         case updatedAt = "updated_at"
+        case season
+        case playerType = "player_type"
+        case source
         case metrics
         case games
     }
 
     var overallPercentile: Int {
         guard !metrics.isEmpty else { return 0 }
-        return metrics.map(\.percentile).reduce(0, +) / metrics.count
+        let total = metrics.map(\.percentile).reduce(0, +)
+        return Int(round(Double(total) / Double(metrics.count)))
     }
 
     var headlineMetric: Metric? {
@@ -41,14 +48,18 @@ struct Player: Identifiable, Codable, Hashable, Sendable {
     }
 
     var shareSummary: String {
-        let topSignal = headlineMetric.map { "\($0.label) \($0.value), \($0.percentile.ordinal) percentile" } ?? "\(overallPercentile.ordinal) overall percentile"
+        let topSignal = headlineMetric.map { metric in
+            let valueText = metric.value.isEmpty ? "\(metric.percentile.ordinal) percentile" : "\(metric.value), \(metric.percentile.ordinal) percentile"
+            return "\(metric.label) \(valueText)"
+        } ?? "\(overallPercentile.ordinal) overall percentile"
         return "\(name) · \(team) \(position)\nOverall: \(overallPercentile.ordinal) percentile\nTop signal: \(topSignal)\nStatScout"
     }
 
     func percentile(for category: MetricCategory) -> Int? {
         let categoryMetrics = metrics.filter { $0.category == category }
         guard !categoryMetrics.isEmpty else { return nil }
-        return categoryMetrics.map(\.percentile).reduce(0, +) / categoryMetrics.count
+        let total = categoryMetrics.map(\.percentile).reduce(0, +)
+        return Int(round(Double(total) / Double(categoryMetrics.count)))
     }
 }
 

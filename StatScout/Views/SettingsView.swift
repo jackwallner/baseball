@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct SettingsView: View {
-    let lastUpdated: Date
+    let lastUpdated: Date?
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -32,9 +32,15 @@ struct SettingsView: View {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Last Updated")
                                     .font(.headline.weight(.bold))
-                                Text(lastUpdated.formatted(date: .long, time: .shortened))
-                                    .font(.subheadline)
-                                    .foregroundStyle(.white.opacity(0.6))
+                                if let lastUpdated {
+                                    Text(lastUpdated.formatted(date: .long, time: .shortened))
+                                        .font(.subheadline)
+                                        .foregroundStyle(.white.opacity(0.6))
+                                } else {
+                                    Text("Not yet updated")
+                                        .font(.subheadline)
+                                        .foregroundStyle(.white.opacity(0.6))
+                                }
                             }
                         }
                         .padding(.vertical, 4)
@@ -53,6 +59,19 @@ struct SettingsView: View {
                                     .font(.subheadline)
                                     .foregroundStyle(.white.opacity(0.6))
                             }
+                        }
+                        .padding(.vertical, 4)
+                        .listRowBackground(Color.white.opacity(0.05))
+                    }
+
+                    Section("About") {
+                        HStack {
+                            Text("Version")
+                                .font(.headline.weight(.bold))
+                            Spacer()
+                            Text("\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0") (\(Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "0"))")
+                                .font(.subheadline)
+                                .foregroundStyle(.white.opacity(0.6))
                         }
                         .padding(.vertical, 4)
                         .listRowBackground(Color.white.opacity(0.05))

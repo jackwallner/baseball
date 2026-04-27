@@ -8,6 +8,14 @@ struct StatScoutTheme {
     static let hot = Color(red: 1.00, green: 0.37, blue: 0.28)
     static let savantBlue = Color(red: 0.09, green: 0.38, blue: 0.74)
     static let savantRed = Color(red: 0.84, green: 0.16, blue: 0.16)
+    static let savantOrange = Color(red: 0.90, green: 0.40, blue: 0.30)
+    static let savantMidBlue = Color(red: 0.30, green: 0.55, blue: 0.85)
+
+    static func percentileColor(_ percentile: Int) -> Color {
+        if percentile >= 75 { return savantRed }
+        if percentile <= 25 { return savantBlue }
+        return Color.white.opacity(0.7)
+    }
 }
 
 struct HeroHeaderView: View {
@@ -15,7 +23,7 @@ struct HeroHeaderView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("StatScout")
+            Text(Date(), style: .date)
                 .font(.system(size: 34, weight: .black, design: .rounded))
                 .foregroundStyle(.white)
 
@@ -81,20 +89,22 @@ struct TeamChipRow: View {
 }
 
 struct RandomPlayerButton: View {
+    let isEnabled: Bool
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
             HStack(spacing: 8) {
                 Image(systemName: "shuffle")
-                Text("Random Player")
+                Text(isEnabled ? "Random Player" : "Loading players...")
             }
             .font(.subheadline.weight(.bold))
-            .foregroundStyle(.white)
+            .foregroundStyle(isEnabled ? .white : .white.opacity(0.5))
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
-            .background(StatScoutTheme.savantRed.opacity(0.85), in: Capsule())
+            .background(isEnabled ? StatScoutTheme.savantRed.opacity(0.85) : StatScoutTheme.card, in: Capsule())
         }
+        .disabled(!isEnabled)
     }
 }
 
@@ -176,6 +186,21 @@ struct SavantPlayerHeader: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack(alignment: .top, spacing: 16) {
+                if let imageURL = player.imageURL {
+                    AsyncImage(url: imageURL) { phase in
+                        if let image = phase.image {
+                            image.resizable().aspectRatio(contentMode: .fill)
+                        } else if phase.error != nil {
+                            Image(systemName: "person.fill").foregroundStyle(.white.opacity(0.5))
+                        } else {
+                            ProgressView().tint(.white.opacity(0.5))
+                        }
+                    }
+                    .frame(width: 64, height: 64)
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                    .background(StatScoutTheme.card, in: RoundedRectangle(cornerRadius: 16))
+                }
+
                 VStack(alignment: .leading, spacing: 6) {
                     Text(player.name)
                         .font(.system(size: 32, weight: .black, design: .rounded))
@@ -191,7 +216,7 @@ struct SavantPlayerHeader: View {
                     Text("PCTL")
                         .font(.system(size: 10, weight: .black))
                 }
-                .foregroundStyle(player.overallPercentile > 75 ? StatScoutTheme.savantRed : (player.overallPercentile < 25 ? StatScoutTheme.savantBlue : .white.opacity(0.7)))
+                .foregroundStyle(StatScoutTheme.percentileColor(player.overallPercentile))
                 .frame(width: 64, height: 64)
                 .background(StatScoutTheme.card, in: RoundedRectangle(cornerRadius: 16))
                 .overlay(RoundedRectangle(cornerRadius: 16).stroke(StatScoutTheme.stroke))
@@ -202,7 +227,7 @@ struct SavantPlayerHeader: View {
                     Image(systemName: "star.fill")
                         .font(.caption2)
                         .foregroundStyle(StatScoutTheme.accent)
-                    Text("\(headline.label): \(headline.value) — \(headline.percentile.ordinal) percentile")
+                    Text("\(headline.label): \(headline.value.isEmpty ? "--" : headline.value) — \(headline.percentile.ordinal) percentile")
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(.white.opacity(0.8))
                 }
@@ -228,6 +253,7 @@ struct SavantPlayerHeader: View {
 
 struct CategoryFilter: View {
     @Binding var selectedCategory: MetricCategory?
+    let counts: [MetricCategory: Int]
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
@@ -236,7 +262,8 @@ struct CategoryFilter: View {
                     selectedCategory = nil
                 }
                 ForEach(MetricCategory.allCases, id: \.self) { category in
-                    FilterChip(title: category.rawValue, isSelected: selectedCategory == category) {
+                    let count = counts[category] ?? 0
+                    FilterChip(title: "\(category.rawValue) (\(count))", isSelected: selectedCategory == category) {
                         selectedCategory = category
                     }
                 }
@@ -285,6 +312,21 @@ struct PlayerCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack(alignment: .top) {
+                if let imageURL = player.imageURL {
+                    AsyncImage(url: imageURL) { phase in
+                        if let image = phase.image {
+                            image.resizable().aspectRatio(contentMode: .fill)
+                        } else if phase.error != nil {
+                            Image(systemName: "person.fill").foregroundStyle(.white.opacity(0.5))
+                        } else {
+                            ProgressView().tint(.white.opacity(0.5))
+                        }
+                    }
+                    .frame(width: 48, height: 48)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 12))
+                }
+
                 VStack(alignment: .leading, spacing: 6) {
                     Text(player.name)
                         .font(.title2.weight(.black))
@@ -300,17 +342,15 @@ struct PlayerCard: View {
                     Text("PCTL")
                         .font(.system(size: 8, weight: .black))
                 }
-                .foregroundStyle(player.overallPercentile > 75 ? StatScoutTheme.savantRed : (player.overallPercentile < 25 ? StatScoutTheme.savantBlue : .white))
+                .foregroundStyle(StatScoutTheme.percentileColor(player.overallPercentile))
                 .frame(width: 48, height: 48)
                 .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 12))
             }
 
             if let metric = player.headlineMetric {
                 HStack(spacing: 4) {
-                    Image(systemName: "arrow.up.forward")
-                        .font(.caption2.weight(.black))
-                        .foregroundStyle(StatScoutTheme.savantRed)
-                    Text("\(metric.label): \(metric.value) (\(metric.percentile) PCTL)")
+                    TrendGlyph(direction: metric.direction)
+                    Text("\(metric.label): \(metric.value.isEmpty ? "--" : metric.value) (\(metric.percentile) PCTL)")
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(.white.opacity(0.82))
                 }
@@ -339,12 +379,12 @@ struct LeaderboardRow: View {
         HStack(spacing: 14) {
             VStack(spacing: 0) {
                 Text("\(player.overallPercentile)")
-                    .font(.system(size: 18, weight: .black, design: .rounded))
+                    .font(.system(size: 22, weight: .black, design: .rounded))
                 Text("PCTL")
-                    .font(.system(size: 8, weight: .black))
+                    .font(.system(size: 10, weight: .black))
             }
-            .foregroundStyle(player.overallPercentile > 75 ? StatScoutTheme.savantRed : (player.overallPercentile < 25 ? StatScoutTheme.savantBlue : .white))
-            .frame(width: 52, height: 52)
+            .foregroundStyle(StatScoutTheme.percentileColor(player.overallPercentile))
+            .frame(width: 64, height: 64)
             .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 14))
 
             VStack(alignment: .leading, spacing: 5) {
@@ -363,7 +403,7 @@ struct LeaderboardRow: View {
                         .foregroundStyle(.white.opacity(0.64))
                     Text("\(metric.percentile)")
                         .font(.caption2.weight(.black))
-                        .foregroundStyle(metric.percentile > 75 ? StatScoutTheme.savantRed : (metric.percentile < 25 ? StatScoutTheme.savantBlue : .white.opacity(0.7)))
+                        .foregroundStyle(StatScoutTheme.percentileColor(metric.percentile))
                 }
             } else {
                 Text("—")
@@ -374,23 +414,6 @@ struct LeaderboardRow: View {
         .padding(14)
         .background(StatScoutTheme.card, in: RoundedRectangle(cornerRadius: 16))
         .overlay(RoundedRectangle(cornerRadius: 16).stroke(StatScoutTheme.stroke))
-    }
-}
-
-struct PercentileBadge: View {
-    let percentile: Int
-
-    var body: some View {
-        VStack(spacing: 0) {
-            Text("\(percentile)")
-                .font(.title3.weight(.black))
-            Text("PCTL")
-                .font(.system(size: 9, weight: .black))
-        }
-        .foregroundStyle(percentile > 90 ? .black : .white)
-        .frame(width: 58, height: 58)
-        .background(percentile > 90 ? StatScoutTheme.accent : Color.white.opacity(0.10), in: Circle())
-        .overlay(Circle().stroke(StatScoutTheme.stroke))
     }
 }
 
@@ -410,14 +433,14 @@ struct MetricBar: View {
                     .font(.system(size: 13, weight: .bold))
                     .foregroundStyle(.white.opacity(0.85))
                 Spacer()
-                if showValue {
+                if showValue && !metric.value.isEmpty {
                     Text(metric.value)
                         .font(.system(size: 13, weight: .black))
                         .foregroundStyle(.white)
                 }
                 Text("\(metric.percentile)")
                     .font(.system(size: 13, weight: .black))
-                    .foregroundStyle(percentileTextColor)
+                    .foregroundStyle(StatScoutTheme.percentileColor(metric.percentile))
             }
             GeometryReader { proxy in
                 ZStack(alignment: .leading) {
@@ -426,10 +449,6 @@ struct MetricBar: View {
                     RoundedRectangle(cornerRadius: 3)
                         .fill(percentileFillColor)
                         .frame(width: max(4, proxy.size.width * CGFloat(metric.percentile) / 100))
-                    Rectangle()
-                        .fill(Color.white.opacity(0.25))
-                        .frame(width: 1)
-                        .position(x: proxy.size.width * 0.5, y: proxy.size.height / 2)
                 }
             }
             .frame(height: 10)
@@ -441,22 +460,12 @@ struct MetricBar: View {
             return StatScoutTheme.savantRed
         }
         if metric.percentile >= 50 {
-            return Color(red: 0.90, green: 0.40, blue: 0.30)
+            return StatScoutTheme.savantOrange
         }
         if metric.percentile >= 25 {
-            return Color(red: 0.30, green: 0.55, blue: 0.85)
+            return StatScoutTheme.savantMidBlue
         }
         return StatScoutTheme.savantBlue
-    }
-
-    private var percentileTextColor: Color {
-        if metric.percentile >= 75 {
-            return StatScoutTheme.savantRed
-        }
-        if metric.percentile <= 25 {
-            return StatScoutTheme.savantBlue
-        }
-        return .white.opacity(0.7)
     }
 }
 

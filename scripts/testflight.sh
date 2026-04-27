@@ -11,6 +11,13 @@ OPTIONS_PLIST="$PROJECT_DIR/AppStoreUploadOptions.plist"
 
 cd "$PROJECT_DIR"
 
+echo "==> Regenerating Xcode project..."
+if command -v xcodegen &> /dev/null; then
+  xcodegen generate
+else
+  echo "warning: xcodegen not found. Using existing StatScout.xcodeproj."
+fi
+
 echo "==> Cleaning..."
 xcodebuild -project StatScout.xcodeproj -scheme "$SCHEME" clean
 

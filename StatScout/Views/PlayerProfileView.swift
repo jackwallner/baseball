@@ -28,7 +28,7 @@ struct PlayerProfileView: View {
                                 if let avg = player.percentile(for: group.category) {
                                     Text("Avg \(avg)")
                                         .font(.caption.weight(.black))
-                                        .foregroundStyle(avg > 75 ? StatScoutTheme.savantRed : (avg < 25 ? StatScoutTheme.savantBlue : .white.opacity(0.6)))
+                                        .foregroundStyle(StatScoutTheme.percentileColor(avg))
                                         .padding(.horizontal, 10)
                                         .padding(.vertical, 5)
                                         .background(Color.white.opacity(0.06), in: Capsule())
@@ -59,7 +59,12 @@ struct PlayerProfileView: View {
                 .padding(20)
             }
             .background(StatScoutTheme.background.ignoresSafeArea())
+            .navigationTitle(player.name)
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    ShareLink(item: player.shareSummary)
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") { dismiss() }
                         .fontWeight(.bold)
@@ -94,10 +99,14 @@ struct GameTrendCard: View {
 
             Text(game.keyMetric)
                 .font(.caption.weight(.black))
-                .foregroundStyle(.black)
+                .foregroundStyle(.white)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 6)
                 .background(StatScoutTheme.accent, in: Capsule())
+
+            Text("Percentile change since previous game")
+                .font(.caption2)
+                .foregroundStyle(.white.opacity(0.5))
         }
         .padding(16)
         .background(StatScoutTheme.card, in: RoundedRectangle(cornerRadius: 20))

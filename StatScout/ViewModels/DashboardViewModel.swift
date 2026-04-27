@@ -11,18 +11,14 @@ final class DashboardViewModel {
     var selectedCategory: MetricCategory? = nil
     var isLoading = false
     var errorMessage: String?
+    var lastFetchFailed = false
 
-    var lastUpdated: Date {
-        players.map(\.updatedAt).max() ?? Date()
+    var lastUpdated: Date? {
+        players.map(\.updatedAt).max()
     }
 
     init(provider: StatcastProviding = PreviewStatcastAPI()) {
         self.provider = provider
-    }
-
-    var searchIsTeamQuery: Bool {
-        let teams = Set(players.map(\.team))
-        return teams.contains(searchText.uppercased())
     }
 
     var filteredPlayers: [Player] {
@@ -53,18 +49,31 @@ final class DashboardViewModel {
         players.filter { $0.team == team }.sorted { $0.overallPercentile > $1.overallPercentile }
     }
 
+    var categoryCounts: [MetricCategory: Int] {
+        var counts: [MetricCategory: Int] = [:]
+        for player in players {
+            let categories = Set(player.metrics.map(\.category))
+            for category in categories {
+                counts[category, default: 0] += 1
+            }
+        }
+        return counts
+    }
+
     var allMetrics: [(label: String, category: MetricCategory, best: (player: Player, value: Int)?, worst: (player: Player, value: Int)?)] {
         var metricMap: [String: (category: MetricCategory, values: [(player: Player, value: Int)])] = [:]
         for player in players {
             for metric in player.metrics {
-                if metricMap[metric.label] == nil {
-                    metricMap[metric.label] = (category: metric.category, values: [])
+                let compositeKey = "\(metric.label)|\(metric.category.rawValue)"
+                if metricMap[compositeKey] == nil {
+                    metricMap[compositeKey] = (category: metric.category, values: [])
                 }
-                metricMap[metric.label]?.values.append((player: player, value: metric.percentile))
+                metricMap[compositeKey]?.values.append((player: player, value: metric.percentile))
             }
         }
-        return metricMap.map { (label, data) in
+        return metricMap.map { (key, data) in
             let sorted = data.values.sorted { $0.value > $1.value }
+            let label = key.split(separator: "|").first.map(String.init) ?? key
             return (
                 label: label,
                 category: data.category,
@@ -77,11 +86,36 @@ final class DashboardViewModel {
     func load() async {
         isLoading = true
         errorMessage = nil
+        lastFetchFailed = false
         do {
-            players = try await provider.fetchPlayers()
-        } catch {
-            errorMessage = "Using sample data until the nightly feed is connected."
+            let fetched = try await provider.fetchPlayers()
+            guard !fetched.isEmpty else {
+                errorMessage = "No players found for this season."
+                lastFetchFailed = true
+                #if DEBUG
+                players = SampleData.players
+                #endif
+                return
+            }
+            players = fetched
+        } catch is DecodingError {
+            errorMessage = "Data format changed — app may need an update."
+            lastFetchFailed = true
+            #if DEBUG
             players = SampleData.players
+            #endif
+        } catch let urlError as URLError {
+            errorMessage = "Can't reach Statcast feed. Check your connection."
+            lastFetchFailed = true
+            #if DEBUG
+            players = SampleData.players
+            #endif
+        } catch {
+            errorMessage = "Something went wrong loading player data."
+            lastFetchFailed = true
+            #if DEBUG
+            players = SampleData.players
+            #endif
         }
         isLoading = false
     }

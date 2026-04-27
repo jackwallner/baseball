@@ -25,13 +25,21 @@ struct TeamView: View {
                     SectionHeader(title: "Roster", subtitle: "Sorted by overall percentile")
                         .padding(.horizontal, 20)
 
-                    VStack(spacing: 10) {
-                        ForEach(players) { player in
-                            LeaderboardRow(player: player)
-                                .onTapGesture { selectedPlayer = player }
+                    if players.isEmpty {
+                        ContentUnavailableView {
+                            Label("No players tracked", systemImage: "person.2.slash")
+                        } description: {
+                            Text("No players found for \(team) yet.")
                         }
+                    } else {
+                        VStack(spacing: 10) {
+                            ForEach(players) { player in
+                                LeaderboardRow(player: player)
+                                    .onTapGesture { selectedPlayer = player }
+                            }
+                        }
+                        .padding(.horizontal, 20)
                     }
-                    .padding(.horizontal, 20)
                 }
                 .padding(.bottom, 24)
             }

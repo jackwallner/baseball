@@ -2,14 +2,30 @@ import SwiftUI
 
 @main
 struct StatScoutApp: App {
-    private let api = StatcastAPI(
-        baseURL: URL(string: "https://babzqsbmcunrezsdpyng.supabase.co")!,
-        apiKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJhYnpxc2JtY3VucmV6c2RweW5nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMzQ5NjIsImV4cCI6MjA5MjgxMDk2Mn0.6OLIj-KnMcWhvjjSzSM3NF_d8AyToi4HSgPJ2oMIHG4"
-    )
+    private let api: StatcastAPI
+
+    init() {
+        guard let urlString = Self.configValue(for: "SUPABASE_URL"),
+              let url = URL(string: urlString),
+              let key = Self.configValue(for: "SUPABASE_ANON_KEY") else {
+            fatalError("Missing Supabase configuration. Set SUPABASE_URL and SUPABASE_ANON_KEY in the scheme environment or Info.plist build settings.")
+        }
+        self.api = StatcastAPI(baseURL: url, apiKey: key)
+    }
+
+    private static func configValue(for key: String) -> String? {
+        if let plistValue = Bundle.main.object(forInfoDictionaryKey: key) as? String,
+           !plistValue.isEmpty,
+           !plistValue.hasPrefix("$(") {
+            return plistValue
+        }
+        return ProcessInfo.processInfo.environment[key]
+    }
 
     var body: some Scene {
         WindowGroup {
             DashboardView(viewModel: DashboardViewModel(provider: api))
+                .preferredColorScheme(.dark)
         }
     }
 }

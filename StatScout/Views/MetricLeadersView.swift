@@ -20,20 +20,28 @@ struct MetricLeadersView: View {
                         .foregroundStyle(.white.opacity(0.7))
                         .padding(.horizontal, 20)
 
-                    VStack(spacing: 12) {
-                        ForEach(metrics, id: \.label) { metric in
-                            MetricLeaderRow(
-                                label: metric.label,
-                                category: metric.category,
-                                bestPlayer: metric.best?.player,
-                                bestValue: metric.best?.value,
-                                worstPlayer: metric.worst?.player,
-                                worstValue: metric.worst?.value,
-                                onSelect: { selectedPlayer = $0 }
-                            )
+                    if metrics.isEmpty {
+                        ContentUnavailableView {
+                            Label("No metric data available", systemImage: "chart.bar")
+                        } description: {
+                            Text("Check back after the nightly update.")
                         }
+                    } else {
+                        VStack(spacing: 12) {
+                            ForEach(metrics, id: \.label) { metric in
+                                MetricLeaderRow(
+                                    label: metric.label,
+                                    category: metric.category,
+                                    bestPlayer: metric.best?.player,
+                                    bestValue: metric.best?.value,
+                                    worstPlayer: metric.worst?.player,
+                                    worstValue: metric.worst?.value,
+                                    onSelect: { selectedPlayer = $0 }
+                                )
+                            }
+                        }
+                        .padding(.horizontal, 20)
                     }
-                    .padding(.horizontal, 20)
                 }
                 .padding(.bottom, 24)
             }
