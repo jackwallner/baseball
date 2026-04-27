@@ -28,8 +28,12 @@ targets:
       configs:
         Debug:
           CODE_SIGN_IDENTITY: "Apple Development"
+          SUPABASE_URL: https://babzqsbmcunrezsdpyng.supabase.co
+          SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJhYnpxc2JtY3VucmV6c2RweW5nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMzQ5NjIsImV4cCI6MjA5MjgxMDk2Mn0.6OLIj-KnMcWhvjjSzSM3NF_d8AyToi4HSgPJ2oMIHG4
         Release:
           PROVISIONING_PROFILE_SPECIFIER: $(PROVISIONING_PROFILE_SPECIFIER)
+          SUPABASE_URL: https://babzqsbmcunrezsdpyng.supabase.co
+          SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJhYnpxc2JtY3VucmV6c2RweW5nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMzQ5NjIsImV4cCI6MjA5MjgxMDk2Mn0.6OLIj-KnMcWhvjjSzSM3NF_d8AyToi4HSgPJ2oMIHG4
     buildScripts:
       - name: Pre-build validation
         script: |

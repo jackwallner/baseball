@@ -7,15 +7,15 @@ if [ -z "$IPA_PATH" ]; then
   exit 1
 fi
 
-: "${APPSTORE_APPLE_ID:?APPSTORE_APPLE_ID env var is required}"
-: "${APPSTORE_USERNAME:?APPSTORE_USERNAME env var is required}"
+APPLE_ID="${APPSTORE_APPLE_ID:-6763945657}"
+USERNAME="${APPSTORE_USERNAME:-jack.wallner@gmail.com}"
 
 echo "==> Uploading $IPA_PATH to TestFlight..."
 
 xcrun altool --upload-app --type ios \
   --file "$IPA_PATH" \
-  --apple-id "$APPSTORE_APPLE_ID" \
-  --username "$APPSTORE_USERNAME" \
+  --apple-id "$APPLE_ID" \
+  --username "$USERNAME" \
   --password "@keychain:App Store Connect"
 
 echo "==> Upload complete!"

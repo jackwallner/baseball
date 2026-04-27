@@ -8,9 +8,9 @@ struct Player: Identifiable, Codable, Hashable, Sendable {
     let handedness: String
     let imageURL: URL?
     let updatedAt: Date
-    let season: Int?
-    let playerType: String?
-    let source: String?
+    let season: Int? = nil
+    let playerType: String? = nil
+    let source: String? = nil
     let metrics: [Metric]
     let games: [GameTrend]
 
