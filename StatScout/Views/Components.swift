@@ -222,12 +222,7 @@ struct LeaderboardTableHeader: View {
                 .font(SavantType.micro)
                 .tracking(0.5)
                 .foregroundStyle(SavantPalette.inkTertiary)
-                .frame(width: 96, alignment: .leading)
-            Text("·")
-                .font(SavantType.micro)
-                .tracking(0.5)
-                .foregroundStyle(SavantPalette.inkTertiary)
-                .frame(width: 32, alignment: .trailing)
+                .frame(width: 120, alignment: .leading)
         }
         .frame(height: SavantGeo.rowHeightHeader)
         .padding(.horizontal, SavantGeo.padInline)
@@ -290,11 +285,7 @@ struct LeaderboardTableRow: View {
                     .frame(width: 56, alignment: .trailing)
             }
             PercentileBarMini(percentile: displayPercentile)
-                .frame(width: 96, alignment: .leading)
-            Text("\(displayPercentile)")
-                .font(SavantType.statMed)
-                .foregroundStyle(SavantPalette.color(forPercentile: displayPercentile))
-                .frame(width: 32, alignment: .trailing)
+                .frame(width: 120, alignment: .leading)
         }
         .frame(height: SavantGeo.rowHeight)
         .padding(.horizontal, SavantGeo.padInline)

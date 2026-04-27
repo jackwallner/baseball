@@ -36,7 +36,6 @@ struct PlayerIdentityStrip: View {
 
 struct TeamIdentityStrip: View {
     let team: String
-    let playerCount: Int
 
     var body: some View {
         HStack(alignment: .center, spacing: 14) {
@@ -53,7 +52,7 @@ struct TeamIdentityStrip: View {
                     .font(SavantType.playerName)
                     .foregroundStyle(SavantPalette.inkOnDark)
                     .lineLimit(1).minimumScaleFactor(0.7)
-                Text("\(playerCount) Players · 2026 Season")
+                Text("2026 Season")
                     .font(SavantType.small)
                     .foregroundStyle(.white.opacity(0.65))
             }
