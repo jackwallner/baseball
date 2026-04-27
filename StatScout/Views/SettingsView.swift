@@ -15,6 +15,7 @@ struct AboutView: View {
                 aboutCard
                 refreshCard
                 versionCard
+                disclaimerCard
             }
             .padding(.horizontal, 12)
             .padding(.top, 12)
@@ -31,7 +32,7 @@ struct AboutView: View {
                     .font(.title2)
                     .foregroundStyle(SavantPalette.savantRed)
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Baseball Savant-style Percentiles")
+                    Text("Percentile Rankings")
                         .font(SavantType.cardTitle)
                         .foregroundStyle(SavantPalette.ink)
                     Text("Mobile-first percentile rankings and leaderboards for fans and media.")
@@ -56,7 +57,7 @@ struct AboutView: View {
             row(
                 icon: "moon.stars.fill",
                 title: "Nightly Refresh",
-                subtitle: "Refreshed each night via GitHub Actions using Baseball Savant / Statcast feeds."
+                subtitle: "Refreshed each night using publicly available pitch-tracking data."
             )
             Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline)
             row(
@@ -86,6 +87,24 @@ struct AboutView: View {
                     .foregroundStyle(SavantPalette.inkSecondary)
             }
             .padding(SavantGeo.padCard)
+        }
+        .background(SavantPalette.surface)
+        .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
+        .overlay(
+            RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
+                .stroke(SavantPalette.hairline, lineWidth: 0.5)
+        )
+    }
+
+    private var disclaimerCard: some View {
+        VStack(spacing: 0) {
+            SavantSectionBar(title: "DISCLAIMER")
+            Text("Not affiliated with, endorsed by, or sponsored by Major League Baseball, MLB Advanced Media, MLBPA, or any team. Team names and abbreviations are used for identification only. All trademarks are property of their respective owners.")
+                .font(SavantType.small)
+                .foregroundStyle(SavantPalette.inkSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(SavantGeo.padCard)
         }
         .background(SavantPalette.surface)
         .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))

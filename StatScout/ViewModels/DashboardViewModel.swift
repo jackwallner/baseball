@@ -105,7 +105,7 @@ final class DashboardViewModel {
             players = SampleData.players
             #endif
         } catch let urlError as URLError {
-            errorMessage = "Can't reach Statcast feed. Check your connection."
+            errorMessage = "Can't reach data feed. Check your connection."
             lastFetchFailed = true
             #if DEBUG
             players = SampleData.players

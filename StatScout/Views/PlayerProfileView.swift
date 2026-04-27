@@ -2,7 +2,7 @@ import SwiftUI
 
 struct PlayerProfileView: View {
     let player: Player
-    @State private var selectedTab = "Statcast"
+    @State private var selectedTab = "Advanced"
 
     private var groupedMetrics: [(category: MetricCategory, metrics: [Metric])] {
         let grouped = Dictionary(grouping: player.metrics) { $0.category }
@@ -18,12 +18,12 @@ struct PlayerProfileView: View {
                 PlayerIdentityStrip(player: player)
 
                 SavantTabs(
-                    tabs: ["Standard", "Statcast", "Game Logs", "Splits"],
+                    tabs: ["Standard", "Advanced", "Game Logs", "Splits"],
                     selected: $selectedTab
                 )
 
                 switch selectedTab {
-                case "Statcast":
+                case "Advanced":
                     statcastContent
                 case "Standard":
                     standardContent

@@ -23,7 +23,7 @@ struct TeamsView: View {
         ScrollView {
             VStack(spacing: 0) {
                 SavantSectionBar(
-                    title: "MLB CLUBS",
+                    title: "TEAMS",
                     trailing: AnyView(
                         Text("\(rosteredTeams.count)/30 tracked")
                             .font(SavantType.micro)
