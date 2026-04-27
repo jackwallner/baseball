@@ -2,7 +2,7 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>aps-environment</key>
-    <string>development</string>
+    <!-- Placeholder for future capabilities (e.g., push notifications, iCloud, App Groups).
+         Add keys here only after configuring them in the Apple Developer Portal. -->
 </dict>
 </plist>
