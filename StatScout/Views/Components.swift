@@ -82,10 +82,6 @@ struct MetricBar: View {
                         .foregroundStyle(SavantPalette.inkSecondary)
                         .frame(minWidth: 64, alignment: .trailing)
                 }
-                Text("\(metric.percentile)")
-                    .font(SavantType.statSmall)
-                    .foregroundStyle(SavantPalette.color(forPercentile: metric.percentile))
-                    .frame(width: 32, alignment: .trailing)
             }
             GeometryReader { proxy in
                 let p = max(0, min(100, metric.percentile))
@@ -95,10 +91,6 @@ struct MetricBar: View {
                         .fill(SavantPalette.hairline)
                         .frame(height: SavantGeo.barTrack)
                         .frame(maxHeight: .infinity)
-                    Rectangle()
-                        .fill(SavantPalette.inkTertiary)
-                        .frame(width: 1, height: 10)
-                        .position(x: proxy.size.width * 0.5, y: proxy.size.height / 2)
                     Circle()
                         .fill(SavantPalette.color(forPercentile: p))
                         .frame(width: SavantGeo.barMarker, height: SavantGeo.barMarker)
@@ -138,7 +130,6 @@ struct SearchField: View {
 
 struct CategoryFilter: View {
     @Binding var selectedCategory: MetricCategory?
-    let counts: [MetricCategory: Int]
 
     var body: some View {
         let tabs = ["All"] + MetricCategory.allCases.map { $0.rawValue }
@@ -248,7 +239,21 @@ struct LeaderboardTableHeader: View {
 struct LeaderboardTableRow: View {
     let rank: Int
     let player: Player
-    let onTap: () -> Void
+    var metricLabel: String? = nil
+
+    private var displayMetric: Metric? {
+        if let metricLabel {
+            return player.metrics.first { $0.label == metricLabel }
+        }
+        return player.headlineMetric
+    }
+
+    private var displayPercentile: Int {
+        if metricLabel != nil {
+            return displayMetric?.percentile ?? player.overallPercentile
+        }
+        return player.overallPercentile
+    }
 
     var body: some View {
         HStack(spacing: 8) {
@@ -265,7 +270,7 @@ struct LeaderboardTableRow: View {
                         .lineLimit(1)
                     HStack(spacing: 5) {
                         TeamColorDot(abbr: player.team, size: 6)
-                        Text("\(player.team) · \(player.position)")
+                        Text(player.team)
                             .font(SavantType.micro)
                             .tracking(0.4)
                             .foregroundStyle(SavantPalette.inkTertiary)
@@ -273,35 +278,28 @@ struct LeaderboardTableRow: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            if let metric = player.headlineMetric {
+            if let metric = displayMetric {
                 Text(metric.value)
                     .font(SavantType.statMed)
                     .foregroundStyle(SavantPalette.ink)
                     .frame(width: 56, alignment: .trailing)
-                PercentileBarMini(percentile: metric.percentile)
-                    .frame(width: 96, alignment: .leading)
-                Text("\(metric.percentile)")
-                    .font(SavantType.statMed)
-                    .foregroundStyle(SavantPalette.color(forPercentile: metric.percentile))
-                    .frame(width: 32, alignment: .trailing)
             } else {
                 Text("—")
                     .font(SavantType.statMed)
                     .foregroundStyle(SavantPalette.inkTertiary)
                     .frame(width: 56, alignment: .trailing)
-                Spacer()
-                    .frame(width: 96)
-                Text("—")
-                    .font(SavantType.statMed)
-                    .foregroundStyle(SavantPalette.inkTertiary)
-                    .frame(width: 32, alignment: .trailing)
             }
+            PercentileBarMini(percentile: displayPercentile)
+                .frame(width: 96, alignment: .leading)
+            Text("\(displayPercentile)")
+                .font(SavantType.statMed)
+                .foregroundStyle(SavantPalette.color(forPercentile: displayPercentile))
+                .frame(width: 32, alignment: .trailing)
         }
         .frame(height: SavantGeo.rowHeight)
         .padding(.horizontal, SavantGeo.padInline)
         .background(rank % 2 == 0 ? SavantPalette.surface : SavantPalette.surfaceAlt)
         .contentShape(Rectangle())
-        .onTapGesture(perform: onTap)
         .overlay(Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline), alignment: .bottom)
     }
 }
@@ -318,10 +316,6 @@ struct PercentileBarMini: View {
                     .fill(SavantPalette.hairline)
                     .frame(height: 4)
                     .position(x: proxy.size.width / 2, y: proxy.size.height / 2)
-                Rectangle()
-                    .fill(SavantPalette.inkTertiary)
-                    .frame(width: 1, height: 8)
-                    .position(x: proxy.size.width * 0.5, y: proxy.size.height / 2)
                 Circle()
                     .fill(SavantPalette.color(forPercentile: p))
                     .frame(width: 10, height: 10)
@@ -337,7 +331,14 @@ struct PercentileBarMini: View {
 
 struct FeaturedTile: View {
     let player: Player
-    let onTap: () -> Void
+    var weeklyDelta: Int? = nil
+
+    private var deltaDirection: MetricDirection {
+        guard let weeklyDelta else { return .flat }
+        if weeklyDelta > 0 { return .up }
+        if weeklyDelta < 0 { return .down }
+        return .flat
+    }
 
     var body: some View {
         HStack(spacing: 10) {
@@ -349,7 +350,7 @@ struct FeaturedTile: View {
                     .lineLimit(1)
                 HStack(spacing: 5) {
                     TeamColorDot(abbr: player.team, size: 6)
-                    Text("\(player.team) · \(player.position)")
+                    Text(player.team)
                         .font(SavantType.micro)
                         .tracking(0.4)
                         .foregroundStyle(SavantPalette.inkTertiary)
@@ -363,6 +364,20 @@ struct FeaturedTile: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .overlay(alignment: .topTrailing) {
+            if let weeklyDelta {
+                HStack(spacing: 3) {
+                    TrendGlyph(direction: deltaDirection)
+                    Text("\(weeklyDelta >= 0 ? "+" : "")\(weeklyDelta)")
+                        .font(SavantType.statSmall)
+                        .foregroundStyle(weeklyDelta >= 0 ? SavantPalette.up : SavantPalette.down)
+                }
+                .padding(.horizontal, 6)
+                .padding(.vertical, 3)
+                .background(SavantPalette.surfaceAlt)
+                .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusBadge))
+            }
+        }
         .padding(.horizontal, 12)
         .padding(.vertical, 10)
         .frame(width: 240, height: 80)
@@ -372,7 +387,6 @@ struct FeaturedTile: View {
                 .stroke(SavantPalette.hairline, lineWidth: 0.5)
         )
         .contentShape(Rectangle())
-        .onTapGesture(perform: onTap)
     }
 }
 

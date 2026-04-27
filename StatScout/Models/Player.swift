@@ -47,6 +47,13 @@ struct Player: Identifiable, Codable, Hashable, Sendable {
         latestGame?.percentileDelta ?? 0
     }
 
+    var weeklyDelta: Int {
+        let cutoff = Date().addingTimeInterval(-7 * 24 * 3600)
+        return games.filter { $0.date >= cutoff }
+            .map(\.percentileDelta)
+            .reduce(0, +)
+    }
+
     var shareSummary: String {
         let topSignal = headlineMetric.map { metric in
             let valueText = metric.value.isEmpty ? "\(metric.percentile.ordinal) percentile" : "\(metric.value), \(metric.percentile.ordinal) percentile"

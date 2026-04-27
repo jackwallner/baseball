@@ -68,10 +68,13 @@ struct MetricLeadersView: View {
 
             ForEach(Array(group.1.enumerated()), id: \.offset) { index, item in
                 HStack(spacing: 8) {
-                    Text(item.label)
-                        .font(SavantType.smallBold)
-                        .foregroundStyle(SavantPalette.ink)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                    NavigationLink(value: MetricRoute(label: item.label)) {
+                        Text(item.label)
+                            .font(SavantType.smallBold)
+                            .foregroundStyle(SavantPalette.ink)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .buttonStyle(.plain)
 
                     if let best = item.best {
                         NavigationLink(value: best.player) {

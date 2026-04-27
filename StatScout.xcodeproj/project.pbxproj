@@ -23,6 +23,7 @@
 		B4DCC3A1E6B450909ED5F5DC /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B12DA38BF60E2D7C4CC7DFF /* Player.swift */; };
 		B5240594E14DF2FC8A45B40A /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E111095560BABC78B5DCB36E /* XCTest.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		B56324087E4F4F901D6586E5 /* PlayerProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AD97C159FCE484C7AA9DDDF /* PlayerProfileView.swift */; };
+		B7206DA461865E379BE3029D /* MetricRankingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00934226FB4C12145112549C /* MetricRankingView.swift */; };
 		C5718F0C8435928CBF995DE5 /* StatcastAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15914E954BD86B91C09E5C88 /* StatcastAPI.swift */; };
 		DE3E81E46D644C2617940B7E /* PlayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC2DEECB438987B32405C3A /* PlayerTests.swift */; };
 		F9CFA1F577A94864AB624B41 /* SampleData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BF12CF754F018EFD7BE7729 /* SampleData.swift */; };
@@ -40,6 +41,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		00934226FB4C12145112549C /* MetricRankingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetricRankingView.swift; sourceTree = "<group>"; };
 		147A7B626DB00162FDED79EA /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		15914E954BD86B91C09E5C88 /* StatcastAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatcastAPI.swift; sourceTree = "<group>"; };
 		1E4FF70B13A65617E39C4E75 /* DashboardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardViewModel.swift; sourceTree = "<group>"; };
@@ -169,6 +171,7 @@
 				28F7C1A7CADA7CA917C9B9BF /* Components.swift */,
 				64CFDB4111B83AFFDDABB591 /* DashboardView.swift */,
 				91414B3D597831487B630032 /* MetricLeadersView.swift */,
+				00934226FB4C12145112549C /* MetricRankingView.swift */,
 				9AD97C159FCE484C7AA9DDDF /* PlayerProfileView.swift */,
 				8E9C629EF1C253BCEAF314EF /* RootTabView.swift */,
 				9C04FC271035959EFD5300A2 /* SavantModules.swift */,
@@ -284,6 +287,7 @@
 				A6741F572242D827B65EF326 /* DashboardView.swift in Sources */,
 				B254FB702E1FD23611E5472B /* DashboardViewModel.swift in Sources */,
 				5ADC10C15D1FF7D02AD7E9F4 /* MetricLeadersView.swift in Sources */,
+				B7206DA461865E379BE3029D /* MetricRankingView.swift in Sources */,
 				B4DCC3A1E6B450909ED5F5DC /* Player.swift in Sources */,
 				B56324087E4F4F901D6586E5 /* PlayerProfileView.swift in Sources */,
 				14FE0A5789F558B6C9BBCA6A /* RootTabView.swift in Sources */,
@@ -315,7 +319,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = StatScout/StatScout.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_TEAM = YXG4MP6W39;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = StatScout/Info.plist;
@@ -417,7 +421,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = StatScout/StatScout.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_TEAM = YXG4MP6W39;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = StatScout/Info.plist;

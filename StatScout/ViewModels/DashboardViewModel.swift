@@ -23,7 +23,10 @@ final class DashboardViewModel {
 
     var filteredPlayers: [Player] {
         players.filter { player in
-            let matchesSearch = searchText.isEmpty || player.name.localizedCaseInsensitiveContains(searchText) || player.team.localizedCaseInsensitiveContains(searchText)
+            let matchesSearch = searchText.isEmpty
+                || player.name.localizedCaseInsensitiveContains(searchText)
+                || player.team.localizedCaseInsensitiveContains(searchText)
+                || teamFullName(player.team).localizedCaseInsensitiveContains(searchText)
             let matchesCategory = selectedCategory == nil || player.metrics.contains { $0.category == selectedCategory }
             return matchesSearch && matchesCategory
         }
@@ -33,8 +36,18 @@ final class DashboardViewModel {
         filteredPlayers.sorted { $0.overallPercentile > $1.overallPercentile }
     }
 
-    var featuredPlayers: [Player] {
-        Array(leaderboard.prefix(5))
+    var biggestRisers: [Player] {
+        players.filter { $0.weeklyDelta > 0 }
+            .sorted { $0.weeklyDelta > $1.weeklyDelta }
+            .prefix(3)
+            .map { $0 }
+    }
+
+    var biggestFallers: [Player] {
+        players.filter { $0.weeklyDelta < 0 }
+            .sorted { $0.weeklyDelta < $1.weeklyDelta }
+            .prefix(3)
+            .map { $0 }
     }
 
     var randomPlayer: Player? {
@@ -47,17 +60,6 @@ final class DashboardViewModel {
 
     func players(forTeam team: String) -> [Player] {
         players.filter { $0.team == team }.sorted { $0.overallPercentile > $1.overallPercentile }
-    }
-
-    var categoryCounts: [MetricCategory: Int] {
-        var counts: [MetricCategory: Int] = [:]
-        for player in players {
-            let categories = Set(player.metrics.map(\.category))
-            for category in categories {
-                counts[category, default: 0] += 1
-            }
-        }
-        return counts
     }
 
     var allMetrics: [(label: String, category: MetricCategory, best: (player: Player, value: Int)?, worst: (player: Player, value: Int)?)] {

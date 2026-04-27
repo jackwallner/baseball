@@ -118,16 +118,19 @@ struct PlayerProfileView: View {
                 )
 
                 ForEach(Array(group.metrics.enumerated()), id: \.element.id) { index, metric in
-                    MetricBar(metric: metric)
-                        .padding(.horizontal, SavantGeo.padCard)
-                        .padding(.vertical, 12)
-                        .background(index % 2 == 0 ? SavantPalette.surface : SavantPalette.surfaceAlt)
-                        .overlay(
-                            Rectangle()
-                                .fill(SavantPalette.divider)
-                                .frame(height: SavantGeo.hairline),
-                            alignment: .bottom
-                        )
+                    NavigationLink(value: MetricRoute(label: metric.label)) {
+                        MetricBar(metric: metric)
+                            .padding(.horizontal, SavantGeo.padCard)
+                            .padding(.vertical, 12)
+                            .background(index % 2 == 0 ? SavantPalette.surface : SavantPalette.surfaceAlt)
+                            .overlay(
+                                Rectangle()
+                                    .fill(SavantPalette.divider)
+                                    .frame(height: SavantGeo.hairline),
+                                alignment: .bottom
+                            )
+                    }
+                    .buttonStyle(.plain)
                 }
             }
         }

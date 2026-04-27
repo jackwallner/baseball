@@ -4,28 +4,40 @@ struct TeamDestination: Hashable {
     let abbr: String
 }
 
+struct MetricRoute: Hashable {
+    let label: String
+}
+
 struct RootTabView: View {
     @State private var viewModel: DashboardViewModel
+    @State private var selection = 0
 
     init(viewModel: DashboardViewModel) {
         _viewModel = State(initialValue: viewModel)
     }
 
     var body: some View {
-        TabView {
+        TabView(selection: $selection) {
             leadersTab
                 .tabItem { Label("Leaders", systemImage: "list.number") }
+                .tag(0)
 
             teamsTab
                 .tabItem { Label("Teams", systemImage: "shield.lefthalf.filled") }
+                .tag(1)
 
             metricsTab
                 .tabItem { Label("Metrics", systemImage: "chart.bar.fill") }
+                .tag(2)
 
             aboutTab
                 .tabItem { Label("About", systemImage: "info.circle") }
+                .tag(3)
         }
         .tint(SavantPalette.savantRed)
+        .onChange(of: selection) { _, _ in
+            viewModel.searchText = ""
+        }
         .task { await viewModel.load() }
     }
 
@@ -89,6 +101,10 @@ private struct StandardDestinations: ViewModifier {
             }
             .navigationDestination(for: TeamDestination.self) { dest in
                 TeamView(team: dest.abbr, players: viewModel.players(forTeam: dest.abbr))
+                    .modifier(SavantNavBar())
+            }
+            .navigationDestination(for: MetricRoute.self) { route in
+                MetricRankingView(metricLabel: route.label, players: viewModel.players)
                     .modifier(SavantNavBar())
             }
     }

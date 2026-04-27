@@ -47,6 +47,48 @@ final class DashboardViewModelTests: XCTestCase {
         let vm = DashboardViewModel(provider: MockProvider(players: []))
         XCTAssertNil(vm.lastUpdated)
     }
+
+    @MainActor
+    func testSearchMatchesFullTeamName() async {
+        let player = Player(
+            id: 1, name: "Aaron Judge", team: "NYY", position: "RF", handedness: "R/R", imageURL: nil,
+            updatedAt: Date(),
+            metrics: [],
+            games: []
+        )
+        let vm = DashboardViewModel(provider: MockProvider(players: [player]))
+        await vm.load()
+        vm.searchText = "Yankees"
+
+        XCTAssertEqual(vm.filteredPlayers.map(\.id), [1])
+    }
+
+    @MainActor
+    func testBiggestMoversOrdering() async {
+        let now = Date()
+        let players = [
+            mover(id: 1, delta: 4, date: now),
+            mover(id: 2, delta: 12, date: now),
+            mover(id: 3, delta: -7, date: now),
+            mover(id: 4, delta: -2, date: now)
+        ]
+        let vm = DashboardViewModel(provider: MockProvider(players: players))
+        await vm.load()
+
+        XCTAssertEqual(vm.biggestRisers.map(\.id), [2, 1])
+        XCTAssertEqual(vm.biggestFallers.map(\.id), [3, 4])
+    }
+
+    private func mover(id: Int, delta: Int, date: Date) -> Player {
+        Player(
+            id: id, name: "Player \(id)", team: "NYY", position: "RF", handedness: "R/R", imageURL: nil,
+            updatedAt: date,
+            metrics: [],
+            games: [
+                GameTrend(id: "\(id)-game", date: date, opponent: "BOS", summary: "", percentileDelta: delta, keyMetric: "xwOBA")
+            ]
+        )
+    }
 }
 
 struct MockProvider: StatcastProviding, @unchecked Sendable {

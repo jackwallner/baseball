@@ -12,8 +12,6 @@ struct TeamView: View {
                 VStack(spacing: 0) {
                     SavantSectionBar(title: "ROSTER")
 
-                    LeaderboardTableHeader()
-
                     if players.isEmpty {
                         ContentUnavailableView {
                             Label("No players tracked", systemImage: "person.2.slash")
@@ -22,12 +20,12 @@ struct TeamView: View {
                         }
                         .padding(.vertical, 24)
                     } else {
+                        LeaderboardTableHeader()
                         ForEach(Array(players.enumerated()), id: \.element.id) { index, player in
                             NavigationLink(value: player) {
                                 LeaderboardTableRow(
                                     rank: index + 1,
-                                    player: player,
-                                    onTap: {}
+                                    player: player
                                 )
                             }
                             .buttonStyle(.plain)

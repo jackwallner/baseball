@@ -7,19 +7,15 @@ struct DashboardView: View {
         ZStack {
             ScrollView {
                 VStack(spacing: 0) {
-                    CategoryFilter(selectedCategory: $viewModel.selectedCategory, counts: viewModel.categoryCounts)
+                    CategoryFilter(selectedCategory: $viewModel.selectedCategory)
 
-                    if !viewModel.featuredPlayers.isEmpty {
+                    if !viewModel.biggestRisers.isEmpty || !viewModel.biggestFallers.isEmpty {
                         featuredStrip
                     }
 
                     leaderboardSection
                 }
             }
-            .refreshable {
-                await viewModel.load()
-            }
-
             if viewModel.isLoading && viewModel.players.isEmpty {
                 ProgressView()
                     .scaleEffect(1.5)
@@ -31,35 +27,45 @@ struct DashboardView: View {
 
     private var featuredStrip: some View {
         VStack(spacing: 0) {
-            SavantSectionBar(title: "FEATURED")
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 10) {
-                    ForEach(viewModel.featuredPlayers) { player in
-                        NavigationLink(value: player) {
-                            FeaturedTile(player: player) { }
-                        }
-                        .buttonStyle(.plain)
-                    }
+            SavantSectionBar(title: "BIGGEST MOVERS")
+            VStack(spacing: 0) {
+                if !viewModel.biggestRisers.isEmpty {
+                    moverRow(title: "TRENDING UP", players: viewModel.biggestRisers)
                 }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 12)
+                if !viewModel.biggestFallers.isEmpty {
+                    moverRow(title: "TRENDING DOWN", players: viewModel.biggestFallers)
+                }
             }
             .background(SavantPalette.surfaceAlt)
             .overlay(Rectangle().fill(SavantPalette.hairline).frame(height: SavantGeo.hairline), alignment: .bottom)
         }
     }
 
+    private func moverRow(title: String, players: [Player]) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title)
+                .font(SavantType.micro)
+                .tracking(0.6)
+                .foregroundStyle(SavantPalette.inkSecondary)
+                .padding(.horizontal, 12)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 10) {
+                    ForEach(players) { player in
+                        NavigationLink(value: player) {
+                            FeaturedTile(player: player, weeklyDelta: player.weeklyDelta)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.horizontal, 12)
+            }
+        }
+        .padding(.vertical, 10)
+    }
+
     private var leaderboardSection: some View {
         VStack(spacing: 0) {
-            SavantSectionBar(
-                title: "LEADERBOARD",
-                trailing: AnyView(
-                    Text("\(viewModel.leaderboard.count) players")
-                        .font(SavantType.micro)
-                        .tracking(0.5)
-                        .foregroundStyle(SavantPalette.inkSecondary)
-                )
-            )
+            SavantSectionBar(title: "LEADERBOARD")
 
             SearchField(text: $viewModel.searchText)
                 .padding(.horizontal, 12)
@@ -76,7 +82,7 @@ struct DashboardView: View {
                 ContentUnavailableView {
                     Label("No players yet", systemImage: "baseball")
                 } description: {
-                    Text("Pull down to refresh or check back after the nightly update.")
+                    Text("Check back after the nightly update.")
                 }
                 .padding(.vertical, 24)
             } else {
@@ -85,8 +91,7 @@ struct DashboardView: View {
                     NavigationLink(value: player) {
                         LeaderboardTableRow(
                             rank: index + 1,
-                            player: player,
-                            onTap: {}
+                            player: player
                         )
                     }
                     .buttonStyle(.plain)

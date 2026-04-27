@@ -28,4 +28,20 @@ final class PlayerTests: XCTestCase {
         XCTAssertTrue(summary.contains("xwOBA"))
         XCTAssertTrue(summary.contains("100th"))
     }
+
+    func testWeeklyDeltaSumsRecentGamesOnly() {
+        let now = Date()
+        let player = Player(
+            id: 1, name: "Test", team: "NYY", position: "RF",
+            handedness: "R/R", imageURL: nil,
+            updatedAt: now, metrics: [],
+            games: [
+                GameTrend(id: "recent-up", date: now.addingTimeInterval(-24 * 3600), opponent: "BOS", summary: "", percentileDelta: 5, keyMetric: "xwOBA"),
+                GameTrend(id: "recent-down", date: now.addingTimeInterval(-2 * 24 * 3600), opponent: "TOR", summary: "", percentileDelta: -2, keyMetric: "Barrel%"),
+                GameTrend(id: "old", date: now.addingTimeInterval(-8 * 24 * 3600), opponent: "TB", summary: "", percentileDelta: 20, keyMetric: "Hard-Hit%")
+            ]
+        )
+
+        XCTAssertEqual(player.weeklyDelta, 3)
+    }
 }
