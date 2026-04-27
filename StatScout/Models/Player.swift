@@ -85,6 +85,20 @@ enum MetricCategory: String, Codable, CaseIterable, Hashable, Sendable {
     case running = "Running"
 }
 
+struct TeamRoute: Hashable {
+    let abbr: String
+    let players: [Player]
+}
+
+extension Player {
+    var initials: String {
+        name.split(separator: " ").prefix(2).compactMap { $0.first.map(String.init) }.joined()
+    }
+    var headshotURL: URL? {
+        imageURL ?? URL(string: "https://midfield.mlbstatic.com/v1/people/\(id)/spots/240")
+    }
+}
+
 struct GameTrend: Identifiable, Codable, Hashable, Sendable {
     let id: String
     let date: Date

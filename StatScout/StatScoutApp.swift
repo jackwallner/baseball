@@ -25,7 +25,7 @@ struct StatScoutApp: App {
     var body: some Scene {
         WindowGroup {
             DashboardView(viewModel: DashboardViewModel(provider: api))
-                .preferredColorScheme(.dark)
+                .preferredColorScheme(.light)
         }
     }
 }

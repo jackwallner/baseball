@@ -8,7 +8,7 @@ struct SampleData {
             team: "NYY",
             position: "RF",
             handedness: "R/R",
-            imageURL: nil,
+            imageURL: URL(string: "https://midfield.mlbstatic.com/v1/people/592450/spots/240"),
             updatedAt: Date(),
             metrics: [
                 Metric(id: "judge-xwoba", label: "xwOBA", value: ".463", percentile: 100, direction: .up, category: .hitting),
@@ -27,7 +27,7 @@ struct SampleData {
             team: "LAD",
             position: "DH",
             handedness: "L/R",
-            imageURL: nil,
+            imageURL: URL(string: "https://midfield.mlbstatic.com/v1/people/660271/spots/240"),
             updatedAt: Date(),
             metrics: [
                 Metric(id: "ohtani-xslg", label: "xSLG", value: ".676", percentile: 100, direction: .up, category: .hitting),
@@ -46,7 +46,7 @@ struct SampleData {
             team: "KC",
             position: "SS",
             handedness: "R/R",
-            imageURL: nil,
+            imageURL: URL(string: "https://midfield.mlbstatic.com/v1/people/669203/spots/240"),
             updatedAt: Date(),
             metrics: [
                 Metric(id: "witt-sprint", label: "Sprint", value: "30.5 ft/s", percentile: 100, direction: .flat, category: .running),
@@ -65,7 +65,7 @@ struct SampleData {
             team: "PIT",
             position: "SP",
             handedness: "R/R",
-            imageURL: nil,
+            imageURL: URL(string: "https://midfield.mlbstatic.com/v1/people/694973/spots/240"),
             updatedAt: Date(),
             metrics: [
                 Metric(id: "skenes-velo", label: "Fastball Velo", value: "98.8 mph", percentile: 99, direction: .flat, category: .pitching),

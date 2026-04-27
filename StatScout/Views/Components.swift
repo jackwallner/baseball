@@ -1,52 +1,117 @@
 import SwiftUI
 
-struct StatScoutTheme {
-    static let background = LinearGradient(colors: [Color(red: 0.03, green: 0.05, blue: 0.10), Color(red: 0.06, green: 0.08, blue: 0.16)], startPoint: .top, endPoint: .bottom)
-    static let card = Color.white.opacity(0.08)
-    static let stroke = Color.white.opacity(0.12)
-    static let accent = Color(red: 0.38, green: 0.77, blue: 1.00)
-    static let hot = Color(red: 1.00, green: 0.37, blue: 0.28)
-    static let savantBlue = Color(red: 0.09, green: 0.38, blue: 0.74)
-    static let savantRed = Color(red: 0.84, green: 0.16, blue: 0.16)
-    static let savantOrange = Color(red: 0.90, green: 0.40, blue: 0.30)
-    static let savantMidBlue = Color(red: 0.30, green: 0.55, blue: 0.85)
+// MARK: - Atomic Components
 
-    static func percentileColor(_ percentile: Int) -> Color {
-        if percentile >= 75 { return savantRed }
-        if percentile <= 25 { return savantBlue }
-        return Color.white.opacity(0.7)
-    }
-}
-
-struct HeroHeaderView: View {
-    let playerCount: Int
+struct PlayerHeadshot: View {
+    let url: URL?
+    let initials: String
+    let size: CGFloat
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text(Date(), style: .date)
-                .font(.system(size: 34, weight: .black, design: .rounded))
-                .foregroundStyle(.white)
-
-            Text("Baseball Savant-style player percentiles, leaderboards, and metric insights.")
-                .font(.callout)
-                .foregroundStyle(.white.opacity(0.72))
-
-            HStack(spacing: 8) {
-                Image(systemName: "baseball.fill")
-                Text("\(playerCount) players tracked")
+        ZStack {
+            Circle().fill(SavantPalette.surfaceAlt)
+            if let url {
+                AsyncImage(url: url) { phase in
+                    switch phase {
+                    case .success(let image):
+                        image.resizable().scaledToFill()
+                    default:
+                        initialsView
+                    }
+                }
+            } else {
+                initialsView
             }
-            .font(.caption.weight(.bold))
-            .foregroundStyle(StatScoutTheme.accent)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(22)
-        .background(
-            LinearGradient(colors: [Color(red: 0.06, green: 0.14, blue: 0.32), Color(red: 0.04, green: 0.08, blue: 0.18)], startPoint: .topLeading, endPoint: .bottomTrailing),
-            in: RoundedRectangle(cornerRadius: 28)
-        )
-        .overlay(RoundedRectangle(cornerRadius: 28).stroke(StatScoutTheme.stroke))
+        .frame(width: size, height: size)
+        .clipShape(Circle())
+        .overlay(Circle().stroke(SavantPalette.hairline, lineWidth: 0.5))
+    }
+
+    private var initialsView: some View {
+        Text(initials)
+            .font(.system(size: size * 0.36, weight: .bold))
+            .foregroundStyle(SavantPalette.inkTertiary)
     }
 }
+
+struct OverallPercentileBadge: View {
+    let percentile: Int
+    var size: CGFloat = 64
+
+    var body: some View {
+        VStack(spacing: 0) {
+            Text("\(percentile)")
+                .font(SavantType.statHero)
+                .foregroundStyle(.white)
+            Text("PCTL")
+                .font(SavantType.micro)
+                .tracking(0.6)
+                .foregroundStyle(.white.opacity(0.85))
+        }
+        .frame(width: size, height: size)
+        .background(SavantPalette.color(forPercentile: percentile))
+        .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusBadge))
+    }
+}
+
+struct TeamColorDot: View {
+    let abbr: String
+    var size: CGFloat = 8
+    var body: some View {
+        Circle().fill(MLBTeamColor.color(abbr)).frame(width: size, height: size)
+    }
+}
+
+// MARK: - Module 2: Percentile Bar Row (MetricBar)
+
+struct MetricBar: View {
+    let metric: Metric
+    var showValue: Bool = true
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 12) {
+                Text(metric.label)
+                    .font(SavantType.smallBold)
+                    .foregroundStyle(SavantPalette.ink)
+                Spacer(minLength: 8)
+                if showValue && !metric.value.isEmpty {
+                    Text(metric.value)
+                        .font(SavantType.statSmall)
+                        .foregroundStyle(SavantPalette.inkSecondary)
+                        .frame(minWidth: 64, alignment: .trailing)
+                }
+                Text("\(metric.percentile)")
+                    .font(SavantType.statSmall)
+                    .foregroundStyle(SavantPalette.color(forPercentile: metric.percentile))
+                    .frame(width: 32, alignment: .trailing)
+            }
+            GeometryReader { proxy in
+                let p = max(0, min(100, metric.percentile))
+                let x = max(6, min(proxy.size.width - 6, proxy.size.width * CGFloat(p) / 100.0))
+                ZStack(alignment: .leading) {
+                    RoundedRectangle(cornerRadius: 2)
+                        .fill(SavantPalette.hairline)
+                        .frame(height: SavantGeo.barTrack)
+                        .frame(maxHeight: .infinity)
+                    Rectangle()
+                        .fill(SavantPalette.inkTertiary)
+                        .frame(width: 1, height: 10)
+                        .position(x: proxy.size.width * 0.5, y: proxy.size.height / 2)
+                    Circle()
+                        .fill(SavantPalette.color(forPercentile: p))
+                        .frame(width: SavantGeo.barMarker, height: SavantGeo.barMarker)
+                        .overlay(Circle().stroke(.white, lineWidth: 2))
+                        .position(x: x, y: proxy.size.height / 2)
+                }
+            }
+            .frame(height: 12)
+        }
+    }
+}
+
+// MARK: - Search (restyled for light mode)
 
 struct SearchField: View {
     @Binding var text: String
@@ -54,241 +119,48 @@ struct SearchField: View {
     var body: some View {
         HStack(spacing: 10) {
             Image(systemName: "magnifyingglass")
-                .foregroundStyle(.white.opacity(0.56))
+                .foregroundStyle(SavantPalette.inkTertiary)
             TextField("Search players or teams (e.g. NYY, LAD)", text: $text)
                 .textInputAutocapitalization(.never)
-                .foregroundStyle(.white)
+                .foregroundStyle(SavantPalette.ink)
         }
-        .padding(16)
-        .background(StatScoutTheme.card, in: RoundedRectangle(cornerRadius: 18))
-        .overlay(RoundedRectangle(cornerRadius: 18).stroke(StatScoutTheme.stroke))
-    }
-}
-
-struct TeamChipRow: View {
-    let teams: [String]
-    let onSelect: (String) -> Void
-
-    var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 10) {
-                ForEach(teams, id: \.self) { team in
-                    Button(action: { onSelect(team) }) {
-                        Text(team)
-                            .font(.caption.weight(.bold))
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 10)
-                            .foregroundStyle(.white)
-                            .background(StatScoutTheme.card, in: Capsule())
-                            .overlay(Capsule().stroke(StatScoutTheme.stroke))
-                    }
-                }
-            }
-        }
-    }
-}
-
-struct RandomPlayerButton: View {
-    let isEnabled: Bool
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: 8) {
-                Image(systemName: "shuffle")
-                Text(isEnabled ? "Random Player" : "Loading players...")
-            }
-            .font(.subheadline.weight(.bold))
-            .foregroundStyle(isEnabled ? .white : .white.opacity(0.5))
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .background(isEnabled ? StatScoutTheme.savantRed.opacity(0.85) : StatScoutTheme.card, in: Capsule())
-        }
-        .disabled(!isEnabled)
-    }
-}
-
-struct MetricLeaderRow: View {
-    let label: String
-    let category: MetricCategory
-    let bestPlayer: Player?
-    let bestValue: Int?
-    let worstPlayer: Player?
-    let worstValue: Int?
-    let onSelect: (Player) -> Void
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Text(label)
-                    .font(.subheadline.weight(.black))
-                    .foregroundStyle(.white)
-                Spacer()
-                Text(category.rawValue)
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(.white.opacity(0.5))
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(Color.white.opacity(0.08), in: Capsule())
-            }
-
-            if let bestPlayer, let bestValue {
-                HStack(spacing: 10) {
-                    Text("Best")
-                        .font(.caption2.weight(.bold))
-                        .foregroundStyle(StatScoutTheme.savantRed)
-                        .frame(width: 36, alignment: .leading)
-
-                    Text(bestPlayer.name)
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.white)
-
-                    Spacer()
-
-                    Text("\(bestValue)")
-                        .font(.caption.weight(.black))
-                        .foregroundStyle(StatScoutTheme.savantRed)
-                }
-                .contentShape(Rectangle())
-                .onTapGesture { onSelect(bestPlayer) }
-            }
-
-            if let worstPlayer, let worstValue {
-                HStack(spacing: 10) {
-                    Text("Worst")
-                        .font(.caption2.weight(.bold))
-                        .foregroundStyle(StatScoutTheme.savantBlue)
-                        .frame(width: 36, alignment: .leading)
-
-                    Text(worstPlayer.name)
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.white.opacity(0.8))
-
-                    Spacer()
-
-                    Text("\(worstValue)")
-                        .font(.caption.weight(.black))
-                        .foregroundStyle(StatScoutTheme.savantBlue)
-                }
-                .contentShape(Rectangle())
-                .onTapGesture { onSelect(worstPlayer) }
-            }
-        }
-        .padding(14)
-        .background(StatScoutTheme.card, in: RoundedRectangle(cornerRadius: 16))
-        .overlay(RoundedRectangle(cornerRadius: 16).stroke(StatScoutTheme.stroke))
-    }
-}
-
-struct SavantPlayerHeader: View {
-    let player: Player
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            HStack(alignment: .top, spacing: 16) {
-                if let imageURL = player.imageURL {
-                    AsyncImage(url: imageURL) { phase in
-                        if let image = phase.image {
-                            image.resizable().aspectRatio(contentMode: .fill)
-                        } else if phase.error != nil {
-                            Image(systemName: "person.fill").foregroundStyle(.white.opacity(0.5))
-                        } else {
-                            ProgressView().tint(.white.opacity(0.5))
-                        }
-                    }
-                    .frame(width: 64, height: 64)
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
-                    .background(StatScoutTheme.card, in: RoundedRectangle(cornerRadius: 16))
-                }
-
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(player.name)
-                        .font(.system(size: 32, weight: .black, design: .rounded))
-                        .foregroundStyle(.white)
-                    Text("\(player.team) · \(player.position) · \(player.handedness)")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(.white.opacity(0.62))
-                }
-                Spacer()
-                VStack(spacing: 2) {
-                    Text("\(player.overallPercentile)")
-                        .font(.system(size: 28, weight: .black, design: .rounded))
-                    Text("PCTL")
-                        .font(.system(size: 10, weight: .black))
-                }
-                .foregroundStyle(StatScoutTheme.percentileColor(player.overallPercentile))
-                .frame(width: 64, height: 64)
-                .background(StatScoutTheme.card, in: RoundedRectangle(cornerRadius: 16))
-                .overlay(RoundedRectangle(cornerRadius: 16).stroke(StatScoutTheme.stroke))
-            }
-
-            if let headline = player.headlineMetric {
-                HStack(spacing: 6) {
-                    Image(systemName: "star.fill")
-                        .font(.caption2)
-                        .foregroundStyle(StatScoutTheme.accent)
-                    Text("\(headline.label): \(headline.value.isEmpty ? "--" : headline.value) — \(headline.percentile.ordinal) percentile")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.white.opacity(0.8))
-                }
-            } else {
-                HStack(spacing: 6) {
-                    Image(systemName: "info.circle.fill")
-                        .font(.caption2)
-                        .foregroundStyle(.white.opacity(0.4))
-                    Text("No standout metric available yet")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.white.opacity(0.5))
-                }
-            }
-        }
-        .padding(20)
-        .background(
-            LinearGradient(colors: [Color(red: 0.04, green: 0.10, blue: 0.24), Color(red: 0.03, green: 0.06, blue: 0.14)], startPoint: .topLeading, endPoint: .bottomTrailing),
-            in: RoundedRectangle(cornerRadius: 24)
+        .padding(.horizontal, 12)
+        .frame(height: 32)
+        .background(SavantPalette.surface)
+        .overlay(
+            RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
+                .stroke(SavantPalette.hairline, lineWidth: 1)
         )
-        .overlay(RoundedRectangle(cornerRadius: 24).stroke(StatScoutTheme.stroke))
     }
 }
+
+// MARK: - Category Tabs (Module 5 variant for dashboard)
 
 struct CategoryFilter: View {
     @Binding var selectedCategory: MetricCategory?
     let counts: [MetricCategory: Int]
 
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 10) {
-                FilterChip(title: "All", isSelected: selectedCategory == nil) {
-                    selectedCategory = nil
-                }
-                ForEach(MetricCategory.allCases, id: \.self) { category in
-                    let count = counts[category] ?? 0
-                    FilterChip(title: "\(category.rawValue) (\(count))", isSelected: selectedCategory == category) {
-                        selectedCategory = category
+        let tabs = ["All"] + MetricCategory.allCases.map { $0.rawValue }
+        let selectedTab = selectedCategory?.rawValue ?? "All"
+
+        SavantTabs(
+            tabs: tabs,
+            selected: Binding(
+                get: { selectedTab },
+                set: { newValue in
+                    if newValue == "All" {
+                        selectedCategory = nil
+                    } else {
+                        selectedCategory = MetricCategory.allCases.first { $0.rawValue == newValue }
                     }
                 }
-            }
-        }
+            )
+        )
     }
 }
 
-struct FilterChip: View {
-    let title: String
-    let isSelected: Bool
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            Text(title)
-                .font(.caption.weight(.bold))
-                .padding(.horizontal, 14)
-                .padding(.vertical, 10)
-                .foregroundStyle(isSelected ? .black : .white)
-                .background(isSelected ? StatScoutTheme.accent : StatScoutTheme.card, in: Capsule())
-                .overlay(Capsule().stroke(StatScoutTheme.stroke))
-        }
-    }
-}
+// MARK: - Section Header (legacy, minimal use)
 
 struct SectionHeader: View {
     let title: String
@@ -297,177 +169,17 @@ struct SectionHeader: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title)
-                .font(.title3.weight(.black))
-                .foregroundStyle(.white)
+                .font(SavantType.sectionTitle)
+                .tracking(0.8)
+                .foregroundStyle(SavantPalette.ink)
             Text(subtitle)
-                .font(.footnote)
-                .foregroundStyle(.white.opacity(0.58))
+                .font(SavantType.small)
+                .foregroundStyle(SavantPalette.inkSecondary)
         }
     }
 }
 
-struct PlayerCard: View {
-    let player: Player
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            HStack(alignment: .top) {
-                if let imageURL = player.imageURL {
-                    AsyncImage(url: imageURL) { phase in
-                        if let image = phase.image {
-                            image.resizable().aspectRatio(contentMode: .fill)
-                        } else if phase.error != nil {
-                            Image(systemName: "person.fill").foregroundStyle(.white.opacity(0.5))
-                        } else {
-                            ProgressView().tint(.white.opacity(0.5))
-                        }
-                    }
-                    .frame(width: 48, height: 48)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 12))
-                }
-
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(player.name)
-                        .font(.title2.weight(.black))
-                        .foregroundStyle(.white)
-                    Text("\(player.team) · \(player.position) · \(player.handedness)")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.white.opacity(0.58))
-                }
-                Spacer()
-                VStack(spacing: 0) {
-                    Text("\(player.overallPercentile)")
-                        .font(.system(size: 20, weight: .black, design: .rounded))
-                    Text("PCTL")
-                        .font(.system(size: 8, weight: .black))
-                }
-                .foregroundStyle(StatScoutTheme.percentileColor(player.overallPercentile))
-                .frame(width: 48, height: 48)
-                .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 12))
-            }
-
-            if let metric = player.headlineMetric {
-                HStack(spacing: 4) {
-                    TrendGlyph(direction: metric.direction)
-                    Text("\(metric.label): \(metric.value.isEmpty ? "--" : metric.value) (\(metric.percentile) PCTL)")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.white.opacity(0.82))
-                }
-            } else {
-                Text("No metrics available")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.white.opacity(0.4))
-            }
-
-            VStack(spacing: 8) {
-                ForEach(player.metrics.prefix(3)) { metric in
-                    MetricBar(metric: metric)
-                }
-            }
-        }
-        .padding(18)
-        .background(StatScoutTheme.card, in: RoundedRectangle(cornerRadius: 24))
-        .overlay(RoundedRectangle(cornerRadius: 24).stroke(StatScoutTheme.stroke))
-    }
-}
-
-struct LeaderboardRow: View {
-    let player: Player
-
-    var body: some View {
-        HStack(spacing: 14) {
-            VStack(spacing: 0) {
-                Text("\(player.overallPercentile)")
-                    .font(.system(size: 22, weight: .black, design: .rounded))
-                Text("PCTL")
-                    .font(.system(size: 10, weight: .black))
-            }
-            .foregroundStyle(StatScoutTheme.percentileColor(player.overallPercentile))
-            .frame(width: 64, height: 64)
-            .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 14))
-
-            VStack(alignment: .leading, spacing: 5) {
-                Text(player.name)
-                    .font(.headline.weight(.bold))
-                    .foregroundStyle(.white)
-                Text("\(player.team) · \(player.position) · \(player.handedness)")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.white.opacity(0.55))
-            }
-            Spacer()
-            if let metric = player.headlineMetric {
-                VStack(alignment: .trailing, spacing: 4) {
-                    Text(metric.label)
-                        .font(.caption.weight(.bold))
-                        .foregroundStyle(.white.opacity(0.64))
-                    Text("\(metric.percentile)")
-                        .font(.caption2.weight(.black))
-                        .foregroundStyle(StatScoutTheme.percentileColor(metric.percentile))
-                }
-            } else {
-                Text("—")
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(.white.opacity(0.3))
-            }
-        }
-        .padding(14)
-        .background(StatScoutTheme.card, in: RoundedRectangle(cornerRadius: 16))
-        .overlay(RoundedRectangle(cornerRadius: 16).stroke(StatScoutTheme.stroke))
-    }
-}
-
-struct MetricBar: View {
-    let metric: Metric
-    let showValue: Bool
-
-    init(metric: Metric, showValue: Bool = true) {
-        self.metric = metric
-        self.showValue = showValue
-    }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 7) {
-            HStack {
-                Text(metric.label)
-                    .font(.system(size: 13, weight: .bold))
-                    .foregroundStyle(.white.opacity(0.85))
-                Spacer()
-                if showValue && !metric.value.isEmpty {
-                    Text(metric.value)
-                        .font(.system(size: 13, weight: .black))
-                        .foregroundStyle(.white)
-                }
-                Text("\(metric.percentile)")
-                    .font(.system(size: 13, weight: .black))
-                    .foregroundStyle(StatScoutTheme.percentileColor(metric.percentile))
-            }
-            GeometryReader { proxy in
-                ZStack(alignment: .leading) {
-                    RoundedRectangle(cornerRadius: 3)
-                        .fill(Color.white.opacity(0.08))
-                    RoundedRectangle(cornerRadius: 3)
-                        .fill(percentileFillColor)
-                        .frame(width: max(4, proxy.size.width * CGFloat(metric.percentile) / 100))
-                }
-            }
-            .frame(height: 10)
-        }
-    }
-
-    private var percentileFillColor: Color {
-        if metric.percentile >= 75 {
-            return StatScoutTheme.savantRed
-        }
-        if metric.percentile >= 50 {
-            return StatScoutTheme.savantOrange
-        }
-        if metric.percentile >= 25 {
-            return StatScoutTheme.savantMidBlue
-        }
-        return StatScoutTheme.savantBlue
-    }
-}
+// MARK: - Trend Glyph
 
 struct TrendGlyph: View {
     let direction: MetricDirection
@@ -488,12 +200,183 @@ struct TrendGlyph: View {
 
     private var color: Color {
         switch direction {
-        case .up: .green
-        case .flat: .white.opacity(0.6)
-        case .down: .orange
+        case .up: SavantPalette.up
+        case .flat: SavantPalette.inkTertiary
+        case .down: SavantPalette.down
         }
     }
 }
+
+// MARK: - Leaderboard Table Components
+
+struct LeaderboardTableHeader: View {
+    var body: some View {
+        HStack(spacing: 8) {
+            Text("#")
+                .font(SavantType.micro)
+                .tracking(0.5)
+                .foregroundStyle(SavantPalette.inkTertiary)
+                .frame(width: 28, alignment: .trailing)
+            Text("PLAYER")
+                .font(SavantType.micro)
+                .tracking(0.5)
+                .foregroundStyle(SavantPalette.inkTertiary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            Text("VAL")
+                .font(SavantType.micro)
+                .tracking(0.5)
+                .foregroundStyle(SavantPalette.inkTertiary)
+                .frame(width: 56, alignment: .trailing)
+            Text("PCTL")
+                .font(SavantType.micro)
+                .tracking(0.5)
+                .foregroundStyle(SavantPalette.inkTertiary)
+                .frame(width: 96, alignment: .leading)
+            Text("·")
+                .font(SavantType.micro)
+                .tracking(0.5)
+                .foregroundStyle(SavantPalette.inkTertiary)
+                .frame(width: 32, alignment: .trailing)
+        }
+        .frame(height: SavantGeo.rowHeightHeader)
+        .padding(.horizontal, SavantGeo.padInline)
+        .background(SavantPalette.surfaceAlt)
+        .overlay(Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline), alignment: .bottom)
+    }
+}
+
+struct LeaderboardTableRow: View {
+    let rank: Int
+    let player: Player
+    let onTap: () -> Void
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Text("\(rank)")
+                .font(SavantType.statSmall)
+                .foregroundStyle(SavantPalette.inkSecondary)
+                .frame(width: 28, alignment: .trailing)
+            HStack(spacing: 10) {
+                PlayerHeadshot(url: player.headshotURL, initials: player.initials, size: 28)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(player.name)
+                        .font(SavantType.bodyBold)
+                        .foregroundStyle(SavantPalette.ink)
+                        .lineLimit(1)
+                    HStack(spacing: 5) {
+                        TeamColorDot(abbr: player.team, size: 6)
+                        Text("\(player.team) · \(player.position)")
+                            .font(SavantType.micro)
+                            .tracking(0.4)
+                            .foregroundStyle(SavantPalette.inkTertiary)
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            if let metric = player.headlineMetric {
+                Text(metric.value)
+                    .font(SavantType.statMed)
+                    .foregroundStyle(SavantPalette.ink)
+                    .frame(width: 56, alignment: .trailing)
+                PercentileBarMini(percentile: metric.percentile)
+                    .frame(width: 96, alignment: .leading)
+                Text("\(metric.percentile)")
+                    .font(SavantType.statMed)
+                    .foregroundStyle(SavantPalette.color(forPercentile: metric.percentile))
+                    .frame(width: 32, alignment: .trailing)
+            } else {
+                Text("—")
+                    .font(SavantType.statMed)
+                    .foregroundStyle(SavantPalette.inkTertiary)
+                    .frame(width: 56, alignment: .trailing)
+                Spacer()
+                    .frame(width: 96)
+                Text("—")
+                    .font(SavantType.statMed)
+                    .foregroundStyle(SavantPalette.inkTertiary)
+                    .frame(width: 32, alignment: .trailing)
+            }
+        }
+        .frame(height: SavantGeo.rowHeight)
+        .padding(.horizontal, SavantGeo.padInline)
+        .background(rank % 2 == 0 ? SavantPalette.surface : SavantPalette.surfaceAlt)
+        .contentShape(Rectangle())
+        .onTapGesture(perform: onTap)
+        .overlay(Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline), alignment: .bottom)
+    }
+}
+
+struct PercentileBarMini: View {
+    let percentile: Int
+
+    var body: some View {
+        GeometryReader { proxy in
+            let p = max(0, min(100, percentile))
+            let x = max(5, min(proxy.size.width - 5, proxy.size.width * CGFloat(p) / 100.0))
+            ZStack(alignment: .leading) {
+                RoundedRectangle(cornerRadius: 2)
+                    .fill(SavantPalette.hairline)
+                    .frame(height: 4)
+                    .position(x: proxy.size.width / 2, y: proxy.size.height / 2)
+                Rectangle()
+                    .fill(SavantPalette.inkTertiary)
+                    .frame(width: 1, height: 8)
+                    .position(x: proxy.size.width * 0.5, y: proxy.size.height / 2)
+                Circle()
+                    .fill(SavantPalette.color(forPercentile: p))
+                    .frame(width: 10, height: 10)
+                    .overlay(Circle().stroke(.white, lineWidth: 1.5))
+                    .position(x: x, y: proxy.size.height / 2)
+            }
+        }
+        .frame(height: 18)
+    }
+}
+
+// MARK: - Featured Tile
+
+struct FeaturedTile: View {
+    let player: Player
+    let onTap: () -> Void
+
+    var body: some View {
+        HStack(spacing: 10) {
+            PlayerHeadshot(url: player.headshotURL, initials: player.initials, size: 56)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(player.name)
+                    .font(SavantType.bodyBold)
+                    .foregroundStyle(SavantPalette.ink)
+                    .lineLimit(1)
+                HStack(spacing: 5) {
+                    TeamColorDot(abbr: player.team, size: 6)
+                    Text("\(player.team) · \(player.position)")
+                        .font(SavantType.micro)
+                        .tracking(0.4)
+                        .foregroundStyle(SavantPalette.inkTertiary)
+                }
+                if let metric = player.headlineMetric {
+                    Text("\(metric.label) \(metric.value) · \(metric.percentile) PCTL")
+                        .font(SavantType.smallBold)
+                        .foregroundStyle(SavantPalette.color(forPercentile: metric.percentile))
+                        .lineLimit(1)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .frame(width: 240, height: 80)
+        .background(SavantPalette.surface)
+        .overlay(
+            RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
+                .stroke(SavantPalette.hairline, lineWidth: 0.5)
+        )
+        .contentShape(Rectangle())
+        .onTapGesture(perform: onTap)
+    }
+}
+
+// MARK: - Utility
 
 extension Int {
     var ordinal: String {

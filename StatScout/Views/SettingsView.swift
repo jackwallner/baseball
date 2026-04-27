@@ -7,77 +7,73 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                StatScoutTheme.background.ignoresSafeArea()
-                List {
+                SavantPalette.canvas.ignoresSafeArea()
+                Form {
                     Section {
                         HStack(spacing: 12) {
                             Image(systemName: "moon.stars.fill")
                                 .font(.title2)
-                                .foregroundStyle(StatScoutTheme.accent)
+                                .foregroundStyle(SavantPalette.savantRed)
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Nightly Refresh")
                                     .font(.headline.weight(.bold))
                                 Text("Data is refreshed nightly via GitHub Actions using Baseball Savant / Statcast feeds.")
                                     .font(.subheadline)
-                                    .foregroundStyle(.white.opacity(0.6))
+                                    .foregroundStyle(SavantPalette.inkSecondary)
                             }
                         }
                         .padding(.vertical, 4)
-                        .listRowBackground(Color.white.opacity(0.05))
 
                         HStack(spacing: 12) {
                             Image(systemName: "clock.arrow.circlepath")
                                 .font(.title2)
-                                .foregroundStyle(StatScoutTheme.accent)
+                                .foregroundStyle(SavantPalette.savantRed)
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Last Updated")
                                     .font(.headline.weight(.bold))
                                 if let lastUpdated {
                                     Text(lastUpdated.formatted(date: .long, time: .shortened))
                                         .font(.subheadline)
-                                        .foregroundStyle(.white.opacity(0.6))
+                                        .foregroundStyle(SavantPalette.inkSecondary)
                                 } else {
                                     Text("Not yet updated")
                                         .font(.subheadline)
-                                        .foregroundStyle(.white.opacity(0.6))
+                                        .foregroundStyle(SavantPalette.inkSecondary)
                                 }
                             }
                         }
                         .padding(.vertical, 4)
-                        .listRowBackground(Color.white.opacity(0.05))
                     }
 
                     Section {
                         HStack(spacing: 12) {
                             Image(systemName: "baseball.fill")
                                 .font(.title2)
-                                .foregroundStyle(StatScoutTheme.savantRed)
+                                .foregroundStyle(SavantPalette.savantRed)
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("StatScout")
                                     .font(.headline.weight(.bold))
                                 Text("Baseball Savant-style percentiles and leaderboards for fans and media.")
                                     .font(.subheadline)
-                                    .foregroundStyle(.white.opacity(0.6))
+                                    .foregroundStyle(SavantPalette.inkSecondary)
                             }
                         }
                         .padding(.vertical, 4)
-                        .listRowBackground(Color.white.opacity(0.05))
                     }
 
-                    Section("About") {
+                    Section("ABOUT") {
                         HStack {
                             Text("Version")
                                 .font(.headline.weight(.bold))
                             Spacer()
                             Text("\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0") (\(Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "0"))")
                                 .font(.subheadline)
-                                .foregroundStyle(.white.opacity(0.6))
+                                .foregroundStyle(SavantPalette.inkSecondary)
                         }
                         .padding(.vertical, 4)
-                        .listRowBackground(Color.white.opacity(0.05))
                     }
                 }
-                .listStyle(.plain)
+                .formStyle(.grouped)
                 .scrollContentBackground(.hidden)
             }
             .navigationTitle("Settings")
@@ -89,7 +85,7 @@ struct SettingsView: View {
                 }
             }
         }
-        .tint(.white)
+        .tint(SavantPalette.ink)
     }
 }
 

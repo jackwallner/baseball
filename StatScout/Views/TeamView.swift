@@ -3,27 +3,16 @@ import SwiftUI
 struct TeamView: View {
     let team: String
     let players: [Player]
-    @Binding var selectedPlayer: Player?
-    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    HStack {
-                        Text(team)
-                            .font(.system(size: 40, weight: .black, design: .rounded))
-                            .foregroundStyle(.white)
-                        Spacer()
-                        Text("\(players.count) players")
-                            .font(.caption.weight(.bold))
-                            .foregroundStyle(.white.opacity(0.6))
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 12)
+        ScrollView {
+            VStack(spacing: 0) {
+                TeamIdentityStrip(team: team, playerCount: players.count)
 
-                    SectionHeader(title: "Roster", subtitle: "Sorted by overall percentile")
-                        .padding(.horizontal, 20)
+                VStack(spacing: 0) {
+                    SavantSectionBar(title: "ROSTER")
+
+                    LeaderboardTableHeader()
 
                     if players.isEmpty {
                         ContentUnavailableView {
@@ -31,36 +20,41 @@ struct TeamView: View {
                         } description: {
                             Text("No players found for \(team) yet.")
                         }
+                        .padding(.vertical, 24)
                     } else {
-                        VStack(spacing: 10) {
-                            ForEach(players) { player in
-                                LeaderboardRow(player: player)
-                                    .onTapGesture { selectedPlayer = player }
+                        ForEach(Array(players.enumerated()), id: \.element.id) { index, player in
+                            NavigationLink(value: player) {
+                                LeaderboardTableRow(
+                                    rank: index + 1,
+                                    player: player,
+                                    onTap: {}
+                                )
                             }
+                            .buttonStyle(.plain)
                         }
-                        .padding(.horizontal, 20)
                     }
                 }
-                .padding(.bottom, 24)
-            }
-            .background(StatScoutTheme.background.ignoresSafeArea())
-            .navigationTitle(team)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") { dismiss() }
-                        .fontWeight(.bold)
-                }
+                .background(SavantPalette.surface)
+                .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
+                .overlay(
+                    RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
+                        .stroke(SavantPalette.hairline, lineWidth: 0.5)
+                )
+                .padding(.horizontal, 12)
+                .padding(.top, 12)
             }
         }
-        .tint(.white)
+        .background(SavantPalette.canvas.ignoresSafeArea())
+        .navigationTitle(teamFullName(team))
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 
 #Preview {
-    TeamView(
-        team: "NYY",
-        players: SampleData.players.filter { $0.team == "NYY" },
-        selectedPlayer: .constant(nil)
-    )
+    NavigationStack {
+        TeamView(
+            team: "NYY",
+            players: SampleData.players.filter { $0.team == "NYY" }
+        )
+    }
 }

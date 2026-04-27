@@ -2,7 +2,7 @@ import SwiftUI
 
 struct PlayerProfileView: View {
     let player: Player
-    @Environment(\.dismiss) private var dismiss
+    @State private var selectedTab = "Statcast"
 
     private var groupedMetrics: [(category: MetricCategory, metrics: [Metric])] {
         let grouped = Dictionary(grouping: player.metrics) { $0.category }
@@ -13,107 +13,268 @@ struct PlayerProfileView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
-                    SavantPlayerHeader(player: player)
+        ScrollView {
+            VStack(spacing: 0) {
+                PlayerIdentityStrip(player: player)
 
-                    ForEach(groupedMetrics, id: \.category) { group in
-                        VStack(alignment: .leading, spacing: 12) {
-                            HStack {
-                                Text(group.category.rawValue)
-                                    .font(.title3.weight(.black))
-                                    .foregroundStyle(.white)
-                                Spacer()
-                                if let avg = player.percentile(for: group.category) {
-                                    Text("Avg \(avg)")
-                                        .font(.caption.weight(.black))
-                                        .foregroundStyle(StatScoutTheme.percentileColor(avg))
-                                        .padding(.horizontal, 10)
-                                        .padding(.vertical, 5)
-                                        .background(Color.white.opacity(0.06), in: Capsule())
-                                }
-                            }
+                SavantTabs(
+                    tabs: ["Standard", "Statcast", "Game Logs", "Splits"],
+                    selected: $selectedTab
+                )
 
-                            VStack(spacing: 10) {
-                                ForEach(group.metrics) { metric in
-                                    MetricBar(metric: metric)
-                                        .padding(.horizontal, 14)
-                                        .padding(.vertical, 12)
-                                        .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 12))
-                                }
-                            }
-                        }
-                    }
-
-                    if !player.games.isEmpty {
-                        SectionHeader(title: "Recent Games", subtitle: "Game-to-game trends and context")
-
-                        VStack(spacing: 12) {
-                            ForEach(player.games) { game in
-                                GameTrendCard(game: game)
-                            }
-                        }
-                    }
+                switch selectedTab {
+                case "Statcast":
+                    statcastContent
+                case "Standard":
+                    standardContent
+                case "Game Logs":
+                    gameLogsContent
+                case "Splits":
+                    comingSoon("Splits")
+                default:
+                    statcastContent
                 }
-                .padding(20)
             }
-            .background(StatScoutTheme.background.ignoresSafeArea())
-            .navigationTitle(player.name)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    ShareLink(item: player.shareSummary)
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") { dismiss() }
-                        .fontWeight(.bold)
-                }
+        }
+        .background(SavantPalette.canvas.ignoresSafeArea())
+        .navigationTitle(player.name)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                ShareLink(item: player.shareSummary)
             }
         }
     }
+
+    private var statcastContent: some View {
+        VStack(spacing: 12) {
+            percentileRankingsCard
+            standardStatsCard
+            if !player.games.isEmpty {
+                gameByGameCard
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.top, 12)
+    }
+
+    private var standardContent: some View {
+        VStack(spacing: 12) {
+            standardStatsCard
+        }
+        .padding(.horizontal, 12)
+        .padding(.top, 12)
+    }
+
+    private var gameLogsContent: some View {
+        VStack(spacing: 12) {
+            if !player.games.isEmpty {
+                gameByGameCard
+            } else {
+                ContentUnavailableView {
+                    Label("No game data", systemImage: "baseball")
+                }
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.top, 12)
+    }
+
+    private func comingSoon(_ label: String) -> some View {
+        VStack(spacing: 12) {
+            ContentUnavailableView {
+                Label("\(label) coming soon", systemImage: "clock")
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.top, 12)
+    }
+
+    // MARK: - Cards
+
+    private var percentileRankingsCard: some View {
+        VStack(spacing: 0) {
+            SavantSectionBar(
+                title: "PERCENTILE RANKINGS",
+                trailing: AnyView(
+                    HStack(spacing: 4) {
+                        Text("2026")
+                            .font(SavantType.micro)
+                            .tracking(0.5)
+                            .foregroundStyle(SavantPalette.inkSecondary)
+                        Text("ⓘ")
+                            .font(SavantType.micro)
+                            .foregroundStyle(SavantPalette.linkBlue)
+                    }
+                )
+            )
+
+            ForEach(groupedMetrics, id: \.category) { group in
+                let avg = player.percentile(for: group.category)
+                SavantSubSectionBar(
+                    title: "\(group.category.rawValue.uppercased())",
+                    trailing: avg.map { "AVG \($0)" },
+                    trailingColor: avg.map { SavantPalette.color(forPercentile: $0) } ?? SavantPalette.inkSecondary
+                )
+
+                ForEach(Array(group.metrics.enumerated()), id: \.element.id) { index, metric in
+                    MetricBar(metric: metric)
+                        .padding(.horizontal, SavantGeo.padCard)
+                        .padding(.vertical, 12)
+                        .background(index % 2 == 0 ? SavantPalette.surface : SavantPalette.surfaceAlt)
+                        .overlay(
+                            Rectangle()
+                                .fill(SavantPalette.divider)
+                                .frame(height: SavantGeo.hairline),
+                            alignment: .bottom
+                        )
+                }
+            }
+        }
+        .background(SavantPalette.surface)
+        .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
+        .overlay(
+            RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
+                .stroke(SavantPalette.hairline, lineWidth: 0.5)
+        )
+    }
+
+    private var standardStatsCard: some View {
+        let cols = player.metrics.chunked(into: 2)
+        return VStack(spacing: 0) {
+            SavantSectionBar(title: "STANDARD STATS · 2026")
+
+            ForEach(Array(cols.enumerated()), id: \.offset) { rowIndex, pair in
+                HStack(spacing: 0) {
+                    ForEach(Array(pair.enumerated()), id: \.element.id) { colIndex, metric in
+                        HStack {
+                            Text(metric.label.uppercased())
+                                .font(SavantType.micro)
+                                .tracking(0.4)
+                                .foregroundStyle(SavantPalette.inkTertiary)
+                            Spacer()
+                            Text(metric.value)
+                                .font(SavantType.statMed)
+                                .foregroundStyle(SavantPalette.ink)
+                        }
+                        .padding(.horizontal, SavantGeo.padCard)
+                        .padding(.vertical, 12)
+                        .frame(maxWidth: .infinity)
+                        .background((rowIndex * 2 + colIndex) % 2 == 0 ? SavantPalette.surface : SavantPalette.surfaceAlt)
+                        .overlay(
+                            Rectangle()
+                                .fill(SavantPalette.divider)
+                                .frame(height: SavantGeo.hairline),
+                            alignment: .bottom
+                        )
+                        .overlay(
+                            Rectangle()
+                                .fill(SavantPalette.divider)
+                                .frame(width: SavantGeo.hairline)
+                                .opacity(colIndex > 0 ? 1 : 0),
+                            alignment: .leading
+                        )
+                    }
+                }
+            }
+        }
+        .background(SavantPalette.surface)
+        .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
+        .overlay(
+            RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
+                .stroke(SavantPalette.hairline, lineWidth: 0.5)
+        )
+    }
+
+    private var gameByGameCard: some View {
+        VStack(spacing: 0) {
+            SavantSectionBar(title: "GAME-BY-GAME")
+
+            HStack(spacing: 8) {
+                Text("DATE")
+                    .font(SavantType.micro)
+                    .tracking(0.5)
+                    .foregroundStyle(SavantPalette.inkTertiary)
+                    .frame(width: 60, alignment: .leading)
+                Text("OPP")
+                    .font(SavantType.micro)
+                    .tracking(0.5)
+                    .foregroundStyle(SavantPalette.inkTertiary)
+                    .frame(width: 44, alignment: .leading)
+                Text("Δ PCTL")
+                    .font(SavantType.micro)
+                    .tracking(0.5)
+                    .foregroundStyle(SavantPalette.inkTertiary)
+                    .frame(width: 52, alignment: .trailing)
+                Text("KEY METRIC")
+                    .font(SavantType.micro)
+                    .tracking(0.5)
+                    .foregroundStyle(SavantPalette.inkTertiary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .frame(height: SavantGeo.rowHeightHeader)
+            .padding(.horizontal, SavantGeo.padInline)
+            .background(SavantPalette.surfaceAlt)
+            .overlay(
+                Rectangle()
+                    .fill(SavantPalette.divider)
+                    .frame(height: SavantGeo.hairline),
+                alignment: .bottom
+            )
+
+            ForEach(Array(player.games.enumerated()), id: \.element.id) { index, game in
+                HStack(spacing: 8) {
+                    Text(game.date.formatted(date: .abbreviated, time: .omitted))
+                        .font(SavantType.small)
+                        .foregroundStyle(SavantPalette.inkSecondary)
+                        .frame(width: 60, alignment: .leading)
+                    Text(game.opponent)
+                        .font(SavantType.smallBold)
+                        .foregroundStyle(SavantPalette.ink)
+                        .frame(width: 44, alignment: .leading)
+                    HStack(spacing: 2) {
+                        Text(game.percentileDelta >= 0 ? "▲" : "▼")
+                            .font(.system(size: 9))
+                        Text("\(game.percentileDelta >= 0 ? "+" : "")\(game.percentileDelta)")
+                            .font(SavantType.statSmall)
+                    }
+                    .foregroundStyle(game.percentileDelta >= 0 ? SavantPalette.up : SavantPalette.down)
+                    .frame(width: 52, alignment: .trailing)
+                    Text(game.keyMetric)
+                        .font(SavantType.smallBold)
+                        .foregroundStyle(SavantPalette.ink)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .frame(height: SavantGeo.rowHeight)
+                .padding(.horizontal, SavantGeo.padInline)
+                .background(index % 2 == 0 ? SavantPalette.surface : SavantPalette.surfaceAlt)
+                .overlay(
+                    Rectangle()
+                        .fill(SavantPalette.divider)
+                        .frame(height: SavantGeo.hairline),
+                    alignment: .bottom
+                )
+            }
+        }
+        .background(SavantPalette.surface)
+        .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
+        .overlay(
+            RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
+                .stroke(SavantPalette.hairline, lineWidth: 0.5)
+        )
+    }
 }
 
-struct GameTrendCard: View {
-    let game: GameTrend
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Text(game.date.formatted(date: .abbreviated, time: .omitted))
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(.white.opacity(0.56))
-                Text("vs \(game.opponent)")
-                    .font(.caption.weight(.black))
-                    .foregroundStyle(StatScoutTheme.accent)
-                Spacer()
-                Text(game.percentileDelta >= 0 ? "+\(game.percentileDelta)" : "\(game.percentileDelta)")
-                    .font(.caption.weight(.black))
-                    .foregroundStyle(game.percentileDelta >= 0 ? .green : .orange)
-            }
-
-            Text(game.summary)
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(.white.opacity(0.82))
-                .fixedSize(horizontal: false, vertical: true)
-
-            Text(game.keyMetric)
-                .font(.caption.weight(.black))
-                .foregroundStyle(.white)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 6)
-                .background(StatScoutTheme.accent, in: Capsule())
-
-            Text("Percentile change since previous game")
-                .font(.caption2)
-                .foregroundStyle(.white.opacity(0.5))
+extension Array {
+    func chunked(into size: Int) -> [[Element]] {
+        stride(from: 0, to: count, by: size).map {
+            Array(self[$0..<Swift.min($0 + size, count)])
         }
-        .padding(16)
-        .background(StatScoutTheme.card, in: RoundedRectangle(cornerRadius: 20))
-        .overlay(RoundedRectangle(cornerRadius: 20).stroke(StatScoutTheme.stroke))
     }
 }
 
 #Preview {
-    PlayerProfileView(player: SampleData.players[0])
+    NavigationStack {
+        PlayerProfileView(player: SampleData.players[0])
+    }
 }
