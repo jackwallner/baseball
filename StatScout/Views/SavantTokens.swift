@@ -1,5 +1,4 @@
 import SwiftUI
-import UIKit
 
 enum SavantPalette {
     static let canvas       = Color(red: 0.96, green: 0.96, blue: 0.96)
@@ -25,20 +24,21 @@ enum SavantPalette {
     static func color(forPercentile p: Int) -> Color {
         let t = max(0.0, min(1.0, Double(p) / 100.0))
         if t < 0.5 {
-            return lerp(pctlCold, pctlMid, t * 2.0)
+            return lerp(coldRGB, midRGB, t * 2.0)
         } else {
-            return lerp(pctlMid, pctlHot, (t - 0.5) * 2.0)
+            return lerp(midRGB, hotRGB, (t - 0.5) * 2.0)
         }
     }
 
-    private static func lerp(_ a: Color, _ b: Color, _ t: Double) -> Color {
-        let ar = UIColor(a).cgColor.components ?? [0,0,0,1]
-        let br = UIColor(b).cgColor.components ?? [0,0,0,1]
-        return Color(
-            red:   Double(ar[0] + (br[0] - ar[0]) * Float(t)),
-            green: Double(ar[1] + (br[1] - ar[1]) * Float(t)),
-            blue:  Double(ar[2] + (br[2] - ar[2]) * Float(t))
-        )
+    private static let hotRGB: (Double, Double, Double) = (0.823, 0.176, 0.184)
+    private static let midRGB: (Double, Double, Double) = (0.749, 0.749, 0.749)
+    private static let coldRGB: (Double, Double, Double) = (0.212, 0.380, 0.678)
+
+    private static func lerp(_ a: (Double, Double, Double), _ b: (Double, Double, Double), _ t: Double) -> Color {
+        let r = a.0 + (b.0 - a.0) * t
+        let g = a.1 + (b.1 - a.1) * t
+        let bl = a.2 + (b.2 - a.2) * t
+        return Color(red: r, green: g, blue: bl)
     }
 }
 
