@@ -2,7 +2,6 @@ import SwiftUI
 
 struct MetricLeadersView: View {
     let metrics: [(label: String, category: MetricCategory, best: (player: Player, value: Int)?, worst: (player: Player, value: Int)?)]
-    @Environment(\.dismiss) private var dismiss
 
     private var groupedByCategory: [(MetricCategory, [(label: String, best: (player: Player, value: Int)?, worst: (player: Player, value: Int)?)])] {
         let grouped = Dictionary(grouping: metrics) { $0.category }
@@ -14,56 +13,28 @@ struct MetricLeadersView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(spacing: 0) {
-                    HStack {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("METRIC LEADERS")
-                                .font(SavantType.playerName)
-                                .foregroundStyle(SavantPalette.inkOnDark)
-                            Text("Best & worst per Statcast metric")
-                                .font(SavantType.small)
-                                .foregroundStyle(.white.opacity(0.65))
-                        }
-                        Spacer()
+        ScrollView {
+            VStack(spacing: 0) {
+                if metrics.isEmpty {
+                    ContentUnavailableView {
+                        Label("No metric data", systemImage: "chart.bar")
+                    } description: {
+                        Text("Check back after the nightly update.")
                     }
-                    .padding(.horizontal, SavantGeo.padPage)
-                    .padding(.vertical, SavantGeo.padPage)
-                    .background(SavantPalette.savantNavy)
-
-                    if metrics.isEmpty {
-                        ContentUnavailableView {
-                            Label("No metric data", systemImage: "chart.bar")
-                        } description: {
-                            Text("Check back after the nightly update.")
+                    .padding(.vertical, 48)
+                } else {
+                    VStack(spacing: 12) {
+                        ForEach(groupedByCategory, id: \.0) { group in
+                            categoryCard(group)
                         }
-                        .padding(.vertical, 48)
-                    } else {
-                        VStack(spacing: 12) {
-                            ForEach(groupedByCategory, id: \.0) { group in
-                                categoryCard(group)
-                            }
-                        }
-                        .padding(.horizontal, 12)
-                        .padding(.top, 12)
                     }
-                }
-            }
-            .background(SavantPalette.canvas.ignoresSafeArea())
-            .navigationTitle("Leaders")
-            .navigationBarTitleDisplayMode(.inline)
-            .navigationDestination(for: Player.self) { player in
-                PlayerProfileView(player: player)
-            }
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") { dismiss() }
-                        .fontWeight(.bold)
+                    .padding(.horizontal, 12)
+                    .padding(.top, 12)
+                    .padding(.bottom, 12)
                 }
             }
         }
-        .tint(SavantPalette.ink)
+        .background(SavantPalette.canvas.ignoresSafeArea())
     }
 
     private func categoryCard(_ group: (MetricCategory, [(label: String, best: (player: Player, value: Int)?, worst: (player: Player, value: Int)?)])) -> some View {
@@ -169,5 +140,7 @@ struct MetricLeadersView: View {
 }
 
 #Preview {
-    MetricLeadersView(metrics: [])
+    NavigationStack {
+        MetricLeadersView(metrics: [])
+    }
 }

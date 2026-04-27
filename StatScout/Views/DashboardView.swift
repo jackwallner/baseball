@@ -1,90 +1,52 @@
 import SwiftUI
 
-enum SheetDestination: Identifiable {
-    case settings
-    case metricLeaders
-
-    var id: String {
-        switch self {
-        case .settings: return "settings"
-        case .metricLeaders: return "metric-leaders"
-        }
-    }
-}
-
 struct DashboardView: View {
-    @State private var viewModel: DashboardViewModel
-    @State private var sheetDestination: SheetDestination?
-
-    init(viewModel: DashboardViewModel) {
-        _viewModel = State(initialValue: viewModel)
-    }
+    @Bindable var viewModel: DashboardViewModel
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                ScrollView {
-                    VStack(spacing: 0) {
-                        AppHeader(
-                            onMetricLeaders: { sheetDestination = .metricLeaders },
-                            onSettings: { sheetDestination = .settings }
-                        )
-                        BreadcrumbStrip(crumbs: [("Leaderboard", false), ("Percentile Rankings", true)])
-                        FilterPillRow()
-                        CategoryFilter(selectedCategory: $viewModel.selectedCategory, counts: viewModel.categoryCounts)
+        ZStack {
+            ScrollView {
+                VStack(spacing: 0) {
+                    CategoryFilter(selectedCategory: $viewModel.selectedCategory, counts: viewModel.categoryCounts)
 
-                        if !viewModel.featuredPlayers.isEmpty {
-                            featuredStrip
-                        }
-
-                        leaderboardSection
+                    if !viewModel.featuredPlayers.isEmpty {
+                        featuredStrip
                     }
-                }
-                .refreshable {
-                    await viewModel.load()
-                }
 
-                if viewModel.isLoading && viewModel.players.isEmpty {
-                    ProgressView()
-                        .scaleEffect(1.5)
-                        .tint(SavantPalette.inkTertiary)
+                    leaderboardSection
                 }
             }
-            .background(SavantPalette.canvas.ignoresSafeArea())
-            .navigationBarHidden(true)
-            .navigationDestination(for: Player.self) { player in
-                PlayerProfileView(player: player)
-            }
-            .sheet(item: $sheetDestination) { destination in
-                switch destination {
-                case .settings:
-                    SettingsView(lastUpdated: viewModel.lastUpdated)
-                case .metricLeaders:
-                    MetricLeadersView(metrics: viewModel.allMetrics)
-                }
-            }
-            .task {
+            .refreshable {
                 await viewModel.load()
             }
+
+            if viewModel.isLoading && viewModel.players.isEmpty {
+                ProgressView()
+                    .scaleEffect(1.5)
+                    .tint(SavantPalette.inkTertiary)
+            }
         }
-        .tint(SavantPalette.ink)
+        .background(SavantPalette.canvas.ignoresSafeArea())
     }
 
     private var featuredStrip: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 10) {
-                ForEach(viewModel.featuredPlayers) { player in
-                    NavigationLink(value: player) {
-                        FeaturedTile(player: player) { }
+        VStack(spacing: 0) {
+            SavantSectionBar(title: "FEATURED")
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 10) {
+                    ForEach(viewModel.featuredPlayers) { player in
+                        NavigationLink(value: player) {
+                            FeaturedTile(player: player) { }
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
                 }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 12)
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 14)
+            .background(SavantPalette.surfaceAlt)
+            .overlay(Rectangle().fill(SavantPalette.hairline).frame(height: SavantGeo.hairline), alignment: .bottom)
         }
-        .background(SavantPalette.surfaceAlt)
-        .overlay(Rectangle().fill(SavantPalette.hairline).frame(height: SavantGeo.hairline), alignment: .bottom)
     }
 
     private var leaderboardSection: some View {
@@ -139,9 +101,12 @@ struct DashboardView: View {
         )
         .padding(.horizontal, 12)
         .padding(.top, 12)
+        .padding(.bottom, 12)
     }
 }
 
 #Preview {
-    DashboardView(viewModel: DashboardViewModel())
+    NavigationStack {
+        DashboardView(viewModel: DashboardViewModel())
+    }
 }

@@ -7,7 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		03322BA439762FE028116ADC /* TeamsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93AB140AC9F51D7E0F0E2C6D /* TeamsView.swift */; };
 		0E57D0D337381AEB2F905D79 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 80FA4CA4AA0C875123767D0C /* PrivacyInfo.xcprivacy */; };
+		14FE0A5789F558B6C9BBCA6A /* RootTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9C629EF1C253BCEAF314EF /* RootTabView.swift */; };
 		189D1222312FEE374CFA4DEE /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147A7B626DB00162FDED79EA /* SettingsView.swift */; };
 		203BA78977360FDD34CE3DCE /* SavantTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBA717240777CE85A8A2379E /* SavantTokens.swift */; };
 		53AAA361EDCCDA0BB2681CD8 /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28F7C1A7CADA7CA917C9B9BF /* Components.swift */; };
@@ -51,7 +53,9 @@
 		7617277D84B90249653F8ED5 /* StatScout.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = StatScout.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7B12DA38BF60E2D7C4CC7DFF /* Player.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
 		80FA4CA4AA0C875123767D0C /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		8E9C629EF1C253BCEAF314EF /* RootTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootTabView.swift; sourceTree = "<group>"; };
 		91414B3D597831487B630032 /* MetricLeadersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetricLeadersView.swift; sourceTree = "<group>"; };
+		93AB140AC9F51D7E0F0E2C6D /* TeamsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamsView.swift; sourceTree = "<group>"; };
 		9AD97C159FCE484C7AA9DDDF /* PlayerProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerProfileView.swift; sourceTree = "<group>"; };
 		9C04FC271035959EFD5300A2 /* SavantModules.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavantModules.swift; sourceTree = "<group>"; };
 		C7699F37BE47BC9BE5A5A4B1 /* StatScoutTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = StatScoutTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -166,9 +170,11 @@
 				64CFDB4111B83AFFDDABB591 /* DashboardView.swift */,
 				91414B3D597831487B630032 /* MetricLeadersView.swift */,
 				9AD97C159FCE484C7AA9DDDF /* PlayerProfileView.swift */,
+				8E9C629EF1C253BCEAF314EF /* RootTabView.swift */,
 				9C04FC271035959EFD5300A2 /* SavantModules.swift */,
 				DBA717240777CE85A8A2379E /* SavantTokens.swift */,
 				147A7B626DB00162FDED79EA /* SettingsView.swift */,
+				93AB140AC9F51D7E0F0E2C6D /* TeamsView.swift */,
 				FCF08005AEA98F7CFF7919C6 /* TeamView.swift */,
 			);
 			path = Views;
@@ -280,6 +286,7 @@
 				5ADC10C15D1FF7D02AD7E9F4 /* MetricLeadersView.swift in Sources */,
 				B4DCC3A1E6B450909ED5F5DC /* Player.swift in Sources */,
 				B56324087E4F4F901D6586E5 /* PlayerProfileView.swift in Sources */,
+				14FE0A5789F558B6C9BBCA6A /* RootTabView.swift in Sources */,
 				F9CFA1F577A94864AB624B41 /* SampleData.swift in Sources */,
 				FE17DDC74A43A910CD4A1CE8 /* SavantModules.swift in Sources */,
 				203BA78977360FDD34CE3DCE /* SavantTokens.swift in Sources */,
@@ -287,6 +294,7 @@
 				97ADF393CE14DE856A50A0B5 /* StatScoutApp.swift in Sources */,
 				C5718F0C8435928CBF995DE5 /* StatcastAPI.swift in Sources */,
 				648F3040D95418DB26BE2EE1 /* TeamView.swift in Sources */,
+				03322BA439762FE028116ADC /* TeamsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
