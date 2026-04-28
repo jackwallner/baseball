@@ -18,7 +18,7 @@ struct PlayerProfileView: View {
                 PlayerIdentityStrip(player: player)
 
                 SavantTabs(
-                    tabs: ["Standard", "Advanced", "Game Logs", "Splits"],
+                    tabs: ["Standard", "Advanced", "Splits"],
                     selected: $selectedTab
                 )
 
@@ -27,8 +27,6 @@ struct PlayerProfileView: View {
                     statcastContent
                 case "Standard":
                     standardContent
-                case "Game Logs":
-                    gameLogsContent
                 case "Splits":
                     comingSoon("Splits")
                 default:
@@ -49,9 +47,6 @@ struct PlayerProfileView: View {
     private var statcastContent: some View {
         VStack(spacing: 12) {
             percentileRankingsCard
-            if !player.games.isEmpty {
-                gameByGameCard
-            }
         }
         .padding(.horizontal, 12)
         .padding(.top, 12)
@@ -60,22 +55,6 @@ struct PlayerProfileView: View {
     private var standardContent: some View {
         VStack(spacing: 12) {
             standardStatsGridCard
-        }
-        .padding(.horizontal, 12)
-        .padding(.top, 12)
-    }
-
-    private var gameLogsContent: some View {
-        VStack(spacing: 12) {
-            if !player.games.isEmpty {
-                gameByGameCard
-            } else {
-                emptyStateCard(
-                    icon: "baseball",
-                    title: "Game logs update nightly",
-                    description: "Detailed game-by-game data will appear once available from Statcast."
-                )
-            }
         }
         .padding(.horizontal, 12)
         .padding(.top, 12)
@@ -219,83 +198,6 @@ struct PlayerProfileView: View {
         )
     }
 
-    private var gameByGameCard: some View {
-        VStack(spacing: 0) {
-            SavantSectionBar(title: "GAME-BY-GAME")
-
-            HStack(spacing: 8) {
-                Text("DATE")
-                    .font(SavantType.micro)
-                    .tracking(0.5)
-                    .foregroundStyle(SavantPalette.inkTertiary)
-                    .frame(width: 60, alignment: .leading)
-                Text("OPP")
-                    .font(SavantType.micro)
-                    .tracking(0.5)
-                    .foregroundStyle(SavantPalette.inkTertiary)
-                    .frame(width: 44, alignment: .leading)
-                Text("Δ PCTL")
-                    .font(SavantType.micro)
-                    .tracking(0.5)
-                    .foregroundStyle(SavantPalette.inkTertiary)
-                    .frame(width: 52, alignment: .trailing)
-                Text("KEY METRIC")
-                    .font(SavantType.micro)
-                    .tracking(0.5)
-                    .foregroundStyle(SavantPalette.inkTertiary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
-            .frame(height: SavantGeo.rowHeightHeader)
-            .padding(.horizontal, SavantGeo.padInline)
-            .background(SavantPalette.surfaceAlt)
-            .overlay(
-                Rectangle()
-                    .fill(SavantPalette.divider)
-                    .frame(height: SavantGeo.hairline),
-                alignment: .bottom
-            )
-
-            ForEach(Array(player.games.enumerated()), id: \.element.id) { index, game in
-                HStack(spacing: 8) {
-                    Text(game.date.formatted(date: .abbreviated, time: .omitted))
-                        .font(SavantType.small)
-                        .foregroundStyle(SavantPalette.inkSecondary)
-                        .frame(width: 60, alignment: .leading)
-                    Text(game.opponent)
-                        .font(SavantType.smallBold)
-                        .foregroundStyle(SavantPalette.ink)
-                        .frame(width: 44, alignment: .leading)
-                    HStack(spacing: 2) {
-                        Text(game.percentileDelta >= 0 ? "▲" : "▼")
-                            .font(.system(size: 9))
-                        Text("\(game.percentileDelta >= 0 ? "+" : "")\(game.percentileDelta)")
-                            .font(SavantType.statSmall)
-                    }
-                    .foregroundStyle(game.percentileDelta >= 0 ? SavantPalette.up : SavantPalette.down)
-                    .frame(width: 52, alignment: .trailing)
-                    Text(game.keyMetric)
-                        .font(SavantType.smallBold)
-                        .foregroundStyle(SavantPalette.ink)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                .frame(height: SavantGeo.rowHeight)
-                .padding(.horizontal, SavantGeo.padInline)
-                .background(index % 2 == 0 ? SavantPalette.surface : SavantPalette.surfaceAlt)
-                .overlay(
-                    Rectangle()
-                        .fill(SavantPalette.divider)
-                        .frame(height: SavantGeo.hairline),
-                    alignment: .bottom
-                )
-            }
-        }
-        .background(SavantPalette.surface)
-        .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
-        .overlay(
-            RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
-                .stroke(SavantPalette.hairline, lineWidth: 0.5)
-        )
-    }
 }
 
 extension Array {

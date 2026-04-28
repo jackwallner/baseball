@@ -15,6 +15,7 @@ struct PlayerHeadshot: View {
                     switch phase {
                     case .success(let image):
                         image.resizable().scaledToFill()
+                            .frame(width: size, height: size)
                     default:
                         initialsView
                     }
