@@ -52,7 +52,7 @@ struct MetricLeadersView: View {
                     .tracking(0.5)
                     .foregroundStyle(SavantPalette.inkTertiary)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                Text("WORST")
+                Text("LOWEST")
                     .font(SavantType.micro)
                     .tracking(0.5)
                     .foregroundStyle(SavantPalette.inkTertiary)

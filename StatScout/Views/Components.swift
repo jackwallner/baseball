@@ -27,6 +27,7 @@ struct PlayerHeadshot: View {
         .frame(width: size, height: size)
         .clipShape(Circle())
         .overlay(Circle().stroke(SavantPalette.hairline, lineWidth: 0.5))
+        .accessibilityHidden(true)
     }
 
     private var initialsView: some View {
@@ -53,6 +54,7 @@ struct OverallPercentileBadge: View {
         .frame(width: size, height: size)
         .background(SavantPalette.color(forPercentile: percentile))
         .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusBadge))
+        .accessibilityLabel("Overall \(percentile)th percentile")
     }
 }
 
@@ -61,6 +63,7 @@ struct TeamColorDot: View {
     var size: CGFloat = 8
     var body: some View {
         Circle().fill(MLBTeamColor.color(abbr)).frame(width: size, height: size)
+            .accessibilityHidden(true)
     }
 }
 
@@ -105,6 +108,7 @@ struct MetricBar: View {
                 }
             }
             .frame(height: 8)
+            .accessibilityHidden(true)
         }
     }
 }
@@ -277,8 +281,14 @@ struct LeaderboardTableRow: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            PercentileBarMini(percentile: displayPercentile)
-                .frame(width: 120, alignment: .leading)
+            HStack(spacing: 6) {
+                PercentileBarMini(percentile: displayPercentile)
+                    .frame(width: 84, alignment: .leading)
+                Text("\(displayPercentile)")
+                    .font(SavantType.statSmall)
+                    .foregroundStyle(SavantPalette.inkSecondary)
+                    .frame(width: 24, alignment: .trailing)
+            }
         }
         .frame(height: SavantGeo.rowHeight)
         .padding(.horizontal, SavantGeo.padInline)
@@ -307,6 +317,8 @@ struct PercentileBarMini: View {
             }
         }
         .frame(height: 18)
+        .accessibilityElement()
+        .accessibilityLabel("\(percentile)th percentile")
     }
 }
 

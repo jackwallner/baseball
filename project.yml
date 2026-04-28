@@ -14,6 +14,8 @@ targets:
     platform: iOS
     sources:
       - path: StatScout
+    resources:
+      - StatScout/PrivacyInfo.xcprivacy
     settings:
       base:
         DEVELOPMENT_TEAM: YXG4MP6W39
@@ -28,17 +30,21 @@ targets:
       configs:
         Debug:
           CODE_SIGN_IDENTITY: "Apple Development"
-          SUPABASE_URL: https://babzqsbmcunrezsdpyng.supabase.co
+          SUPABASE_URL: $(SUPABASE_URL)
           SUPABASE_ANON_KEY: $(SUPABASE_ANON_KEY)
         Release:
           PROVISIONING_PROFILE_SPECIFIER: $(PROVISIONING_PROFILE_SPECIFIER)
-          SUPABASE_URL: https://babzqsbmcunrezsdpyng.supabase.co
+          SUPABASE_URL: $(SUPABASE_URL)
           SUPABASE_ANON_KEY: $(SUPABASE_ANON_KEY)
     preBuildScripts:
       - name: Pre-build validation
         script: |
           if ! command -v xcodegen &> /dev/null; then
             echo "warning: xcodegen not found. Install via 'brew install xcodegen'."
+          fi
+          if [ -z "$SUPABASE_URL" ]; then
+            echo "error: SUPABASE_URL not set."
+            exit 1
           fi
           if [ -z "$SUPABASE_ANON_KEY" ]; then
             echo "error: SUPABASE_ANON_KEY not set."

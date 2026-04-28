@@ -3,6 +3,7 @@ import SwiftUI
 struct PlayerProfileView: View {
     let player: Player
     @State private var selectedTab = "Advanced"
+    @State private var showPercentileInfo = false
 
     private var seasonLabel: String {
         player.season.map(String.init) ?? "Season"
@@ -43,6 +44,9 @@ struct PlayerProfileView: View {
             ToolbarItem(placement: .topBarTrailing) {
                 ShareLink(item: player.shareSummary)
             }
+        }
+        .sheet(isPresented: $showPercentileInfo) {
+            PercentileInfoSheet()
         }
     }
 
@@ -92,9 +96,12 @@ struct PlayerProfileView: View {
                             .font(SavantType.micro)
                             .tracking(0.5)
                             .foregroundStyle(SavantPalette.inkSecondary)
-                        Text("ⓘ")
-                            .font(SavantType.micro)
-                            .foregroundStyle(SavantPalette.linkBlue)
+                        Button(action: { showPercentileInfo = true }) {
+                            Text("ⓘ")
+                                .font(SavantType.micro)
+                                .foregroundStyle(SavantPalette.linkBlue)
+                        }
+                        .buttonStyle(.plain)
                     }
                 )
             )
@@ -140,7 +147,7 @@ struct PlayerProfileView: View {
                 emptyStateCard(
                     icon: "chart.bar",
                     title: "Standard stats unavailable",
-                    description: "Traditional stats are not available for this player in the current data feed."
+                    description: "Traditional stats are not available for this player."
                 )
                 .padding(.vertical, 24)
             } else {
@@ -188,6 +195,45 @@ struct PlayerProfileView: View {
         )
     }
 
+}
+
+struct PercentileInfoSheet: View {
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Percentile Rankings")
+                        .font(SavantType.playerName)
+                        .foregroundStyle(SavantPalette.ink)
+
+                    Text("Baseball Savant percentiles compare a player to all others at the same position. A 90th percentile means the player ranks in the top 10% of the league for that metric.")
+                        .font(SavantType.body)
+                        .foregroundStyle(SavantPalette.inkSecondary)
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Label("Elite (75–100): Red bars", systemImage: "flame.fill")
+                            .font(SavantType.bodyBold)
+                            .foregroundStyle(SavantPalette.pctlHot)
+                        Label("Average (25–75): Gray bars", systemImage: "minus")
+                            .font(SavantType.bodyBold)
+                            .foregroundStyle(SavantPalette.inkSecondary)
+                        Label("Below Average (0–25): Blue bars", systemImage: "snowflake")
+                            .font(SavantType.bodyBold)
+                            .foregroundStyle(SavantPalette.pctlCold)
+                    }
+                    .padding(.vertical, 8)
+
+                    Text("Data refreshes nightly from Baseball Savant percentile leaderboards. Not all metrics are available for every player due to qualifying thresholds.")
+                        .font(SavantType.small)
+                        .foregroundStyle(SavantPalette.inkTertiary)
+                }
+                .padding(24)
+            }
+            .background(SavantPalette.canvas.ignoresSafeArea())
+            .navigationTitle("About Percentiles")
+            .navigationBarTitleDisplayMode(.inline)
+        }
+    }
 }
 
 extension Array {
