@@ -94,6 +94,29 @@ def test_normalize_team_abbr_aliases():
     assert ingest.normalize_team_abbr("KCR") == "KC"
 
 
+def test_normalize_team_abbr_unknown_falls_back_to_tbd():
+    assert ingest.normalize_team_abbr("XYZ") == "TBD"
+    assert ingest.normalize_team_abbr("Some Random Garbage") == "TBD"
+    assert ingest.normalize_team_abbr("") == "TBD"
+
+
+def test_resolve_season_invalid_input_falls_back():
+    with patch.dict(os.environ, {"STATCAST_SEASON": "2099"}):
+        assert ingest._resolve_season() == ingest._default_season()
+    with patch.dict(os.environ, {"STATCAST_SEASON": "abc"}):
+        assert ingest._resolve_season() == ingest._default_season()
+    with patch.dict(os.environ, {"STATCAST_SEASON": "1999"}):
+        assert ingest._resolve_season() == ingest._default_season()
+
+
+def test_fetch_standard_stats_uses_qualifying_thresholds():
+    with patch("ingest.batting_stats", return_value=pd.DataFrame()) as bat_mock:
+        with patch("ingest.pitching_stats", return_value=pd.DataFrame()) as pit_mock:
+            ingest._fetch_standard_stats(2026)
+    bat_mock.assert_called_once_with(2026, qual=100)
+    pit_mock.assert_called_once_with(2026, qual=10)
+
+
 def test_merge_player_row_two_way():
     row = pd.Series(
         {

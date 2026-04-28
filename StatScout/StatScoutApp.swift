@@ -2,13 +2,14 @@ import SwiftUI
 
 @main
 struct StatScoutApp: App {
-    private let api: StatcastAPI
+    private let api: StatcastAPI?
 
     init() {
         guard let urlString = Self.configValue(for: "SUPABASE_URL"),
               let url = URL(string: urlString),
               let key = Self.configValue(for: "SUPABASE_ANON_KEY") else {
-            fatalError("Missing Supabase configuration. Set SUPABASE_URL and SUPABASE_ANON_KEY in the scheme environment or Info.plist build settings.")
+            self.api = nil
+            return
         }
         self.api = StatcastAPI(baseURL: url, apiKey: key)
     }
@@ -24,8 +25,36 @@ struct StatScoutApp: App {
 
     var body: some Scene {
         WindowGroup {
-            RootTabView(viewModel: DashboardViewModel(provider: api))
-                .preferredColorScheme(.light)
+            if let api {
+                RootTabView(viewModel: DashboardViewModel(provider: api, cache: DiskPlayerCache()))
+                    .preferredColorScheme(.dark)
+            } else {
+                ConfigMissingView()
+                    .preferredColorScheme(.dark)
+            }
         }
+    }
+}
+
+struct ConfigMissingView: View {
+    var body: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .font(.system(size: 44, weight: .bold))
+                .foregroundStyle(SavantPalette.savantRed)
+            Text("StatScout can't load")
+                .font(SavantType.playerName)
+                .foregroundStyle(SavantPalette.ink)
+            Text("This build is missing its data-feed configuration. Please install the latest TestFlight build or contact support.")
+                .font(SavantType.body)
+                .foregroundStyle(SavantPalette.inkSecondary)
+                .multilineTextAlignment(.center)
+            Link("Contact Support", destination: URL(string: "https://jackwallner.github.io/baseball/support.html")!)
+                .buttonStyle(.borderedProminent)
+                .tint(SavantPalette.savantRed)
+        }
+        .padding(24)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(SavantPalette.canvas.ignoresSafeArea())
     }
 }

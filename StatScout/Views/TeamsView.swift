@@ -22,7 +22,7 @@ struct TeamsView: View {
 
                 LazyVGrid(columns: columns, spacing: 8) {
                     ForEach(Self.allTeams, id: \.self) { abbr in
-                        let count = viewModel.players(forTeam: abbr).count
+                        let count = viewModel.teamCounts[abbr] ?? 0
                         NavigationLink(value: TeamDestination(abbr: abbr)) {
                             TeamTile(abbr: abbr, playerCount: count)
                         }

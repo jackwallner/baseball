@@ -3,11 +3,11 @@ import SwiftUI
 struct MetricLeadersView: View {
     let metrics: [(label: String, category: MetricCategory, best: (player: Player, value: Int)?, worst: (player: Player, value: Int)?)]
 
-    private var groupedByCategory: [(MetricCategory, [(label: String, best: (player: Player, value: Int)?, worst: (player: Player, value: Int)?)])] {
+    private var groupedByCategory: [(MetricCategory, [(label: String, category: MetricCategory, best: (player: Player, value: Int)?, worst: (player: Player, value: Int)?)])] {
         let grouped = Dictionary(grouping: metrics) { $0.category }
         return MetricCategory.allCases.compactMap { cat in
             guard let items = grouped[cat], !items.isEmpty else { return nil }
-            let mapped = items.map { (label: $0.label, best: $0.best, worst: $0.worst) }
+            let mapped = items.map { (label: $0.label, category: $0.category, best: $0.best, worst: $0.worst) }
             return (cat, mapped)
         }
     }
@@ -37,7 +37,7 @@ struct MetricLeadersView: View {
         .background(SavantPalette.canvas.ignoresSafeArea())
     }
 
-    private func categoryCard(_ group: (MetricCategory, [(label: String, best: (player: Player, value: Int)?, worst: (player: Player, value: Int)?)])) -> some View {
+    private func categoryCard(_ group: (MetricCategory, [(label: String, category: MetricCategory, best: (player: Player, value: Int)?, worst: (player: Player, value: Int)?)])) -> some View {
         VStack(spacing: 0) {
             SavantSectionBar(title: group.0.rawValue.uppercased())
 
@@ -68,7 +68,7 @@ struct MetricLeadersView: View {
 
             ForEach(Array(group.1.enumerated()), id: \.offset) { index, item in
                 HStack(spacing: 8) {
-                    NavigationLink(value: MetricRoute(label: item.label)) {
+                    NavigationLink(value: MetricRoute(label: item.label, category: item.category)) {
                         Text(item.label)
                             .font(SavantType.smallBold)
                             .foregroundStyle(SavantPalette.ink)

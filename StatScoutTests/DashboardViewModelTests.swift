@@ -92,32 +92,35 @@ final class DashboardViewModelTests: XCTestCase {
     }
 
     @MainActor
-    func testBiggestMoversOrdering() async {
-        let now = Date()
+    func testTeamCountsPopulatedAfterLoad() async {
         let players = [
-            mover(id: 1, delta: 4, date: now),
-            mover(id: 2, delta: 12, date: now),
-            mover(id: 3, delta: -7, date: now),
-            mover(id: 4, delta: -2, date: now)
+            Player(id: 1, name: "A", team: "NYY", position: "RF", handedness: "R/R", imageURL: nil, updatedAt: Date(), metrics: [], standardStats: [], games: []),
+            Player(id: 2, name: "B", team: "NYY", position: "1B", handedness: "L/R", imageURL: nil, updatedAt: Date(), metrics: [], standardStats: [], games: []),
+            Player(id: 3, name: "C", team: "BOS", position: "SS", handedness: "R/R", imageURL: nil, updatedAt: Date(), metrics: [], standardStats: [], games: [])
         ]
         let vm = DashboardViewModel(provider: MockProvider(players: players))
         await vm.load()
-
-        XCTAssertEqual(vm.biggestRisers.map(\.id), [2, 1])
-        XCTAssertEqual(vm.biggestFallers.map(\.id), [3, 4])
+        XCTAssertEqual(vm.teamCounts["NYY"], 2)
+        XCTAssertEqual(vm.teamCounts["BOS"], 1)
     }
 
-    private func mover(id: Int, delta: Int, date: Date) -> Player {
-        Player(
-            id: id, name: "Player \(id)", team: "NYY", position: "RF", handedness: "R/R", imageURL: nil,
-            updatedAt: date,
-            metrics: [],
-            standardStats: [],
-            games: [
-                GameTrend(id: "\(id)-game", date: date, opponent: "BOS", summary: "", percentileDelta: delta, keyMetric: "xwOBA")
-            ]
-        )
+    @MainActor
+    func testCacheHydratesPlayersBeforeFetch() async {
+        let cached = [
+            Player(id: 99, name: "Cached", team: "NYY", position: "DH", handedness: "L/R", imageURL: nil, updatedAt: Date(), metrics: [], standardStats: [], games: [])
+        ]
+        let cache = InMemoryPlayerCache(seed: cached)
+        let vm = DashboardViewModel(provider: MockProvider(error: URLError(.notConnectedToInternet)), cache: cache)
+        await vm.load()
+        XCTAssertEqual(vm.players.map(\.id), [99], "Cached players should be shown even when refresh fails")
     }
+}
+
+final class InMemoryPlayerCache: PlayerCaching, @unchecked Sendable {
+    private var stored: [Player]
+    init(seed: [Player] = []) { self.stored = seed }
+    func loadPlayers() throws -> [Player] { stored }
+    func savePlayers(_ players: [Player]) throws { stored = players }
 }
 
 struct MockProvider: StatcastProviding, @unchecked Sendable {

@@ -20,7 +20,7 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.jackwallner.baseball
         PRODUCT_NAME: "Baseball Savvy StatScout"
         MARKETING_VERSION: "1.0"
-        CURRENT_PROJECT_VERSION: "20"
+        CURRENT_PROJECT_VERSION: "21"
         GENERATE_INFOPLIST_FILE: NO
         INFOPLIST_FILE: StatScout/Info.plist
         CODE_SIGN_ENTITLEMENTS: StatScout/StatScout.entitlements
@@ -29,11 +29,11 @@ targets:
         Debug:
           CODE_SIGN_IDENTITY: "Apple Development"
           SUPABASE_URL: https://babzqsbmcunrezsdpyng.supabase.co
-          SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJhYnpxc2JtY3VucmV6c2RweW5nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMzQ5NjIsImV4cCI6MjA5MjgxMDk2Mn0.6OLIj-KnMcWhvjjSzSM3NF_d8AyToi4HSgPJ2oMIHG4
+          SUPABASE_ANON_KEY: $(SUPABASE_ANON_KEY)
         Release:
           PROVISIONING_PROFILE_SPECIFIER: $(PROVISIONING_PROFILE_SPECIFIER)
           SUPABASE_URL: https://babzqsbmcunrezsdpyng.supabase.co
-          SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJhYnpxc2JtY3VucmV6c2RweW5nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMzQ5NjIsImV4cCI6MjA5MjgxMDk2Mn0.6OLIj-KnMcWhvjjSzSM3NF_d8AyToi4HSgPJ2oMIHG4
+          SUPABASE_ANON_KEY: $(SUPABASE_ANON_KEY)
     buildScripts:
       - name: Pre-build validation
         script: |
@@ -41,7 +41,8 @@ targets:
             echo "warning: xcodegen not found. Install via 'brew install xcodegen'."
           fi
           if [ -z "${SUPABASE_ANON_KEY}" ]; then
-            echo "warning: SUPABASE_ANON_KEY not set. StatScoutApp will fatalError at launch."
+            echo "error: SUPABASE_ANON_KEY not set."
+            exit 1
           fi
     entitlements:
       path: StatScout/StatScout.entitlements

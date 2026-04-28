@@ -6,6 +6,7 @@ struct TeamDestination: Hashable {
 
 struct MetricRoute: Hashable {
     let label: String
+    let category: MetricCategory
 }
 
 struct RootTabView: View {
@@ -35,9 +36,6 @@ struct RootTabView: View {
                 .tag(3)
         }
         .tint(SavantPalette.savantRed)
-        .onChange(of: selection) { _, _ in
-            viewModel.searchText = ""
-        }
         .task { await viewModel.load() }
     }
 
@@ -104,7 +102,7 @@ private struct StandardDestinations: ViewModifier {
                     .modifier(SavantNavBar())
             }
             .navigationDestination(for: MetricRoute.self) { route in
-                MetricRankingView(metricLabel: route.label, players: viewModel.players)
+                MetricRankingView(metricLabel: route.label, metricCategory: route.category, players: viewModel.players)
                     .modifier(SavantNavBar())
             }
     }

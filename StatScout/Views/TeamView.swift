@@ -7,7 +7,7 @@ struct TeamView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
-                TeamIdentityStrip(team: team)
+                TeamIdentityStrip(team: team, season: players.compactMap(\.season).max())
 
                 VStack(spacing: 0) {
                     SavantSectionBar(title: "ROSTER")

@@ -4,6 +4,10 @@ struct PlayerProfileView: View {
     let player: Player
     @State private var selectedTab = "Advanced"
 
+    private var seasonLabel: String {
+        player.season.map(String.init) ?? "Season"
+    }
+
     private var groupedMetrics: [(category: MetricCategory, metrics: [Metric])] {
         let grouped = Dictionary(grouping: player.metrics) { $0.category }
         return MetricCategory.allCases.compactMap { cat in
@@ -18,7 +22,7 @@ struct PlayerProfileView: View {
                 PlayerIdentityStrip(player: player)
 
                 SavantTabs(
-                    tabs: ["Standard", "Advanced", "Splits"],
+                    tabs: ["Standard", "Advanced"],
                     selected: $selectedTab
                 )
 
@@ -27,8 +31,6 @@ struct PlayerProfileView: View {
                     statcastContent
                 case "Standard":
                     standardContent
-                case "Splits":
-                    comingSoon("Splits")
                 default:
                     statcastContent
                 }
@@ -60,18 +62,6 @@ struct PlayerProfileView: View {
         .padding(.top, 12)
     }
 
-    private func comingSoon(_ label: String) -> some View {
-        VStack(spacing: 12) {
-            emptyStateCard(
-                icon: "clock",
-                title: "\(label) coming soon",
-                description: "This feature is planned for a future update."
-            )
-        }
-        .padding(.horizontal, 12)
-        .padding(.top, 12)
-    }
-
     private func emptyStateCard(icon: String, title: String, description: String) -> some View {
         VStack(spacing: 12) {
             ContentUnavailableView {
@@ -98,7 +88,7 @@ struct PlayerProfileView: View {
                 title: "PERCENTILE RANKINGS",
                 trailing: AnyView(
                     HStack(spacing: 4) {
-                        Text("2026")
+                        Text(seasonLabel)
                             .font(SavantType.micro)
                             .tracking(0.5)
                             .foregroundStyle(SavantPalette.inkSecondary)
@@ -118,7 +108,7 @@ struct PlayerProfileView: View {
                 )
 
                 ForEach(Array(group.metrics.enumerated()), id: \.element.id) { index, metric in
-                    NavigationLink(value: MetricRoute(label: metric.label)) {
+                    NavigationLink(value: MetricRoute(label: metric.label, category: metric.category)) {
                         MetricBar(metric: metric)
                             .padding(.horizontal, SavantGeo.padCard)
                             .padding(.vertical, 12)
@@ -144,13 +134,13 @@ struct PlayerProfileView: View {
 
     private var standardStatsGridCard: some View {
         VStack(spacing: 0) {
-            SavantSectionBar(title: "STANDARD STATS · 2026")
+            SavantSectionBar(title: "STANDARD STATS · \(seasonLabel)")
 
             if (player.standardStats ?? []).isEmpty {
                 emptyStateCard(
                     icon: "chart.bar",
                     title: "Standard stats unavailable",
-                    description: "Traditional stats will appear after the nightly data refresh."
+                    description: "Traditional stats are not available for this player in the current data feed."
                 )
                 .padding(.vertical, 24)
             } else {

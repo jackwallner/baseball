@@ -12,6 +12,7 @@
 		14FE0A5789F558B6C9BBCA6A /* RootTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9C629EF1C253BCEAF314EF /* RootTabView.swift */; };
 		189D1222312FEE374CFA4DEE /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147A7B626DB00162FDED79EA /* SettingsView.swift */; };
 		203BA78977360FDD34CE3DCE /* SavantTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBA717240777CE85A8A2379E /* SavantTokens.swift */; };
+		3DA5F5AA0CC4C3141DB727AA /* PlayerCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 346E3D39DDC5F6FDD387016B /* PlayerCache.swift */; };
 		53AAA361EDCCDA0BB2681CD8 /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28F7C1A7CADA7CA917C9B9BF /* Components.swift */; };
 		546D608E319D793C05C8EF0B /* DashboardViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5656B47DF4560469CCFA8564 /* DashboardViewModelTests.swift */; };
 		5ADC10C15D1FF7D02AD7E9F4 /* MetricLeadersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91414B3D597831487B630032 /* MetricLeadersView.swift */; };
@@ -47,6 +48,7 @@
 		1E4FF70B13A65617E39C4E75 /* DashboardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardViewModel.swift; sourceTree = "<group>"; };
 		28F7C1A7CADA7CA917C9B9BF /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
 		2BF12CF754F018EFD7BE7729 /* SampleData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleData.swift; sourceTree = "<group>"; };
+		346E3D39DDC5F6FDD387016B /* PlayerCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerCache.swift; sourceTree = "<group>"; };
 		3472ECB1AEDAC645F39334C8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		5656B47DF4560469CCFA8564 /* DashboardViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardViewModelTests.swift; sourceTree = "<group>"; };
 		5915A8F24A5447D26C221603 /* StatScout.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = StatScout.entitlements; sourceTree = "<group>"; };
@@ -152,6 +154,7 @@
 		C13D4BF64FC7CE5A7B9F7842 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				346E3D39DDC5F6FDD387016B /* PlayerCache.swift */,
 				15914E954BD86B91C09E5C88 /* StatcastAPI.swift */,
 			);
 			path = Services;
@@ -289,6 +292,7 @@
 				5ADC10C15D1FF7D02AD7E9F4 /* MetricLeadersView.swift in Sources */,
 				B7206DA461865E379BE3029D /* MetricRankingView.swift in Sources */,
 				B4DCC3A1E6B450909ED5F5DC /* Player.swift in Sources */,
+				3DA5F5AA0CC4C3141DB727AA /* PlayerCache.swift in Sources */,
 				B56324087E4F4F901D6586E5 /* PlayerProfileView.swift in Sources */,
 				14FE0A5789F558B6C9BBCA6A /* RootTabView.swift in Sources */,
 				F9CFA1F577A94864AB624B41 /* SampleData.swift in Sources */,
@@ -319,7 +323,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = StatScout/StatScout.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CURRENT_PROJECT_VERSION = 20;
+				CURRENT_PROJECT_VERSION = 21;
 				DEVELOPMENT_TEAM = YXG4MP6W39;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = StatScout/Info.plist;
@@ -331,7 +335,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.jackwallner.baseball;
 				PRODUCT_NAME = "Baseball Savvy StatScout";
 				SDKROOT = iphoneos;
-				SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJhYnpxc2JtY3VucmV6c2RweW5nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMzQ5NjIsImV4cCI6MjA5MjgxMDk2Mn0.6OLIj-KnMcWhvjjSzSM3NF_d8AyToi4HSgPJ2oMIHG4";
+				SUPABASE_ANON_KEY = "$(SUPABASE_ANON_KEY)";
 				SUPABASE_URL = "https://babzqsbmcunrezsdpyng.supabase.co";
 				TARGETED_DEVICE_FAMILY = 1;
 			};
@@ -422,7 +426,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = StatScout/StatScout.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 20;
+				CURRENT_PROJECT_VERSION = 21;
 				DEVELOPMENT_TEAM = YXG4MP6W39;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = StatScout/Info.plist;
@@ -435,7 +439,7 @@
 				PRODUCT_NAME = "Baseball Savvy StatScout";
 				PROVISIONING_PROFILE_SPECIFIER = "$(PROVISIONING_PROFILE_SPECIFIER)";
 				SDKROOT = iphoneos;
-				SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJhYnpxc2JtY3VucmV6c2RweW5nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMzQ5NjIsImV4cCI6MjA5MjgxMDk2Mn0.6OLIj-KnMcWhvjjSzSM3NF_d8AyToi4HSgPJ2oMIHG4";
+				SUPABASE_ANON_KEY = "$(SUPABASE_ANON_KEY)";
 				SUPABASE_URL = "https://babzqsbmcunrezsdpyng.supabase.co";
 				TARGETED_DEVICE_FAMILY = 1;
 			};

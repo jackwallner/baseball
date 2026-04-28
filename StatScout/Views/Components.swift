@@ -236,10 +236,13 @@ struct LeaderboardTableRow: View {
     let rank: Int
     let player: Player
     var metricLabel: String? = nil
+    var metricCategory: MetricCategory? = nil
 
     private var displayMetric: Metric? {
         if let metricLabel {
-            return player.metrics.first { $0.label == metricLabel }
+            return player.metrics.first { metric in
+                metric.label == metricLabel && (metricCategory == nil || metric.category == metricCategory)
+            }
         }
         return player.headlineMetric
     }

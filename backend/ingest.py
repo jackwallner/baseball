@@ -30,7 +30,23 @@ def _default_season() -> int:
     return today.year if today.month >= 4 else today.year - 1
 
 
-STATCAST_SEASON = int(os.environ.get("STATCAST_SEASON", _default_season()))
+def _resolve_season() -> int:
+    raw = os.environ.get("STATCAST_SEASON")
+    fallback = _default_season()
+    if raw is None or raw == "":
+        return fallback
+    try:
+        season = int(raw)
+    except ValueError:
+        logger.warning("Invalid STATCAST_SEASON=%r; using %d", raw, fallback)
+        return fallback
+    if season < 2015 or season > fallback:
+        logger.warning("STATCAST_SEASON=%d out of range [2015, %d]; clamping to %d", season, fallback, fallback)
+        return fallback
+    return season
+
+
+STATCAST_SEASON = _resolve_season()
 
 BATTER_METRICS = [
     ("xwoba", "xwOBA", "Hitting"),
@@ -196,6 +212,7 @@ def build_metrics(row: pd.Series, player_type: str, metric_defs: list[tuple[str,
     metrics: list[dict[str, Any]] = []
     for key, label, category in metric_defs:
         if key not in row:
+            logger.debug("Skipping metric %s/%s for player %s: column missing", label, category, player_id)
             continue
         percentile = percentile_value(row[key])
         if percentile is None:
@@ -281,7 +298,18 @@ def normalize_team_abbr(value: Any) -> str:
         "WASHINGTON NATIONALS": "WSH",
         "WSN": "WSH",
     }
-    return aliases.get(upper, upper)
+    canonical = aliases.get(upper, upper)
+    if canonical not in MLB_TEAM_WHITELIST:
+        logger.warning("Unrecognized team string %r — falling back to TBD", value)
+        return "TBD"
+    return canonical
+
+
+MLB_TEAM_WHITELIST: set[str] = {
+    "ARI", "ATL", "BAL", "BOS", "CHC", "CWS", "CIN", "CLE", "COL", "DET",
+    "HOU", "KC", "LAA", "LAD", "MIA", "MIL", "MIN", "NYM", "NYY", "OAK",
+    "PHI", "PIT", "SD", "SEA", "SF", "STL", "TB", "TEX", "TOR", "WSH",
+}
 
 
 def position_from_row(row: pd.Series, player_type: str) -> str:
@@ -336,7 +364,7 @@ def _fetch_standard_stats(season: int) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Fetch FanGraphs standard stats for hitters and pitchers."""
     logger.info("Fetching standard batting stats for season %s", season)
     try:
-        bat = batting_stats(season, qual=1)
+        bat = batting_stats(season, qual=100)
         logger.info("Standard batting rows: %d", len(bat))
     except Exception:
         logger.exception("Failed to fetch standard batting stats")
@@ -344,7 +372,7 @@ def _fetch_standard_stats(season: int) -> tuple[pd.DataFrame, pd.DataFrame]:
 
     logger.info("Fetching standard pitching stats for season %s", season)
     try:
-        pitch = pitching_stats(season, qual=1)
+        pitch = pitching_stats(season, qual=10)
         logger.info("Standard pitching rows: %d", len(pitch))
     except Exception:
         logger.exception("Failed to fetch standard pitching stats")

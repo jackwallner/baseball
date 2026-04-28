@@ -5,6 +5,7 @@ import Observation
 @Observable
 final class DashboardViewModel {
     private let provider: StatcastProviding
+    private let cache: PlayerCaching?
 
     var players: [Player] = []
     var searchText = ""
@@ -12,13 +13,22 @@ final class DashboardViewModel {
     var isLoading = false
     var errorMessage: String?
     var lastFetchFailed = false
+    var teamCounts: [String: Int] = [:]
 
     var lastUpdated: Date? {
         players.map(\.updatedAt).max()
     }
 
-    init(provider: StatcastProviding = PreviewStatcastAPI()) {
+    var freshnessText: String? {
+        guard let lastUpdated else { return nil }
+        let formatter = RelativeDateTimeFormatter()
+        formatter.unitsStyle = .abbreviated
+        return "Updated \(formatter.localizedString(for: lastUpdated, relativeTo: Date()))"
+    }
+
+    init(provider: StatcastProviding = PreviewStatcastAPI(), cache: PlayerCaching? = nil) {
         self.provider = provider
+        self.cache = cache
     }
 
     var filteredPlayers: [Player] {
@@ -34,24 +44,6 @@ final class DashboardViewModel {
 
     var leaderboard: [Player] {
         filteredPlayers.sorted { $0.overallPercentile > $1.overallPercentile }
-    }
-
-    var biggestRisers: [Player] {
-        players.filter { $0.weeklyDelta > 0 }
-            .sorted { $0.weeklyDelta > $1.weeklyDelta }
-            .prefix(3)
-            .map { $0 }
-    }
-
-    var biggestFallers: [Player] {
-        players.filter { $0.weeklyDelta < 0 }
-            .sorted { $0.weeklyDelta < $1.weeklyDelta }
-            .prefix(3)
-            .map { $0 }
-    }
-
-    var randomPlayer: Player? {
-        players.randomElement()
     }
 
     var allTeams: [String] {
@@ -89,8 +81,18 @@ final class DashboardViewModel {
         }.sorted { $0.label < $1.label }
     }
 
+    private func updateDerivedState() {
+        updateAllMetrics()
+        teamCounts = Dictionary(grouping: players) { normalizedTeamAbbreviation($0.team) }
+            .mapValues(\.count)
+    }
+
     func load() async {
-        isLoading = true
+        if players.isEmpty, let cached = try? cache?.loadPlayers(), !cached.isEmpty {
+            players = cached
+            updateDerivedState()
+        }
+        isLoading = players.isEmpty
         errorMessage = nil
         lastFetchFailed = false
         do {
@@ -102,15 +104,16 @@ final class DashboardViewModel {
                 return
             }
             players = fetched
-            updateAllMetrics()
+            updateDerivedState()
+            try? cache?.savePlayers(fetched)
         } catch is DecodingError {
             errorMessage = "Data format changed — app may need an update."
             lastFetchFailed = true
         } catch let urlError as URLError {
-            errorMessage = "Can't reach data feed. Check your connection."
+            errorMessage = players.isEmpty ? "Can't reach data feed. Check your connection." : "Showing saved data. Pull to refresh when your connection improves."
             lastFetchFailed = true
         } catch {
-            errorMessage = "Something went wrong loading player data."
+            errorMessage = players.isEmpty ? "Something went wrong loading player data." : "Showing saved data. Pull to refresh to try again."
             lastFetchFailed = true
         }
         isLoading = false

@@ -9,10 +9,6 @@ struct DashboardView: View {
                 VStack(spacing: 0) {
                     CategoryFilter(selectedCategory: $viewModel.selectedCategory)
 
-                    if !viewModel.biggestRisers.isEmpty || !viewModel.biggestFallers.isEmpty {
-                        featuredStrip
-                    }
-
                     leaderboardSection
                 }
             }
@@ -28,47 +24,19 @@ struct DashboardView: View {
         .background(SavantPalette.canvas.ignoresSafeArea())
     }
 
-    private var featuredStrip: some View {
-        VStack(spacing: 0) {
-            SavantSectionBar(title: "BIGGEST MOVERS")
-            VStack(spacing: 0) {
-                if !viewModel.biggestRisers.isEmpty {
-                    moverRow(title: "TRENDING UP", players: viewModel.biggestRisers)
-                }
-                if !viewModel.biggestFallers.isEmpty {
-                    moverRow(title: "TRENDING DOWN", players: viewModel.biggestFallers)
-                }
-            }
-            .background(SavantPalette.surfaceAlt)
-            .overlay(Rectangle().fill(SavantPalette.hairline).frame(height: SavantGeo.hairline), alignment: .bottom)
-        }
-    }
-
-    private func moverRow(title: String, players: [Player]) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(title)
-                .font(SavantType.micro)
-                .tracking(0.6)
-                .foregroundStyle(SavantPalette.inkSecondary)
-                .padding(.horizontal, 12)
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 10) {
-                    ForEach(players) { player in
-                        NavigationLink(value: player) {
-                            FeaturedTile(player: player, weeklyDelta: player.weeklyDelta)
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-                .padding(.horizontal, 12)
-            }
-        }
-        .padding(.vertical, 10)
-    }
-
     private var leaderboardSection: some View {
         VStack(spacing: 0) {
-            SavantSectionBar(title: "LEADERBOARD")
+            SavantSectionBar(
+                title: "LEADERBOARD",
+                trailing: viewModel.freshnessText.map {
+                    AnyView(
+                        Text($0)
+                            .font(SavantType.micro)
+                            .tracking(0.4)
+                            .foregroundStyle(SavantPalette.inkSecondary)
+                    )
+                }
+            )
 
             SearchField(text: $viewModel.searchText)
                 .padding(.horizontal, 12)

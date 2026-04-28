@@ -2,7 +2,7 @@ name: Nightly Statcast Refresh
 
 on:
   schedule:
-    - cron: "0 8 * * *"
+    - cron: "0 14 * * *"
   workflow_dispatch:
 
 jobs:
@@ -27,11 +27,14 @@ jobs:
         run: PYTHONPATH=backend python -m pytest backend/tests
 
       - name: Run ingestion
+        shell: bash
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           STATCAST_SEASON: ${{ vars.STATCAST_SEASON || '2026' }}
-        run: python backend/ingest.py
+        run: |
+          set -o pipefail
+          python backend/ingest.py 2>&1 | tee ingestion.log
 
       - name: Upload artifacts on failure
         if: failure()
@@ -41,6 +44,7 @@ jobs:
           path: |
             backend/tests/
             backend/*.py
+            ingestion.log
 
       - name: Notify on failure
         if: failure()
@@ -48,9 +52,9 @@ jobs:
         continue-on-error: true
         with:
           script: |
-            github.rest.issues.createComment({
-              issue_number: 1,
+            github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
+              title: 'Nightly Statcast ingestion failed',
               body: ':warning: Nightly Statcast ingestion failed — check [run logs](https://github.com/' + context.repo.owner + '/' + context.repo.repo + '/actions/runs/' + context.runId + ')'
             })

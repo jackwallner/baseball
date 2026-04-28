@@ -8,9 +8,9 @@ struct Player: Identifiable, Codable, Hashable, Sendable {
     let handedness: String
     let imageURL: URL?
     let updatedAt: Date
-    let season: Int? = nil
-    let playerType: String? = nil
-    let source: String? = nil
+    let season: Int?
+    let playerType: String?
+    let source: String?
     let metrics: [Metric]
     let standardStats: [StandardStat]?
     let games: [GameTrend]
@@ -31,8 +31,49 @@ struct Player: Identifiable, Codable, Hashable, Sendable {
         case games
     }
 
+    init(id: Int, name: String, team: String, position: String, handedness: String, imageURL: URL?, updatedAt: Date, season: Int? = nil, playerType: String? = nil, source: String? = nil, metrics: [Metric], standardStats: [StandardStat]?, games: [GameTrend]) {
+        self.id = id
+        self.name = name
+        self.team = team
+        self.position = position
+        self.handedness = handedness
+        self.imageURL = imageURL
+        self.updatedAt = updatedAt
+        self.season = season
+        self.playerType = playerType
+        self.source = source
+        self.metrics = metrics
+        self.standardStats = standardStats
+        self.games = games
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(Int.self, forKey: .id)
+        name = try container.decode(String.self, forKey: .name)
+        team = try container.decode(String.self, forKey: .team)
+        position = try container.decode(String.self, forKey: .position)
+        handedness = try container.decode(String.self, forKey: .handedness)
+        imageURL = try container.decodeIfPresent(URL.self, forKey: .imageURL)
+        updatedAt = try container.decode(Date.self, forKey: .updatedAt)
+        season = try container.decodeIfPresent(Int.self, forKey: .season)
+        playerType = try container.decodeIfPresent(String.self, forKey: .playerType)
+        source = try container.decodeIfPresent(String.self, forKey: .source)
+        metrics = try container.decode([Metric].self, forKey: .metrics)
+        standardStats = try container.decodeIfPresent([StandardStat].self, forKey: .standardStats)
+        games = try container.decodeIfPresent([GameTrend].self, forKey: .games) ?? []
+    }
+
     var overallPercentile: Int {
         guard !metrics.isEmpty else { return 0 }
+        if playerType == "two_way" {
+            let categoryAverages = Dictionary(grouping: metrics) { $0.category }
+                .values
+                .map { group in
+                    Double(group.map(\.percentile).reduce(0, +)) / Double(group.count)
+                }
+            return Int(round(categoryAverages.max() ?? 0))
+        }
         let total = metrics.map(\.percentile).reduce(0, +)
         return Int(round(Double(total) / Double(metrics.count)))
     }
@@ -106,7 +147,19 @@ struct TeamRoute: Hashable {
 
 extension Player {
     var initials: String {
-        name.split(separator: " ").prefix(2).compactMap { $0.first.map(String.init) }.joined()
+        let parts = name.split(separator: " ")
+        guard let first = parts.first else { return "" }
+        var initials = [String(first.prefix(1))]
+        if parts.count > 1 {
+            initials.append(String(parts[1].prefix(1)))
+        }
+        if let last = parts.last {
+            let suffix = last.trimmingCharacters(in: .punctuationCharacters).uppercased()
+            if ["JR", "SR", "II", "III", "IV", "V"].contains(suffix), parts.count > 2 {
+                initials.append(String(last.prefix(1)))
+            }
+        }
+        return initials.joined()
     }
     var headshotURL: URL? {
         imageURL ?? URL(string: "https://midfield.mlbstatic.com/v1/people/\(id)/spots/240")

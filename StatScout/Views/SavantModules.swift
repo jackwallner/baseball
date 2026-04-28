@@ -36,9 +36,15 @@ struct PlayerIdentityStrip: View {
 
 struct TeamIdentityStrip: View {
     let team: String
+    var season: Int? = nil
 
     private var normalizedTeam: String {
         normalizedTeamAbbreviation(team)
+    }
+
+    private var seasonLabel: String {
+        let year = season ?? Calendar(identifier: .gregorian).component(.year, from: Date())
+        return "\(year) Season"
     }
 
     var body: some View {
@@ -56,7 +62,7 @@ struct TeamIdentityStrip: View {
                     .font(SavantType.playerName)
                     .foregroundStyle(SavantPalette.inkOnDark)
                     .lineLimit(1).minimumScaleFactor(0.7)
-                Text("2026 Season")
+                Text(seasonLabel)
                     .font(SavantType.small)
                     .foregroundStyle(.white.opacity(0.65))
             }
