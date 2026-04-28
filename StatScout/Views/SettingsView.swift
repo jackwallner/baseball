@@ -14,6 +14,7 @@ struct AboutView: View {
             VStack(spacing: 12) {
                 aboutCard
                 refreshCard
+                linkCard
                 versionCard
                 disclaimerCard
             }
@@ -65,6 +66,37 @@ struct AboutView: View {
                 title: "Last Updated",
                 subtitle: lastUpdated.map { $0.formatted(date: .long, time: .shortened) } ?? "—"
             )
+        }
+        .background(SavantPalette.surface)
+        .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
+        .overlay(
+            RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
+                .stroke(SavantPalette.hairline, lineWidth: 0.5)
+        )
+    }
+
+    private var linkCard: some View {
+        VStack(spacing: 0) {
+            SavantSectionBar(title: "SUPPORT & PRIVACY")
+            Link(destination: URL(string: "mailto:support@statscout.app")!) {
+                row(
+                    icon: "envelope.fill",
+                    title: "Contact Support",
+                    subtitle: "support@statscout.app"
+                )
+            }
+            .buttonStyle(.plain)
+            
+            Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline)
+            
+            Link(destination: URL(string: "https://statscout.app/privacy")!) {
+                row(
+                    icon: "shield.lefthalf.filled",
+                    title: "Privacy Policy",
+                    subtitle: "No data collection. No tracking."
+                )
+            }
+            .buttonStyle(.plain)
         }
         .background(SavantPalette.surface)
         .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
