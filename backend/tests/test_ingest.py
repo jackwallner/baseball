@@ -60,6 +60,30 @@ def test_merge_player_row_defaults_team_to_tbd():
     assert players[1]["team"] == "TBD"
 
 
+def test_merge_player_row_uses_standard_stats_team_when_savant_team_missing():
+    row = pd.Series({"player_id": 592450, "player_name": "Judge, Aaron", "xwoba": 90})
+    standard_lookup = {
+        "aaron judge": pd.Series(
+            {
+                "Name": "Aaron Judge",
+                "Team": "New York Yankees",
+                "Pos": "RF",
+                "AVG": .300,
+            }
+        )
+    }
+    players = {}
+    ingest.merge_player_row(players, row, "batter", ingest.BATTER_METRICS, "2026-04-26T00:00:00Z", standard_lookup)
+    assert players[592450]["team"] == "NYY"
+    assert players[592450]["position"] == "RF"
+
+
+def test_normalize_team_abbr_aliases():
+    assert ingest.normalize_team_abbr("Chicago White Sox") == "CWS"
+    assert ingest.normalize_team_abbr("CHW") == "CWS"
+    assert ingest.normalize_team_abbr("KCR") == "KC"
+
+
 def test_merge_player_row_two_way():
     row = pd.Series(
         {

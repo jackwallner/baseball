@@ -67,6 +67,31 @@ final class DashboardViewModelTests: XCTestCase {
     }
 
     @MainActor
+    func testPlayersForTeamMatchesAliases() async {
+        let players = [
+            Player(
+                id: 1, name: "A", team: "New York Yankees", position: "RF", handedness: "R/R", imageURL: nil,
+                updatedAt: Date(),
+                metrics: [],
+                standardStats: [],
+                games: []
+            ),
+            Player(
+                id: 2, name: "B", team: "CHW", position: "1B", handedness: "L/R", imageURL: nil,
+                updatedAt: Date(),
+                metrics: [],
+                standardStats: [],
+                games: []
+            )
+        ]
+        let vm = DashboardViewModel(provider: MockProvider(players: players))
+        await vm.load()
+
+        XCTAssertEqual(vm.players(forTeam: "NYY").map(\.id), [1])
+        XCTAssertEqual(vm.players(forTeam: "CWS").map(\.id), [2])
+    }
+
+    @MainActor
     func testBiggestMoversOrdering() async {
         let now = Date()
         let players = [

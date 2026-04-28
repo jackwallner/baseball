@@ -226,12 +226,64 @@ def safe_player_id(row: pd.Series) -> Optional[int]:
 def team_from_row(row: pd.Series) -> str:
     for col in ("team", "team_name", "player_team", "Team"):
         if col in row and pd.notna(row[col]):
-            return str(row[col]).strip().upper()
+            return normalize_team_abbr(str(row[col]))
     return "TBD"
 
 
+def normalize_team_abbr(value: Any) -> str:
+    raw = str(value).strip()
+    if not raw:
+        return "TBD"
+    upper = raw.upper()
+    aliases = {
+        "ARIZONA DIAMONDBACKS": "ARI",
+        "ATLANTA BRAVES": "ATL",
+        "BALTIMORE ORIOLES": "BAL",
+        "BOSTON RED SOX": "BOS",
+        "CHICAGO CUBS": "CHC",
+        "CHICAGO WHITE SOX": "CWS",
+        "CHW": "CWS",
+        "CHW0": "CWS",
+        "CINCINNATI REDS": "CIN",
+        "CLEVELAND GUARDIANS": "CLE",
+        "CLEVELAND INDIANS": "CLE",
+        "COLORADO ROCKIES": "COL",
+        "DETROIT TIGERS": "DET",
+        "HOUSTON ASTROS": "HOU",
+        "KANSAS CITY ROYALS": "KC",
+        "KCR": "KC",
+        "LOS ANGELES ANGELS": "LAA",
+        "ANAHEIM ANGELS": "LAA",
+        "LOS ANGELES DODGERS": "LAD",
+        "MIAMI MARLINS": "MIA",
+        "MILWAUKEE BREWERS": "MIL",
+        "MINNESOTA TWINS": "MIN",
+        "NEW YORK METS": "NYM",
+        "NEW YORK YANKEES": "NYY",
+        "ATHLETICS": "OAK",
+        "OAKLAND ATHLETICS": "OAK",
+        "ATH": "OAK",
+        "PHILADELPHIA PHILLIES": "PHI",
+        "PITTSBURGH PIRATES": "PIT",
+        "SAN DIEGO PADRES": "SD",
+        "SDP": "SD",
+        "SEATTLE MARINERS": "SEA",
+        "SAN FRANCISCO GIANTS": "SF",
+        "SFG": "SF",
+        "ST. LOUIS CARDINALS": "STL",
+        "ST LOUIS CARDINALS": "STL",
+        "TAMPA BAY RAYS": "TB",
+        "TBR": "TB",
+        "TEXAS RANGERS": "TEX",
+        "TORONTO BLUE JAYS": "TOR",
+        "WASHINGTON NATIONALS": "WSH",
+        "WSN": "WSH",
+    }
+    return aliases.get(upper, upper)
+
+
 def position_from_row(row: pd.Series, player_type: str) -> str:
-    for col in ("position", "player_position", "pos"):
+    for col in ("position", "player_position", "pos", "Pos"):
         if col in row and pd.notna(row[col]):
             return str(row[col]).strip()
     return "Hitter" if player_type == "batter" else "Pitcher"
@@ -312,16 +364,24 @@ def merge_player_row(players: dict[int, dict[str, Any]], row: pd.Series, player_
     if player_id not in players:
         player_name = display_name(row.get("player_name", ""))
         norm_name = _normalize_name(player_name)
+        standard_row = standard_lookup.get(norm_name) if standard_lookup else None
         standard_stats: list[dict[str, Any]] = []
-        if standard_lookup and norm_name in standard_lookup:
+        if standard_row is not None:
             stat_defs = PITCHER_STANDARD_STATS if player_type == "pitcher" else HITTER_STANDARD_STATS
-            standard_stats = _build_standard_stats(standard_lookup[norm_name], stat_defs)
+            standard_stats = _build_standard_stats(standard_row, stat_defs)
+
+        team = team_from_row(row)
+        if team == "TBD" and standard_row is not None:
+            team = team_from_row(standard_row)
+        position = position_from_row(row, player_type)
+        if position in ("Hitter", "Pitcher") and standard_row is not None:
+            position = position_from_row(standard_row, player_type)
 
         players[player_id] = {
             "id": player_id,
             "name": player_name,
-            "team": team_from_row(row),
-            "position": position_from_row(row, player_type),
+            "team": team,
+            "position": position,
             "handedness": handedness_from_row(row),
             "image_url": f"https://img.mlbstatic.com/mlb-photos/image/upload/w_180,q_100/v1/people/{player_id}/headshot/67/current",
             "updated_at": now,

@@ -37,18 +37,22 @@ struct PlayerIdentityStrip: View {
 struct TeamIdentityStrip: View {
     let team: String
 
+    private var normalizedTeam: String {
+        normalizedTeamAbbreviation(team)
+    }
+
     var body: some View {
         HStack(alignment: .center, spacing: 14) {
             ZStack {
                 Circle()
-                    .fill(MLBTeamColor.color(team))
+                    .fill(MLBTeamColor.color(normalizedTeam))
                     .frame(width: 56, height: 56)
-                Text(team)
+                Text(normalizedTeam)
                     .font(SavantType.statLarge)
                     .foregroundStyle(.white)
             }
             VStack(alignment: .leading, spacing: 4) {
-                Text(teamFullName(team))
+                Text(teamFullName(normalizedTeam))
                     .font(SavantType.playerName)
                     .foregroundStyle(SavantPalette.inkOnDark)
                     .lineLimit(1).minimumScaleFactor(0.7)

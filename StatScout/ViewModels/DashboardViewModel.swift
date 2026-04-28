@@ -55,11 +55,13 @@ final class DashboardViewModel {
     }
 
     var allTeams: [String] {
-        Array(Set(players.map(\.team))).sorted()
+        Array(Set(players.map { normalizedTeamAbbreviation($0.team) })).sorted()
     }
 
     func players(forTeam team: String) -> [Player] {
-        players.filter { $0.team == team }.sorted { $0.overallPercentile > $1.overallPercentile }
+        let normalized = normalizedTeamAbbreviation(team)
+        return players.filter { normalizedTeamAbbreviation($0.team) == normalized }
+            .sorted { $0.overallPercentile > $1.overallPercentile }
     }
 
     var allMetrics: [(label: String, category: MetricCategory, best: (player: Player, value: Int)?, worst: (player: Player, value: Int)?)] = []

@@ -105,7 +105,28 @@ enum MLBTeamColor {
         "TOR": Color(red: 0.07, green: 0.30, blue: 0.65),
         "WSH": Color(red: 0.67, green: 0.10, blue: 0.18)
     ]
-    static func color(_ abbr: String) -> Color { primary[abbr.uppercased()] ?? SavantPalette.inkTertiary }
+    static func color(_ abbr: String) -> Color { primary[normalizedTeamAbbreviation(abbr)] ?? SavantPalette.inkTertiary }
+}
+
+func normalizedTeamAbbreviation(_ team: String) -> String {
+    let key = team.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+    let aliases: [String: String] = [
+        "ARIZONA DIAMONDBACKS": "ARI", "ATLANTA BRAVES": "ATL", "BALTIMORE ORIOLES": "BAL",
+        "BOSTON RED SOX": "BOS", "CHICAGO CUBS": "CHC", "CHICAGO WHITE SOX": "CWS",
+        "CHW": "CWS", "CINCINNATI REDS": "CIN", "CLEVELAND GUARDIANS": "CLE",
+        "CLEVELAND INDIANS": "CLE", "COLORADO ROCKIES": "COL", "DETROIT TIGERS": "DET",
+        "HOUSTON ASTROS": "HOU", "KANSAS CITY ROYALS": "KC", "KCR": "KC",
+        "LOS ANGELES ANGELS": "LAA", "ANAHEIM ANGELS": "LAA", "LOS ANGELES DODGERS": "LAD",
+        "MIAMI MARLINS": "MIA", "MILWAUKEE BREWERS": "MIL", "MINNESOTA TWINS": "MIN",
+        "NEW YORK METS": "NYM", "NEW YORK YANKEES": "NYY", "ATHLETICS": "OAK",
+        "OAKLAND ATHLETICS": "OAK", "ATH": "OAK", "PHILADELPHIA PHILLIES": "PHI",
+        "PITTSBURGH PIRATES": "PIT", "SAN DIEGO PADRES": "SD", "SDP": "SD",
+        "SEATTLE MARINERS": "SEA", "SAN FRANCISCO GIANTS": "SF", "SFG": "SF",
+        "ST. LOUIS CARDINALS": "STL", "ST LOUIS CARDINALS": "STL", "TAMPA BAY RAYS": "TB",
+        "TBR": "TB", "TEXAS RANGERS": "TEX", "TORONTO BLUE JAYS": "TOR",
+        "WASHINGTON NATIONALS": "WSH", "WSN": "WSH"
+    ]
+    return aliases[key] ?? key
 }
 
 func teamFullName(_ abbr: String) -> String {
@@ -121,7 +142,8 @@ func teamFullName(_ abbr: String) -> String {
         "SF":"San Francisco Giants","STL":"St. Louis Cardinals","TB":"Tampa Bay Rays",
         "TEX":"Texas Rangers","TOR":"Toronto Blue Jays","WSH":"Washington Nationals"
     ]
-    return map[abbr.uppercased()] ?? abbr
+    let normalized = normalizedTeamAbbreviation(abbr)
+    return map[normalized] ?? abbr
 }
 
 struct StatScoutTheme {
