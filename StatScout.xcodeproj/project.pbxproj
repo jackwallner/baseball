@@ -211,6 +211,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 5AA02C652FDCD5011E23A013 /* Build configuration list for PBXNativeTarget "StatScout" */;
 			buildPhases = (
+				2544ECE7BFE80C32283888C9 /* Pre-build validation */,
 				8D503ED964FE7ADDD8578786 /* Sources */,
 				1AA49039FB2B094A9F99EF4F /* Resources */,
 				A0D512F2B3CA023982E11731 /* Frameworks */,
@@ -271,6 +272,27 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		2544ECE7BFE80C32283888C9 /* Pre-build validation */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Pre-build validation";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if ! command -v xcodegen &> /dev/null; then\n  echo \"warning: xcodegen not found. Install via 'brew install xcodegen'.\"\nfi\nif [ -z \"$SUPABASE_ANON_KEY\" ]; then\n  echo \"error: SUPABASE_ANON_KEY not set.\"\n  exit 1\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		5B98AABF53796930E31C2849 /* Sources */ = {
