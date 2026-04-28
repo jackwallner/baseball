@@ -238,6 +238,7 @@ def normalize_team_abbr(value: Any) -> str:
     upper = raw.upper()
     aliases = {
         "ARIZONA DIAMONDBACKS": "ARI",
+        "AZ": "ARI",
         "ATLANTA BRAVES": "ATL",
         "BALTIMORE ORIOLES": "BAL",
         "BOSTON RED SOX": "BOS",

@@ -88,6 +88,7 @@ def test_merge_player_row_uses_roster_lookup_when_other_team_sources_missing():
 
 
 def test_normalize_team_abbr_aliases():
+    assert ingest.normalize_team_abbr("AZ") == "ARI"
     assert ingest.normalize_team_abbr("Chicago White Sox") == "CWS"
     assert ingest.normalize_team_abbr("CHW") == "CWS"
     assert ingest.normalize_team_abbr("KCR") == "KC"

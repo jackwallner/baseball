@@ -111,7 +111,7 @@ enum MLBTeamColor {
 func normalizedTeamAbbreviation(_ team: String) -> String {
     let key = team.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
     let aliases: [String: String] = [
-        "ARIZONA DIAMONDBACKS": "ARI", "ATLANTA BRAVES": "ATL", "BALTIMORE ORIOLES": "BAL",
+        "ARIZONA DIAMONDBACKS": "ARI", "AZ": "ARI", "ATLANTA BRAVES": "ATL", "BALTIMORE ORIOLES": "BAL",
         "BOSTON RED SOX": "BOS", "CHICAGO CUBS": "CHC", "CHICAGO WHITE SOX": "CWS",
         "CHW": "CWS", "CINCINNATI REDS": "CIN", "CLEVELAND GUARDIANS": "CLE",
         "CLEVELAND INDIANS": "CLE", "COLORADO ROCKIES": "COL", "DETROIT TIGERS": "DET",
