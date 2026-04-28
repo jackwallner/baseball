@@ -78,7 +78,7 @@ struct AboutView: View {
     private var linkCard: some View {
         VStack(spacing: 0) {
             SavantSectionBar(title: "SUPPORT & PRIVACY")
-            Link(destination: URL(string: "mailto:support@statscout.app")!) {
+            Link(destination: URL(string: "https://jackwallner.github.io/baseball/support.html")!) {
                 row(
                     icon: "envelope.fill",
                     title: "Contact Support",
@@ -89,7 +89,7 @@ struct AboutView: View {
             
             Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline)
             
-            Link(destination: URL(string: "https://statscout.app/privacy")!) {
+            Link(destination: URL(string: "https://jackwallner.github.io/baseball/privacy-policy.html")!) {
                 row(
                     icon: "shield.lefthalf.filled",
                     title: "Privacy Policy",

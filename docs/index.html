@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StatScout - MLB Percentile Rankings & Advanced Metrics</title>
+    <meta name="description" content="Visual MLB percentile rankings and leaderboards. Track every player's xwOBA, Hard-Hit%, Sprint Speed, and more with nightly updates. 100% private.">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
+            color: #1d1d1f;
+            background: #fafafa;
+            -webkit-font-smoothing: antialiased;
+        }
+        .container { max-width: 980px; margin: 0 auto; padding: 0 24px; }
+        nav {
+            padding: 16px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+            background: rgba(250,250,250,0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        nav .container { display: flex; align-items: center; justify-content: space-between; }
+        .nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: #1d1d1f; font-weight: 600; }
+        .nav-link { font-size: 14px; text-decoration: none; background: #1d1d1f; color: #fff; padding: 8px 18px; border-radius: 980px; font-weight: 500; }
+        .hero { text-align: center; padding: 100px 24px 64px; }
+        .hero h1 { font-size: 52px; font-weight: 700; letter-spacing: -1.5px; line-height: 1.08; margin-bottom: 16px; }
+        .hero h1 span { color: #d32f2f; }
+        .hero .tagline { font-size: 19px; color: #6e6e73; line-height: 1.5; max-width: 500px; margin: 0 auto 36px; }
+        .features { padding: 80px 0; background: #fff; border-top: 1px solid rgba(0,0,0,0.06); }
+        .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.06); }
+        .feature-card { background: #fff; padding: 36px 32px; }
+        .feature-card h3 { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+        .feature-card p { font-size: 14px; color: #6e6e73; line-height: 1.55; }
+        .privacy { padding: 80px 0; text-align: center; }
+        .privacy h2 { font-size: 32px; font-weight: 700; margin-bottom: 12px; }
+        .privacy a { color: #0066cc; text-decoration: none; font-weight: 500; }
+        footer { text-align: center; padding: 40px 24px; font-size: 12px; color: #86868b; border-top: 1px solid rgba(0,0,0,0.06); }
+        footer a { color: #86868b; text-decoration: none; margin: 0 10px; }
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 36px; }
+            .features-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <a class="nav-brand" href="#">StatScout</a>
+            <a class="nav-link" href="#">Coming Soon</a>
+        </div>
+    </nav>
+    <section class="hero">
+        <h1>Scout the league <span>like a pro</span></h1>
+        <p class="tagline">Visual percentile rankings, advanced leaderboards, and nightly tracking for every MLB player.</p>
+        <p style="color: #86868b; font-size: 13px;">iPhone &middot; Privacy First</p>
+    </section>
+    <section class="features">
+        <div class="container">
+            <div class="features-grid">
+                <div class="feature-card">
+                    <h3>Visual Percentiles</h3>
+                    <p>Instantly see where players rank in xwOBA, Hard-Hit%, and more with our signature visual bars.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Live Leaderboards</h3>
+                    <p>Filter the entire league across Hitting, Pitching, and Running to find top performers.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Nightly Updates</h3>
+                    <p>Data refreshes every night, ensuring you have the latest rankings as the season unfolds.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="privacy">
+        <div class="container">
+            <h2>Private by design</h2>
+            <p style="color: #6e6e73; margin-bottom: 20px;">No accounts. No tracking. No ads. Your data never leaves your device.</p>
+            <a href="privacy-policy.html">Privacy Policy &rarr;</a>
+        </div>
+    </section>
+    <footer>
+        <p>&copy; 2026 Jack Wallner</p>
+        <div style="margin-top: 10px;">
+            <a href="support.html">Support</a>
+            <a href="privacy-policy.html">Privacy</a>
+        </div>
+    </footer>
+</body>
+</html>
