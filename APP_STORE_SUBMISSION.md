@@ -16,8 +16,8 @@
 ## 2. Platform URLs (Public-Facing)
 | Field | URL |
 | :--- | :--- |
-| **Support URL** | `https://jackwallner.github.io/baseball/support.html` |
-| **Privacy Policy URL** | `https://jackwallner.github.io/baseball/privacy-policy.html` |
+| **Support URL** | `https://jackwallner.github.io/statscout/support.html` |
+| **Privacy Policy URL** | `https://jackwallner.github.io/statscout/privacy-policy.html` |
 
 ---
 
