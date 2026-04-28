@@ -11,10 +11,10 @@ struct SampleData {
             imageURL: URL(string: "https://midfield.mlbstatic.com/v1/people/592450/spots/240"),
             updatedAt: Date(),
             metrics: [
-                Metric(id: "judge-xwoba", label: "xwOBA", value: ".463", percentile: 100, direction: .up, category: .hitting),
-                Metric(id: "judge-ev", label: "Avg EV", value: "96.2", percentile: 100, direction: .flat, category: .hitting),
-                Metric(id: "judge-barrel", label: "Barrel%", value: "26.9%", percentile: 100, direction: .up, category: .hitting),
-                Metric(id: "judge-sprint", label: "Sprint", value: "27.2", percentile: 58, direction: .down, category: .running)
+                Metric(id: "judge-xwoba", label: "xwOBA", value: ".463", percentile: 100, category: .hitting),
+                Metric(id: "judge-ev", label: "Avg EV", value: "96.2", percentile: 100, category: .hitting),
+                Metric(id: "judge-barrel", label: "Barrel%", value: "26.9%", percentile: 100, category: .hitting),
+                Metric(id: "judge-sprint", label: "Sprint", value: "27.2", percentile: 58, category: .running)
             ],
             standardStats: [
                 StandardStat(id: "std-AVG", label: "AVG", value: ".312"),
@@ -43,10 +43,10 @@ struct SampleData {
             imageURL: URL(string: "https://midfield.mlbstatic.com/v1/people/660271/spots/240"),
             updatedAt: Date(),
             metrics: [
-                Metric(id: "ohtani-xslg", label: "xSLG", value: ".676", percentile: 100, direction: .up, category: .hitting),
-                Metric(id: "ohtani-hardhit", label: "Hard-Hit%", value: "61.4%", percentile: 100, direction: .up, category: .hitting),
-                Metric(id: "ohtani-sprint", label: "Sprint", value: "28.1", percentile: 82, direction: .flat, category: .running),
-                Metric(id: "ohtani-arm", label: "Arm Value", value: "+2", percentile: 74, direction: .flat, category: .fielding)
+                Metric(id: "ohtani-xslg", label: "xSLG", value: ".676", percentile: 100, category: .hitting),
+                Metric(id: "ohtani-hardhit", label: "Hard-Hit%", value: "61.4%", percentile: 100, category: .hitting),
+                Metric(id: "ohtani-sprint", label: "Sprint", value: "28.1", percentile: 82, category: .running),
+                Metric(id: "ohtani-arm", label: "Arm Value", value: "+2", percentile: 74, category: .fielding)
             ],
             standardStats: [
                 StandardStat(id: "std-AVG", label: "AVG", value: ".310"),
@@ -75,10 +75,10 @@ struct SampleData {
             imageURL: URL(string: "https://midfield.mlbstatic.com/v1/people/669203/spots/240"),
             updatedAt: Date(),
             metrics: [
-                Metric(id: "witt-sprint", label: "Sprint", value: "30.5", percentile: 100, direction: .flat, category: .running),
-                Metric(id: "witt-xba", label: "xBA", value: ".329", percentile: 99, direction: .up, category: .hitting),
-                Metric(id: "witt-oaa", label: "OAA", value: "+15", percentile: 98, direction: .up, category: .fielding),
-                Metric(id: "witt-ev", label: "Avg EV", value: "92.1", percentile: 87, direction: .flat, category: .hitting)
+                Metric(id: "witt-sprint", label: "Sprint", value: "30.5", percentile: 100, category: .running),
+                Metric(id: "witt-xba", label: "xBA", value: ".329", percentile: 99, category: .hitting),
+                Metric(id: "witt-oaa", label: "OAA", value: "+15", percentile: 98, category: .fielding),
+                Metric(id: "witt-ev", label: "Avg EV", value: "92.1", percentile: 87, category: .hitting)
             ],
             standardStats: [
                 StandardStat(id: "std-AVG", label: "AVG", value: ".332"),
@@ -107,10 +107,10 @@ struct SampleData {
             imageURL: URL(string: "https://midfield.mlbstatic.com/v1/people/694973/spots/240"),
             updatedAt: Date(),
             metrics: [
-                Metric(id: "skenes-velo", label: "Fastball Velo", value: "98.8", percentile: 99, direction: .flat, category: .pitching),
-                Metric(id: "skenes-whiff", label: "Whiff%", value: "34.8%", percentile: 96, direction: .up, category: .pitching),
-                Metric(id: "skenes-chase", label: "Chase%", value: "33.1%", percentile: 91, direction: .up, category: .pitching),
-                Metric(id: "skenes-barrel", label: "Barrel Allowed", value: "4.2%", percentile: 88, direction: .flat, category: .pitching)
+                Metric(id: "skenes-velo", label: "Fastball Velo", value: "98.8", percentile: 99, category: .pitching),
+                Metric(id: "skenes-whiff", label: "Whiff%", value: "34.8%", percentile: 96, category: .pitching),
+                Metric(id: "skenes-chase", label: "Chase%", value: "33.1%", percentile: 91, category: .pitching),
+                Metric(id: "skenes-barrel", label: "Barrel Allowed", value: "4.2%", percentile: 88, category: .pitching)
             ],
             standardStats: [
                 StandardStat(id: "std-ERA", label: "ERA", value: "1.96"),

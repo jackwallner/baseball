@@ -207,7 +207,6 @@ def build_metrics(row: pd.Series, player_type: str, metric_defs: list[tuple[str,
                 "label": label,
                 "value": value,
                 "percentile": percentile,
-                "direction": "flat",
                 "category": category,
             }
         )

@@ -62,7 +62,9 @@ final class DashboardViewModel {
         players.filter { $0.team == team }.sorted { $0.overallPercentile > $1.overallPercentile }
     }
 
-    var allMetrics: [(label: String, category: MetricCategory, best: (player: Player, value: Int)?, worst: (player: Player, value: Int)?)] {
+    var allMetrics: [(label: String, category: MetricCategory, best: (player: Player, value: Int)?, worst: (player: Player, value: Int)?)] = []
+
+    private func updateAllMetrics() {
         var metricMap: [String: (category: MetricCategory, values: [(player: Player, value: Int)])] = [:]
         for player in players {
             for metric in player.metrics {
@@ -73,7 +75,7 @@ final class DashboardViewModel {
                 metricMap[compositeKey]?.values.append((player: player, value: metric.percentile))
             }
         }
-        return metricMap.map { (key, data) in
+        allMetrics = metricMap.map { (key, data) in
             let sorted = data.values.sorted { $0.value > $1.value }
             let label = key.split(separator: "|").first.map(String.init) ?? key
             return (
@@ -94,30 +96,20 @@ final class DashboardViewModel {
             guard !fetched.isEmpty else {
                 errorMessage = "No players found for this season."
                 lastFetchFailed = true
-                #if DEBUG
-                players = SampleData.players
-                #endif
+                isLoading = false
                 return
             }
             players = fetched
+            updateAllMetrics()
         } catch is DecodingError {
             errorMessage = "Data format changed — app may need an update."
             lastFetchFailed = true
-            #if DEBUG
-            players = SampleData.players
-            #endif
         } catch let urlError as URLError {
             errorMessage = "Can't reach data feed. Check your connection."
             lastFetchFailed = true
-            #if DEBUG
-            players = SampleData.players
-            #endif
         } catch {
             errorMessage = "Something went wrong loading player data."
             lastFetchFailed = true
-            #if DEBUG
-            players = SampleData.players
-            #endif
         }
         isLoading = false
     }

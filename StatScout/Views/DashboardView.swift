@@ -81,6 +81,19 @@ struct DashboardView: View {
                     Text("Try a different search term.")
                 }
                 .padding(.vertical, 24)
+            } else if let errorMessage = viewModel.errorMessage, viewModel.leaderboard.isEmpty {
+                ContentUnavailableView {
+                    Label("Data Error", systemImage: "exclamationmark.triangle")
+                } description: {
+                    Text(errorMessage)
+                } actions: {
+                    Button("Retry") {
+                        Task { await viewModel.load() }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(SavantPalette.inkTertiary)
+                }
+                .padding(.vertical, 24)
             } else if viewModel.leaderboard.isEmpty {
                 ContentUnavailableView {
                     Label("No players yet", systemImage: "baseball")

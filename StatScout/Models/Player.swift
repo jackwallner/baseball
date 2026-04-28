@@ -77,7 +77,6 @@ struct Metric: Identifiable, Codable, Hashable, Sendable {
     let label: String
     let value: String
     let percentile: Int
-    let direction: MetricDirection
     let category: MetricCategory
 }
 

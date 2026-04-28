@@ -1,5 +1,5 @@
 import XCTest
-@testable import StatScout
+@testable import Baseball_Savvy_StatScout
 
 final class DashboardViewModelTests: XCTestCase {
     @MainActor
@@ -9,7 +9,7 @@ final class DashboardViewModelTests: XCTestCase {
                 id: 1, name: "A", team: "NYY", position: "DH", handedness: "L/R", imageURL: nil,
                 updatedAt: Date(),
                 metrics: [
-                    Metric(id: "m1", label: "xwOBA", value: ".400", percentile: 90, direction: .flat, category: .hitting)
+                    Metric(id: "m1", label: "xwOBA", value: ".400", percentile: 90, category: .hitting)
                 ],
                 standardStats: [],
                 games: []
@@ -18,7 +18,7 @@ final class DashboardViewModelTests: XCTestCase {
                 id: 2, name: "B", team: "NYY", position: "SP", handedness: "R/R", imageURL: nil,
                 updatedAt: Date(),
                 metrics: [
-                    Metric(id: "m2", label: "xwOBA", value: ".350", percentile: 85, direction: .flat, category: .pitching)
+                    Metric(id: "m2", label: "xwOBA", value: ".350", percentile: 85, category: .pitching)
                 ],
                 standardStats: [],
                 games: []
