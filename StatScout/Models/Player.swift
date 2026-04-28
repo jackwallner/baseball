@@ -12,7 +12,7 @@ struct Player: Identifiable, Codable, Hashable, Sendable {
     let playerType: String? = nil
     let source: String? = nil
     let metrics: [Metric]
-    let standardStats: [StandardStat]
+    let standardStats: [StandardStat]?
     let games: [GameTrend]
 
     enum CodingKeys: String, CodingKey {

@@ -167,7 +167,7 @@ struct PlayerProfileView: View {
         VStack(spacing: 0) {
             SavantSectionBar(title: "STANDARD STATS · 2026")
 
-            if player.standardStats.isEmpty {
+            if (player.standardStats ?? []).isEmpty {
                 emptyStateCard(
                     icon: "chart.bar",
                     title: "Standard stats unavailable",
@@ -175,7 +175,7 @@ struct PlayerProfileView: View {
                 )
                 .padding(.vertical, 24)
             } else {
-                let cols = player.standardStats.chunked(into: 2)
+                let cols = (player.standardStats ?? []).chunked(into: 2)
                 ForEach(Array(cols.enumerated()), id: \.offset) { rowIndex, pair in
                     HStack(spacing: 0) {
                         ForEach(Array(pair.enumerated()), id: \.element.id) { colIndex, stat in
