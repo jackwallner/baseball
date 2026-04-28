@@ -2,7 +2,7 @@ name: Nightly Statcast Refresh
 
 on:
   schedule:
-    - cron: "0 14 * * *"
+    - cron: "0 8 * * *"
   workflow_dispatch:
 
 jobs:
