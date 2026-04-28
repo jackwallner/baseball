@@ -78,6 +78,15 @@ def test_merge_player_row_uses_standard_stats_team_when_savant_team_missing():
     assert players[592450]["position"] == "RF"
 
 
+def test_merge_player_row_uses_roster_lookup_when_other_team_sources_missing():
+    row = pd.Series({"player_id": 592450, "player_name": "Judge, Aaron", "xwoba": 90})
+    roster_lookup = {592450: {"team": "NYY", "position": "RF"}}
+    players = {}
+    ingest.merge_player_row(players, row, "batter", ingest.BATTER_METRICS, "2026-04-26T00:00:00Z", roster_lookup=roster_lookup)
+    assert players[592450]["team"] == "NYY"
+    assert players[592450]["position"] == "RF"
+
+
 def test_normalize_team_abbr_aliases():
     assert ingest.normalize_team_abbr("Chicago White Sox") == "CWS"
     assert ingest.normalize_team_abbr("CHW") == "CWS"

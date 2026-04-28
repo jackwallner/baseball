@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from typing import Any, Iterator, Optional
 
 import pandas as pd
+import requests
 from dotenv import load_dotenv
 from pybaseball import (
     batting_stats,
@@ -351,7 +352,46 @@ def _fetch_standard_stats(season: int) -> tuple[pd.DataFrame, pd.DataFrame]:
     return bat, pitch
 
 
-def merge_player_row(players: dict[int, dict[str, Any]], row: pd.Series, player_type: str, metric_defs: list[tuple[str, str, str]], now: str, standard_lookup: Optional[dict[str, pd.Series]] = None) -> None:
+def _fetch_mlb_roster_lookup(season: int) -> dict[int, dict[str, str]]:
+    lookup: dict[int, dict[str, str]] = {}
+    try:
+        teams_response = requests.get(
+            "https://statsapi.mlb.com/api/v1/teams",
+            params={"sportId": 1, "season": season},
+            timeout=30,
+        )
+        teams_response.raise_for_status()
+        teams = teams_response.json().get("teams", [])
+    except Exception:
+        logger.exception("Failed to fetch MLB teams")
+        return lookup
+
+    for team in teams:
+        team_id = team.get("id")
+        team_abbr = normalize_team_abbr(team.get("abbreviation") or team.get("teamCode") or team.get("fileCode") or team.get("name") or "")
+        if not team_id or team_abbr == "TBD":
+            continue
+        for roster_type in ("active", "40Man"):
+            try:
+                roster_response = requests.get(
+                    f"https://statsapi.mlb.com/api/v1/teams/{team_id}/roster",
+                    params={"season": season, "rosterType": roster_type},
+                    timeout=30,
+                )
+                roster_response.raise_for_status()
+                for item in roster_response.json().get("roster", []):
+                    person_id = item.get("person", {}).get("id")
+                    if not person_id:
+                        continue
+                    position = item.get("position", {}).get("abbreviation") or ""
+                    lookup[int(person_id)] = {"team": team_abbr, "position": str(position)}
+            except Exception:
+                logger.exception("Failed to fetch %s roster for team %s", roster_type, team_abbr)
+    logger.info("MLB roster lookup rows: %d", len(lookup))
+    return lookup
+
+
+def merge_player_row(players: dict[int, dict[str, Any]], row: pd.Series, player_type: str, metric_defs: list[tuple[str, str, str]], now: str, standard_lookup: Optional[dict[str, pd.Series]] = None, roster_lookup: Optional[dict[int, dict[str, str]]] = None) -> None:
     player_id = safe_player_id(row)
     if player_id is None:
         logger.warning("Skipping row with missing or invalid player_id: %s", row.to_dict())
@@ -373,9 +413,13 @@ def merge_player_row(players: dict[int, dict[str, Any]], row: pd.Series, player_
         team = team_from_row(row)
         if team == "TBD" and standard_row is not None:
             team = team_from_row(standard_row)
+        if team == "TBD" and roster_lookup and player_id in roster_lookup:
+            team = normalize_team_abbr(roster_lookup[player_id].get("team", ""))
         position = position_from_row(row, player_type)
         if position in ("Hitter", "Pitcher") and standard_row is not None:
             position = position_from_row(standard_row, player_type)
+        if position in ("Hitter", "Pitcher") and roster_lookup and player_id in roster_lookup:
+            position = roster_lookup[player_id].get("position", position)
 
         players[player_id] = {
             "id": player_id,
@@ -454,6 +498,7 @@ def build_snapshot_rows() -> list[dict[str, Any]]:
             pitcher_lookup[key] = row
 
     logger.info("Standard stat lookups: batters=%d, pitchers=%d", len(batter_lookup), len(pitcher_lookup))
+    roster_lookup = _fetch_mlb_roster_lookup(STATCAST_SEASON)
 
     batter_metrics = _all_metric_defs("batter")
     pitcher_metrics = _all_metric_defs("pitcher")
@@ -461,14 +506,14 @@ def build_snapshot_rows() -> list[dict[str, Any]]:
     skipped = 0
     for _, row in batter_rows.iterrows():
         try:
-            merge_player_row(players, row, "batter", batter_metrics, now, batter_lookup)
+            merge_player_row(players, row, "batter", batter_metrics, now, batter_lookup, roster_lookup)
         except Exception:
             skipped += 1
             logger.exception("Failed to process batter row")
 
     for _, row in pitcher_rows.iterrows():
         try:
-            merge_player_row(players, row, "pitcher", pitcher_metrics, now, pitcher_lookup)
+            merge_player_row(players, row, "pitcher", pitcher_metrics, now, pitcher_lookup, roster_lookup)
         except Exception:
             skipped += 1
             logger.exception("Failed to process pitcher row")
