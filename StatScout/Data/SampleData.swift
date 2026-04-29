@@ -3,7 +3,7 @@ import Foundation
 struct SampleData {
     static let players: [Player] = [
         Player(
-            id: 592450,
+            playerId: 1,
             name: "Aaron Judge",
             team: "NYY",
             position: "RF",
@@ -35,7 +35,7 @@ struct SampleData {
             ]
         ),
         Player(
-            id: 660271,
+            playerId: 660271,
             name: "Shohei Ohtani",
             team: "LAD",
             position: "DH",
@@ -67,7 +67,7 @@ struct SampleData {
             ]
         ),
         Player(
-            id: 669203,
+            playerId: 669203,
             name: "Bobby Witt Jr.",
             team: "KC",
             position: "SS",
@@ -99,7 +99,7 @@ struct SampleData {
             ]
         ),
         Player(
-            id: 694973,
+            playerId: 694973,
             name: "Paul Skenes",
             team: "PIT",
             position: "SP",

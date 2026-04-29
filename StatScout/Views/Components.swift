@@ -74,40 +74,52 @@ struct MetricBar: View {
     var showValue: Bool = true
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 8) {
                 Text(metric.label)
-                    .font(SavantType.smallBold)
+                    .font(SavantType.bodyBold)
                     .foregroundStyle(SavantPalette.ink)
 
                 Spacer(minLength: 4)
 
                 if showValue && !metric.value.isEmpty {
                     Text(metric.value)
-                        .font(SavantType.statSmall)
+                        .font(SavantType.statMed)
                         .foregroundStyle(SavantPalette.inkSecondary)
                 }
 
                 Text("\(metric.percentile)")
-                    .font(SavantType.statSmall.weight(.bold))
+                    .font(SavantType.statLarge)
                     .foregroundStyle(SavantPalette.color(forPercentile: metric.percentile))
-                    .frame(minWidth: 32, alignment: .trailing)
+                    .frame(minWidth: 40, alignment: .trailing)
             }
 
             GeometryReader { proxy in
                 let p = max(0, min(100, metric.percentile))
-                let fillWidth = proxy.size.width * CGFloat(p) / 100.0
+                let iconSize: CGFloat = 16
+                let trackWidth = proxy.size.width - iconSize
+                let offset = trackWidth * CGFloat(p) / 100.0
+                
                 ZStack(alignment: .leading) {
                     RoundedRectangle(cornerRadius: 3)
                         .fill(SavantPalette.hairline)
                         .frame(height: 8)
+                        .padding(.horizontal, iconSize / 2)
 
                     RoundedRectangle(cornerRadius: 3)
                         .fill(SavantPalette.color(forPercentile: p))
-                        .frame(width: max(2, fillWidth), height: 8)
+                        .frame(width: offset, height: 8)
+                        .padding(.leading, iconSize / 2)
+                        
+                    Image(systemName: "baseball.fill")
+                        .resizable()
+                        .frame(width: iconSize, height: iconSize)
+                        .foregroundStyle(SavantPalette.color(forPercentile: p))
+                        .background(Circle().fill(.white))
+                        .offset(x: offset)
                 }
             }
-            .frame(height: 8)
+            .frame(height: 16)
             .accessibilityHidden(true)
         }
     }
@@ -142,19 +154,15 @@ struct CategoryFilter: View {
     @Binding var selectedCategory: MetricCategory?
 
     var body: some View {
-        let tabs = ["All"] + MetricCategory.allCases.map { $0.rawValue }
-        let selectedTab = selectedCategory?.rawValue ?? "All"
+        let tabs = MetricCategory.allCases.map { $0.rawValue }
+        let selectedTab = selectedCategory?.rawValue ?? MetricCategory.hitting.rawValue
 
         SavantTabs(
             tabs: tabs,
             selected: Binding(
                 get: { selectedTab },
                 set: { newValue in
-                    if newValue == "All" {
-                        selectedCategory = nil
-                    } else {
-                        selectedCategory = MetricCategory.allCases.first { $0.rawValue == newValue }
-                    }
+                    selectedCategory = MetricCategory.allCases.first { $0.rawValue == newValue }
                 }
             )
         )
@@ -223,11 +231,6 @@ struct LeaderboardTableHeader: View {
                 .tracking(0.5)
                 .foregroundStyle(SavantPalette.inkTertiary)
                 .frame(maxWidth: .infinity, alignment: .leading)
-            Text("PCTL")
-                .font(SavantType.micro)
-                .tracking(0.5)
-                .foregroundStyle(SavantPalette.inkTertiary)
-                .frame(width: 120, alignment: .leading)
         }
         .frame(height: SavantGeo.rowHeightHeader)
         .padding(.horizontal, SavantGeo.padInline)

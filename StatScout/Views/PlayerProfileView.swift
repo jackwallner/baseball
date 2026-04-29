@@ -2,7 +2,7 @@ import SwiftUI
 
 struct PlayerProfileView: View {
     let player: Player
-    @State private var selectedTab = "Advanced"
+    let history: [Player]
     @State private var showPercentileInfo = false
 
     private var seasonLabel: String {
@@ -22,18 +22,14 @@ struct PlayerProfileView: View {
             VStack(spacing: 0) {
                 PlayerIdentityStrip(player: player)
 
-                SavantTabs(
-                    tabs: ["Standard", "Advanced"],
-                    selected: $selectedTab
-                )
-
-                switch selectedTab {
-                case "Advanced":
-                    statcastContent
-                case "Standard":
+                statcastContent
+                
+                if history.count > 1 {
+                    historyContent
+                }
+                
+                if !(player.standardStats ?? []).isEmpty {
                     standardContent
-                default:
-                    statcastContent
                 }
             }
         }
@@ -64,6 +60,56 @@ struct PlayerProfileView: View {
         }
         .padding(.horizontal, 12)
         .padding(.top, 12)
+    }
+
+    private var historyContent: some View {
+        VStack(spacing: 12) {
+            historyCard
+        }
+        .padding(.horizontal, 12)
+        .padding(.top, 12)
+    }
+
+    private var historyCard: some View {
+        VStack(spacing: 0) {
+            SavantSectionBar(title: "YEAR OVER YEAR")
+
+            ForEach(Array(history.sorted { ($0.season ?? 0) > ($1.season ?? 0) }.enumerated()), id: \.element.id) { index, pastPlayer in
+                HStack {
+                    Text(pastPlayer.season.map(String.init) ?? "N/A")
+                        .font(SavantType.bodyBold)
+                        .foregroundStyle(SavantPalette.ink)
+                        .frame(width: 60, alignment: .leading)
+                    
+                    Spacer()
+                    
+                    let pctl = pastPlayer.overallPercentile
+                    HStack(spacing: 6) {
+                        PercentileBarMini(percentile: pctl)
+                        Text("\(pctl)")
+                            .font(SavantType.statSmall)
+                            .foregroundStyle(SavantPalette.inkSecondary)
+                            .frame(width: 24, alignment: .trailing)
+                    }
+                    .frame(width: 140, alignment: .trailing)
+                }
+                .frame(height: SavantGeo.rowHeight)
+                .padding(.horizontal, SavantGeo.padInline)
+                .background(index % 2 == 0 ? SavantPalette.surface : SavantPalette.surfaceAlt)
+                .overlay(
+                    Rectangle()
+                        .fill(SavantPalette.divider)
+                        .frame(height: SavantGeo.hairline),
+                    alignment: .bottom
+                )
+            }
+        }
+        .background(SavantPalette.surface)
+        .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
+        .overlay(
+            RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
+                .stroke(SavantPalette.hairline, lineWidth: 0.5)
+        )
     }
 
     private func emptyStateCard(icon: String, title: String, description: String) -> some View {
@@ -246,6 +292,6 @@ extension Array {
 
 #Preview {
     NavigationStack {
-        PlayerProfileView(player: SampleData.players[0])
+        PlayerProfileView(player: SampleData.players[0], history: [SampleData.players[0]])
     }
 }

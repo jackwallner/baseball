@@ -1,5 +1,5 @@
 create table if not exists public.player_snapshots (
-  id bigint primary key,
+  id bigint,
   name text not null,
   team text not null default 'TBD',
   position text not null default '',
@@ -12,7 +12,8 @@ create table if not exists public.player_snapshots (
   source text not null default 'baseball_savant_percentile_rankings',
   metrics jsonb not null default '[]'::jsonb,
   standard_stats jsonb not null default '[]'::jsonb,
-  games jsonb not null default '[]'::jsonb
+  games jsonb not null default '[]'::jsonb,
+  primary key (id, season)
 );
 
 create index if not exists player_snapshots_team_idx on public.player_snapshots(team);

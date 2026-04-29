@@ -12,9 +12,6 @@ struct DashboardView: View {
                     leaderboardSection
                 }
             }
-            .refreshable {
-                await viewModel.load()
-            }
             if viewModel.isLoading && viewModel.players.isEmpty {
                 ProgressView()
                     .scaleEffect(1.5)
@@ -28,14 +25,24 @@ struct DashboardView: View {
         VStack(spacing: 0) {
             SavantSectionBar(
                 title: "LEADERBOARD",
-                trailing: viewModel.freshnessText.map {
-                    AnyView(
-                        Text($0)
+                trailing: AnyView(
+                    HStack(spacing: 12) {
+                        Button(action: { viewModel.sortDescending.toggle() }) {
+                            HStack(spacing: 4) {
+                                Text("Sort")
+                                Image(systemName: viewModel.sortDescending ? "arrow.down" : "arrow.up")
+                            }
                             .font(SavantType.micro)
-                            .tracking(0.4)
                             .foregroundStyle(SavantPalette.inkSecondary)
-                    )
-                }
+                        }
+                        if let text = viewModel.freshnessText {
+                            Text(text)
+                                .font(SavantType.micro)
+                                .tracking(0.4)
+                                .foregroundStyle(SavantPalette.inkSecondary)
+                        }
+                    }
+                )
             )
 
             SearchField(text: $viewModel.searchText)

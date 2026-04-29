@@ -8,8 +8,10 @@ final class DashboardViewModel {
     private let cache: PlayerCaching?
 
     var players: [Player] = []
+    var playerHistories: [Int: [Player]] = [:]
     var searchText = ""
-    var selectedCategory: MetricCategory? = nil
+    var selectedCategory: MetricCategory? = .hitting
+    var sortDescending = true
     var isLoading = false
     var errorMessage: String?
     var lastFetchFailed = false
@@ -21,9 +23,10 @@ final class DashboardViewModel {
 
     var freshnessText: String? {
         guard let lastUpdated else { return nil }
-        let formatter = RelativeDateTimeFormatter()
-        formatter.unitsStyle = .abbreviated
-        return "Updated \(formatter.localizedString(for: lastUpdated, relativeTo: Date()))"
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .none
+        return "Through \(formatter.string(from: lastUpdated))"
     }
 
     init(provider: StatcastProviding = PreviewStatcastAPI(), cache: PlayerCaching? = nil) {
@@ -43,7 +46,11 @@ final class DashboardViewModel {
     }
 
     var leaderboard: [Player] {
-        filteredPlayers.sorted { $0.overallPercentile > $1.overallPercentile }
+        filteredPlayers.sorted { p1, p2 in
+            let p1Score = selectedCategory.flatMap { p1.percentile(for: $0) } ?? p1.overallPercentile
+            let p2Score = selectedCategory.flatMap { p2.percentile(for: $0) } ?? p2.overallPercentile
+            return sortDescending ? p1Score > p2Score : p1Score < p2Score
+        }
     }
 
     var allTeams: [String] {
@@ -103,7 +110,22 @@ final class DashboardViewModel {
                 isLoading = false
                 return
             }
-            players = fetched
+            
+            let grouped = Dictionary(grouping: fetched, by: \.playerId)
+            var latestPlayers: [Player] = []
+            var histories: [Int: [Player]] = [:]
+            
+            for (playerId, history) in grouped {
+                let sortedHistory = history.sorted { ($0.season ?? 0) > ($1.season ?? 0) }
+                histories[playerId] = sortedHistory
+                if let latest = sortedHistory.first {
+                    latestPlayers.append(latest)
+                }
+            }
+            
+            self.playerHistories = histories
+            self.players = latestPlayers
+            
             updateDerivedState()
             try? cache?.savePlayers(fetched)
         } catch is DecodingError {

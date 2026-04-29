@@ -12,6 +12,7 @@ struct MetricRoute: Hashable {
 struct RootTabView: View {
     @State private var viewModel: DashboardViewModel
     @State private var selection = 0
+    @State private var showingAbout = false
 
     init(viewModel: DashboardViewModel) {
         _viewModel = State(initialValue: viewModel)
@@ -30,13 +31,23 @@ struct RootTabView: View {
             metricsTab
                 .tabItem { Label("Metrics", systemImage: "chart.bar.fill") }
                 .tag(2)
-
-            aboutTab
-                .tabItem { Label("About", systemImage: "info.circle") }
-                .tag(3)
         }
         .tint(SavantPalette.savantRed)
         .task { await viewModel.load() }
+        .sheet(isPresented: $showingAbout) {
+            NavigationStack {
+                AboutView(lastUpdated: viewModel.lastUpdated)
+                    .navigationTitle("About")
+                    .navigationBarTitleDisplayMode(.inline)
+                    .modifier(SavantNavBar())
+                    .toolbar {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            Button("Done") { showingAbout = false }
+                                .tint(.white)
+                        }
+                    }
+            }
+        }
     }
 
     private var leadersTab: some View {
@@ -46,6 +57,14 @@ struct RootTabView: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .modifier(SavantNavBar())
                 .modifier(StandardDestinations(viewModel: viewModel))
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button(action: { showingAbout = true }) {
+                            Image(systemName: "info.circle")
+                        }
+                        .tint(.white)
+                    }
+                }
         }
     }
 
@@ -56,6 +75,14 @@ struct RootTabView: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .modifier(SavantNavBar())
                 .modifier(StandardDestinations(viewModel: viewModel))
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button(action: { showingAbout = true }) {
+                            Image(systemName: "info.circle")
+                        }
+                        .tint(.white)
+                    }
+                }
         }
     }
 
@@ -66,15 +93,14 @@ struct RootTabView: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .modifier(SavantNavBar())
                 .modifier(StandardDestinations(viewModel: viewModel))
-        }
-    }
-
-    private var aboutTab: some View {
-        NavigationStack {
-            AboutView(lastUpdated: viewModel.lastUpdated)
-                .navigationTitle("About")
-                .navigationBarTitleDisplayMode(.inline)
-                .modifier(SavantNavBar())
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button(action: { showingAbout = true }) {
+                            Image(systemName: "info.circle")
+                        }
+                        .tint(.white)
+                    }
+                }
         }
     }
 }
@@ -94,7 +120,7 @@ private struct StandardDestinations: ViewModifier {
     func body(content: Content) -> some View {
         content
             .navigationDestination(for: Player.self) { player in
-                PlayerProfileView(player: player)
+                PlayerProfileView(player: player, history: viewModel.playerHistories[player.playerId] ?? [])
                     .modifier(SavantNavBar())
             }
             .navigationDestination(for: TeamDestination.self) { dest in

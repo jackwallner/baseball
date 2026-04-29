@@ -1,7 +1,8 @@
 import Foundation
 
 struct Player: Identifiable, Codable, Hashable, Sendable {
-    let id: Int
+    var id: String { "\(playerId)-\(season ?? 0)" }
+    let playerId: Int
     let name: String
     let team: String
     let position: String
@@ -16,7 +17,7 @@ struct Player: Identifiable, Codable, Hashable, Sendable {
     let games: [GameTrend]
 
     enum CodingKeys: String, CodingKey {
-        case id
+        case playerId = "id"
         case name
         case team
         case position
@@ -31,8 +32,8 @@ struct Player: Identifiable, Codable, Hashable, Sendable {
         case games
     }
 
-    init(id: Int, name: String, team: String, position: String, handedness: String, imageURL: URL?, updatedAt: Date, season: Int? = nil, playerType: String? = nil, source: String? = nil, metrics: [Metric], standardStats: [StandardStat]?, games: [GameTrend]) {
-        self.id = id
+    init(playerId: Int, name: String, team: String, position: String, handedness: String, imageURL: URL?, updatedAt: Date, season: Int? = nil, playerType: String? = nil, source: String? = nil, metrics: [Metric], standardStats: [StandardStat]?, games: [GameTrend]) {
+        self.playerId = playerId
         self.name = name
         self.team = team
         self.position = position
@@ -49,7 +50,7 @@ struct Player: Identifiable, Codable, Hashable, Sendable {
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        id = try container.decode(Int.self, forKey: .id)
+        playerId = try container.decode(Int.self, forKey: .playerId)
         name = try container.decode(String.self, forKey: .name)
         team = try container.decode(String.self, forKey: .team)
         position = try container.decode(String.self, forKey: .position)

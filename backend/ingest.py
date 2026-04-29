@@ -46,8 +46,6 @@ def _resolve_season() -> int:
     return season
 
 
-STATCAST_SEASON = _resolve_season()
-
 BATTER_METRICS = [
     ("xwoba", "xwOBA", "Hitting"),
     ("xba", "xBA", "Hitting"),
@@ -167,12 +165,6 @@ def percentile_value(value: Any) -> Optional[int]:
 
 
 def raw_stat_value(row: pd.Series, key: str) -> Optional[str]:
-    """Attempt to extract a raw stat value from the row.
-
-    Percentile-rank DataFrames from pybaseball primarily contain percentiles (0-100).
-    Some versions also include raw values in companion columns or the same column.
-    We try multiple heuristics to find the actual baseball number.
-    """
     # If a companion raw column exists (e.g. 'xwoba_value'), use it.
     raw_key = f"{key}_value"
     if raw_key in row:
@@ -187,22 +179,15 @@ def raw_stat_value(row: pd.Series, key: str) -> Optional[str]:
         if pd.notna(raw):
             return str(raw)
 
-    # Heuristic: if the value in the key column has a decimal component,
-    # it's almost certainly a raw stat, not an integer percentile.
     if key in row:
         val = row[key]
         if pd.notna(val):
             try:
                 f = float(val)
-                # Percentiles are integers 0-100. If it has decimals, it's raw.
                 if f != int(f):
                     return str(val)
-                # If outside 0-100, it's definitely raw.
                 if f < 0 or f > 100:
                     return str(val)
-                # For known raw-stat columns where values can legitimately be 0-100
-                # (like exit_velocity ~96, bat_speed ~70), we still might miss them.
-                # We accept that limitation here; standard stats fill the gap.
             except (ValueError, TypeError):
                 pass
     return None
@@ -420,7 +405,7 @@ def _fetch_mlb_roster_lookup(season: int) -> dict[int, dict[str, str]]:
     return lookup
 
 
-def merge_player_row(players: dict[int, dict[str, Any]], row: pd.Series, player_type: str, metric_defs: list[tuple[str, str, str]], now: str, standard_lookup: Optional[dict[str, pd.Series]] = None, roster_lookup: Optional[dict[int, dict[str, str]]] = None) -> None:
+def merge_player_row(players: dict[int, dict[str, Any]], row: pd.Series, player_type: str, metric_defs: list[tuple[str, str, str]], now: str, season: int, standard_lookup: Optional[dict[str, pd.Series]] = None, roster_lookup: Optional[dict[int, dict[str, str]]] = None) -> None:
     player_id = safe_player_id(row)
     if player_id is None:
         logger.warning("Skipping row with missing or invalid player_id: %s", row.to_dict())
@@ -458,7 +443,7 @@ def merge_player_row(players: dict[int, dict[str, Any]], row: pd.Series, player_
             "handedness": handedness_from_row(row),
             "image_url": f"https://img.mlbstatic.com/mlb-photos/image/upload/w_180,q_100/v1/people/{player_id}/headshot/67/current",
             "updated_at": now,
-            "season": STATCAST_SEASON,
+            "season": season,
             "player_type": player_type,
             "source": "baseball_savant_percentile_rankings",
             "metrics": metrics,
@@ -478,13 +463,13 @@ def chunks(lst: list, n: int) -> Iterator[list]:
         yield lst[i:i + n]
 
 
-def build_snapshot_rows() -> list[dict[str, Any]]:
+def build_snapshot_rows(season: int) -> list[dict[str, Any]]:
     now = datetime.now(UTC).isoformat()
     players: dict[int, dict[str, Any]] = {}
 
-    logger.info("Fetching batter percentile ranks for season %s", STATCAST_SEASON)
+    logger.info("Fetching batter percentile ranks for season %s", season)
     try:
-        batter_rows = statcast_batter_percentile_ranks(STATCAST_SEASON)
+        batter_rows = statcast_batter_percentile_ranks(season)
         logger.info("Batter rows: %d", len(batter_rows))
         if batter_rows.empty:
             logger.warning("Empty batter DataFrame returned")
@@ -492,9 +477,9 @@ def build_snapshot_rows() -> list[dict[str, Any]]:
         logger.exception("Failed to fetch batter percentile ranks")
         raise
 
-    logger.info("Fetching pitcher percentile ranks for season %s", STATCAST_SEASON)
+    logger.info("Fetching pitcher percentile ranks for season %s", season)
     try:
-        pitcher_rows = statcast_pitcher_percentile_ranks(STATCAST_SEASON)
+        pitcher_rows = statcast_pitcher_percentile_ranks(season)
         logger.info("Pitcher rows: %d", len(pitcher_rows))
         if pitcher_rows.empty:
             logger.warning("Empty pitcher DataFrame returned")
@@ -514,7 +499,7 @@ def build_snapshot_rows() -> list[dict[str, Any]]:
         logger.warning("Missing pitcher columns: %s", missing_pitcher)
 
     # Fetch standard stats and build name-keyed lookups
-    bat_std, pitch_std = _fetch_standard_stats(STATCAST_SEASON)
+    bat_std, pitch_std = _fetch_standard_stats(season)
     batter_lookup: dict[str, pd.Series] = {}
     pitcher_lookup: dict[str, pd.Series] = {}
     if not bat_std.empty and "Name" in bat_std.columns:
@@ -527,7 +512,7 @@ def build_snapshot_rows() -> list[dict[str, Any]]:
             pitcher_lookup[key] = row
 
     logger.info("Standard stat lookups: batters=%d, pitchers=%d", len(batter_lookup), len(pitcher_lookup))
-    roster_lookup = _fetch_mlb_roster_lookup(STATCAST_SEASON)
+    roster_lookup = _fetch_mlb_roster_lookup(season)
 
     batter_metrics = _all_metric_defs("batter")
     pitcher_metrics = _all_metric_defs("pitcher")
@@ -535,14 +520,14 @@ def build_snapshot_rows() -> list[dict[str, Any]]:
     skipped = 0
     for _, row in batter_rows.iterrows():
         try:
-            merge_player_row(players, row, "batter", batter_metrics, now, batter_lookup, roster_lookup)
+            merge_player_row(players, row, "batter", batter_metrics, now, season, batter_lookup, roster_lookup)
         except Exception:
             skipped += 1
             logger.exception("Failed to process batter row")
 
     for _, row in pitcher_rows.iterrows():
         try:
-            merge_player_row(players, row, "pitcher", pitcher_metrics, now, pitcher_lookup, roster_lookup)
+            merge_player_row(players, row, "pitcher", pitcher_metrics, now, season, pitcher_lookup, roster_lookup)
         except Exception:
             skipped += 1
             logger.exception("Failed to process pitcher row")
@@ -561,7 +546,8 @@ def build_snapshot_rows() -> list[dict[str, Any]]:
     two_way = sum(1 for p in players.values() if p.get("player_type") == "two_way")
     with_std = sum(1 for p in players.values() if p.get("standard_stats"))
     logger.info(
-        "Total players: %d (batters: %d, pitchers: %d, two-way: %d, skipped rows: %d, with standard stats: %d)",
+        "Total players for %s: %d (batters: %d, pitchers: %d, two-way: %d, skipped rows: %d, with standard stats: %d)",
+        season,
         len(players),
         sum(1 for p in players.values() if p.get("player_type") == "batter"),
         sum(1 for p in players.values() if p.get("player_type") == "pitcher"),
@@ -576,11 +562,6 @@ def build_snapshot_rows() -> list[dict[str, Any]]:
 def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
-    rows = build_snapshot_rows()
-    if not rows:
-        logger.error("No rows to upsert. Exiting.")
-        sys.exit(1)
-
     url = SUPABASE_URL or os.environ.get("SUPABASE_URL", "")
     key = SUPABASE_SERVICE_ROLE_KEY or os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
     if not url or not key:
@@ -589,22 +570,28 @@ def main() -> None:
 
     client = create_client(url, key)
 
-    batch_size = 150
-    for i, batch in enumerate(chunks(rows, batch_size)):
-        logger.info("Upserting batch %d (%d rows)...", i + 1, len(batch))
-        try:
-            # supabase-py 2.x: upsert(data, on_conflict="column") is the documented API.
-            # If postgrest-py changes this shape, the batch will fail loudly and exit non-zero.
-            client.table("player_snapshots").upsert(batch, on_conflict="id").execute()
-        except Exception:
-            logger.exception("Batch %d failed", i + 1)
-            sys.exit(1)
+    fetch_all = os.environ.get("FETCH_ALL_TIME", "false").lower() == "true"
+    end_season = _default_season()
+    seasons_to_fetch = list(range(2015, end_season + 1)) if fetch_all else [_resolve_season()]
 
-    logger.info(
-        "Upserted %d Baseball Savant percentile player snapshots for %s",
-        len(rows),
-        STATCAST_SEASON,
-    )
+    for season in seasons_to_fetch:
+        logger.info("=== Processing season %s ===", season)
+        try:
+            rows = build_snapshot_rows(season)
+            if not rows:
+                logger.error("No rows to upsert for %s.", season)
+                continue
+
+            batch_size = 150
+            for i, batch in enumerate(chunks(rows, batch_size)):
+                logger.info("Upserting batch %d (%d rows) for %s...", i + 1, len(batch), season)
+                client.table("player_snapshots").upsert(batch, on_conflict="id,season").execute()
+
+            logger.info("Successfully upserted %d player snapshots for %s.", len(rows), season)
+        except Exception:
+            logger.exception("Failed to process season %s", season)
+            if not fetch_all:
+                sys.exit(1)
 
 
 if __name__ == "__main__":

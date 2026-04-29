@@ -4,20 +4,35 @@ struct MetricRankingView: View {
     let metricLabel: String
     let metricCategory: MetricCategory
     let players: [Player]
+    @State private var sortDescending = true
 
     private var rankedPlayers: [Player] {
         players.filter { player in
             player.metrics.contains { $0.label == metricLabel && $0.category == metricCategory }
         }
         .sorted {
-            metricPercentile(for: $0) > metricPercentile(for: $1)
+            let p1 = metricPercentile(for: $0)
+            let p2 = metricPercentile(for: $1)
+            return sortDescending ? p1 > p2 : p1 < p2
         }
     }
 
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
-                SavantSectionBar(title: "\(metricLabel) · \(metricCategory.rawValue)")
+                SavantSectionBar(
+                    title: "\(metricLabel) · \(metricCategory.rawValue)",
+                    trailing: AnyView(
+                        Button(action: { sortDescending.toggle() }) {
+                            HStack(spacing: 4) {
+                                Text("Sort")
+                                Image(systemName: sortDescending ? "arrow.down" : "arrow.up")
+                            }
+                            .font(SavantType.micro)
+                            .foregroundStyle(SavantPalette.inkSecondary)
+                        }
+                    )
+                )
 
                 if rankedPlayers.isEmpty {
                     ContentUnavailableView {
