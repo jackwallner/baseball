@@ -2,124 +2,130 @@
 
 ## Summary
 
-**Key Finding:** pybaseball provides **BOTH** percentile rankings AND actual values, but from **different endpoints**.
-
-To display data like Baseball Savant (e.g., "95.4 mph · 100th percentile"), we need to fetch from multiple sources and merge them.
+This document tracks which stats have **actual values** vs. **percentiles only** in pybaseball.
 
 ---
 
-## Data Sources Comparison
+## Current Coverage (Post-Backfill)
 
-### 1. Percentile Ranks Only (0-100 scale)
-
-| Function | Data Type | Key Metrics |
-|----------|-----------|-------------|
-| `statcast_batter_percentile_ranks` | Percentiles | xwoba, xslg, xba, exit_velocity, sprint_speed, oaa, brl_percent, k_percent, bb_percent, whiff_percent, chase_percent, arm_strength, bat_speed |
-| `statcast_pitcher_percentile_ranks` | Percentiles | xwoba, xera, xba, exit_velocity, k_percent, bb_percent, whiff_percent, chase_percent, fb_velocity, fb_spin, curve_spin |
-
-**Limitation:** Only returns 0-100 percentiles, not actual stat values.
-
----
-
-### 2. Actual Values (Raw Stats)
-
-| Function | Data Type | Key Metrics | Sample Values |
-|----------|-----------|-------------|---------------|
-| `statcast_sprint_speed` | Actual ft/s | sprint_speed, hp_to_1b, bolts | **30.3 ft/s**, 4.13 sec |
-| `statcast_batter_expected_stats` | Actual decimals | est_woba, est_slg, est_ba | **0.460**, **0.708**, **0.300** |
-| `statcast_batter_exitvelo_barrels` | Actual mph/% | avg_hit_speed, brl_percent, ev95percent | **95.4 mph**, **24.7%** |
-| `statcast_pitcher_expected_stats` | Actual decimals | est_woba, xera, est_ba | **2.85**, **3.12** |
-| `statcast_pitcher_exitvelo_barrels` | Actual mph/% | avg_hit_speed, brl_percent | **88.2 mph** |
-| `statcast_pitcher_pitch_arsenal` | Actual mph | ff_avg_speed, sl_avg_speed, ch_avg_speed | **96.5 mph** |
-| `statcast_outs_above_average` | Actual count | outs_above_average, fielding_runs_prevented | **+15 OAA**, **+12 runs** |
-| `statcast_outfielder_jump` | Actual feet | f_bootup_distance, outs_above_average | **38.9 ft** |
+| Stat | Actual Value Source | Example | Status |
+|------|---------------------|---------|--------|
+| **xwOBA** | `statcast_*_expected_stats` | 0.344 | ✅ Available |
+| **xBA** | `statcast_*_expected_stats` | 0.269 | ✅ Available |
+| **xSLG** | `statcast_*_expected_stats` | 0.479 | ✅ Available |
+| **xERA** | `statcast_pitcher_expected_stats` | 4.04 | ✅ Available |
+| **Exit Velocity** | `statcast_*_exitvelo_barrels` | 91.8 mph | ✅ Available |
+| **Barrel%** | `statcast_*_exitvelo_barrels` | 9.8% | ✅ Available |
+| **Hard-Hit%** | `statcast_*_exitvelo_barrels` | 37.2% | ✅ Available |
+| **Max EV** | `statcast_*_exitvelo_barrels` | 113.2 mph | ✅ Available |
+| **Sprint Speed** | `statcast_sprint_speed` | 29.2 ft/s | ✅ Available |
+| **OAA** | `statcast_outs_above_average` | +11 | ✅ Available |
+| **Fastball Velo** | `statcast_pitcher_pitch_arsenal` | 95.0 mph | ✅ Available |
+| **K%** | Calculated from MLB Stats API | 21.4% | ✅ Available |
+| **BB%** | Calculated from MLB Stats API | 6.2% | ✅ Available |
+| **Whiff%** | Play-by-play only | - | ❌ Percentile only |
+| **Chase%** | Play-by-play only | - | ❌ Percentile only |
+| **Bat Speed** | No aggregated source | - | ❌ Percentile only |
+| **Swing Length** | No aggregated source | - | ❌ Percentile only |
+| **FB Spin** | No aggregated source | - | ❌ Percentile only |
+| **Curve Spin** | No aggregated source | - | ❌ Percentile only |
 
 ---
 
-## Example: Aaron Judge (2025)
-
-| Metric | Percentile Rank | Actual Value | Source for Actual |
-|--------|-----------------|--------------|-------------------|
-| xwOBA | 100 | 0.460 | expected_stats |
-| xSLG | 100 | 0.708 | expected_stats |
-| xBA | - | 0.300 | expected_stats |
-| Exit Velocity | 100 | 95.4 mph | exitvelo_barrels |
-| Barrel % | - | 24.7% | exitvelo_barrels |
-| Sprint Speed | 42 | 27.1 ft/s | sprint_speed |
-| OAA | 87 | +15 | outs_above_average |
-
----
-
-## Recommendation: Hybrid Approach
-
-### Option A: Simple (Current) - Percentiles Only
-- **Pros:** Single API call, consistent data, easier to cache
-- **Cons:** Can't show "95.4 mph" - only "100th percentile"
-
-### Option B: Enhanced - Fetch Both
-- **Pros:** Shows actual values like Baseball Savant, more informative
-- **Cons:** Multiple API calls, more complex backend, higher latency
-
-### Option C: Tiered (Recommended)
-1. **Primary:** Use percentile_ranks for overview (fast, single call)
-2. **On demand:** Fetch actual values from specific endpoints when needed
-3. **Smart caching:** Cache actual values separately with same TTL
-
----
-
-## Implementation Strategy
-
-```python
-# New endpoints needed:
-GET /player/{id}/savant-values  # Actual values from specific endpoints
-GET /player/{id}/savant         # Existing: percentiles
-
-# Merge in backend or let frontend call both
-```
-
-### Data Flow for Savant-Style Display:
+## Validation: Julio Rodríguez (2025)
 
 ```
-Player Profile View
-    ↓
-[1] Fetch percentiles (existing endpoint)
-    ↓
-[2] Fetch actual values:
-    - Sprint speed → statcast_sprint_speed
-    - xwOBA/xSLG → statcast_batter_expected_stats  
-    - Exit velo → statcast_batter_exitvelo_barrels
-    - Pitch velo → statcast_pitcher_pitch_arsenal
-    - Fielding → statcast_outs_above_average
-    ↓
-[3] Merge by player_id
-    ↓
-Response: {
-  "percentiles": { "xwoba": 100, ... },
-  "actual_values": { "xwoba": 0.460, "exit_velocity": 95.4, ... }
-}
+ACTUAL VALUES WITH PERCENTILES:
+  xwOBA:     0.344  (76th percentile)
+  xSLG:      0.479  (81st percentile)
+  xBA:       0.269  (80th percentile)
+  Exit Velo: 91.8 mph (87th percentile)
+  Barrel%:   9.8%   (58th percentile)
+  Sprint:    29.2 ft/s (93rd percentile)
+  OAA:       +11    (97th percentile)
+  K%:        ~21%   (50th percentile)
+  BB%:       ~6%    (24th percentile)
+
+PERCENTILE-ONLY:
+  Whiff%:    (26th percentile) - no actual value source
+  Chase%:    (10th percentile) - no actual value source
+  Bat Speed: (percentile only) - no aggregated source
 ```
 
 ---
 
-## Coverage Gaps
+## Validation: Luis Castillo (2025)
 
-**NOT available in pybaseball (actual MLB Savant feature):**
-- Run Values (Batting, Baserunning, Fielding, Pitching)
-- These require play-by-play run expectancy calculations
+```
+ACTUAL VALUES WITH PERCENTILES:
+  xERA:      4.04   (45th percentile)
+  xwOBA:     0.312  (45th percentile)
+  xBA:       0.245  (41st percentile)
+  xSLG:      0.418  (33rd percentile)
+  Exit Velo: 90.3 mph (22nd percentile)
+  Barrel%:   10.4%  (17th percentile)
+  FB Velo:   95.0 mph (60th percentile)
+  K%:        ~22%   (43rd percentile)
+  BB%:       ~9%    (28th percentile)
 
-**Workaround:** Remove these metrics or calculate from `statcast()` play-by-play data (very large dataset).
+PERCENTILE-ONLY:
+  Whiff%, Chase%, FB Spin, Curve Spin
+```
 
 ---
 
-## Data Completeness by Source
+## Why Some Stats Are Percentile-Only
 
-| Metric Category | Percentiles Available | Actual Values Available | Can Merge? |
-|-----------------|----------------------|-------------------------|------------|
-| Hitting (xwOBA) | ✅ Yes | ✅ Yes (expected_stats) | ✅ Yes |
-| Exit Velocity | ✅ Yes | ✅ Yes (exitvelo_barrels) | ✅ Yes |
-| Sprint Speed | ✅ Yes | ✅ Yes (sprint_speed) | ✅ Yes |
-| Fielding (OAA) | ✅ Yes | ✅ Yes (outs_above_average) | ✅ Yes |
-| K% / BB% | ✅ Yes | ❌ No | ❌ No |
-| Whiff% / Chase% | ✅ Yes | ❌ No | ❌ No |
-| Pitch Velocity | ✅ Yes | ✅ Yes (pitch_arsenal) | ✅ Yes |
-| Pitch Spin | ✅ Yes | ❌ No | ❌ No |
+### Whiff% / Chase% / Plate Discipline
+- **Source needed:** Play-by-play pitch data (`statcast_batter` / `statcast_pitcher`)
+- **Problem:** Returns ~2900 rows per player (one per pitch)
+- **To calculate:** Would need to:
+  1. Fetch 2900+ rows × 835 players = **2.4+ million rows**
+  2. Parse every pitch's zone and description
+  3. Calculate rates per player
+  4. Runtime: **hours** instead of minutes
+- **Trade-off:** Too slow for nightly ingestion
+
+### Bat Speed / Swing Length
+- **Source needed:** Tracking data (newer Statcast metrics)
+- **Problem:** Only available via percentile ranks endpoint
+- **No aggregated source** in pybaseball
+
+### Spin Rates
+- **Source needed:** `statcast_pitcher_pitch_arsenal` or similar
+- **Problem:** pybaseball only returns velocities, not spin rates
+- **MLB Savant:** Has this data but not exposed in pybaseball
+
+---
+
+## Implementation Details
+
+### Data Flow
+
+```
+1. Fetch percentile rankings (batter/pitcher) - fast
+2. Prefetch actual values:
+   - Expected stats (one call each for batters/pitchers)
+   - Exit velo/barrels (one call each)
+   - Sprint speed (one call)
+   - OAA (one call)
+   - Pitch arsenal (one call)
+3. Fetch standard stats from MLB Stats API (batched)
+4. Calculate K%/BB% from counting stats
+5. Merge and upsert to database
+```
+
+### Key Files
+
+- `backend/ingest_v2.py` - Main ingestion script
+- `backend/savant_mapping.py` - Mapping of stats to data sources
+- `.github/workflows/nightly-statcast.yml` - Automated nightly refresh
+
+---
+
+## Summary
+
+**✅ 13 stats** now have actual values with percentiles
+**❌ 6 stats** remain percentile-only (would require play-by-play processing or unavailable data)
+
+The enhanced backend successfully displays data in Baseball Savant format: **"91.8 mph · 87th percentile"**
