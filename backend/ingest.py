@@ -151,7 +151,7 @@ PITCHER_STANDARD_STATS = [
 
 def _all_metric_defs(player_type: str) -> list[tuple[str, str, str]]:
     if player_type == "batter":
-        return BATTER_METRICS + RUNNING_METRICS + FIELDING_METRICS
+        return BATTER_METRICS + RUN_VALUE_METRICS + RUNNING_METRICS + FIELDING_METRICS
     return PITCHER_METRICS
 
 
