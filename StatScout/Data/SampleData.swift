@@ -14,7 +14,7 @@ struct SampleData {
                 Metric(id: "judge-xwoba", label: "xwOBA", value: ".463", percentile: 100, category: .hitting),
                 Metric(id: "judge-ev", label: "Avg EV", value: "96.2", percentile: 100, category: .hitting),
                 Metric(id: "judge-barrel", label: "Barrel%", value: "26.9%", percentile: 100, category: .hitting),
-                Metric(id: "judge-sprint", label: "Sprint", value: "27.2", percentile: 58, category: .running)
+                Metric(id: "judge-sprint", label: "Sprint Speed", value: "27.2 ft/s", percentile: 58, category: .running)
             ],
             standardStats: [
                 StandardStat(id: "std-AVG", label: "AVG", value: ".312"),
@@ -45,7 +45,7 @@ struct SampleData {
             metrics: [
                 Metric(id: "ohtani-xslg", label: "xSLG", value: ".676", percentile: 100, category: .hitting),
                 Metric(id: "ohtani-hardhit", label: "Hard-Hit%", value: "61.4%", percentile: 100, category: .hitting),
-                Metric(id: "ohtani-sprint", label: "Sprint", value: "28.1", percentile: 82, category: .running),
+                Metric(id: "ohtani-sprint", label: "Sprint Speed", value: "28.1 ft/s", percentile: 82, category: .running),
                 Metric(id: "ohtani-arm", label: "Arm Value", value: "+2", percentile: 74, category: .fielding)
             ],
             standardStats: [
@@ -75,7 +75,7 @@ struct SampleData {
             imageURL: URL(string: "https://midfield.mlbstatic.com/v1/people/669203/spots/240"),
             updatedAt: Date(),
             metrics: [
-                Metric(id: "witt-sprint", label: "Sprint", value: "30.5", percentile: 100, category: .running),
+                Metric(id: "witt-sprint", label: "Sprint Speed", value: "30.5 ft/s", percentile: 100, category: .running),
                 Metric(id: "witt-xba", label: "xBA", value: ".329", percentile: 99, category: .hitting),
                 Metric(id: "witt-oaa", label: "OAA", value: "+15", percentile: 98, category: .fielding),
                 Metric(id: "witt-ev", label: "Avg EV", value: "92.1", percentile: 87, category: .hitting)
