@@ -11,6 +11,7 @@
 		0E57D0D337381AEB2F905D79 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 80FA4CA4AA0C875123767D0C /* PrivacyInfo.xcprivacy */; };
 		14FE0A5789F558B6C9BBCA6A /* RootTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9C629EF1C253BCEAF314EF /* RootTabView.swift */; };
 		189D1222312FEE374CFA4DEE /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147A7B626DB00162FDED79EA /* SettingsView.swift */; };
+		194BDDCA1D45B8E71852DF10 /* StandardStatsLeadersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9CBAD749A639F5A5ADCF10B /* StandardStatsLeadersView.swift */; };
 		203BA78977360FDD34CE3DCE /* SavantTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBA717240777CE85A8A2379E /* SavantTokens.swift */; };
 		3DA5F5AA0CC4C3141DB727AA /* PlayerCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 346E3D39DDC5F6FDD387016B /* PlayerCache.swift */; };
 		53AAA361EDCCDA0BB2681CD8 /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28F7C1A7CADA7CA917C9B9BF /* Components.swift */; };
@@ -67,6 +68,7 @@
 		E111095560BABC78B5DCB36E /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = System/Library/Frameworks/XCTest.framework; sourceTree = SDKROOT; };
 		E2D1812126A525283A3CEC7F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		ECB59368024F23FBC63D833E /* StatScoutApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatScoutApp.swift; sourceTree = "<group>"; };
+		F9CBAD749A639F5A5ADCF10B /* StandardStatsLeadersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StandardStatsLeadersView.swift; sourceTree = "<group>"; };
 		FCF08005AEA98F7CFF7919C6 /* TeamView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -180,6 +182,7 @@
 				9C04FC271035959EFD5300A2 /* SavantModules.swift */,
 				DBA717240777CE85A8A2379E /* SavantTokens.swift */,
 				147A7B626DB00162FDED79EA /* SettingsView.swift */,
+				F9CBAD749A639F5A5ADCF10B /* StandardStatsLeadersView.swift */,
 				93AB140AC9F51D7E0F0E2C6D /* TeamsView.swift */,
 				FCF08005AEA98F7CFF7919C6 /* TeamView.swift */,
 			);
@@ -321,6 +324,7 @@
 				FE17DDC74A43A910CD4A1CE8 /* SavantModules.swift in Sources */,
 				203BA78977360FDD34CE3DCE /* SavantTokens.swift in Sources */,
 				189D1222312FEE374CFA4DEE /* SettingsView.swift in Sources */,
+				194BDDCA1D45B8E71852DF10 /* StandardStatsLeadersView.swift in Sources */,
 				97ADF393CE14DE856A50A0B5 /* StatScoutApp.swift in Sources */,
 				C5718F0C8435928CBF995DE5 /* StatcastAPI.swift in Sources */,
 				648F3040D95418DB26BE2EE1 /* TeamView.swift in Sources */,

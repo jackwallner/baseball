@@ -27,3 +27,14 @@ Migrations are in `supabase/migrations/` and should be applied after any schema 
 - FanGraphs blocks cloud IPs (403) - disabled in favor of MLB Stats API
 - Supabase composite PK on `(id, season)` required for upsert - migration: `20260502000000_ensure_composite_pk.sql`
 - Node.js 20 deprecation warning - handled by `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true`
+
+## Build & TestFlight Upload
+
+Credentials are stored in `~/.baseball_credentials`:
+- SUPABASE_URL: https://kxlybsrsbibqkexffqmg.supabase.co
+- SUPABASE_ANON_KEY: [see ~/.baseball_credentials]
+
+To upload to TestFlight:
+```bash
+source ~/.baseball_credentials && bash scripts/testflight.sh
+```

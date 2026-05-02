@@ -9,6 +9,7 @@ build/
 .env
 .env.*
 !.env.example
+.baseball_credentials
 __pycache__/
 *.pyc
 .DS_Store

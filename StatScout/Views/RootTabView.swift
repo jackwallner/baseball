@@ -31,6 +31,10 @@ struct RootTabView: View {
             metricsTab
                 .tabItem { Label("Metrics", systemImage: "chart.bar.fill") }
                 .tag(2)
+            
+            standardStatsTab
+                .tabItem { Label("Stats", systemImage: "baseball.fill") }
+                .tag(3)
         }
         .tint(SavantPalette.savantRed)
         .task { await viewModel.load() }
@@ -91,6 +95,24 @@ struct RootTabView: View {
         NavigationStack {
             MetricLeadersView(metrics: viewModel.allMetrics)
                 .navigationTitle("Metric Leaders")
+                .navigationBarTitleDisplayMode(.inline)
+                .modifier(SavantNavBar())
+                .modifier(StandardDestinations(viewModel: viewModel))
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button(action: { showingAbout = true }) {
+                            Image(systemName: "gear")
+                        }
+                        .tint(.white)
+                    }
+                }
+        }
+    }
+    
+    private var standardStatsTab: some View {
+        NavigationStack {
+            StandardStatsLeadersView(players: viewModel.players)
+                .navigationTitle("Standard Stats")
                 .navigationBarTitleDisplayMode(.inline)
                 .modifier(SavantNavBar())
                 .modifier(StandardDestinations(viewModel: viewModel))
