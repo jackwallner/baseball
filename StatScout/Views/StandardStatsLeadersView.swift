@@ -92,7 +92,7 @@ struct StandardStatsLeadersView: View {
                             .background(
                                 selectedCategory == category ? SavantPalette.savantRed : SavantPalette.surface
                             )
-                            .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusButton))
+                            .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
                     }
                     .buttonStyle(.plain)
                 }
@@ -115,7 +115,7 @@ struct StandardStatsLeadersView: View {
                             .background(
                                 selectedStat == stat ? SavantPalette.savantNavy : SavantPalette.surface
                             )
-                            .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusPill))
+                            .clipShape(Capsule())
                     }
                     .buttonStyle(.plain)
                 }
@@ -198,7 +198,7 @@ struct StandardStatsLeadersView: View {
                             .foregroundStyle(SavantPalette.ink)
                             .lineLimit(1)
                         Text("\(player.team) · \(player.position)")
-                            .font(SavantType.caption)
+                            .font(SavantType.small)
                             .foregroundStyle(SavantPalette.inkSecondary)
                     }
                 }
@@ -227,7 +227,7 @@ struct StandardStatsLeadersView: View {
 
 #Preview {
     NavigationStack {
-        StandardStatsLeadersView(players: PreviewPlayers.all)
+        StandardStatsLeadersView(players: SampleData.players)
             .navigationTitle("Standard Stats")
     }
 }
