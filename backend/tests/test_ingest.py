@@ -42,13 +42,13 @@ def test_build_metrics_skips_missing_columns():
 
 def test_merge_player_row_maps_team(sample_batter_row):
     players = {}
-    ingest.merge_player_row(players, sample_batter_row, "batter", ingest.BATTER_METRICS, "2026-04-26T00:00:00Z")
+    ingest.merge_player_row(players, sample_batter_row, "batter", ingest.BATTER_METRICS, "2026-04-26T00:00:00Z", 2026)
     assert players[592450]["team"] == "NYY"
 
 
 def test_merge_player_row_maps_position_and_handedness(sample_batter_row):
     players = {}
-    ingest.merge_player_row(players, sample_batter_row, "batter", ingest.BATTER_METRICS, "2026-04-26T00:00:00Z")
+    ingest.merge_player_row(players, sample_batter_row, "batter", ingest.BATTER_METRICS, "2026-04-26T00:00:00Z", 2026)
     assert players[592450]["position"] == "RF"
     assert players[592450]["handedness"] == "R/R"
 
@@ -56,7 +56,7 @@ def test_merge_player_row_maps_position_and_handedness(sample_batter_row):
 def test_merge_player_row_defaults_team_to_tbd():
     row = pd.Series({"player_id": 1, "player_name": "Test", "xwoba": 90})
     players = {}
-    ingest.merge_player_row(players, row, "batter", ingest.BATTER_METRICS, "2026-04-26T00:00:00Z")
+    ingest.merge_player_row(players, row, "batter", ingest.BATTER_METRICS, "2026-04-26T00:00:00Z", 2026)
     assert players[1]["team"] == "TBD"
 
 
@@ -73,7 +73,7 @@ def test_merge_player_row_uses_standard_stats_team_when_savant_team_missing():
         )
     }
     players = {}
-    ingest.merge_player_row(players, row, "batter", ingest.BATTER_METRICS, "2026-04-26T00:00:00Z", standard_lookup)
+    ingest.merge_player_row(players, row, "batter", ingest.BATTER_METRICS, "2026-04-26T00:00:00Z", 2026, standard_lookup)
     assert players[592450]["team"] == "NYY"
     assert players[592450]["position"] == "RF"
 
@@ -82,7 +82,7 @@ def test_merge_player_row_uses_roster_lookup_when_other_team_sources_missing():
     row = pd.Series({"player_id": 592450, "player_name": "Judge, Aaron", "xwoba": 90})
     roster_lookup = {592450: {"team": "NYY", "position": "RF"}}
     players = {}
-    ingest.merge_player_row(players, row, "batter", ingest.BATTER_METRICS, "2026-04-26T00:00:00Z", roster_lookup=roster_lookup)
+    ingest.merge_player_row(players, row, "batter", ingest.BATTER_METRICS, "2026-04-26T00:00:00Z", 2026, roster_lookup=roster_lookup)
     assert players[592450]["team"] == "NYY"
     assert players[592450]["position"] == "RF"
 
@@ -131,8 +131,8 @@ def test_merge_player_row_two_way():
         }
     )
     players = {}
-    ingest.merge_player_row(players, row, "batter", ingest.BATTER_METRICS, "2026-04-26T00:00:00Z")
-    ingest.merge_player_row(players, row, "pitcher", ingest.PITCHER_METRICS, "2026-04-26T00:00:00Z")
+    ingest.merge_player_row(players, row, "batter", ingest.BATTER_METRICS, "2026-04-26T00:00:00Z", 2026)
+    ingest.merge_player_row(players, row, "pitcher", ingest.PITCHER_METRICS, "2026-04-26T00:00:00Z", 2026)
     assert players[660271]["position"] == "Two-way"
     assert players[660271]["player_type"] == "two_way"
 
@@ -149,8 +149,8 @@ def test_build_snapshot_rows_handles_empty_dataframe():
     with patch("ingest.statcast_batter_percentile_ranks", return_value=pd.DataFrame()):
         with patch("ingest.statcast_pitcher_percentile_ranks", return_value=pd.DataFrame()):
             with patch("ingest._fetch_standard_stats", return_value=(pd.DataFrame(), pd.DataFrame())):
-                with pytest.raises(SystemExit):
-                    ingest.main()
+                # Empty dataframes now log error and continue, not exit
+                ingest.main()
 
 
 def test_batching():
