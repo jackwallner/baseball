@@ -9,6 +9,7 @@ struct PlayerProfileView: View {
     enum PlayerStatTab: String, CaseIterable {
         case statcast = "Percentiles"
         case standard = "Standard Stats"
+        case yearCompare = "Year Compare"
     }
 
     private var seasonLabel: String {
@@ -37,10 +38,8 @@ struct PlayerProfileView: View {
                     statcastContent
                 case .standard:
                     standardContent
-                }
-                
-                if history.count > 1 {
-                    historyContent
+                case .yearCompare:
+                    yearCompareContent
                 }
             }
         }
@@ -61,6 +60,7 @@ struct PlayerProfileView: View {
         HStack(spacing: 8) {
             statcastTabButton
             standardTabButton
+            yearCompareTabButton
         }
     }
 
@@ -103,6 +103,27 @@ struct PlayerProfileView: View {
         .opacity(hasStats ? 1 : 0.5)
     }
 
+    private var yearCompareTabButton: some View {
+        let isSelected = selectedTab == .yearCompare
+        let hasHistory = history.count > 1
+        return Button(action: {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                selectedTab = .yearCompare
+            }
+        }) {
+            Text(PlayerStatTab.yearCompare.rawValue)
+                .font(SavantType.bodyBold)
+                .foregroundStyle(isSelected ? .white : SavantPalette.ink)
+                .frame(maxWidth: .infinity)
+                .frame(height: 44)
+                .background(isSelected ? SavantPalette.savantRed : SavantPalette.surface)
+                .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
+        }
+        .buttonStyle(.plain)
+        .disabled(!hasHistory)
+        .opacity(hasHistory ? 1 : 0.5)
+    }
+
     private var statcastContent: some View {
         VStack(spacing: 12) {
             percentileRankingsCard
@@ -117,6 +138,10 @@ struct PlayerProfileView: View {
         }
         .padding(.horizontal, 12)
         .padding(.top, 12)
+    }
+
+    private var yearCompareContent: some View {
+        YearComparisonView(history: history)
     }
 
     private var historyContent: some View {

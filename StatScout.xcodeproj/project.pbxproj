@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		03322BA439762FE028116ADC /* TeamsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93AB140AC9F51D7E0F0E2C6D /* TeamsView.swift */; };
+		AA11BB22CC33DD44EE55FF66AA77BB88 /* YearComparisonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB11AA22CC33DD44EE55FF66AA77BB99 /* YearComparisonView.swift */; };
 		0E57D0D337381AEB2F905D79 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 80FA4CA4AA0C875123767D0C /* PrivacyInfo.xcprivacy */; };
 		14FE0A5789F558B6C9BBCA6A /* RootTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9C629EF1C253BCEAF314EF /* RootTabView.swift */; };
 		189D1222312FEE374CFA4DEE /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147A7B626DB00162FDED79EA /* SettingsView.swift */; };
@@ -44,6 +45,7 @@
 
 /* Begin PBXFileReference section */
 		00934226FB4C12145112549C /* MetricRankingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetricRankingView.swift; sourceTree = "<group>"; };
+		BB11AA22CC33DD44EE55FF66AA77BB99 /* YearComparisonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YearComparisonView.swift; sourceTree = "<group>"; };
 		147A7B626DB00162FDED79EA /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		15914E954BD86B91C09E5C88 /* StatcastAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatcastAPI.swift; sourceTree = "<group>"; };
 		1E4FF70B13A65617E39C4E75 /* DashboardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardViewModel.swift; sourceTree = "<group>"; };
@@ -185,6 +187,7 @@
 				F9CBAD749A639F5A5ADCF10B /* StandardStatsLeadersView.swift */,
 				93AB140AC9F51D7E0F0E2C6D /* TeamsView.swift */,
 				FCF08005AEA98F7CFF7919C6 /* TeamView.swift */,
+			BB11AA22CC33DD44EE55FF66AA77BB99 /* YearComparisonView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -329,6 +332,7 @@
 				C5718F0C8435928CBF995DE5 /* StatcastAPI.swift in Sources */,
 				648F3040D95418DB26BE2EE1 /* TeamView.swift in Sources */,
 				03322BA439762FE028116ADC /* TeamsView.swift in Sources */,
+			AA11BB22CC33DD44EE55FF66AA77BB88 /* YearComparisonView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

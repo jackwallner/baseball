@@ -6,7 +6,7 @@ final class DashboardViewModelTests: XCTestCase {
     func testAllMetricsKeyCollision() async throws {
         let players: [Player] = [
             Player(
-                id: 1, name: "A", team: "NYY", position: "DH", handedness: "L/R", imageURL: nil,
+                playerId: 1, name: "A", team: "NYY", position: "DH", handedness: "L/R", imageURL: nil,
                 updatedAt: Date(),
                 metrics: [
                     Metric(id: "m1", label: "xwOBA", value: ".400", percentile: 90, category: .hitting)
@@ -15,7 +15,7 @@ final class DashboardViewModelTests: XCTestCase {
                 games: []
             ),
             Player(
-                id: 2, name: "B", team: "NYY", position: "SP", handedness: "R/R", imageURL: nil,
+                playerId: 2, name: "B", team: "NYY", position: "SP", handedness: "R/R", imageURL: nil,
                 updatedAt: Date(),
                 metrics: [
                     Metric(id: "m2", label: "xwOBA", value: ".350", percentile: 85, category: .pitching)
@@ -53,7 +53,7 @@ final class DashboardViewModelTests: XCTestCase {
     @MainActor
     func testSearchMatchesFullTeamName() async {
         let player = Player(
-            id: 1, name: "Aaron Judge", team: "NYY", position: "RF", handedness: "R/R", imageURL: nil,
+            playerId: 1, name: "Aaron Judge", team: "NYY", position: "RF", handedness: "R/R", imageURL: nil,
             updatedAt: Date(),
             metrics: [],
             standardStats: [],
@@ -63,21 +63,21 @@ final class DashboardViewModelTests: XCTestCase {
         await vm.load()
         vm.searchText = "Yankees"
 
-        XCTAssertEqual(vm.filteredPlayers.map(\.id), [1])
+        XCTAssertEqual(vm.filteredPlayers.map { $0.playerId }, [1])
     }
 
     @MainActor
     func testPlayersForTeamMatchesAliases() async {
         let players = [
             Player(
-                id: 1, name: "A", team: "New York Yankees", position: "RF", handedness: "R/R", imageURL: nil,
+                playerId: 1, name: "A", team: "New York Yankees", position: "RF", handedness: "R/R", imageURL: nil,
                 updatedAt: Date(),
                 metrics: [],
                 standardStats: [],
                 games: []
             ),
             Player(
-                id: 2, name: "B", team: "CHW", position: "1B", handedness: "L/R", imageURL: nil,
+                playerId: 2, name: "B", team: "CHW", position: "1B", handedness: "L/R", imageURL: nil,
                 updatedAt: Date(),
                 metrics: [],
                 standardStats: [],
@@ -87,16 +87,16 @@ final class DashboardViewModelTests: XCTestCase {
         let vm = DashboardViewModel(provider: MockProvider(players: players))
         await vm.load()
 
-        XCTAssertEqual(vm.players(forTeam: "NYY").map(\.id), [1])
-        XCTAssertEqual(vm.players(forTeam: "CWS").map(\.id), [2])
+        XCTAssertEqual(vm.players(forTeam: "NYY").map { $0.playerId }, [1])
+        XCTAssertEqual(vm.players(forTeam: "CWS").map { $0.playerId }, [2])
     }
 
     @MainActor
     func testTeamCountsPopulatedAfterLoad() async {
         let players = [
-            Player(id: 1, name: "A", team: "NYY", position: "RF", handedness: "R/R", imageURL: nil, updatedAt: Date(), metrics: [], standardStats: [], games: []),
-            Player(id: 2, name: "B", team: "NYY", position: "1B", handedness: "L/R", imageURL: nil, updatedAt: Date(), metrics: [], standardStats: [], games: []),
-            Player(id: 3, name: "C", team: "BOS", position: "SS", handedness: "R/R", imageURL: nil, updatedAt: Date(), metrics: [], standardStats: [], games: [])
+            Player(playerId: 1, name: "A", team: "NYY", position: "RF", handedness: "R/R", imageURL: nil, updatedAt: Date(), metrics: [], standardStats: [], games: []),
+            Player(playerId: 2, name: "B", team: "NYY", position: "1B", handedness: "L/R", imageURL: nil, updatedAt: Date(), metrics: [], standardStats: [], games: []),
+            Player(playerId: 3, name: "C", team: "BOS", position: "SS", handedness: "R/R", imageURL: nil, updatedAt: Date(), metrics: [], standardStats: [], games: [])
         ]
         let vm = DashboardViewModel(provider: MockProvider(players: players))
         await vm.load()
@@ -107,12 +107,12 @@ final class DashboardViewModelTests: XCTestCase {
     @MainActor
     func testCacheHydratesPlayersBeforeFetch() async {
         let cached = [
-            Player(id: 99, name: "Cached", team: "NYY", position: "DH", handedness: "L/R", imageURL: nil, updatedAt: Date(), metrics: [], standardStats: [], games: [])
+            Player(playerId: 99, name: "Cached", team: "NYY", position: "DH", handedness: "L/R", imageURL: nil, updatedAt: Date(), metrics: [], standardStats: [], games: [])
         ]
         let cache = InMemoryPlayerCache(seed: cached)
         let vm = DashboardViewModel(provider: MockProvider(error: URLError(.notConnectedToInternet)), cache: cache)
         await vm.load()
-        XCTAssertEqual(vm.players.map(\.id), [99], "Cached players should be shown even when refresh fails")
+        XCTAssertEqual(vm.players.map { $0.id }, ["99-0"], "Cached players should be shown even when refresh fails")
     }
 }
 

@@ -9,7 +9,7 @@ final class PlayerTests: XCTestCase {
             Metric(id: "m3", label: "C", value: "3", percentile: 77, category: .hitting)
         ]
         let player = Player(
-            id: 1, name: "Test", team: "NYY", position: "RF",
+            playerId: 1, name: "Test", team: "NYY", position: "RF",
             handedness: "R/R", imageURL: nil,
             updatedAt: Date(), metrics: metrics, standardStats: [], games: []
         )
@@ -19,7 +19,7 @@ final class PlayerTests: XCTestCase {
     func testShareSummaryIncludesTopSignal() {
         let metric = Metric(id: "m1", label: "xwOBA", value: ".463", percentile: 100, category: .hitting)
         let player = Player(
-            id: 1, name: "Aaron Judge", team: "NYY", position: "RF",
+            playerId: 1, name: "Aaron Judge", team: "NYY", position: "RF",
             handedness: "R/R", imageURL: nil,
             updatedAt: Date(), metrics: [metric], standardStats: [], games: []
         )
@@ -37,7 +37,7 @@ final class PlayerTests: XCTestCase {
             Metric(id: "p2", label: "K%", value: "22", percentile: 30, category: .pitching)
         ]
         let player = Player(
-            id: 1, name: "Two Way", team: "LAA", position: "Two-way",
+            playerId: 1, name: "Two Way", team: "LAA", position: "Two-way",
             handedness: "L/R", imageURL: nil,
             updatedAt: Date(), playerType: "two_way",
             metrics: metrics, standardStats: [], games: []
@@ -71,14 +71,14 @@ final class PlayerTests: XCTestCase {
     }
 
     func testInitialsHandleSuffixes() {
-        let player = Player(id: 1, name: "Bobby Witt Jr.", team: "KC", position: "SS", handedness: "R/R", imageURL: nil, updatedAt: Date(), metrics: [], standardStats: [], games: [])
+        let player = Player(playerId: 1, name: "Bobby Witt Jr.", team: "KC", position: "SS", handedness: "R/R", imageURL: nil, updatedAt: Date(), metrics: [], standardStats: [], games: [])
         XCTAssertEqual(player.initials, "BWJ")
     }
 
     func testWeeklyDeltaSumsRecentGamesOnly() {
         let now = Date()
         let player = Player(
-            id: 1, name: "Test", team: "NYY", position: "RF",
+            playerId: 1, name: "Test", team: "NYY", position: "RF",
             handedness: "R/R", imageURL: nil,
             updatedAt: now, metrics: [], standardStats: [],
             games: [
