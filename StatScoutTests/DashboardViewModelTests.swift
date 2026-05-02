@@ -63,7 +63,7 @@ final class DashboardViewModelTests: XCTestCase {
         await vm.load()
         vm.searchText = "Yankees"
 
-        XCTAssertEqual(vm.filteredPlayers.map { $0.playerId }, [1])
+        XCTAssertEqual(vm.filteredPlayers.map { $0.playerId }, [1], "Should find player when searching for full team name 'Yankees'")
     }
 
     @MainActor
