@@ -499,19 +499,13 @@ def build_snapshot_rows(season: int) -> list[dict[str, Any]]:
         logger.warning("Missing pitcher columns: %s", missing_pitcher)
 
     # Fetch standard stats and build name-keyed lookups
-    bat_std, pitch_std = _fetch_standard_stats(season)
+    # Note: FanGraphs disabled - blocks cloud IPs (403). MLB Stats API could be used instead:
+    # https://statsapi.mlb.com/api/v1/people/{playerId}/stats?stats=season&group=hitting|pitching
+    # For now, we rely on Statcast percentile data only, which is the primary app data source.
+    bat_std, pitch_std = pd.DataFrame(), pd.DataFrame()
     batter_lookup: dict[str, pd.Series] = {}
     pitcher_lookup: dict[str, pd.Series] = {}
-    if not bat_std.empty and "Name" in bat_std.columns:
-        for _, row in bat_std.iterrows():
-            key = _normalize_name(row["Name"])
-            batter_lookup[key] = row
-    if not pitch_std.empty and "Name" in pitch_std.columns:
-        for _, row in pitch_std.iterrows():
-            key = _normalize_name(row["Name"])
-            pitcher_lookup[key] = row
-
-    logger.info("Standard stat lookups: batters=%d, pitchers=%d", len(batter_lookup), len(pitcher_lookup))
+    logger.info("Standard stats disabled - using Statcast data only")
     roster_lookup = _fetch_mlb_roster_lookup(season)
 
     batter_metrics = _all_metric_defs("batter")
@@ -520,40 +514,27 @@ def build_snapshot_rows(season: int) -> list[dict[str, Any]]:
     skipped = 0
     for _, row in batter_rows.iterrows():
         try:
-            merge_player_row(players, row, "batter", batter_metrics, now, season, batter_lookup, roster_lookup)
+            merge_player_row(players, row, "batter", batter_metrics, now, season, None, roster_lookup)
         except Exception:
             skipped += 1
             logger.exception("Failed to process batter row")
 
     for _, row in pitcher_rows.iterrows():
         try:
-            merge_player_row(players, row, "pitcher", pitcher_metrics, now, season, pitcher_lookup, roster_lookup)
+            merge_player_row(players, row, "pitcher", pitcher_metrics, now, season, None, roster_lookup)
         except Exception:
             skipped += 1
             logger.exception("Failed to process pitcher row")
 
-    # For two-way players, try to attach the opposite standard stats if missing
-    for p in players.values():
-        if p.get("player_type") == "two_way":
-            norm = _normalize_name(p["name"])
-            if not p.get("standard_stats"):
-                # Prefer hitter stats for two-way unless they have only pitching metrics
-                if norm in batter_lookup:
-                    p["standard_stats"] = _build_standard_stats(batter_lookup[norm], HITTER_STANDARD_STATS)
-                elif norm in pitcher_lookup:
-                    p["standard_stats"] = _build_standard_stats(pitcher_lookup[norm], PITCHER_STANDARD_STATS)
-
     two_way = sum(1 for p in players.values() if p.get("player_type") == "two_way")
-    with_std = sum(1 for p in players.values() if p.get("standard_stats"))
     logger.info(
-        "Total players for %s: %d (batters: %d, pitchers: %d, two-way: %d, skipped rows: %d, with standard stats: %d)",
+        "Total players for %s: %d (batters: %d, pitchers: %d, two-way: %d, skipped rows: %d)",
         season,
         len(players),
         sum(1 for p in players.values() if p.get("player_type") == "batter"),
         sum(1 for p in players.values() if p.get("player_type") == "pitcher"),
         two_way,
         skipped,
-        with_std,
     )
 
     return list(players.values())
