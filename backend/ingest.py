@@ -47,22 +47,27 @@ def _resolve_season() -> int:
 
 
 BATTER_METRICS = [
+    # Baseball Savant order: expected stats first
     ("xwoba", "xwOBA", "Hitting"),
     ("xba", "xBA", "Hitting"),
     ("xslg", "xSLG", "Hitting"),
     ("xiso", "xISO", "Hitting"),
     ("xobp", "xOBP", "Hitting"),
+    # Quality of contact
+    ("exit_velocity", "EV", "Hitting"),
     ("brl_percent", "Barrel%", "Hitting"),
-    ("exit_velocity", "Avg EV", "Hitting"),
-    ("max_ev", "Max EV", "Hitting"),
     ("hard_hit_percent", "Hard-Hit%", "Hitting"),
-    ("k_percent", "K%", "Hitting"),
-    ("bb_percent", "BB%", "Hitting"),
-    ("whiff_percent", "Whiff%", "Hitting"),
-    ("chase_percent", "Chase%", "Hitting"),
+    ("launch_angle_sweet_spot", "LA Sweet Spot%", "Hitting"),
+    ("max_ev", "Max EV", "Hitting"),
+    # Swing characteristics
     ("bat_speed", "Bat Speed", "Hitting"),
     ("squared_up_rate", "Squared-Up%", "Hitting"),
     ("swing_length", "Swing Length", "Hitting"),
+    # Plate discipline (Savant order: Chase, Whiff, K, BB)
+    ("chase_percent", "Chase%", "Hitting"),
+    ("whiff_percent", "Whiff%", "Hitting"),
+    ("k_percent", "K%", "Hitting"),
+    ("bb_percent", "BB%", "Hitting"),
 ]
 
 RUNNING_METRICS = [
@@ -70,8 +75,9 @@ RUNNING_METRICS = [
 ]
 
 FIELDING_METRICS = [
+    ("oaa", "Range (OAA)", "Fielding"),
+    ("arm_value", "Arm Value", "Fielding"),
     ("arm_strength", "Arm Strength", "Fielding"),
-    ("oaa", "OAA", "Fielding"),
 ]
 
 PITCHER_METRICS = [

@@ -12,7 +12,7 @@ struct SampleData {
             updatedAt: Date(),
             metrics: [
                 Metric(id: "judge-xwoba", label: "xwOBA", value: ".463", percentile: 100, category: .hitting),
-                Metric(id: "judge-ev", label: "Avg EV", value: "96.2", percentile: 100, category: .hitting),
+                Metric(id: "judge-ev", label: "EV", value: "96.2", percentile: 100, category: .hitting),
                 Metric(id: "judge-barrel", label: "Barrel%", value: "26.9%", percentile: 100, category: .hitting),
                 Metric(id: "judge-sprint", label: "Sprint Speed", value: "27.2 ft/s", percentile: 58, category: .running)
             ],
