@@ -14,9 +14,9 @@ enum SavantPalette {
     static let savantNavy   = Color(red: 0.06, green: 0.13, blue: 0.32)
     static let savantRed    = Color(red: 0.78, green: 0.10, blue: 0.13)
     static let linkBlue     = Color(red: 0.00, green: 0.36, blue: 0.69)
-    static let pctlHot      = Color(red: 0.823, green: 0.176, blue: 0.184)
-    static let pctlMid      = Color(red: 0.749, green: 0.749, blue: 0.749)
-    static let pctlCold     = Color(red: 0.212, green: 0.380, blue: 0.678)
+    static let pctlHot      = Color(red: 0.80, green: 0.15, blue: 0.15)
+    static let pctlMid      = Color(red: 0.95, green: 0.95, blue: 0.95)
+    static let pctlCold     = Color(red: 0.15, green: 0.35, blue: 0.70)
     static let up           = Color(red: 0.16, green: 0.55, blue: 0.27)
     static let down         = savantRed
     static let flat         = inkTertiary
@@ -30,9 +30,9 @@ enum SavantPalette {
         }
     }
 
-    private static let hotRGB: (Double, Double, Double) = (0.823, 0.176, 0.184)
-    private static let midRGB: (Double, Double, Double) = (0.749, 0.749, 0.749)
-    private static let coldRGB: (Double, Double, Double) = (0.212, 0.380, 0.678)
+    private static let hotRGB: (Double, Double, Double) = (0.80, 0.15, 0.15)
+    private static let midRGB: (Double, Double, Double) = (0.95, 0.95, 0.95)
+    private static let coldRGB: (Double, Double, Double) = (0.15, 0.35, 0.70)
 
     private static func lerp(_ a: (Double, Double, Double), _ b: (Double, Double, Double), _ t: Double) -> Color {
         let r = a.0 + (b.0 - a.0) * t

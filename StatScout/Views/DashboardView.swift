@@ -12,6 +12,9 @@ struct DashboardView: View {
                     leaderboardSection
                 }
             }
+            .refreshable {
+                await viewModel.load()
+            }
             if viewModel.isLoading && viewModel.players.isEmpty {
                 ProgressView()
                     .scaleEffect(1.5)
@@ -34,6 +37,9 @@ struct DashboardView: View {
                             }
                             .font(SavantType.micro)
                             .foregroundStyle(SavantPalette.inkSecondary)
+                            .padding(.vertical, 8)
+                            .padding(.horizontal, 4)
+                            .contentShape(Rectangle())
                         }
                         if let text = viewModel.freshnessText {
                             Text(text)

@@ -6,6 +6,7 @@ struct PlayerHeadshot: View {
     let url: URL?
     let initials: String
     let size: CGFloat
+    @State private var isLoading = true
 
     var body: some View {
         ZStack {
@@ -16,8 +17,14 @@ struct PlayerHeadshot: View {
                     case .success(let image):
                         image.resizable().scaledToFill()
                             .frame(width: size, height: size)
-                    default:
+                            .onAppear { isLoading = false }
+                    case .failure(_):
                         initialsView
+                            .onAppear { isLoading = false }
+                    case .empty:
+                        shimmerView
+                    @unknown default:
+                        shimmerView
                     }
                 }
             } else {
@@ -34,6 +41,41 @@ struct PlayerHeadshot: View {
         Text(initials)
             .font(.system(size: size * 0.36, weight: .bold))
             .foregroundStyle(SavantPalette.inkTertiary)
+    }
+
+    private var shimmerView: some View {
+        Circle()
+            .fill(SavantPalette.surfaceAlt)
+            .shimmering()
+    }
+}
+
+// MARK: - Shimmer Effect Modifier
+struct ShimmerModifier: ViewModifier {
+    @State private var phase: CGFloat = 0
+
+    func body(content: Content) -> some View {
+        content
+            .overlay(
+                GeometryReader { proxy in
+                    LinearGradient(
+                        gradient: Gradient(colors: [.clear, .white.opacity(0.5), .clear]),
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                    .frame(width: proxy.size.width * 2)
+                    .offset(x: -proxy.size.width + phase * proxy.size.width * 2)
+                    .animation(.linear(duration: 1.5).repeatForever(autoreverses: false), value: phase)
+                }
+            )
+            .mask(content)
+            .onAppear { phase = 1 }
+    }
+}
+
+extension View {
+    func shimmering() -> some View {
+        modifier(ShimmerModifier())
     }
 }
 
@@ -85,42 +127,42 @@ struct MetricBar: View {
                 if showValue && !metric.value.isEmpty {
                     Text(metric.value)
                         .font(SavantType.statMed)
-                        .foregroundStyle(SavantPalette.inkSecondary)
+                        .foregroundStyle(SavantPalette.ink)
+                        .frame(minWidth: 40, alignment: .trailing)
                 }
-
-                Text("\(metric.percentile)")
-                    .font(SavantType.statLarge)
-                    .foregroundStyle(SavantPalette.color(forPercentile: metric.percentile))
-                    .frame(minWidth: 40, alignment: .trailing)
             }
 
             GeometryReader { proxy in
                 let p = max(0, min(100, metric.percentile))
-                let iconSize: CGFloat = 16
-                let trackWidth = proxy.size.width - iconSize
-                let offset = trackWidth * CGFloat(p) / 100.0
-                
-                ZStack(alignment: .leading) {
-                    RoundedRectangle(cornerRadius: 3)
-                        .fill(SavantPalette.hairline)
-                        .frame(height: 8)
-                        .padding(.horizontal, iconSize / 2)
+                let circleSize: CGFloat = 28
+                let trackWidth = proxy.size.width - circleSize
+                // Clamp offset so circle stays fully within bounds at 0% and 100%
+                let offset = (circleSize / 2) + (trackWidth * CGFloat(p) / 100.0)
 
-                    RoundedRectangle(cornerRadius: 3)
+                ZStack(alignment: .leading) {
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(SavantPalette.hairline)
+                        .frame(height: 12)
+
+                    RoundedRectangle(cornerRadius: 4)
                         .fill(SavantPalette.color(forPercentile: p))
-                        .frame(width: offset, height: 8)
-                        .padding(.leading, iconSize / 2)
-                        
-                    Image(systemName: "baseball.fill")
-                        .resizable()
-                        .frame(width: iconSize, height: iconSize)
-                        .foregroundStyle(SavantPalette.color(forPercentile: p))
-                        .background(Circle().fill(.white))
-                        .offset(x: offset)
+                        .frame(width: offset, height: 12)
+
+                    ZStack {
+                        Circle()
+                            .fill(SavantPalette.color(forPercentile: p))
+                            .frame(width: circleSize, height: circleSize)
+
+                        Text("\(p)")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundStyle(p < 25 ? SavantPalette.ink : .white)
+                    }
+                    .position(x: offset, y: 6)
                 }
             }
-            .frame(height: 16)
-            .accessibilityHidden(true)
+            .frame(height: 28)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("\(metric.label): \(metric.value), \(p)th percentile")
         }
     }
 }
@@ -298,6 +340,9 @@ struct LeaderboardTableRow: View {
         .background(rank % 2 == 0 ? SavantPalette.surface : SavantPalette.surfaceAlt)
         .contentShape(Rectangle())
         .overlay(Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline), alignment: .bottom)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(rank), \(player.name), \(player.team), \(displayPercentile)th percentile")
+        .accessibilityHint("Double-tap to view player profile")
     }
 }
 
