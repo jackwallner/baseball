@@ -87,21 +87,38 @@ FIELDING_METRICS = [
     ("arm_strength", "Arm Strength", "Fielding"),
 ]
 
+# Pitcher Run Value metrics (runs above/below average by pitch type)
+PITCHER_RUN_VALUE_METRICS = [
+    ("pitching_run_value", "Pitching Run Value", "Pitching"),
+    ("fastball_run_value", "Fastball Run Value", "Pitching"),
+    ("breaking_run_value", "Breaking Run Value", "Pitching"),
+    ("offspeed_run_value", "Offspeed Run Value", "Pitching"),
+]
+
 PITCHER_METRICS = [
+    # Run values first (like Baseball Savant)
+    ("pitching_run_value", "Pitching Run Value", "Pitching"),
+    ("fastball_run_value", "Fastball Run Value", "Pitching"),
+    ("breaking_run_value", "Breaking Run Value", "Pitching"),
+    ("offspeed_run_value", "Offspeed Run Value", "Pitching"),
+    # Expected stats
     ("xera", "xERA", "Pitching"),
     ("xwoba", "xwOBA", "Pitching"),
     ("xba", "xBA", "Pitching"),
     ("xslg", "xSLG", "Pitching"),
     ("xiso", "xISO", "Pitching"),
     ("xobp", "xOBP", "Pitching"),
+    # Quality of contact against
     ("brl_percent", "Barrel%", "Pitching"),
     ("exit_velocity", "Avg EV Against", "Pitching"),
-    ("max_ev", "Max EV Against", "Pitching"),
     ("hard_hit_percent", "Hard-Hit%", "Pitching"),
+    ("max_ev", "Max EV Against", "Pitching"),
+    # Plate discipline
     ("k_percent", "K%", "Pitching"),
     ("bb_percent", "BB%", "Pitching"),
     ("whiff_percent", "Whiff%", "Pitching"),
     ("chase_percent", "Chase%", "Pitching"),
+    # Pitch characteristics
     ("fb_velocity", "Fastball Velo", "Pitching"),
     ("fb_spin", "Fastball Spin", "Pitching"),
     ("curve_spin", "Curve Spin", "Pitching"),
