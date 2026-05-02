@@ -167,7 +167,7 @@ final class DashboardViewModel {
         } catch is DecodingError {
             errorMessage = "Data format changed — app may need an update."
             lastFetchFailed = true
-        } catch let urlError as URLError {
+        } catch _ as URLError {
             errorMessage = players.isEmpty ? "Can't reach data feed. Check your connection." : "Showing saved data. Pull to refresh when your connection improves."
             lastFetchFailed = true
         } catch {

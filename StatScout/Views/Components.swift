@@ -401,6 +401,25 @@ struct LeaderboardTableRow: View {
     }
 }
 
+// MARK: - Int Ordinal Extension
+
+extension Int {
+    var ordinal: String {
+        let suffix: String
+        switch self % 100 {
+        case 11...13: suffix = "th"
+        default:
+            switch self % 10 {
+            case 1: suffix = "st"
+            case 2: suffix = "nd"
+            case 3: suffix = "rd"
+            default: suffix = "th"
+            }
+        }
+        return "\(self)\(suffix)"
+    }
+}
+
 // MARK: - Extensions for Array chunking
 
 extension Array {
