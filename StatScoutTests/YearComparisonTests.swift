@@ -1,0 +1,72 @@
+import XCTest
+@testable import Baseball_Savvy_StatScout
+
+final class YearComparisonTests: XCTestCase {
+    func testPlayerHistorySortedBySeason() {
+        let players = [
+            Player(playerId: 1, name: "Test", team: "NYY", position: "RF", handedness: "R/R", imageURL: nil, updatedAt: Date(), season: 2024, metrics: [], standardStats: [], games: []),
+            Player(playerId: 1, name: "Test", team: "NYY", position: "RF", handedness: "R/R", imageURL: nil, updatedAt: Date(), season: 2025, metrics: [], standardStats: [], games: []),
+            Player(playerId: 1, name: "Test", team: "NYY", position: "RF", handedness: "R/R", imageURL: nil, updatedAt: Date(), season: 2023, metrics: [], standardStats: [], games: [])
+        ]
+        let sorted = players.sorted {
+            guard let s1 = $0.season, let s2 = $1.season else { return false }
+            return s1 > s2
+        }
+        XCTAssertEqual(sorted.map { $0.season }, [2025, 2024, 2023])
+    }
+
+    func testUniqueYearsExtracted() {
+        let players = [
+            Player(playerId: 1, name: "Test", team: "NYY", position: "RF", handedness: "R/R", imageURL: nil, updatedAt: Date(), season: 2024, metrics: [], standardStats: [], games: []),
+            Player(playerId: 1, name: "Test", team: "NYY", position: "RF", handedness: "R/R", imageURL: nil, updatedAt: Date(), season: 2024, metrics: [], standardStats: [], games: []),
+            Player(playerId: 1, name: "Test", team: "NYY", position: "RF", handedness: "R/R", imageURL: nil, updatedAt: Date(), season: 2025, metrics: [], standardStats: [], games: [])
+        ]
+        let years = players.compactMap { $0.season }.uniqued().sorted(by: >)
+        XCTAssertEqual(years, [2025, 2024])
+    }
+
+    func testPercentileChangeCalculation() {
+        let p1 = Player(playerId: 1, name: "Test", team: "NYY", position: "RF", handedness: "R/R", imageURL: nil, updatedAt: Date(), season: 2025, metrics: [
+            Metric(id: "m1", label: "xwOBA", value: ".400", percentile: 85, category: .hitting)
+        ], standardStats: [], games: [])
+        let p2 = Player(playerId: 1, name: "Test", team: "NYY", position: "RF", handedness: "R/R", imageURL: nil, updatedAt: Date(), season: 2024, metrics: [
+            Metric(id: "m1", label: "xwOBA", value: ".380", percentile: 75, category: .hitting)
+        ], standardStats: [], games: [])
+
+        let change = p1.overallPercentile - p2.overallPercentile
+        XCTAssertEqual(change, 10)
+    }
+
+    func testMetricComparisonLogic() {
+        let metrics1 = [
+            Metric(id: "m1", label: "xwOBA", value: ".400", percentile: 85, category: .hitting),
+            Metric(id: "m2", label: "xSLG", value: ".500", percentile: 70, category: .hitting)
+        ]
+        let metrics2 = [
+            Metric(id: "m1", label: "xwOBA", value: ".380", percentile: 75, category: .hitting),
+            Metric(id: "m2", label: "xSLG", value: ".520", percentile: 80, category: .hitting)
+        ]
+
+        let dict1 = Dictionary(grouping: metrics1) { $0.label }
+        let dict2 = Dictionary(grouping: metrics2) { $0.label }
+
+        let allLabels = Set(dict1.keys).union(dict2.keys)
+        var changes: [String: Int] = [:]
+
+        for label in allLabels {
+            if let m1 = dict1[label]?.first, let m2 = dict2[label]?.first {
+                changes[label] = m1.percentile - m2.percentile
+            }
+        }
+
+        XCTAssertEqual(changes["xwOBA"], 10)
+        XCTAssertEqual(changes["xSLG"], -10)
+    }
+}
+
+private extension Sequence where Element: Hashable {
+    func uniqued() -> [Element] {
+        var seen = Set<Element>()
+        return filter { seen.insert($0).inserted }
+    }
+}
