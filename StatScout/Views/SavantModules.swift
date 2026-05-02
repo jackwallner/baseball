@@ -132,7 +132,11 @@ struct SavantTabs: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 0) {
                 ForEach(tabs, id: \.self) { tab in
-                    Button(action: { selected = tab }) {
+                    Button(action: {
+                        selected = tab
+                        let generator = UIImpactFeedbackGenerator(style: .light)
+                        generator.impactOccurred()
+                    }) {
                         VStack(spacing: 0) {
                             Text(tab.uppercased())
                                 .font(SavantType.smallBold)

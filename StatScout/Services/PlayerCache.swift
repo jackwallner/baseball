@@ -9,13 +9,13 @@ struct DiskPlayerCache: PlayerCaching {
     private let fileURL: URL
     private let maxAge: TimeInterval
 
-    init(fileManager: FileManager = .default, maxAge: TimeInterval = 6 * 60 * 60) {
+    init(fileManager: FileManager = .default, maxAge: TimeInterval = 48 * 60 * 60) {
         let directory = fileManager.urls(for: .cachesDirectory, in: .userDomainMask).first ?? fileManager.temporaryDirectory
         self.fileURL = directory.appending(path: "players-cache.json")
         self.maxAge = maxAge
     }
 
-    init(fileURL: URL, maxAge: TimeInterval = 6 * 60 * 60) {
+    init(fileURL: URL, maxAge: TimeInterval = 48 * 60 * 60) {
         self.fileURL = fileURL
         self.maxAge = maxAge
     }

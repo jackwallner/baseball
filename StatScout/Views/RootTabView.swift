@@ -47,6 +47,7 @@ struct RootTabView: View {
                         }
                     }
             }
+            .presentationDragIndicator(.visible)
         }
     }
 
@@ -60,7 +61,7 @@ struct RootTabView: View {
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button(action: { showingAbout = true }) {
-                            Image(systemName: "info.circle")
+                            Image(systemName: "gear")
                         }
                         .tint(.white)
                     }
@@ -78,7 +79,7 @@ struct RootTabView: View {
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button(action: { showingAbout = true }) {
-                            Image(systemName: "info.circle")
+                            Image(systemName: "gear")
                         }
                         .tint(.white)
                     }
@@ -96,7 +97,7 @@ struct RootTabView: View {
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button(action: { showingAbout = true }) {
-                            Image(systemName: "info.circle")
+                            Image(systemName: "gear")
                         }
                         .tint(.white)
                     }

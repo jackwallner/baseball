@@ -6,7 +6,7 @@ struct PlayerProfileView: View {
     @State private var showPercentileInfo = false
 
     private var seasonLabel: String {
-        player.season.map(String.init) ?? "Season"
+        player.season.map(String.init) ?? Calendar.current.component(.year, from: Date()).description
     }
 
     private var groupedMetrics: [(category: MetricCategory, metrics: [Metric])] {
@@ -74,9 +74,15 @@ struct PlayerProfileView: View {
         VStack(spacing: 0) {
             SavantSectionBar(title: "YEAR OVER YEAR")
 
-            ForEach(Array(history.sorted { ($0.season ?? 0) > ($1.season ?? 0) }.enumerated()), id: \.element.id) { index, pastPlayer in
+            ForEach(Array(history.sorted {
+                guard let s1 = $0.season, let s2 = $1.season else {
+                    if $0.season == nil && $1.season == nil { return false }
+                    return $0.season != nil
+                }
+                return s1 > s2
+            }.enumerated()), id: \.element.id) { index, pastPlayer in
                 HStack {
-                    Text(pastPlayer.season.map(String.init) ?? "N/A")
+                    Text(pastPlayer.season.map(String.init) ?? "—")
                         .font(SavantType.bodyBold)
                         .foregroundStyle(SavantPalette.ink)
                         .frame(width: 60, alignment: .leading)

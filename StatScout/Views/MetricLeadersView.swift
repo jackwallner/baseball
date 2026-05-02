@@ -98,10 +98,11 @@ struct MetricLeadersView: View {
                         }
                         .buttonStyle(.plain)
                     } else {
-                        Text("—")
-                            .font(SavantType.small)
+                        Text("No qualified players")
+                            .font(SavantType.micro)
                             .foregroundStyle(SavantPalette.inkTertiary)
                             .frame(maxWidth: .infinity, alignment: .leading)
+                            .lineLimit(1)
                     }
 
                     if let worst = item.worst {
@@ -126,10 +127,11 @@ struct MetricLeadersView: View {
                         }
                         .buttonStyle(.plain)
                     } else {
-                        Text("—")
-                            .font(SavantType.small)
+                        Text("No qualified players")
+                            .font(SavantType.micro)
                             .foregroundStyle(SavantPalette.inkTertiary)
                             .frame(maxWidth: .infinity, alignment: .leading)
+                            .lineLimit(1)
                     }
                 }
                 .frame(height: SavantGeo.rowHeight)

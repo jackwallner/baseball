@@ -30,15 +30,19 @@ struct DashboardView: View {
                 title: "LEADERBOARD",
                 trailing: AnyView(
                     HStack(spacing: 12) {
-                        Button(action: { viewModel.sortDescending.toggle() }) {
+                        Button(action: {
+                            viewModel.sortDescending.toggle()
+                            let generator = UIImpactFeedbackGenerator(style: .light)
+                            generator.impactOccurred()
+                        }) {
                             HStack(spacing: 4) {
                                 Text("Sort")
                                 Image(systemName: viewModel.sortDescending ? "arrow.down" : "arrow.up")
                             }
                             .font(SavantType.micro)
                             .foregroundStyle(SavantPalette.inkSecondary)
-                            .padding(.vertical, 8)
-                            .padding(.horizontal, 4)
+                            .padding(.vertical, 12)
+                            .padding(.horizontal, 8)
                             .contentShape(Rectangle())
                         }
                         if let text = viewModel.freshnessText {
@@ -62,6 +66,7 @@ struct DashboardView: View {
                     Text("Try a different search term.")
                 }
                 .padding(.vertical, 24)
+                .frame(minHeight: 200)
             } else if let errorMessage = viewModel.errorMessage, viewModel.leaderboard.isEmpty {
                 ContentUnavailableView {
                     Label("Data Error", systemImage: "exclamationmark.triangle")
@@ -75,6 +80,7 @@ struct DashboardView: View {
                     .tint(SavantPalette.inkTertiary)
                 }
                 .padding(.vertical, 24)
+                .frame(minHeight: 200)
             } else if viewModel.leaderboard.isEmpty {
                 ContentUnavailableView {
                     Label("No players yet", systemImage: "baseball")
@@ -82,6 +88,7 @@ struct DashboardView: View {
                     Text("Check back after the nightly update.")
                 }
                 .padding(.vertical, 24)
+                .frame(minHeight: 200)
             } else {
                 LeaderboardTableHeader()
                 ForEach(Array(viewModel.leaderboard.enumerated()), id: \.element.id) { index, player in

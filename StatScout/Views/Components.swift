@@ -83,6 +83,16 @@ struct OverallPercentileBadge: View {
     let percentile: Int
     var size: CGFloat = 64
 
+    private var tierDescription: String {
+        switch percentile {
+        case 90...100: return "Elite"
+        case 75..<90: return "Excellent"
+        case 50..<75: return "Above Average"
+        case 25..<50: return "Below Average"
+        default: return "Poor"
+        }
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             Text("\(percentile)")
@@ -96,7 +106,7 @@ struct OverallPercentileBadge: View {
         .frame(width: size, height: size)
         .background(SavantPalette.color(forPercentile: percentile))
         .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusBadge))
-        .accessibilityLabel("Overall \(percentile)th percentile")
+        .accessibilityLabel("Overall \(percentile)th percentile, \(tierDescription)")
     }
 }
 
@@ -114,6 +124,11 @@ struct TeamColorDot: View {
 struct MetricBar: View {
     let metric: Metric
     var showValue: Bool = true
+
+    private var accessibilityLabel: String {
+        let valueText = metric.value.isEmpty ? "\(metric.percentile)th percentile" : "\(metric.value), \(metric.percentile)th percentile"
+        return "\(metric.label): \(valueText)"
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -162,7 +177,7 @@ struct MetricBar: View {
             }
             .frame(height: 28)
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel("\(metric.label): \(metric.value), \(percentileValue)th percentile")
+            .accessibilityLabel(accessibilityLabel)
         }
     }
 }
@@ -176,7 +191,7 @@ struct SearchField: View {
         HStack(spacing: 10) {
             Image(systemName: "magnifyingglass")
                 .foregroundStyle(SavantPalette.inkTertiary)
-            TextField("Search players or teams (e.g. NYY, LAD)", text: $text)
+            TextField("Search players or teams", text: $text)
                 .textInputAutocapitalization(.never)
                 .foregroundStyle(SavantPalette.ink)
         }

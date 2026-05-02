@@ -116,7 +116,15 @@ final class DashboardViewModel {
             var histories: [Int: [Player]] = [:]
             
             for (playerId, history) in grouped {
-                let sortedHistory = history.sorted { ($0.season ?? 0) > ($1.season ?? 0) }
+                // Sort by season descending, with nil seasons at the end
+                let sortedHistory = history.sorted {
+                    guard let s1 = $0.season, let s2 = $1.season else {
+                        // If both nil, keep original order; if one nil, put it last
+                        if $0.season == nil && $1.season == nil { return false }
+                        return $0.season != nil // non-nil comes first
+                    }
+                    return s1 > s2
+                }
                 histories[playerId] = sortedHistory
                 if let latest = sortedHistory.first {
                     latestPlayers.append(latest)

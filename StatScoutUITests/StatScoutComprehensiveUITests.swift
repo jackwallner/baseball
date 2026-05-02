@@ -15,7 +15,7 @@ final class StatScoutComprehensiveUITests: XCTestCase {
 
     func testDashboardSearchField() throws {
         // Test search field exists and is tappable
-        let searchField = app.searchFields["Search players or teams (e.g. NYY, LAD)"]
+        let searchField = app.searchFields["Search players or teams"]
         XCTAssertTrue(searchField.exists, "Search field should exist")
         searchField.tap()
         searchField.typeText("Judge")
@@ -63,7 +63,7 @@ final class StatScoutComprehensiveUITests: XCTestCase {
     }
 
     func testDashboardEmptySearchState() throws {
-        let searchField = app.searchFields["Search players or teams (e.g. NYY, LAD)"]
+        let searchField = app.searchFields["Search players or teams"]
         searchField.tap()
         searchField.typeText("xyznonexistent")
 
@@ -292,7 +292,7 @@ final class StatScoutComprehensiveUITests: XCTestCase {
 
     func testVoiceOverLabels() throws {
         // Check that key elements have accessibility labels
-        let searchField = app.searchFields["Search players or teams (e.g. NYY, LAD)"]
+        let searchField = app.searchFields["Search players or teams"]
         XCTAssertTrue(searchField.exists, "Search field should have accessibility label")
 
         // Verify buttons are accessible
