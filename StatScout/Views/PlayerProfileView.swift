@@ -4,6 +4,12 @@ struct PlayerProfileView: View {
     let player: Player
     let history: [Player]
     @State private var showPercentileInfo = false
+    @State private var selectedTab: PlayerStatTab = .statcast
+
+    enum PlayerStatTab: String, CaseIterable {
+        case statcast = "Percentiles"
+        case standard = "Standard Stats"
+    }
 
     private var seasonLabel: String {
         player.season.map(String.init) ?? Calendar.current.component(.year, from: Date()).description
@@ -22,14 +28,19 @@ struct PlayerProfileView: View {
             VStack(spacing: 0) {
                 PlayerIdentityStrip(player: player)
 
-                statcastContent
+                tabSelector
+                    .padding(.horizontal, 12)
+                    .padding(.top, 12)
+
+                switch selectedTab {
+                case .statcast:
+                    statcastContent
+                case .standard:
+                    standardContent
+                }
                 
                 if history.count > 1 {
                     historyContent
-                }
-                
-                if !(player.standardStats ?? []).isEmpty {
-                    standardContent
                 }
             }
         }
@@ -44,6 +55,52 @@ struct PlayerProfileView: View {
         .sheet(isPresented: $showPercentileInfo) {
             PercentileInfoSheet()
         }
+    }
+
+    private var tabSelector: some View {
+        HStack(spacing: 8) {
+            statcastTabButton
+            standardTabButton
+        }
+    }
+
+    private var statcastTabButton: some View {
+        let isSelected = selectedTab == .statcast
+        return Button(action: {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                selectedTab = .statcast
+            }
+        }) {
+            Text(PlayerStatTab.statcast.rawValue)
+                .font(SavantType.bodyBold)
+                .foregroundStyle(isSelected ? .white : SavantPalette.ink)
+                .frame(maxWidth: .infinity)
+                .frame(height: 44)
+                .background(isSelected ? SavantPalette.savantRed : SavantPalette.surface)
+                .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusButton))
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var standardTabButton: some View {
+        let isSelected = selectedTab == .standard
+        let hasStats = !(player.standardStats ?? []).isEmpty
+        return Button(action: {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                selectedTab = .standard
+            }
+        }) {
+            Text(PlayerStatTab.standard.rawValue)
+                .font(SavantType.bodyBold)
+                .foregroundStyle(isSelected ? .white : SavantPalette.ink)
+                .frame(maxWidth: .infinity)
+                .frame(height: 44)
+                .background(isSelected ? SavantPalette.savantRed : SavantPalette.surface)
+                .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusButton))
+        }
+        .buttonStyle(.plain)
+        .disabled(!hasStats)
+        .opacity(hasStats ? 1 : 0.5)
     }
 
     private var statcastContent: some View {

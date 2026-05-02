@@ -72,13 +72,6 @@ BATTER_METRICS = [
 
 RUNNING_METRICS = [
     ("sprint_speed", "Sprint Speed", "Running"),
-    ("baserunning_run_value", "Baserunning Run Value", "Running"),
-]
-
-# Run Value metrics (runs above/below average, not percentiles)
-RUN_VALUE_METRICS = [
-    ("batting_run_value", "Batting Run Value", "Hitting"),
-    ("fielding_run_value", "Fielding Run Value", "Fielding"),
 ]
 
 FIELDING_METRICS = [
@@ -87,20 +80,7 @@ FIELDING_METRICS = [
     ("arm_strength", "Arm Strength", "Fielding"),
 ]
 
-# Pitcher Run Value metrics (runs above/below average by pitch type)
-PITCHER_RUN_VALUE_METRICS = [
-    ("pitching_run_value", "Pitching Run Value", "Pitching"),
-    ("fastball_run_value", "Fastball Run Value", "Pitching"),
-    ("breaking_run_value", "Breaking Run Value", "Pitching"),
-    ("offspeed_run_value", "Offspeed Run Value", "Pitching"),
-]
-
 PITCHER_METRICS = [
-    # Run values first (like Baseball Savant)
-    ("pitching_run_value", "Pitching Run Value", "Pitching"),
-    ("fastball_run_value", "Fastball Run Value", "Pitching"),
-    ("breaking_run_value", "Breaking Run Value", "Pitching"),
-    ("offspeed_run_value", "Offspeed Run Value", "Pitching"),
     # Expected stats
     ("xera", "xERA", "Pitching"),
     ("xwoba", "xwOBA", "Pitching"),
@@ -168,7 +148,7 @@ PITCHER_STANDARD_STATS = [
 
 def _all_metric_defs(player_type: str) -> list[tuple[str, str, str]]:
     if player_type == "batter":
-        return BATTER_METRICS + RUN_VALUE_METRICS + RUNNING_METRICS + FIELDING_METRICS
+        return BATTER_METRICS + RUNNING_METRICS + FIELDING_METRICS
     return PITCHER_METRICS
 
 
