@@ -72,6 +72,13 @@ BATTER_METRICS = [
 
 RUNNING_METRICS = [
     ("sprint_speed", "Sprint Speed", "Running"),
+    ("baserunning_run_value", "Baserunning Run Value", "Running"),
+]
+
+# Run Value metrics (runs above/below average, not percentiles)
+RUN_VALUE_METRICS = [
+    ("batting_run_value", "Batting Run Value", "Hitting"),
+    ("fielding_run_value", "Fielding Run Value", "Fielding"),
 ]
 
 FIELDING_METRICS = [
