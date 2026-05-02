@@ -14,7 +14,7 @@ jobs:
     permissions:
       contents: read
       issues: write
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -32,7 +32,7 @@ jobs:
       - name: Run tests
         run: PYTHONPATH=backend python -m pytest backend/tests
 
-      - name: Run ingestion
+      - name: Run ingestion (with actual values)
         shell: bash
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -40,7 +40,7 @@ jobs:
           STATCAST_SEASON: ${{ vars.STATCAST_SEASON || '2026' }}
         run: |
           set -o pipefail
-          python backend/ingest.py 2>&1 | tee ingestion.log
+          python backend/ingest_v2.py 2>&1 | tee ingestion.log
 
       - name: Upload artifacts on failure
         if: failure()
