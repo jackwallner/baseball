@@ -91,14 +91,6 @@ def test_resolve_season_invalid_input_falls_back():
         assert ingest._resolve_season() == ingest._default_season()
 
 
-def test_fetch_standard_stats_uses_qualifying_thresholds():
-    with patch("ingest.batting_stats", return_value=pd.DataFrame()) as bat_mock:
-        with patch("ingest.pitching_stats", return_value=pd.DataFrame()) as pit_mock:
-            ingest._fetch_standard_stats(2026)
-    bat_mock.assert_called_once_with(2026, qual=100)
-    pit_mock.assert_called_once_with(2026, qual=10)
-
-
 def test_merge_player_row_two_way():
     row = pd.Series(
         {
@@ -130,11 +122,12 @@ def test_safe_player_id_nan():
 def test_build_snapshot_rows_handles_empty_dataframe():
     with patch("ingest.statcast_batter_percentile_ranks", return_value=pd.DataFrame()):
         with patch("ingest.statcast_pitcher_percentile_ranks", return_value=pd.DataFrame()):
-            with patch("ingest._fetch_standard_stats", return_value=(pd.DataFrame(), pd.DataFrame())):
-                with patch.dict(os.environ, {"SUPABASE_URL": "https://test.supabase.co", "SUPABASE_SERVICE_ROLE_KEY": "test-key"}):
-                    with patch("ingest.create_client"):
-                        # Empty dataframes now log error and continue, not exit
-                        ingest.main()
+            with patch("ingest._fetch_mlb_roster_lookup", return_value={}):
+                with patch("ingest._fetch_mlb_standard_stats", return_value={}):
+                    with patch.dict(os.environ, {"SUPABASE_URL": "https://test.supabase.co", "SUPABASE_SERVICE_ROLE_KEY": "test-key"}):
+                        with patch("ingest.create_client"):
+                            # Empty dataframes now log error and continue, not exit
+                            ingest.main()
 
 
 def test_batching():

@@ -132,12 +132,12 @@ struct MetricBar: View {
                 }
             }
 
+            let percentileValue = max(0, min(100, metric.percentile))
             GeometryReader { proxy in
-                let p = max(0, min(100, metric.percentile))
                 let circleSize: CGFloat = 28
                 let trackWidth = proxy.size.width - circleSize
                 // Clamp offset so circle stays fully within bounds at 0% and 100%
-                let offset = (circleSize / 2) + (trackWidth * CGFloat(p) / 100.0)
+                let offset = (circleSize / 2) + (trackWidth * CGFloat(percentileValue) / 100.0)
 
                 ZStack(alignment: .leading) {
                     RoundedRectangle(cornerRadius: 4)
@@ -145,24 +145,24 @@ struct MetricBar: View {
                         .frame(height: 12)
 
                     RoundedRectangle(cornerRadius: 4)
-                        .fill(SavantPalette.color(forPercentile: p))
+                        .fill(SavantPalette.color(forPercentile: percentileValue))
                         .frame(width: offset, height: 12)
 
                     ZStack {
                         Circle()
-                            .fill(SavantPalette.color(forPercentile: p))
+                            .fill(SavantPalette.color(forPercentile: percentileValue))
                             .frame(width: circleSize, height: circleSize)
 
-                        Text("\(p)")
+                        Text("\(percentileValue)")
                             .font(.system(size: 11, weight: .bold))
-                            .foregroundStyle(p < 25 ? SavantPalette.ink : .white)
+                            .foregroundStyle(percentileValue < 25 ? SavantPalette.ink : .white)
                     }
                     .position(x: offset, y: 6)
                 }
             }
             .frame(height: 28)
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel("\(metric.label): \(metric.value), \(p)th percentile")
+            .accessibilityLabel("\(metric.label): \(metric.value), \(percentileValue)th percentile")
         }
     }
 }

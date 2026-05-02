@@ -345,25 +345,175 @@ def _build_standard_stats(row: pd.Series, stat_defs: list[tuple[str, str]]) -> l
     return stats
 
 
-def _fetch_standard_stats(season: int) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Fetch FanGraphs standard stats for hitters and pitchers."""
-    logger.info("Fetching standard batting stats for season %s", season)
-    try:
-        bat = batting_stats(season, qual=100)
-        logger.info("Standard batting rows: %d", len(bat))
-    except Exception:
-        logger.exception("Failed to fetch standard batting stats")
-        bat = pd.DataFrame()
+def _fetch_mlb_standard_stats(player_ids: list[int], season: int) -> dict[int, dict[str, Any]]:
+    """Fetch traditional stats from MLB Stats API for a list of player IDs.
+    
+    Returns a dict mapping player_id to their stats dict with keys like:
+    - For hitters: avg, obp, slg, ops, hr, rbi, r, h, doubles, triples, bb, so, sb, cs, pa, ab
+    - For pitchers: era, whip, wins, losses, saves, ip, h, r, er, hr, bb, so, k9, bb9, kbb, qs, g, gs
+    """
+    stats_by_player: dict[int, dict[str, Any]] = {}
+    
+    # MLB Stats API can handle multiple player IDs in one request
+    # Split into batches of 50 to avoid URL length issues
+    batch_size = 50
+    for i in range(0, len(player_ids), batch_size):
+        batch = player_ids[i:i + batch_size]
+        ids_param = ",".join(str(pid) for pid in batch)
+        
+        try:
+            # Fetch hitting stats
+            hit_url = f"https://statsapi.mlb.com/api/v1/people"
+            hit_params = {
+                "personIds": ids_param,
+                "hydrate": f"stats(type=season,season={season},group=hitting)",
+            }
+            hit_resp = requests.get(hit_url, params=hit_params, timeout=30)
+            hit_resp.raise_for_status()
+            hit_data = hit_resp.json()
+            
+            for person in hit_data.get("people", []):
+                pid = person.get("id")
+                if not pid:
+                    continue
+                
+                # Extract hitting stats
+                stats_list = person.get("stats", [])
+                for stat_group in stats_list:
+                    if stat_group.get("group") == "hitting":
+                        for split in stat_group.get("splits", []):
+                            stat = split.get("stat", {})
+                            if stat:
+                                stats_by_player[pid] = {
+                                    "avg": stat.get("avg", ""),
+                                    "obp": stat.get("obp", ""),
+                                    "slg": stat.get("slg", ""),
+                                    "ops": stat.get("ops", ""),
+                                    "hr": stat.get("homeRuns", 0),
+                                    "rbi": stat.get("rbi", 0),
+                                    "r": stat.get("runs", 0),
+                                    "h": stat.get("hits", 0),
+                                    "doubles": stat.get("doubles", 0),
+                                    "triples": stat.get("triples", 0),
+                                    "bb": stat.get("baseOnBalls", 0),
+                                    "so": stat.get("strikeOuts", 0),
+                                    "sb": stat.get("stolenBases", 0),
+                                    "cs": stat.get("caughtStealing", 0),
+                                    "pa": stat.get("plateAppearances", 0),
+                                    "ab": stat.get("atBats", 0),
+                                    "player_type": "batter",
+                                }
+            
+            # Fetch pitching stats
+            pitch_url = f"https://statsapi.mlb.com/api/v1/people"
+            pitch_params = {
+                "personIds": ids_param,
+                "hydrate": f"stats(type=season,season={season},group=pitching)",
+            }
+            pitch_resp = requests.get(pitch_url, params=pitch_params, timeout=30)
+            pitch_resp.raise_for_status()
+            pitch_data = pitch_resp.json()
+            
+            for person in pitch_data.get("people", []):
+                pid = person.get("id")
+                if not pid:
+                    continue
+                
+                # Extract pitching stats
+                stats_list = person.get("stats", [])
+                for stat_group in stats_list:
+                    if stat_group.get("group") == "pitching":
+                        for split in stat_group.get("splits", []):
+                            stat = split.get("stat", {})
+                            if stat:
+                                # If player already has hitting stats, they're two-way
+                                existing = stats_by_player.get(pid, {})
+                                existing.update({
+                                    "era": stat.get("era", ""),
+                                    "whip": stat.get("whip", ""),
+                                    "wins": stat.get("wins", 0),
+                                    "losses": stat.get("losses", 0),
+                                    "saves": stat.get("saves", 0),
+                                    "ip": stat.get("inningsPitched", ""),
+                                    "h": stat.get("hits", 0),
+                                    "r": stat.get("runs", 0),
+                                    "er": stat.get("earnedRuns", 0),
+                                    "hr": stat.get("homeRuns", 0),
+                                    "bb": stat.get("baseOnBalls", 0),
+                                    "so": stat.get("strikeOuts", 0),
+                                    "k9": stat.get("strikeoutsPer9Inn", ""),
+                                    "bb9": stat.get("walksPer9Inn", ""),
+                                    "kbb": stat.get("strikeoutWalkRatio", ""),
+                                    "qs": stat.get("qualityStarts", 0),
+                                    "g": stat.get("gamesPlayed", 0),
+                                    "gs": stat.get("gamesStarted", 0),
+                                    "player_type": "two_way" if existing.get("player_type") == "batter" else "pitcher",
+                                })
+                                stats_by_player[pid] = existing
+                                
+        except Exception:
+            logger.exception("Failed to fetch MLB stats for batch %d", i // batch_size)
+            continue
+    
+    logger.info("Fetched MLB standard stats for %d players", len(stats_by_player))
+    return stats_by_player
 
-    logger.info("Fetching standard pitching stats for season %s", season)
-    try:
-        pitch = pitching_stats(season, qual=10)
-        logger.info("Standard pitching rows: %d", len(pitch))
-    except Exception:
-        logger.exception("Failed to fetch standard pitching stats")
-        pitch = pd.DataFrame()
 
-    return bat, pitch
+def _build_standard_stats_from_mlb(stats: dict[str, Any]) -> list[dict[str, str]]:
+    """Convert MLB Stats API data to standard_stats JSON format."""
+    result: list[dict[str, str]] = []
+    
+    # Hitting stats
+    if stats.get("player_type") in ("batter", "two_way"):
+        hitters = [
+            ("avg", "AVG"), ("obp", "OBP"), ("slg", "SLG"), ("ops", "OPS"),
+            ("hr", "HR"), ("rbi", "RBI"), ("r", "R"), ("h", "H"),
+            ("doubles", "2B"), ("triples", "3B"), ("bb", "BB"), ("so", "SO"),
+            ("sb", "SB"), ("cs", "CS"), ("pa", "PA"), ("ab", "AB"),
+        ]
+        for key, label in hitters:
+            val = stats.get(key)
+            if val is not None and val != "":
+                # Format decimals properly
+                if key in ("avg", "obp", "slg", "ops") and val != "":
+                    try:
+                        val_str = f"{float(val):.3f}"
+                    except (ValueError, TypeError):
+                        val_str = str(val)
+                else:
+                    val_str = str(int(val)) if isinstance(val, (int, float)) and float(val).is_integer() else str(val)
+                result.append({"id": f"std-{label}", "label": label, "value": val_str})
+    
+    # Pitching stats
+    if stats.get("player_type") in ("pitcher", "two_way"):
+        pitchers = [
+            ("era", "ERA"), ("whip", "WHIP"), ("wins", "W"), ("losses", "L"), ("saves", "SV"),
+            ("ip", "IP"), ("h", "H"), ("r", "R"), ("er", "ER"), ("hr", "HR"),
+            ("bb", "BB"), ("so", "SO"), ("k9", "K/9"), ("bb9", "BB/9"), ("kbb", "K/BB"),
+            ("qs", "QS"), ("g", "G"), ("gs", "GS"),
+        ]
+        # Avoid duplicates for two-way players
+        existing_labels = {s["label"] for s in result}
+        for key, label in pitchers:
+            if label in existing_labels:
+                continue
+            val = stats.get(key)
+            if val is not None and val != "":
+                if key in ("era", "whip"):
+                    try:
+                        val_str = f"{float(val):.2f}"
+                    except (ValueError, TypeError):
+                        val_str = str(val)
+                elif key in ("k9", "bb9", "kbb"):
+                    try:
+                        val_str = f"{float(val):.2f}"
+                    except (ValueError, TypeError):
+                        val_str = str(val)
+                else:
+                    val_str = str(int(val)) if isinstance(val, (int, float)) and float(val).is_integer() else str(val)
+                result.append({"id": f"std-{label}", "label": label, "value": val_str})
+    
+    return result
 
 
 def _fetch_mlb_roster_lookup(season: int) -> dict[int, dict[str, str]]:
@@ -498,19 +648,13 @@ def build_snapshot_rows(season: int) -> list[dict[str, Any]]:
     if missing_pitcher:
         logger.warning("Missing pitcher columns: %s", missing_pitcher)
 
-    # Fetch standard stats and build name-keyed lookups
-    # Note: FanGraphs disabled - blocks cloud IPs (403). MLB Stats API could be used instead:
-    # https://statsapi.mlb.com/api/v1/people/{playerId}/stats?stats=season&group=hitting|pitching
-    # For now, we rely on Statcast percentile data only, which is the primary app data source.
-    bat_std, pitch_std = pd.DataFrame(), pd.DataFrame()
-    batter_lookup: dict[str, pd.Series] = {}
-    pitcher_lookup: dict[str, pd.Series] = {}
-    logger.info("Standard stats disabled - using Statcast data only")
+    # Fetch roster lookup from MLB API
     roster_lookup = _fetch_mlb_roster_lookup(season)
-
+    
+    # Process Statcast data to build player records
     batter_metrics = _all_metric_defs("batter")
     pitcher_metrics = _all_metric_defs("pitcher")
-
+    
     skipped = 0
     for _, row in batter_rows.iterrows():
         try:
@@ -518,13 +662,27 @@ def build_snapshot_rows(season: int) -> list[dict[str, Any]]:
         except Exception:
             skipped += 1
             logger.exception("Failed to process batter row")
-
+    
     for _, row in pitcher_rows.iterrows():
         try:
             merge_player_row(players, row, "pitcher", pitcher_metrics, now, season, None, roster_lookup)
         except Exception:
             skipped += 1
             logger.exception("Failed to process pitcher row")
+    
+    # Fetch standard stats from MLB Stats API for all players
+    all_player_ids = list(players.keys())
+    logger.info("Fetching standard stats from MLB Stats API for %d players", len(all_player_ids))
+    mlb_stats = _fetch_mlb_standard_stats(all_player_ids, season)
+    
+    # Attach standard stats to players
+    with_std = 0
+    for pid, stats in mlb_stats.items():
+        if pid in players:
+            players[pid]["standard_stats"] = _build_standard_stats_from_mlb(stats)
+            with_std += 1
+    
+    logger.info("Attached standard stats to %d players", with_std)
 
     two_way = sum(1 for p in players.values() if p.get("player_type") == "two_way")
     logger.info(
