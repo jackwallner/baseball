@@ -77,7 +77,7 @@ struct PlayerProfileView: View {
                 .frame(maxWidth: .infinity)
                 .frame(height: 44)
                 .background(isSelected ? SavantPalette.savantRed : SavantPalette.surface)
-                .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusButton))
+                .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
         }
         .buttonStyle(.plain)
     }
@@ -96,7 +96,7 @@ struct PlayerProfileView: View {
                 .frame(maxWidth: .infinity)
                 .frame(height: 44)
                 .background(isSelected ? SavantPalette.savantRed : SavantPalette.surface)
-                .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusButton))
+                .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
         }
         .buttonStyle(.plain)
         .disabled(!hasStats)
