@@ -526,6 +526,91 @@ def merge_player_row(
             players[pid]["metrics"].append(m)
 
 
+def _add_calculated_rates(players: dict[int, dict]) -> None:
+    """Calculate K% and BB% from standard stats and update existing metrics."""
+    for pid, player in players.items():
+        # Get stats from standard_stats
+        std_stats_map = {s["label"]: s.get("value", "") for s in player.get("standard_stats", [])}
+        
+        pa = None
+        so = None
+        bb = None
+        bf = None  # batters faced for pitchers
+        
+        for s in player.get("standard_stats", []):
+            label = s["label"]
+            try:
+                if label == "PA":
+                    pa = int(s["value"])
+                elif label == "SO":
+                    so = int(s["value"])
+                elif label == "BB":
+                    bb = int(s["value"])
+                elif label == "BF":
+                    bf = int(s["value"])
+            except (ValueError, TypeError):
+                pass
+        
+        # Use BF for pitchers if PA not available
+        if pa is None and bf is not None:
+            pa = bf
+        
+        if pa is None or pa <= 0:
+            continue
+        
+        player_type = player.get("player_type", "batter")
+        is_pitcher = player_type == "pitcher" or (player_type == "two_way" and bf is not None)
+        prefix = "pitcher" if is_pitcher else "batter"
+        category = "Pitching" if is_pitcher else "Hitting"
+        
+        # Find existing K% and BB% metrics to get their percentiles
+        existing_metrics = {m["label"]: m for m in player.get("metrics", [])}
+        
+        # Calculate and update K%
+        if so is not None:
+            k_rate = (so / pa) * 100
+            k_value = f"{k_rate:.1f}%"
+            
+            # Update existing K% metric if present
+            if "K%" in existing_metrics:
+                existing_metrics["K%"]["value"] = k_value
+                existing_metrics["K%"]["actual_value"] = k_value
+                if existing_metrics["K%"].get("percentile"):
+                    existing_metrics["K%"]["display_value"] = f"{k_value} · {existing_metrics['K%']['percentile']}th"
+            else:
+                # Add new calculated metric
+                player["metrics"].append({
+                    "id": f"{prefix}-{pid}-k_percent",
+                    "label": "K%",
+                    "value": k_value,
+                    "actual_value": k_value,
+                    "percentile": 0,
+                    "category": category,
+                })
+        
+        # Calculate and update BB%
+        if bb is not None:
+            bb_rate = (bb / pa) * 100
+            bb_value = f"{bb_rate:.1f}%"
+            
+            # Update existing BB% metric if present
+            if "BB%" in existing_metrics:
+                existing_metrics["BB%"]["value"] = bb_value
+                existing_metrics["BB%"]["actual_value"] = bb_value
+                if existing_metrics["BB%"].get("percentile"):
+                    existing_metrics["BB%"]["display_value"] = f"{bb_value} · {existing_metrics['BB%']['percentile']}th"
+            else:
+                # Add new calculated metric
+                player["metrics"].append({
+                    "id": f"{prefix}-{pid}-bb_percent",
+                    "label": "BB%",
+                    "value": bb_value,
+                    "actual_value": bb_value,
+                    "percentile": 0,
+                    "category": category,
+                })
+
+
 def build_snapshot_rows(season: int) -> list[dict]:
     """Build snapshot rows with both percentiles and actual values."""
     logger.info("Building snapshot rows for season %s with actual values...", season)
@@ -572,7 +657,184 @@ def build_snapshot_rows(season: int) -> list[dict]:
         skipped,
     )
     
+    # Fetch standard stats from MLB Stats API
+    all_player_ids = list(players.keys())
+    logger.info("Fetching standard stats from MLB Stats API for %d players...", len(all_player_ids))
+    mlb_stats = _fetch_mlb_standard_stats(all_player_ids, season)
+    
+    # Attach standard stats and calculate K%/BB%
+    with_std = 0
+    for pid, stats in mlb_stats.items():
+        if pid in players:
+            players[pid]["standard_stats"] = _build_standard_stats_from_mlb(stats)
+            with_std += 1
+    
+    logger.info("Attached standard stats to %d players", with_std)
+    
+    # Add calculated K% and BB% from standard stats
+    _add_calculated_rates(players)
+    
     return list(players.values())
+
+
+def _fetch_mlb_standard_stats(player_ids: list[int], season: int) -> dict[int, dict[str, Any]]:
+    """Fetch standard stats from MLB Stats API.
+    
+    Returns a dict mapping player_id to their stats dict.
+    """
+    stats_by_player: dict[int, dict[str, Any]] = {}
+    
+    batch_size = 50
+    for i in range(0, len(player_ids), batch_size):
+        batch = player_ids[i:i + batch_size]
+        ids_param = ",".join(str(pid) for pid in batch)
+        
+        try:
+            # Fetch hitting stats
+            hit_url = f"https://statsapi.mlb.com/api/v1/people"
+            hit_params = {
+                "personIds": ids_param,
+                "hydrate": f"stats(type=season,season={season},group=hitting)",
+            }
+            hit_resp = requests.get(hit_url, params=hit_params, timeout=30)
+            hit_resp.raise_for_status()
+            hit_data = hit_resp.json()
+            
+            for person in hit_data.get("people", []):
+                pid = person.get("id")
+                if not pid:
+                    continue
+                
+                stats_list = person.get("stats", [])
+                for stat_group in stats_list:
+                    group_data = stat_group.get("group", {})
+                    if isinstance(group_data, dict) and group_data.get("displayName") == "hitting":
+                        for split in stat_group.get("splits", []):
+                            stat = split.get("stat", {})
+                            if stat:
+                                stats_by_player[pid] = {
+                                    "avg": stat.get("avg", ""),
+                                    "obp": stat.get("obp", ""),
+                                    "slg": stat.get("slg", ""),
+                                    "ops": stat.get("ops", ""),
+                                    "hr": stat.get("homeRuns", 0),
+                                    "rbi": stat.get("rbi", 0),
+                                    "r": stat.get("runs", 0),
+                                    "h": stat.get("hits", 0),
+                                    "doubles": stat.get("doubles", 0),
+                                    "triples": stat.get("triples", 0),
+                                    "bb": stat.get("baseOnBalls", 0),
+                                    "so": stat.get("strikeOuts", 0),
+                                    "sb": stat.get("stolenBases", 0),
+                                    "cs": stat.get("caughtStealing", 0),
+                                    "pa": stat.get("plateAppearances", 0),
+                                    "ab": stat.get("atBats", 0),
+                                    "player_type": "batter",
+                                }
+            
+            # Fetch pitching stats
+            pitch_url = f"https://statsapi.mlb.com/api/v1/people"
+            pitch_params = {
+                "personIds": ids_param,
+                "hydrate": f"stats(type=season,season={season},group=pitching)",
+            }
+            pitch_resp = requests.get(pitch_url, params=pitch_params, timeout=30)
+            pitch_resp.raise_for_status()
+            pitch_data = pitch_resp.json()
+            
+            for person in pitch_data.get("people", []):
+                pid = person.get("id")
+                if not pid:
+                    continue
+                
+                stats_list = person.get("stats", [])
+                for stat_group in stats_list:
+                    group_data = stat_group.get("group", {})
+                    if isinstance(group_data, dict) and group_data.get("displayName") == "pitching":
+                        for split in stat_group.get("splits", []):
+                            stat = split.get("stat", {})
+                            if stat:
+                                existing = stats_by_player.get(pid, {})
+                                existing.update({
+                                    "era": stat.get("era", ""),
+                                    "whip": stat.get("whip", ""),
+                                    "wins": stat.get("wins", 0),
+                                    "losses": stat.get("losses", 0),
+                                    "saves": stat.get("saves", 0),
+                                    "ip": stat.get("inningsPitched", ""),
+                                    "h": stat.get("hits", 0),
+                                    "r": stat.get("runs", 0),
+                                    "er": stat.get("earnedRuns", 0),
+                                    "hr": stat.get("homeRuns", 0),
+                                    "bb": stat.get("baseOnBalls", 0),
+                                    "so": stat.get("strikeOuts", 0),
+                                    "k9": stat.get("strikeoutsPer9Inn", ""),
+                                    "bb9": stat.get("walksPer9Inn", ""),
+                                    "kbb": stat.get("strikeoutWalkRatio", ""),
+                                    "qs": stat.get("qualityStarts", 0),
+                                    "g": stat.get("gamesPlayed", 0),
+                                    "gs": stat.get("gamesStarted", 0),
+                                    "bf": stat.get("battersFaced", 0),
+                                    "player_type": "two_way" if existing.get("player_type") == "batter" else "pitcher",
+                                })
+                                stats_by_player[pid] = existing
+                                
+        except Exception:
+            logger.exception("Failed to fetch MLB stats for batch %d", i // batch_size)
+            continue
+    
+    logger.info("Fetched MLB standard stats for %d players", len(stats_by_player))
+    return stats_by_player
+
+
+def _build_standard_stats_from_mlb(stats: dict[str, Any]) -> list[dict[str, str]]:
+    """Convert MLB Stats API data to standard_stats JSON format."""
+    result: list[dict[str, str]] = []
+    
+    # Hitting stats
+    if stats.get("player_type") in ("batter", "two_way"):
+        hitters = [
+            ("avg", "AVG"), ("obp", "OBP"), ("slg", "SLG"), ("ops", "OPS"),
+            ("hr", "HR"), ("rbi", "RBI"), ("r", "R"), ("h", "H"),
+            ("doubles", "2B"), ("triples", "3B"), ("bb", "BB"), ("so", "SO"),
+            ("sb", "SB"), ("cs", "CS"), ("pa", "PA"), ("ab", "AB"),
+        ]
+        for key, label in hitters:
+            val = stats.get(key)
+            if val is not None and val != "":
+                if key in ("avg", "obp", "slg", "ops") and val != "":
+                    try:
+                        val_str = f"{float(val):.3f}"
+                    except (ValueError, TypeError):
+                        val_str = str(val)
+                else:
+                    val_str = str(int(val)) if isinstance(val, (int, float)) and float(val).is_integer() else str(val)
+                result.append({"id": f"std-{label}", "label": label, "value": val_str})
+    
+    # Pitching stats
+    if stats.get("player_type") in ("pitcher", "two_way"):
+        pitchers = [
+            ("era", "ERA"), ("whip", "WHIP"), ("wins", "W"), ("losses", "L"), ("saves", "SV"),
+            ("ip", "IP"), ("h", "H"), ("r", "R"), ("er", "ER"), ("hr", "HR"),
+            ("bb", "BB"), ("so", "SO"), ("k9", "K/9"), ("bb9", "BB/9"), ("kbb", "K/BB"),
+            ("qs", "QS"), ("g", "G"), ("gs", "GS"), ("bf", "BF"),
+        ]
+        existing_labels = {s["label"] for s in result}
+        for key, label in pitchers:
+            if label in existing_labels:
+                continue
+            val = stats.get(key)
+            if val is not None and val != "":
+                if key in ("era", "whip", "k9", "bb9", "kbb"):
+                    try:
+                        val_str = f"{float(val):.2f}"
+                    except (ValueError, TypeError):
+                        val_str = str(val)
+                else:
+                    val_str = str(int(val)) if isinstance(val, (int, float)) and float(val).is_integer() else str(val)
+                result.append({"id": f"std-{label}", "label": label, "value": val_str})
+    
+    return result
 
 
 def chunks(lst: list, n: int) -> Iterator[list]:
