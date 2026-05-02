@@ -149,8 +149,10 @@ def test_build_snapshot_rows_handles_empty_dataframe():
     with patch("ingest.statcast_batter_percentile_ranks", return_value=pd.DataFrame()):
         with patch("ingest.statcast_pitcher_percentile_ranks", return_value=pd.DataFrame()):
             with patch("ingest._fetch_standard_stats", return_value=(pd.DataFrame(), pd.DataFrame())):
-                # Empty dataframes now log error and continue, not exit
-                ingest.main()
+                with patch.dict(os.environ, {"SUPABASE_URL": "https://test.supabase.co", "SUPABASE_SERVICE_ROLE_KEY": "test-key"}):
+                    with patch("ingest.create_client"):
+                        # Empty dataframes now log error and continue, not exit
+                        ingest.main()
 
 
 def test_batching():
