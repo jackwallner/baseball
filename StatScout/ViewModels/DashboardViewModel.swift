@@ -45,12 +45,40 @@ final class DashboardViewModel {
         }
     }
 
+    // Baseball Savant-style sorting: use key metric for each category
     var leaderboard: [Player] {
         filteredPlayers.sorted { p1, p2 in
-            let p1Score = selectedCategory.flatMap { p1.percentile(for: $0) } ?? p1.overallPercentile
-            let p2Score = selectedCategory.flatMap { p2.percentile(for: $0) } ?? p2.overallPercentile
+            let p1Score = keyMetricPercentile(for: p1)
+            let p2Score = keyMetricPercentile(for: p2)
             return sortDescending ? p1Score > p2Score : p1Score < p2Score
         }
+    }
+
+    // Get the key metric percentile for sorting - Baseball Savant style
+    private func keyMetricPercentile(for player: Player) -> Int {
+        guard let category = selectedCategory else {
+            return player.overallPercentile
+        }
+
+        // Baseball Savant priority metrics for each category
+        let priorityMetrics: [MetricCategory: [String]] = [
+            .hitting: ["xwOBA", "xSLG", "xBA"],
+            .pitching: ["xERA", "xwOBA", "K%"],
+            .fielding: ["OAA", "Arm Strength"],
+            .running: ["Sprint Speed"]
+        ]
+
+        let metrics = priorityMetrics[category] ?? []
+
+        // Find the first available priority metric
+        for metricLabel in metrics {
+            if let metric = player.metrics.first(where: { $0.label == metricLabel && $0.category == category }) {
+                return metric.percentile
+            }
+        }
+
+        // Fall back to category average or overall
+        return player.percentile(for: category) ?? player.overallPercentile
     }
 
     var allTeams: [String] {
@@ -110,11 +138,11 @@ final class DashboardViewModel {
                 isLoading = false
                 return
             }
-            
+
             let grouped = Dictionary(grouping: fetched, by: \.playerId)
             var latestPlayers: [Player] = []
             var histories: [Int: [Player]] = [:]
-            
+
             for (playerId, history) in grouped {
                 // Sort by season descending, with nil seasons at the end
                 let sortedHistory = history.sorted {
@@ -130,10 +158,10 @@ final class DashboardViewModel {
                     latestPlayers.append(latest)
                 }
             }
-            
+
             self.playerHistories = histories
             self.players = latestPlayers
-            
+
             updateDerivedState()
             try? cache?.savePlayers(fetched)
         } catch is DecodingError {

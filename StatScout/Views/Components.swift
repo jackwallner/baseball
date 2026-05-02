@@ -119,7 +119,7 @@ struct TeamColorDot: View {
     }
 }
 
-// MARK: - Module 2: Percentile Bar Row (MetricBar)
+// MARK: - Module 2: Percentile Bar Row (MetricBar) - Baseball Savant Style
 
 struct MetricBar: View {
     let metric: Metric
@@ -132,50 +132,58 @@ struct MetricBar: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
+            // Label row
             HStack(spacing: 8) {
                 Text(metric.label)
                     .font(SavantType.bodyBold)
                     .foregroundStyle(SavantPalette.ink)
 
                 Spacer(minLength: 4)
-
-                if showValue && !metric.value.isEmpty {
-                    Text(metric.value)
-                        .font(SavantType.statMed)
-                        .foregroundStyle(SavantPalette.ink)
-                        .frame(minWidth: 40, alignment: .trailing)
-                }
             }
 
+            // Percentile bar with value at the end - Baseball Savant style
             let percentileValue = max(0, min(100, metric.percentile))
             GeometryReader { proxy in
-                let circleSize: CGFloat = 28
-                let trackWidth = proxy.size.width - circleSize
-                // Clamp offset so circle stays fully within bounds at 0% and 100%
+                let circleSize: CGFloat = 32
+                let trackWidth = proxy.size.width - circleSize - 60 // Leave room for value text
                 let offset = (circleSize / 2) + (trackWidth * CGFloat(percentileValue) / 100.0)
 
                 ZStack(alignment: .leading) {
+                    // Track
                     RoundedRectangle(cornerRadius: 4)
                         .fill(SavantPalette.hairline)
                         .frame(height: 12)
 
+                    // Fill
                     RoundedRectangle(cornerRadius: 4)
                         .fill(SavantPalette.color(forPercentile: percentileValue))
                         .frame(width: offset, height: 12)
 
+                    // Percentile circle
                     ZStack {
                         Circle()
                             .fill(SavantPalette.color(forPercentile: percentileValue))
                             .frame(width: circleSize, height: circleSize)
 
                         Text("\(percentileValue)")
-                            .font(.system(size: 11, weight: .bold))
+                            .font(.system(size: 12, weight: .bold))
                             .foregroundStyle(percentileValue < 25 ? SavantPalette.ink : .white)
                     }
                     .position(x: offset, y: 6)
+
+                    // Stat value at the right end - Baseball Savant style
+                    if showValue && !metric.value.isEmpty {
+                        HStack {
+                            Spacer()
+                            Text(metric.value)
+                                .font(SavantType.statMed)
+                                .foregroundStyle(SavantPalette.ink)
+                                .frame(width: 55, alignment: .trailing)
+                        }
+                    }
                 }
             }
-            .frame(height: 28)
+            .frame(height: 32)
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(accessibilityLabel)
         }
@@ -273,21 +281,57 @@ struct TrendGlyph: View {
     }
 }
 
-// MARK: - Leaderboard Table Components
+// MARK: - Percentile Bar Mini (for leaderboards)
+
+struct PercentileBarMini: View {
+    let percentile: Int
+    var height: CGFloat = 4
+
+    var body: some View {
+        GeometryReader { proxy in
+            ZStack(alignment: .leading) {
+                RoundedRectangle(cornerRadius: height/2)
+                    .fill(SavantPalette.hairline)
+                    .frame(height: height)
+
+                RoundedRectangle(cornerRadius: height/2)
+                    .fill(SavantPalette.color(forPercentile: percentile))
+                    .frame(width: proxy.size.width * CGFloat(percentile) / 100.0, height: height)
+            }
+        }
+        .frame(height: height)
+        .accessibilityHidden(true)
+    }
+}
+
+// MARK: - Leaderboard Table
 
 struct LeaderboardTableHeader: View {
     var body: some View {
-        HStack(spacing: 8) {
-            Text("#")
+        HStack(spacing: 0) {
+            Text("RANK")
                 .font(SavantType.micro)
                 .tracking(0.5)
                 .foregroundStyle(SavantPalette.inkTertiary)
-                .frame(width: 28, alignment: .trailing)
+                .frame(width: 50, alignment: .leading)
+
             Text("PLAYER")
                 .font(SavantType.micro)
                 .tracking(0.5)
                 .foregroundStyle(SavantPalette.inkTertiary)
                 .frame(maxWidth: .infinity, alignment: .leading)
+
+            Text("TEAM")
+                .font(SavantType.micro)
+                .tracking(0.5)
+                .foregroundStyle(SavantPalette.inkTertiary)
+                .frame(width: 50, alignment: .leading)
+
+            Text("PERCENTILE")
+                .font(SavantType.micro)
+                .tracking(0.5)
+                .foregroundStyle(SavantPalette.inkTertiary)
+                .frame(width: 80, alignment: .trailing)
         }
         .frame(height: SavantGeo.rowHeightHeader)
         .padding(.horizontal, SavantGeo.padInline)
@@ -302,170 +346,67 @@ struct LeaderboardTableRow: View {
     var metricLabel: String? = nil
     var metricCategory: MetricCategory? = nil
 
-    private var displayMetric: Metric? {
-        if let metricLabel {
-            return player.metrics.first { metric in
-                metric.label == metricLabel && (metricCategory == nil || metric.category == metricCategory)
-            }
-        }
-        return player.headlineMetric
-    }
-
     private var displayPercentile: Int {
-        if metricLabel != nil {
-            return displayMetric?.percentile ?? player.overallPercentile
+        if let label = metricLabel, let category = metricCategory {
+            return player.metrics.first { $0.label == label && $0.category == category }?.percentile ?? player.overallPercentile
         }
         return player.overallPercentile
     }
 
     var body: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 0) {
             Text("\(rank)")
                 .font(SavantType.statSmall)
                 .foregroundStyle(SavantPalette.inkSecondary)
-                .frame(width: 28, alignment: .trailing)
+                .frame(width: 50, alignment: .leading)
+                .monospacedDigit()
+
             HStack(spacing: 10) {
-                PlayerHeadshot(url: player.headshotURL, initials: player.initials, size: 28)
+                PlayerHeadshot(url: player.headshotURL, initials: player.initials, size: 36)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(player.name)
                         .font(SavantType.bodyBold)
                         .foregroundStyle(SavantPalette.ink)
                         .lineLimit(1)
-                    HStack(spacing: 5) {
-                        TeamColorDot(abbr: player.team, size: 6)
-                        Text(player.team)
-                            .font(SavantType.micro)
-                            .tracking(0.4)
-                            .foregroundStyle(SavantPalette.inkTertiary)
-                    }
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            HStack(spacing: 6) {
-                PercentileBarMini(percentile: displayPercentile)
-                    .frame(width: 84, alignment: .leading)
-                Text("\(displayPercentile)")
-                    .font(SavantType.statSmall)
-                    .foregroundStyle(SavantPalette.inkSecondary)
-                    .frame(width: 24, alignment: .trailing)
-            }
-        }
-        .frame(height: SavantGeo.rowHeight)
-        .padding(.horizontal, SavantGeo.padInline)
-        .background(rank % 2 == 0 ? SavantPalette.surface : SavantPalette.surfaceAlt)
-        .contentShape(Rectangle())
-        .overlay(Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline), alignment: .bottom)
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(rank), \(player.name), \(player.team), \(displayPercentile)th percentile")
-        .accessibilityHint("Double-tap to view player profile")
-    }
-}
-
-struct PercentileBarMini: View {
-    let percentile: Int
-
-    var body: some View {
-        GeometryReader { proxy in
-            let p = max(0, min(100, percentile))
-            let fillWidth = proxy.size.width * CGFloat(p) / 100.0
-            ZStack(alignment: .leading) {
-                RoundedRectangle(cornerRadius: 2)
-                    .fill(SavantPalette.hairline)
-                    .frame(height: 4)
-                    .position(x: proxy.size.width / 2, y: proxy.size.height / 2)
-                RoundedRectangle(cornerRadius: 2)
-                    .fill(SavantPalette.color(forPercentile: p))
-                    .frame(width: max(2, fillWidth), height: 4)
-                    .position(x: max(2, fillWidth) / 2, y: proxy.size.height / 2)
-            }
-        }
-        .frame(height: 18)
-        .accessibilityElement()
-        .accessibilityLabel("\(percentile)th percentile")
-    }
-}
-
-// MARK: - Featured Tile
-
-struct FeaturedTile: View {
-    let player: Player
-    var weeklyDelta: Int? = nil
-
-    private var deltaDirection: MetricDirection {
-        guard let weeklyDelta else { return .flat }
-        if weeklyDelta > 0 { return .up }
-        if weeklyDelta < 0 { return .down }
-        return .flat
-    }
-
-    var body: some View {
-        HStack(spacing: 10) {
-            PlayerHeadshot(url: player.headshotURL, initials: player.initials, size: 56)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(player.name)
-                    .font(SavantType.bodyBold)
-                    .foregroundStyle(SavantPalette.ink)
-                    .lineLimit(1)
-                HStack(spacing: 5) {
-                    TeamColorDot(abbr: player.team, size: 6)
-                    Text(player.team)
+                    Text(player.position)
                         .font(SavantType.micro)
                         .tracking(0.4)
                         .foregroundStyle(SavantPalette.inkTertiary)
                 }
-                if let metric = player.headlineMetric {
-                    Text("\(metric.label) \(metric.value) · \(metric.percentile.ordinal)")
-                        .font(SavantType.smallBold)
-                        .foregroundStyle(SavantPalette.color(forPercentile: metric.percentile))
-                        .lineLimit(1)
-                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-        }
-        .overlay(alignment: .topTrailing) {
-            if let weeklyDelta {
-                HStack(spacing: 3) {
-                    TrendGlyph(direction: deltaDirection)
-                    Text("\(weeklyDelta >= 0 ? "+" : "")\(weeklyDelta)")
-                        .font(SavantType.statSmall)
-                        .foregroundStyle(weeklyDelta >= 0 ? SavantPalette.up : SavantPalette.down)
-                }
-                .padding(.horizontal, 6)
-                .padding(.vertical, 3)
-                .background(SavantPalette.surfaceAlt)
-                .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusBadge))
+
+            HStack(spacing: 4) {
+                TeamColorDot(abbr: player.team, size: 6)
+                Text(player.team)
+                    .font(SavantType.small)
+                    .foregroundStyle(SavantPalette.inkSecondary)
             }
+            .frame(width: 50, alignment: .leading)
+
+            HStack(spacing: 8) {
+                PercentileBarMini(percentile: displayPercentile)
+                    .frame(width: 40)
+                Text("\(displayPercentile)")
+                    .font(SavantType.statSmall)
+                    .foregroundStyle(SavantPalette.color(forPercentile: displayPercentile))
+                    .frame(width: 28, alignment: .trailing)
+                    .monospacedDigit()
+            }
+            .frame(width: 80, alignment: .trailing)
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 10)
-        .frame(width: 240, height: 80)
-        .background(SavantPalette.surface)
-        .overlay(
-            RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
-                .stroke(SavantPalette.hairline, lineWidth: 0.5)
-        )
+        .frame(height: SavantGeo.rowHeight)
+        .padding(.horizontal, SavantGeo.padInline)
         .contentShape(Rectangle())
     }
 }
 
-// MARK: - Utility
+// MARK: - Extensions for Array chunking
 
-extension Int {
-    var ordinal: String {
-        let suffix: String
-        let ones = self % 10
-        let tens = (self / 10) % 10
-        if tens == 1 {
-            suffix = "th"
-        } else if ones == 1 {
-            suffix = "st"
-        } else if ones == 2 {
-            suffix = "nd"
-        } else if ones == 3 {
-            suffix = "rd"
-        } else {
-            suffix = "th"
+extension Array {
+    func chunked(into size: Int) -> [[Element]] {
+        stride(from: 0, to: count, by: size).map {
+            Array(self[$0..<Swift.min($0 + size, count)])
         }
-        return "\(self)\(suffix)"
     }
 }
