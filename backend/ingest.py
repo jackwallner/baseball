@@ -380,7 +380,8 @@ def _fetch_mlb_standard_stats(player_ids: list[int], season: int) -> dict[int, d
                 # Extract hitting stats
                 stats_list = person.get("stats", [])
                 for stat_group in stats_list:
-                    if stat_group.get("group") == "hitting":
+                    group_data = stat_group.get("group", {})
+                    if isinstance(group_data, dict) and group_data.get("displayName") == "hitting":
                         for split in stat_group.get("splits", []):
                             stat = split.get("stat", {})
                             if stat:
@@ -422,7 +423,8 @@ def _fetch_mlb_standard_stats(player_ids: list[int], season: int) -> dict[int, d
                 # Extract pitching stats
                 stats_list = person.get("stats", [])
                 for stat_group in stats_list:
-                    if stat_group.get("group") == "pitching":
+                    group_data = stat_group.get("group", {})
+                    if isinstance(group_data, dict) and group_data.get("displayName") == "pitching":
                         for split in stat_group.get("splits", []):
                             stat = split.get("stat", {})
                             if stat:
