@@ -585,7 +585,18 @@ def main() -> None:
             batch_size = 150
             for i, batch in enumerate(chunks(rows, batch_size)):
                 logger.info("Upserting batch %d (%d rows) for %s...", i + 1, len(batch), season)
-                client.table("player_snapshots").upsert(batch, on_conflict="id,season").execute()
+                try:
+                    client.table("player_snapshots").upsert(batch, on_conflict="id,season").execute()
+                except Exception as e:
+                    error_str = str(e)
+                    if "no unique or exclusion constraint" in error_str or "ON CONFLICT" in error_str:
+                        logger.warning("Upsert failed due to missing constraint, falling back to delete+insert")
+                        # Fallback: delete existing rows for these (id, season) pairs, then insert
+                        for row in batch:
+                            client.table("player_snapshots").delete().eq("id", row["id"]).eq("season", row["season"]).execute()
+                        client.table("player_snapshots").insert(batch).execute()
+                    else:
+                        raise
 
             logger.info("Successfully upserted %d player snapshots for %s.", len(rows), season)
         except Exception:
