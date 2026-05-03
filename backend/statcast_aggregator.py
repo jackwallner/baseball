@@ -147,18 +147,18 @@ def compute_pitcher_stats(df: pd.DataFrame) -> pd.DataFrame:
     pitcher_stats = []
     
     for pitcher_id, group in df.groupby('pitcher'):
-        # Overall spin rate (min 100 pitches)
+        # Overall spin rate - no minimum, calculate if any spin data exists
         pitches_with_spin = group[group['release_spin_rate'].notna()]
-        avg_spin = pitches_with_spin['release_spin_rate'].mean() if len(pitches_with_spin) >= 100 else None
-        
-        # Spin by pitch type (min 25 pitches each)
+        avg_spin = pitches_with_spin['release_spin_rate'].mean() if len(pitches_with_spin) > 0 else None
+
+        # Spin by pitch type - no minimum thresholds
         fb_spins = group[(group['pitch_category'] == 'Fastball') & group['release_spin_rate'].notna()]
         breaking_spins = group[(group['pitch_category'] == 'Breaking') & group['release_spin_rate'].notna()]
         offspeed_spins = group[(group['pitch_category'] == 'Offspeed') & group['release_spin_rate'].notna()]
-        
-        fb_spin = fb_spins['release_spin_rate'].mean() if len(fb_spins) >= 25 else None
-        breaking_spin = breaking_spins['release_spin_rate'].mean() if len(breaking_spins) >= 25 else None
-        offspeed_spin = offspeed_spins['release_spin_rate'].mean() if len(offspeed_spins) >= 25 else None
+
+        fb_spin = fb_spins['release_spin_rate'].mean() if len(fb_spins) > 0 else None
+        breaking_spin = breaking_spins['release_spin_rate'].mean() if len(breaking_spins) > 0 else None
+        offspeed_spin = offspeed_spins['release_spin_rate'].mean() if len(offspeed_spins) > 0 else None
         
         pitcher_stats.append({
             'player_id': int(pitcher_id),
