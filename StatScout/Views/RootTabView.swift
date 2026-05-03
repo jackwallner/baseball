@@ -132,7 +132,7 @@ private struct StandardDestinations: ViewModifier {
                     .modifier(SavantNavBar())
             }
             .navigationDestination(for: MetricRoute.self) { route in
-                MetricRankingView(metricLabel: route.label, metricCategory: route.category, players: viewModel.seasonPlayers)
+                MetricRankingView(metricLabel: route.label, metricCategory: route.category, players: viewModel.seasonPlayers, season: viewModel.selectedSeason)
                     .modifier(SavantNavBar())
             }
     }

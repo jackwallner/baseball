@@ -4,6 +4,7 @@ struct MetricRankingView: View {
     let metricLabel: String
     let metricCategory: MetricCategory
     let players: [Player]
+    let season: Int?
     @State private var sortDescending = true
 
     private var rankedPlayers: [Player] {
@@ -23,17 +24,24 @@ struct MetricRankingView: View {
                 SavantSectionBar(
                     title: "\(metricLabel) · \(metricCategory.rawValue)",
                     trailing: AnyView(
-                        Button(action: {
-                            sortDescending.toggle()
-                            let generator = UIImpactFeedbackGenerator(style: .light)
-                            generator.impactOccurred()
-                        }) {
-                            HStack(spacing: 4) {
-                                Text("Percentile")
-                                Image(systemName: sortDescending ? "arrow.down" : "arrow.up")
+                        HStack(spacing: 12) {
+                            if let season {
+                                Text("\(season)")
+                                    .font(SavantType.micro)
+                                    .foregroundStyle(SavantPalette.inkSecondary)
                             }
-                            .font(SavantType.micro)
-                            .foregroundStyle(SavantPalette.inkSecondary)
+                            Button(action: {
+                                sortDescending.toggle()
+                                let generator = UIImpactFeedbackGenerator(style: .light)
+                                generator.impactOccurred()
+                            }) {
+                                HStack(spacing: 4) {
+                                    Text("Percentile")
+                                    Image(systemName: sortDescending ? "arrow.down" : "arrow.up")
+                                }
+                                .font(SavantType.micro)
+                                .foregroundStyle(SavantPalette.inkSecondary)
+                            }
                         }
                     )
                 )
@@ -82,6 +90,6 @@ struct MetricRankingView: View {
 
 #Preview {
     NavigationStack {
-        MetricRankingView(metricLabel: "xwOBA", metricCategory: .hitting, players: SampleData.players)
+        MetricRankingView(metricLabel: "xwOBA", metricCategory: .hitting, players: SampleData.players, season: 2026)
     }
 }

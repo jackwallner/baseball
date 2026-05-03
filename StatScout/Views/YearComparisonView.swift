@@ -155,13 +155,33 @@ struct YearComparisonView: View {
         let comparisons = buildComparisons(p1: p1, p2: p2)
         let grouped = Dictionary(grouping: comparisons) { $0.category }
 
-        return VStack(spacing: 12) {
+        if comparisons.isEmpty {
+            return AnyView(noCommonMetricsView)
+        }
+
+        return AnyView(VStack(spacing: 12) {
             ForEach(MetricCategory.allCases, id: \.self) { category in
                 if let items = grouped[category], !items.isEmpty {
                     categoryComparisonCard(category: category, items: items, year1: p1.season ?? 0, year2: p2.season ?? 0)
                 }
             }
+        })
+    }
+
+    private var noCommonMetricsView: some View {
+        ContentUnavailableView {
+            Label("No Comparable Metrics", systemImage: "chart.bar.xaxis")
+        } description: {
+            Text("These seasons don't have overlapping metrics to compare.")
         }
+        .padding(.vertical, 48)
+        .frame(maxWidth: .infinity)
+        .background(SavantPalette.surface)
+        .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
+        .overlay(
+            RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
+                .stroke(SavantPalette.hairline, lineWidth: 0.5)
+        )
     }
 
     private func categoryComparisonCard(category: MetricCategory, items: [MetricComparison], year1: Int, year2: Int) -> some View {
