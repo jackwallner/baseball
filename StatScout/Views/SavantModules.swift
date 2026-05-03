@@ -44,7 +44,7 @@ struct TeamIdentityStrip: View {
 
     private var seasonLabel: String {
         let year = season ?? Calendar(identifier: .gregorian).component(.year, from: Date())
-        return "\(year) Season"
+        return String(year) + " Season"
     }
 
     var body: some View {

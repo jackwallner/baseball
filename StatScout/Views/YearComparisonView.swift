@@ -41,7 +41,7 @@ struct YearComparisonView: View {
         ContentUnavailableView {
             Label("No Data Available", systemImage: "calendar.badge.clock")
         } description: {
-            Text("Historical data for \(selectedYear1) or \(selectedYear2) is not available for this player.")
+            Text("Historical data for " + String(selectedYear1) + " or " + String(selectedYear2) + " is not available for this player.")
         }
         .padding(.vertical, 48)
         .frame(maxWidth: .infinity)
