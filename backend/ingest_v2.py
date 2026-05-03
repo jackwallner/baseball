@@ -548,6 +548,46 @@ def build_metrics_with_values(
     return metrics
 
 
+def build_roster_lookup(season: int) -> dict[int, dict[str, str]]:
+    """Build a lookup of player_id -> {team, position} from MLB Stats API rosters."""
+    lookup: dict[int, dict[str, str]] = {}
+    try:
+        teams_response = requests.get(
+            "https://statsapi.mlb.com/api/v1/teams",
+            params={"sportId": 1, "season": season},
+            timeout=30,
+        )
+        teams_response.raise_for_status()
+        teams = teams_response.json().get("teams", [])
+    except Exception:
+        logger.exception("Failed to fetch MLB teams")
+        return lookup
+
+    for team in teams:
+        team_id = team.get("id")
+        team_abbr = normalize_team_abbr(team.get("abbreviation") or team.get("teamCode") or team.get("fileCode") or team.get("name") or "")
+        if not team_id or team_abbr == "TBD":
+            continue
+        for roster_type in ("active", "40Man"):
+            try:
+                roster_response = requests.get(
+                    f"https://statsapi.mlb.com/api/v1/teams/{team_id}/roster",
+                    params={"season": season, "rosterType": roster_type},
+                    timeout=30,
+                )
+                roster_response.raise_for_status()
+                for item in roster_response.json().get("roster", []):
+                    person_id = item.get("person", {}).get("id")
+                    if not person_id:
+                        continue
+                    position = item.get("position", {}).get("abbreviation") or ""
+                    lookup[int(person_id)] = {"team": team_abbr, "position": str(position)}
+            except Exception:
+                logger.exception("Failed to fetch %s roster for team %s", roster_type, team_abbr)
+    logger.info("MLB roster lookup rows: %d", len(lookup))
+    return lookup
+
+
 def merge_player_row(
     players: dict[int, dict],
     row: pd.Series,
@@ -556,15 +596,20 @@ def merge_player_row(
     now: datetime,
     season: int,
     value_store: ActualValueStore,
+    roster_lookup: Optional[dict[int, dict[str, str]]] = None,
 ) -> None:
     """Merge a data row into the players dictionary with actual values."""
     pid = safe_player_id(row)
     if pid is None:
         return
-    
+
     name = display_name(row.get("last_name, first_name") or row.get("player_name", ""))
     team = team_from_row(row)
+    if team == "TBD" and roster_lookup and pid in roster_lookup:
+        team = normalize_team_abbr(roster_lookup[pid].get("team", ""))
     position = position_from_row(row)
+    if not position and roster_lookup and pid in roster_lookup:
+        position = roster_lookup[pid].get("position", "")
     
     # Convert datetime to ISO format string for JSON serialization
     now_str = now.isoformat()
@@ -695,36 +740,40 @@ def _add_calculated_rates(players: dict[int, dict]) -> None:
 def build_snapshot_rows(season: int) -> list[dict]:
     """Build snapshot rows with both percentiles and actual values."""
     logger.info("Building snapshot rows for season %s with actual values...", season)
-    
+
     now = datetime.now(UTC)
     players: dict[int, dict] = {}
-    
+
     # Prefetch all actual value data
     value_store = ActualValueStore(season)
-    
+
+    # Fetch roster lookup from MLB Stats API for team/position data
+    logger.info("Fetching MLB roster lookup...")
+    roster_lookup = build_roster_lookup(season)
+
     # Fetch percentile rankings
     logger.info("Fetching percentile rankings...")
     batter_rows = statcast_batter_percentile_ranks(season)
     pitcher_rows = statcast_pitcher_percentile_ranks(season)
-    
+
     logger.info("Batter percentile rows: %d", len(batter_rows))
     logger.info("Pitcher percentile rows: %d", len(pitcher_rows))
-    
+
     # Process batters
     batter_metrics = BATTER_METRICS + RUNNING_METRICS + FIELDING_METRICS
     skipped = 0
     for _, row in batter_rows.iterrows():
         try:
-            merge_player_row(players, row, "batter", batter_metrics, now, season, value_store)
+            merge_player_row(players, row, "batter", batter_metrics, now, season, value_store, roster_lookup)
         except Exception:
             skipped += 1
             logger.exception("Failed to process batter row")
-    
+
     # Process pitchers
     pitcher_metrics = PITCHER_METRICS
     for _, row in pitcher_rows.iterrows():
         try:
-            merge_player_row(players, row, "pitcher", pitcher_metrics, now, season, value_store)
+            merge_player_row(players, row, "pitcher", pitcher_metrics, now, season, value_store, roster_lookup)
         except Exception:
             skipped += 1
             logger.exception("Failed to process pitcher row")
