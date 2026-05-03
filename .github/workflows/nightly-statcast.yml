@@ -14,7 +14,7 @@ jobs:
     permissions:
       contents: read
       issues: write
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
