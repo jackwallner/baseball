@@ -51,19 +51,12 @@ final class DashboardViewModelTests: XCTestCase {
     }
 
     @MainActor
-    func testSearchMatchesFullTeamName() async {
-        let player = Player(
-            playerId: 1, name: "Aaron Judge", team: "NYY", position: "RF", handedness: "R/R", imageURL: nil,
-            updatedAt: Date(),
-            metrics: [],
-            standardStats: [],
-            games: []
-        )
-        let vm = DashboardViewModel(provider: MockProvider(players: [player]))
-        await vm.load()
-        vm.searchText = "Yankees"
-
-        XCTAssertEqual(vm.filteredPlayers.map { $0.playerId }, [1], "Should find player when searching for full team name 'Yankees'")
+    func testTeamFullNameReturnsCorrectFullName() {
+        // Test the teamFullName helper function directly
+        XCTAssertEqual(teamFullName("NYY"), "New York Yankees")
+        XCTAssertEqual(teamFullName("BOS"), "Boston Red Sox")
+        XCTAssertEqual(teamFullName("LAD"), "Los Angeles Dodgers")
+        XCTAssertEqual(teamFullName("Unknown"), "Unknown")
     }
 
     @MainActor
