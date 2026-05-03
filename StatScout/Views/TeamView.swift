@@ -93,34 +93,16 @@ struct TeamView: View {
                                 description: "Try a different search term."
                             )
                         } else {
-                            ForEach(filteredPlayers, id: \.id) { player in
+                            // Leaderboard-style header (custom for team view)
+                            TeamTableHeader(sortDescending: sortDescending)
+
+                            // Leaderboard-style rows with alternating backgrounds
+                            ForEach(Array(filteredPlayers.enumerated()), id: \.element.id) { index, player in
                                 NavigationLink(value: player) {
-                                    HStack(spacing: 10) {
-                                        PlayerHeadshot(url: player.headshotURL, initials: player.initials, size: 36)
-                                        VStack(alignment: .leading, spacing: 2) {
-                                            Text(player.name)
-                                                .font(SavantType.bodyBold)
-                                                .foregroundStyle(SavantPalette.ink)
-                                                .lineLimit(1)
-                                            Text(player.position)
-                                                .font(SavantType.micro)
-                                                .tracking(0.4)
-                                                .foregroundStyle(SavantPalette.inkTertiary)
-                                        }
-                                        Spacer()
-                                        HStack(spacing: 6) {
-                                            Text("\(player.overallPercentile)")
-                                                .font(SavantType.statSmall)
-                                                .foregroundStyle(SavantPalette.color(forPercentile: player.overallPercentile))
-                                            Image(systemName: "chevron.right")
-                                                .font(.caption)
-                                                .foregroundStyle(SavantPalette.inkTertiary)
-                                        }
-                                    }
-                                    .padding(.horizontal, 16)
-                                    .padding(.vertical, 10)
-                                    .background(SavantPalette.surface)
-                                    .overlay(Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline), alignment: .bottom)
+                                    TeamPlayerRow(
+                                        rank: index + 1,
+                                        player: player
+                                    )
                                 }
                                 .buttonStyle(.plain)
                             }
@@ -150,6 +132,100 @@ struct TeamView: View {
             Text(description)
         }
         .padding(.vertical, 48)
+    }
+}
+
+// MARK: - Team Table Header (Leaderboard style)
+
+struct TeamTableHeader: View {
+    let sortDescending: Bool
+
+    var body: some View {
+        HStack(spacing: 0) {
+            Text("RANK")
+                .font(SavantType.micro)
+                .tracking(0.5)
+                .foregroundStyle(SavantPalette.inkTertiary)
+                .frame(width: 50, alignment: .leading)
+
+            Text("PLAYER")
+                .font(SavantType.micro)
+                .tracking(0.5)
+                .foregroundStyle(SavantPalette.inkTertiary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            Text("POS")
+                .font(SavantType.micro)
+                .tracking(0.5)
+                .foregroundStyle(SavantPalette.inkTertiary)
+                .frame(width: 60, alignment: .leading)
+
+            HStack(spacing: 4) {
+                Text("OVERALL")
+                    .font(SavantType.micro)
+                    .tracking(0.5)
+                    .foregroundStyle(SavantPalette.inkTertiary)
+                Image(systemName: sortDescending ? "arrow.down" : "arrow.up")
+                    .font(.system(size: 8, weight: .bold))
+                    .foregroundStyle(SavantPalette.savantRed)
+            }
+            .frame(width: 80, alignment: .trailing)
+        }
+        .frame(height: SavantGeo.rowHeightHeader)
+        .padding(.horizontal, SavantGeo.padInline)
+        .background(SavantPalette.surfaceAlt)
+        .overlay(Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline), alignment: .bottom)
+    }
+}
+
+// MARK: - Team Player Row (Leaderboard style)
+
+struct TeamPlayerRow: View {
+    let rank: Int
+    let player: Player
+
+    var body: some View {
+        HStack(spacing: 0) {
+            // Rank
+            Text("\(rank)")
+                .font(SavantType.statSmall)
+                .foregroundStyle(SavantPalette.inkSecondary)
+                .frame(width: 50, alignment: .leading)
+                .monospacedDigit()
+
+            // Player info
+            HStack(spacing: 10) {
+                PlayerHeadshot(url: player.headshotURL, initials: player.initials, size: 36)
+                Text(player.name)
+                    .font(SavantType.bodyBold)
+                    .foregroundStyle(SavantPalette.ink)
+                    .lineLimit(1)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            // Position column (replaces team since all same team)
+            Text(player.position)
+                .font(SavantType.small)
+                .foregroundStyle(SavantPalette.inkSecondary)
+                .frame(width: 60, alignment: .leading)
+
+            // Percentile with bar
+            HStack(spacing: 8) {
+                PercentileBarMini(percentile: player.overallPercentile)
+                    .frame(width: 40)
+                Text("\(player.overallPercentile)")
+                    .font(SavantType.statSmall)
+                    .foregroundStyle(SavantPalette.color(forPercentile: player.overallPercentile))
+                    .frame(width: 28, alignment: .trailing)
+                    .monospacedDigit()
+            }
+            .frame(width: 80, alignment: .trailing)
+        }
+        .frame(height: SavantGeo.rowHeight)
+        .padding(.horizontal, SavantGeo.padInline)
+        .background(rank % 2 == 1 ? SavantPalette.surface : SavantPalette.surfaceAlt)
+        .overlay(Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline), alignment: .bottom)
+        .contentShape(Rectangle())
     }
 }
 
