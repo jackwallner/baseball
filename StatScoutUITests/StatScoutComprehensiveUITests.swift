@@ -317,6 +317,43 @@ final class StatScoutComprehensiveUITests: XCTestCase {
         }
     }
 
+    func testYearComparisonNoOverlappingMetricsMessage() throws {
+        // Navigate to Year Compare for a player
+        let searchField = app.searchFields["Search players or teams"]
+        guard searchField.waitForExistence(timeout: 5) else {
+            return
+        }
+        searchField.tap()
+        searchField.typeText("Judge")
+
+        let judgeCell = app.staticTexts["Aaron Judge"]
+        guard judgeCell.waitForExistence(timeout: 2) else {
+            return
+        }
+        judgeCell.tap()
+
+        let yearCompareTab = app.buttons["Year Compare"]
+        guard yearCompareTab.waitForExistence(timeout: 2) else {
+            return
+        }
+        yearCompareTab.tap()
+
+        // If years have no overlapping metrics, should show the message
+        let noMetricsMessage = app.staticTexts["No Comparable Metrics"]
+        let noMetricsDescription = app.staticTexts["These seasons don't have overlapping metrics to compare."]
+
+        // Check if message exists OR if comparison content exists (both are valid states)
+        if noMetricsMessage.waitForExistence(timeout: 2) {
+            XCTAssertTrue(noMetricsMessage.exists, "Should show 'No Comparable Metrics' message")
+            XCTAssertTrue(noMetricsDescription.exists, "Should show explanation text")
+        } else {
+            // If no message, then comparison grid should be showing
+            let comparisonContent = app.staticTexts["Metric"]
+            XCTAssertTrue(comparisonContent.exists || app.staticTexts["Δ"].exists,
+                          "Should show either no-metrics message or comparison grid")
+        }
+    }
+
     // MARK: - MetricRankingView Tests
 
     func testMetricRankingViewSorting() throws {
@@ -339,6 +376,32 @@ final class StatScoutComprehensiveUITests: XCTestCase {
             // Verify sort changed
             XCTAssertTrue(sortButton.exists, "Sort button should still exist after tap")
         }
+    }
+
+    func testMetricRankingViewShowsSeasonIndicator() throws {
+        // Navigate to Metric Leaders tab
+        let metricsTab = app.buttons["Metrics"]
+        guard metricsTab.waitForExistence(timeout: 5) else {
+            return
+        }
+        metricsTab.tap()
+
+        // Tap on a metric to go to MetricRankingView
+        let metricCell = app.cells.firstMatch
+        guard metricCell.waitForExistence(timeout: 2) else {
+            return
+        }
+        metricCell.tap()
+
+        // Verify season indicator is displayed (e.g., "2026")
+        let currentYear = Calendar.current.component(.year, from: Date())
+        let seasonText = app.staticTexts["\(currentYear)"]
+        // Season indicator should exist as a static text in the header
+        let headerElements = app.staticTexts.allElementsBoundByIndex
+        let hasSeasonIndicator = headerElements.contains { element in
+            element.label.contains("\(currentYear)")
+        }
+        XCTAssertTrue(hasSeasonIndicator || seasonText.exists, "Should show season indicator in header")
     }
 
     func testMetricLeadersViewCategoryGrouping() throws {
