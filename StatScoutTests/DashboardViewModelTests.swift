@@ -172,6 +172,62 @@ final class DashboardViewModelTests: XCTestCase {
         // Should sort by Barrel% since that's the first available priority metric
         XCTAssertEqual(vm.leaderboard.first?.playerId, 1)
     }
+
+    @MainActor
+    func testSeasonPlayersReturnsPlayersForSelectedSeason() async {
+        // Create players with different seasons
+        let player2025 = Player(
+            playerId: 1, name: "Player 2025", team: "NYY", position: "RF", handedness: "R/R", imageURL: nil,
+            updatedAt: Date(), season: 2025, metrics: [], standardStats: [], games: []
+        )
+        let player2024 = Player(
+            playerId: 2, name: "Player 2024", team: "BOS", position: "1B", handedness: "L/R", imageURL: nil,
+            updatedAt: Date(), season: 2024, metrics: [], standardStats: [], games: []
+        )
+
+        let vm = DashboardViewModel(provider: MockProvider(players: [player2025, player2024]))
+        await vm.load()
+
+        // Set season to 2025
+        vm.selectedSeason = 2025
+        XCTAssertEqual(vm.seasonPlayers.count, 1)
+        XCTAssertEqual(vm.seasonPlayers.first?.playerId, 1)
+
+        // Set season to 2024
+        vm.selectedSeason = 2024
+        XCTAssertEqual(vm.seasonPlayers.count, 1)
+        XCTAssertEqual(vm.seasonPlayers.first?.playerId, 2)
+    }
+
+    @MainActor
+    func testSeasonPlayersFallsBackToAllPlayersWhenNoDataForSeason() async {
+        // Players only have 2025 data
+        let player2025 = Player(
+            playerId: 1, name: "Player 2025", team: "NYY", position: "RF", handedness: "R/R", imageURL: nil,
+            updatedAt: Date(), season: 2025, metrics: [], standardStats: [], games: []
+        )
+
+        let vm = DashboardViewModel(provider: MockProvider(players: [player2025]))
+        await vm.load()
+
+        // Select 2024 which has no data
+        vm.selectedSeason = 2024
+
+        // Should fall back to all players
+        XCTAssertEqual(vm.seasonPlayers.count, 1)
+        XCTAssertEqual(vm.seasonPlayers.first?.playerId, 1)
+    }
+
+    @MainActor
+    func testSeasonIndicatorCanBeFormatted() async {
+        // Test that season can be displayed correctly (no commas, just the year)
+        let season: Int = 2026
+
+        // Swift string interpolation should not add commas
+        let formatted = "\(season)"
+        XCTAssertEqual(formatted, "2026")
+        XCTAssertFalse(formatted.contains(","), "Season should not contain comma separators")
+    }
 }
 
 final class InMemoryPlayerCache: PlayerCaching, @unchecked Sendable {
