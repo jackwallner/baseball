@@ -40,7 +40,7 @@ jobs:
           STATCAST_SEASON: ${{ vars.STATCAST_SEASON || '2026' }}
         run: |
           set -o pipefail
-          python backend/ingest_v2.py 2>&1 | tee ingestion.log
+          python backend/ingest.py 2>&1 | tee ingestion.log
 
       - name: Upload artifacts on failure
         if: failure()
