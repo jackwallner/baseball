@@ -106,6 +106,11 @@ struct Player: Identifiable, Codable, Hashable, Sendable {
         return "\(name) · \(team) \(position)\nOverall: \(overallPercentile.ordinal) percentile\nTop signal: \(topSignal)\nStatScout"
     }
 
+    var savantURL: URL? {
+        let slug = name.lowercased().replacingOccurrences(of: " ", with: "-")
+        return URL(string: "https://baseballsavant.mlb.com/savant-player/\(slug)-\(playerId)")
+    }
+
     func percentile(for category: MetricCategory) -> Int? {
         let categoryMetrics = metrics.filter { $0.category == category }
         guard !categoryMetrics.isEmpty else { return nil }

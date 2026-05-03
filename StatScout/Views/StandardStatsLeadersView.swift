@@ -131,17 +131,23 @@ struct StandardStatsLeadersView: View {
                     .font(SavantType.micro)
                     .foregroundStyle(SavantPalette.inkTertiary)
                     .frame(width: 50, alignment: .leading)
-                
+
                 Text("PLAYER")
                     .font(SavantType.micro)
                     .foregroundStyle(SavantPalette.inkTertiary)
-                
+
                 Spacer()
-                
-                Text(selectedStat)
+
+                Button(action: { sortDescending.toggle() }) {
+                    HStack(spacing: 4) {
+                        Text(selectedStat)
+                        Image(systemName: sortDescending ? "arrow.down" : "arrow.up")
+                            .font(.system(size: 8, weight: .bold))
+                    }
                     .font(SavantType.micro)
-                    .foregroundStyle(SavantPalette.inkTertiary)
-                    .frame(width: 60, alignment: .trailing)
+                    .foregroundStyle(SavantPalette.savantRed)
+                }
+                .frame(width: 70, alignment: .trailing)
             }
             .padding(.horizontal, SavantGeo.padInline)
             .padding(.vertical, 8)

@@ -36,7 +36,7 @@ struct DashboardView: View {
                             generator.impactOccurred()
                         }) {
                             HStack(spacing: 4) {
-                                Text("Sort")
+                                Text(viewModel.sortLabel)
                                 Image(systemName: viewModel.sortDescending ? "arrow.down" : "arrow.up")
                             }
                             .font(SavantType.micro)
@@ -90,7 +90,7 @@ struct DashboardView: View {
                 .padding(.vertical, 24)
                 .frame(minHeight: 200)
             } else {
-                LeaderboardTableHeader(sortDescending: viewModel.sortDescending)
+                LeaderboardTableHeader(sortDescending: viewModel.sortDescending, sortLabel: viewModel.sortLabel)
                 ForEach(Array(viewModel.leaderboard.enumerated()), id: \.element.id) { index, player in
                     NavigationLink(value: player) {
                         LeaderboardTableRow(

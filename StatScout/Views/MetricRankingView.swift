@@ -25,7 +25,7 @@ struct MetricRankingView: View {
                     trailing: AnyView(
                         Button(action: { sortDescending.toggle() }) {
                             HStack(spacing: 4) {
-                                Text("Sort")
+                                Text("Percentile")
                                 Image(systemName: sortDescending ? "arrow.down" : "arrow.up")
                             }
                             .font(SavantType.micro)

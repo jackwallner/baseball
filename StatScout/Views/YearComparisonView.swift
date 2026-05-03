@@ -2,8 +2,11 @@ import SwiftUI
 
 struct YearComparisonView: View {
     let history: [Player]
-    @State private var selectedYear1: Int?
-    @State private var selectedYear2: Int?
+    @State private var selectedYear1: Int = 2026
+    @State private var selectedYear2: Int = 2025
+
+    // Static available years - 2024, 2025, 2026
+    private let availableYears: [Int] = [2026, 2025, 2024, 2023, 2022]
 
     private var sortedHistory: [Player] {
         history.sorted {
@@ -12,18 +15,12 @@ struct YearComparisonView: View {
         }
     }
 
-    private var availableYears: [Int] {
-        sortedHistory.compactMap { $0.season }.uniqued().sorted(by: >)
-    }
-
     private var player1: Player? {
-        guard let year = selectedYear1 else { return nil }
-        return sortedHistory.first { $0.season == year }
+        sortedHistory.first { $0.season == selectedYear1 }
     }
 
     private var player2: Player? {
-        guard let year = selectedYear2 else { return nil }
-        return sortedHistory.first { $0.season == year }
+        sortedHistory.first { $0.season == selectedYear2 }
     }
 
     var body: some View {
@@ -33,19 +30,27 @@ struct YearComparisonView: View {
             if let p1 = player1, let p2 = player2 {
                 comparisonContent(p1: p1, p2: p2)
             } else {
-                placeholderContent
+                noDataForYearView
             }
         }
         .padding(.horizontal, 12)
         .padding(.top, 12)
-        .onAppear {
-            if selectedYear1 == nil, let first = availableYears.first {
-                selectedYear1 = first
-            }
-            if selectedYear2 == nil, availableYears.count > 1 {
-                selectedYear2 = availableYears.dropFirst().first
-            }
+    }
+
+    private var noDataForYearView: some View {
+        ContentUnavailableView {
+            Label("No Data Available", systemImage: "calendar.badge.clock")
+        } description: {
+            Text("Historical data for \(selectedYear1) or \(selectedYear2) is not available for this player.")
         }
+        .padding(.vertical, 48)
+        .frame(maxWidth: .infinity)
+        .background(SavantPalette.surface)
+        .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
+        .overlay(
+            RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
+                .stroke(SavantPalette.hairline, lineWidth: 0.5)
+        )
     }
 
     private var yearSelectors: some View {
@@ -68,7 +73,7 @@ struct YearComparisonView: View {
         )
     }
 
-    private func yearPicker(title: String, selection: Binding<Int?>, exclude: Int?) -> some View {
+    private func yearPicker(title: String, selection: Binding<Int>, exclude: Int) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title)
                 .font(SavantType.micro)
@@ -89,7 +94,7 @@ struct YearComparisonView: View {
                 }
             } label: {
                 HStack {
-                    Text(selection.wrappedValue.map(String.init) ?? "Select")
+                    Text(String(selection.wrappedValue))
                         .font(SavantType.bodyBold)
                         .foregroundStyle(SavantPalette.ink)
                     Spacer()

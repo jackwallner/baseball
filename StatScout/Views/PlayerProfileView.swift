@@ -48,7 +48,15 @@ struct PlayerProfileView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                ShareLink(item: player.shareSummary)
+                HStack(spacing: 12) {
+                    if let url = player.savantURL {
+                        Link(destination: url) {
+                            Image(systemName: "safari")
+                                .foregroundStyle(SavantPalette.linkBlue)
+                        }
+                    }
+                    ShareLink(item: player.shareSummary)
+                }
             }
         }
         .sheet(isPresented: $showPercentileInfo) {
@@ -120,10 +128,75 @@ struct PlayerProfileView: View {
 
     private var statcastContent: some View {
         VStack(spacing: 12) {
+            keyStatsCard
             percentileRankingsCard
         }
         .padding(.horizontal, 12)
         .padding(.top, 12)
+    }
+
+    // Key stats showing actual values (not just percentiles)
+    private var keyStatsCard: some View {
+        VStack(spacing: 0) {
+            SavantSectionBar(title: "KEY STATS · \(seasonLabel)")
+
+            // Get top metrics by percentile to show as key stats
+            let topMetrics = player.metrics.sorted { $0.percentile > $1.percentile }.prefix(4)
+
+            if topMetrics.isEmpty {
+                emptyStateCard(
+                    icon: "chart.bar",
+                    title: "No stats available",
+                    description: "Stats are not available for this player."
+                )
+                .padding(.vertical, 24)
+            } else {
+                let cols = Array(topMetrics).chunked(into: 2)
+                ForEach(Array(cols.enumerated()), id: \.offset) { rowIndex, pair in
+                    HStack(spacing: 0) {
+                        ForEach(Array(pair.enumerated()), id: \.element.id) { colIndex, metric in
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(metric.label)
+                                    .font(SavantType.micro)
+                                    .tracking(0.4)
+                                    .foregroundStyle(SavantPalette.inkTertiary)
+                                HStack(alignment: .firstTextBaseline, spacing: 6) {
+                                    Text(metric.value)
+                                        .font(SavantType.statLarge)
+                                        .foregroundStyle(SavantPalette.ink)
+                                    Text("\(metric.percentile)th")
+                                        .font(SavantType.small)
+                                        .foregroundStyle(SavantPalette.color(forPercentile: metric.percentile))
+                                }
+                            }
+                            .padding(.horizontal, SavantGeo.padCard)
+                            .padding(.vertical, 12)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background((rowIndex * 2 + colIndex) % 2 == 0 ? SavantPalette.surface : SavantPalette.surfaceAlt)
+                            .overlay(
+                                Rectangle()
+                                    .fill(SavantPalette.divider)
+                                    .frame(height: SavantGeo.hairline),
+                                alignment: .bottom
+                            )
+                            .overlay(
+                                Rectangle()
+                                    .fill(SavantPalette.divider)
+                                    .frame(width: SavantGeo.hairline)
+                                    .opacity(colIndex > 0 ? 1 : 0),
+                                alignment: .leading
+                            )
+                        }
+                    }
+                }
+            }
+        }
+        .background(SavantPalette.surface)
+        .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
+        .overlay(
+            RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
+                .stroke(SavantPalette.hairline, lineWidth: 0.5)
+        )
     }
 
     private var standardContent: some View {

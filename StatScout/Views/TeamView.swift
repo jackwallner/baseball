@@ -4,7 +4,7 @@ struct TeamView: View {
     let team: String
     let players: [Player]
     @State private var searchText = ""
-    @State private var sortOption: SortOption = .name
+    @State private var sortOption: SortOption = .percentile
     @State private var sortDescending = true
 
     enum SortOption: String, CaseIterable {

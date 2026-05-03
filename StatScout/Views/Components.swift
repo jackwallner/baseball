@@ -98,10 +98,12 @@ struct OverallPercentileBadge: View {
             Text("\(percentile)")
                 .font(SavantType.statHero)
                 .foregroundStyle(.white)
+                .shadow(color: Color.black.opacity(0.4), radius: 2, x: 0, y: 1)
             Text(percentile.ordinal)
                 .font(SavantType.micro)
                 .tracking(0.6)
-                .foregroundStyle(.white.opacity(0.85))
+                .foregroundStyle(.white.opacity(0.9))
+                .shadow(color: Color.black.opacity(0.3), radius: 1, x: 0, y: 0.5)
         }
         .frame(width: size, height: size)
         .background(SavantPalette.color(forPercentile: percentile))
@@ -167,7 +169,8 @@ struct MetricBar: View {
 
                         Text("\(percentileValue)")
                             .font(.system(size: 12, weight: .bold))
-                            .foregroundStyle(percentileValue < 25 ? SavantPalette.ink : .white)
+                            .foregroundStyle(percentileValue >= 35 && percentileValue <= 75 ? SavantPalette.ink : .white)
+                            .shadow(color: percentileValue >= 35 && percentileValue <= 75 ? Color.clear : Color.black.opacity(0.3), radius: 1, x: 0, y: 0.5)
                     }
                     .position(x: offset, y: 16)
 
@@ -310,6 +313,7 @@ struct PercentileBarMini: View {
 
 struct LeaderboardTableHeader: View {
     let sortDescending: Bool
+    var sortLabel: String = "OVERALL"
 
     var body: some View {
         HStack(spacing: 0) {
@@ -332,7 +336,7 @@ struct LeaderboardTableHeader: View {
                 .frame(width: 50, alignment: .leading)
 
             HStack(spacing: 4) {
-                Text("OVERALL")
+                Text(sortLabel.uppercased())
                     .font(SavantType.micro)
                     .tracking(0.5)
                     .foregroundStyle(SavantPalette.inkTertiary)

@@ -63,12 +63,10 @@ struct TeamsView: View {
 
                 LazyVGrid(columns: columns, spacing: 8) {
                     ForEach(sortedTeams, id: \.self) { abbr in
-                        let count = viewModel.teamCounts[abbr] ?? 0
                         let isFav = teamsViewModel.isFavorite(abbr)
                         NavigationLink(value: TeamDestination(abbr: abbr)) {
                             TeamTile(
                                 abbr: abbr,
-                                playerCount: count,
                                 isFavorite: isFav
                             )
                         }
@@ -131,7 +129,6 @@ struct TeamsView: View {
 
 struct TeamTile: View {
     let abbr: String
-    var playerCount: Int = 0
     var isFavorite: Bool = false
 
     var body: some View {
@@ -143,7 +140,7 @@ struct TeamTile: View {
                 Text(abbr)
                     .font(SavantType.statSmall)
                     .foregroundStyle(.white)
-                
+
                 if isFavorite {
                     // Star badge
                     VStack {
@@ -160,20 +157,12 @@ struct TeamTile: View {
                     .frame(width: 44, height: 44)
                 }
             }
-            
-            VStack(spacing: 2) {
-                Text(teamFullName(abbr))
-                    .font(SavantType.smallBold)
-                    .foregroundStyle(isFavorite ? SavantPalette.savantRed : SavantPalette.ink)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-                
-                if playerCount > 0 {
-                    Text("\(playerCount) players")
-                        .font(SavantType.micro)
-                        .foregroundStyle(SavantPalette.inkTertiary)
-                }
-            }
+
+            Text(teamFullName(abbr))
+                .font(SavantType.smallBold)
+                .foregroundStyle(isFavorite ? SavantPalette.savantRed : SavantPalette.ink)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)

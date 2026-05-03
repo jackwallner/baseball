@@ -12,6 +12,17 @@ final class DashboardViewModel {
     var searchText = ""
     var selectedCategory: MetricCategory? = .hitting
     var sortDescending = true
+
+    var sortLabel: String {
+        guard let category = selectedCategory else { return "Overall" }
+        let priorityMetrics: [MetricCategory: String] = [
+            .hitting: "xwOBA",
+            .pitching: "xERA",
+            .fielding: "OAA",
+            .running: "Sprint Speed"
+        ]
+        return priorityMetrics[category] ?? "Overall"
+    }
     var isLoading = false
     var errorMessage: String?
     var lastFetchFailed = false
