@@ -159,7 +159,7 @@ struct MetricBar: View {
                         .fill(SavantPalette.color(forPercentile: percentileValue))
                         .frame(width: offset, height: 12)
 
-                    // Percentile circle
+                    // Percentile circle - centered on the track (track height 12 centered in 32pt frame = y: 16)
                     ZStack {
                         Circle()
                             .fill(SavantPalette.color(forPercentile: percentileValue))
@@ -169,7 +169,7 @@ struct MetricBar: View {
                             .font(.system(size: 12, weight: .bold))
                             .foregroundStyle(percentileValue < 25 ? SavantPalette.ink : .white)
                     }
-                    .position(x: offset, y: 6)
+                    .position(x: offset, y: 16)
 
                     // Stat value at the right end - Baseball Savant style
                     if showValue && !metric.value.isEmpty {
@@ -198,18 +198,20 @@ struct SearchField: View {
     var body: some View {
         HStack(spacing: 10) {
             Image(systemName: "magnifyingglass")
-                .foregroundStyle(SavantPalette.inkTertiary)
+                .foregroundStyle(SavantPalette.inkSecondary)
             TextField("Search players or teams", text: $text)
                 .textInputAutocapitalization(.never)
                 .foregroundStyle(SavantPalette.ink)
         }
         .padding(.horizontal, 12)
-        .frame(height: 32)
+        .frame(height: 36)
         .background(SavantPalette.surface)
+        .cornerRadius(SavantGeo.radiusCard)
         .overlay(
             RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
                 .stroke(SavantPalette.hairline, lineWidth: 1)
         )
+        .shadow(color: Color.black.opacity(0.04), radius: 2, x: 0, y: 1)
     }
 }
 
@@ -307,6 +309,8 @@ struct PercentileBarMini: View {
 // MARK: - Leaderboard Table
 
 struct LeaderboardTableHeader: View {
+    let sortDescending: Bool
+
     var body: some View {
         HStack(spacing: 0) {
             Text("RANK")
@@ -327,11 +331,16 @@ struct LeaderboardTableHeader: View {
                 .foregroundStyle(SavantPalette.inkTertiary)
                 .frame(width: 50, alignment: .leading)
 
-            Text("PERCENTILE")
-                .font(SavantType.micro)
-                .tracking(0.5)
-                .foregroundStyle(SavantPalette.inkTertiary)
-                .frame(width: 80, alignment: .trailing)
+            HStack(spacing: 4) {
+                Text("OVERALL")
+                    .font(SavantType.micro)
+                    .tracking(0.5)
+                    .foregroundStyle(SavantPalette.inkTertiary)
+                Image(systemName: sortDescending ? "arrow.down" : "arrow.up")
+                    .font(.system(size: 8, weight: .bold))
+                    .foregroundStyle(SavantPalette.savantRed)
+            }
+            .frame(width: 80, alignment: .trailing)
         }
         .frame(height: SavantGeo.rowHeightHeader)
         .padding(.horizontal, SavantGeo.padInline)

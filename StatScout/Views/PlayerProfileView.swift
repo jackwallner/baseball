@@ -84,7 +84,6 @@ struct PlayerProfileView: View {
 
     private var standardTabButton: some View {
         let isSelected = selectedTab == .standard
-        let hasStats = !(player.standardStats ?? []).isEmpty
         return Button(action: {
             withAnimation(.easeInOut(duration: 0.2)) {
                 selectedTab = .standard
@@ -99,13 +98,10 @@ struct PlayerProfileView: View {
                 .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
         }
         .buttonStyle(.plain)
-        .disabled(!hasStats)
-        .opacity(hasStats ? 1 : 0.5)
     }
 
     private var yearCompareTabButton: some View {
         let isSelected = selectedTab == .yearCompare
-        let hasHistory = history.count > 1
         return Button(action: {
             withAnimation(.easeInOut(duration: 0.2)) {
                 selectedTab = .yearCompare
@@ -120,8 +116,6 @@ struct PlayerProfileView: View {
                 .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
         }
         .buttonStyle(.plain)
-        .disabled(!hasHistory)
-        .opacity(hasHistory ? 1 : 0.5)
     }
 
     private var statcastContent: some View {

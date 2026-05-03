@@ -90,7 +90,7 @@ struct DashboardView: View {
                 .padding(.vertical, 24)
                 .frame(minHeight: 200)
             } else {
-                LeaderboardTableHeader()
+                LeaderboardTableHeader(sortDescending: viewModel.sortDescending)
                 ForEach(Array(viewModel.leaderboard.enumerated()), id: \.element.id) { index, player in
                     NavigationLink(value: player) {
                         LeaderboardTableRow(
