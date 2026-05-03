@@ -319,7 +319,6 @@ struct PercentileBarMini: View {
 struct LeaderboardTableHeader: View {
     let sortDescending: Bool
     var sortLabel: String = "OVERALL"
-    var onSort: () -> Void = {}
 
     var body: some View {
         HStack(spacing: 0) {
@@ -341,20 +340,17 @@ struct LeaderboardTableHeader: View {
                 .foregroundStyle(SavantPalette.inkTertiary)
                 .frame(width: 50, alignment: .leading)
 
-            Button(action: onSort) {
-                HStack(spacing: 4) {
-                    Text(sortLabel.uppercased())
-                        .font(SavantType.micro)
-                        .tracking(0.5)
-                        .foregroundStyle(SavantPalette.savantRed)
-                    Image(systemName: sortDescending ? "arrow.down" : "arrow.up")
-                        .font(.system(size: 8, weight: .bold))
-                        .foregroundStyle(SavantPalette.savantRed)
-                }
-                .frame(width: 80, alignment: .trailing)
-                .contentShape(Rectangle())
+            // Sort indicator - display only, tap SavantSectionBar to change sort
+            HStack(spacing: 4) {
+                Text(sortLabel.uppercased())
+                    .font(SavantType.micro)
+                    .tracking(0.5)
+                    .foregroundStyle(SavantPalette.savantRed)
+                Image(systemName: sortDescending ? "arrow.down" : "arrow.up")
+                    .font(.system(size: 8, weight: .bold))
+                    .foregroundStyle(SavantPalette.savantRed)
             }
-            .buttonStyle(.plain)
+            .frame(width: 80, alignment: .trailing)
         }
         .frame(height: SavantGeo.rowHeightHeader)
         .padding(.horizontal, SavantGeo.padInline)

@@ -144,11 +144,12 @@ struct StandardStatsLeadersView: View {
                     .foregroundStyle(SavantPalette.inkTertiary)
                     .frame(width: 50, alignment: .leading)
 
+                // Sort indicator - display only, use section bar controls to change
                 HStack(spacing: 4) {
                     Text(selectedStat.uppercased())
                         .font(SavantType.micro)
                         .tracking(0.5)
-                        .foregroundStyle(SavantPalette.inkTertiary)
+                        .foregroundStyle(SavantPalette.savantRed)
                     Image(systemName: sortDescending ? "arrow.down" : "arrow.up")
                         .font(.system(size: 8, weight: .bold))
                         .foregroundStyle(SavantPalette.savantRed)
