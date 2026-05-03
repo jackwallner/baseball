@@ -95,9 +95,11 @@ def compute_batter_stats(df: pd.DataFrame) -> pd.DataFrame:
         total_whiffs = group['is_whiff'].sum()
         pitches_outside = group['is_outside'].sum()
         total_chases = group['is_chase'].sum()
-        
-        whiff_percent = (total_whiffs / total_swings * 100) if total_swings >= 50 else None
-        chase_percent = (total_chases / pitches_outside * 100) if pitches_outside >= 100 else None
+
+        # Lower thresholds for early season data - calculate if we have any data
+        # but require minimum samples for meaningful rates
+        whiff_percent = (total_whiffs / total_swings * 100) if total_swings >= 10 else None
+        chase_percent = (total_chases / pitches_outside * 100) if pitches_outside >= 20 else None
         
         batter_stats.append({
             'player_id': int(batter_id),
