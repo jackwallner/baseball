@@ -22,7 +22,7 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.jackwallner.baseball
         PRODUCT_NAME: "Baseball Savvy StatScout"
         MARKETING_VERSION: "1.0"
-        CURRENT_PROJECT_VERSION: "31"
+        CURRENT_PROJECT_VERSION: "33"
         GENERATE_INFOPLIST_FILE: NO
         INFOPLIST_FILE: StatScout/Info.plist
         CODE_SIGN_ENTITLEMENTS: StatScout/StatScout.entitlements
@@ -68,6 +68,18 @@ targets:
         GENERATE_INFOPLIST_FILE: YES
         TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Baseball Savvy StatScout.app/Baseball Savvy StatScout"
 
+  StatScoutUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: StatScoutUITests
+    dependencies:
+      - target: StatScout
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: StatScout
+
 schemes:
   StatScout:
     build:
@@ -79,6 +91,7 @@ schemes:
       config: Debug
       targets:
         - StatScoutTests
+        - StatScoutUITests
     profile:
       config: Release
     analyze:

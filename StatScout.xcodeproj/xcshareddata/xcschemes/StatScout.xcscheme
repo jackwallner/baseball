@@ -52,10 +52,10 @@
          </TestableReference>
          <TestableReference
             skipped = "NO"
-            parallelizable = "YES">
+            parallelizable = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "B1234C5678D90E1234F567890A1234567B"
+               BlueprintIdentifier = "DC4BFEC196200B1709D13E28"
                BuildableName = "StatScoutUITests.xctest"
                BlueprintName = "StatScoutUITests"
                ReferencedContainer = "container:StatScout.xcodeproj">
