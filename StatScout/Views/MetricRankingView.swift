@@ -23,7 +23,11 @@ struct MetricRankingView: View {
                 SavantSectionBar(
                     title: "\(metricLabel) · \(metricCategory.rawValue)",
                     trailing: AnyView(
-                        Button(action: { sortDescending.toggle() }) {
+                        Button(action: {
+                            sortDescending.toggle()
+                            let generator = UIImpactFeedbackGenerator(style: .light)
+                            generator.impactOccurred()
+                        }) {
                             HStack(spacing: 4) {
                                 Text("Percentile")
                                 Image(systemName: sortDescending ? "arrow.down" : "arrow.up")
@@ -65,6 +69,7 @@ struct MetricRankingView: View {
             .padding(.horizontal, 12)
             .padding(.top, 12)
         }
+        .scrollBounceBehavior(.basedOnSize)
         .background(SavantPalette.canvas.ignoresSafeArea())
         .navigationTitle("\(metricLabel) · \(metricCategory.rawValue)")
         .navigationBarTitleDisplayMode(.inline)

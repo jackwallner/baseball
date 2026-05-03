@@ -62,40 +62,39 @@ struct StandardStatsLeadersView: View {
             VStack(spacing: 16) {
                 // Category selector
                 categorySelector
-                
+
                 // Stat selector
                 statSelector
-                
+
                 // Leaders list
                 leadersList
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 12)
         }
+        .scrollBounceBehavior(.basedOnSize)
         .background(SavantPalette.canvas.ignoresSafeArea())
+        .navigationBarTitleDisplayMode(.inline)
     }
     
     private var categorySelector: some View {
-        VStack(spacing: 8) {
-            HStack(spacing: 8) {
-                ForEach(StandardStatCategory.allCases, id: \.self) { category in
-                    Button(action: {
-                        selectedCategory = category
-                        // Reset to first stat in new category
-                        selectedStat = availableStats.first ?? "AVG"
-                    }) {
-                        Text(category.rawValue)
-                            .font(SavantType.bodyBold)
-                            .foregroundStyle(selectedCategory == category ? .white : SavantPalette.ink)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 44)
-                            .background(
-                                selectedCategory == category ? SavantPalette.savantRed : SavantPalette.surface
-                            )
-                            .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
-                    }
-                    .buttonStyle(.plain)
+        HStack(spacing: 8) {
+            ForEach(StandardStatCategory.allCases, id: \.self) { category in
+                Button(action: {
+                    selectedCategory = category
+                    selectedStat = availableStats.first ?? "AVG"
+                    let generator = UIImpactFeedbackGenerator(style: .light)
+                    generator.impactOccurred()
+                }) {
+                    Text(category.rawValue)
+                        .font(SavantType.bodyBold)
+                        .foregroundStyle(selectedCategory == category ? .white : SavantPalette.ink)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 44)
+                        .background(selectedCategory == category ? SavantPalette.savantRed : SavantPalette.surface)
+                        .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
                 }
+                .buttonStyle(.plain)
             }
         }
     }
@@ -106,15 +105,15 @@ struct StandardStatsLeadersView: View {
                 ForEach(availableStats, id: \.self) { stat in
                     Button(action: {
                         selectedStat = stat
+                        let generator = UIImpactFeedbackGenerator(style: .light)
+                        generator.impactOccurred()
                     }) {
                         Text(stat)
                             .font(SavantType.body)
                             .foregroundStyle(selectedStat == stat ? .white : SavantPalette.ink)
                             .padding(.horizontal, 16)
                             .padding(.vertical, 8)
-                            .background(
-                                selectedStat == stat ? SavantPalette.savantNavy : SavantPalette.surface
-                            )
+                            .background(selectedStat == stat ? SavantPalette.savantNavy : SavantPalette.surface)
                             .clipShape(Capsule())
                     }
                     .buttonStyle(.plain)
@@ -125,33 +124,41 @@ struct StandardStatsLeadersView: View {
     
     private var leadersList: some View {
         VStack(spacing: 0) {
-            // Header
-            HStack {
+            // Header - matches LeaderboardTableHeader style
+            HStack(spacing: 0) {
                 Text("RANK")
                     .font(SavantType.micro)
+                    .tracking(0.5)
                     .foregroundStyle(SavantPalette.inkTertiary)
                     .frame(width: 50, alignment: .leading)
 
                 Text("PLAYER")
                     .font(SavantType.micro)
+                    .tracking(0.5)
                     .foregroundStyle(SavantPalette.inkTertiary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
 
-                Spacer()
-
-                Button(action: { sortDescending.toggle() }) {
-                    HStack(spacing: 4) {
-                        Text(selectedStat)
-                        Image(systemName: sortDescending ? "arrow.down" : "arrow.up")
-                            .font(.system(size: 8, weight: .bold))
-                    }
+                Text("TEAM")
                     .font(SavantType.micro)
-                    .foregroundStyle(SavantPalette.savantRed)
+                    .tracking(0.5)
+                    .foregroundStyle(SavantPalette.inkTertiary)
+                    .frame(width: 50, alignment: .leading)
+
+                HStack(spacing: 4) {
+                    Text(selectedStat.uppercased())
+                        .font(SavantType.micro)
+                        .tracking(0.5)
+                        .foregroundStyle(SavantPalette.inkTertiary)
+                    Image(systemName: sortDescending ? "arrow.down" : "arrow.up")
+                        .font(.system(size: 8, weight: .bold))
+                        .foregroundStyle(SavantPalette.savantRed)
                 }
-                .frame(width: 70, alignment: .trailing)
+                .frame(width: 80, alignment: .trailing)
             }
+            .frame(height: SavantGeo.rowHeightHeader)
             .padding(.horizontal, SavantGeo.padInline)
-            .padding(.vertical, 8)
-            .background(SavantPalette.surface)
+            .background(SavantPalette.surfaceAlt)
+            .overlay(Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline), alignment: .bottom)
             
             // Players
             if sortedPlayers.isEmpty {
@@ -178,47 +185,48 @@ struct StandardStatsLeadersView: View {
     
     private func playerRow(rank: Int, player: Player) -> some View {
         NavigationLink(value: player) {
-            HStack(spacing: 12) {
+            HStack(spacing: 0) {
                 // Rank
                 Text("\(rank)")
-                    .font(SavantType.bodyBold)
-                    .foregroundStyle(SavantPalette.ink)
+                    .font(SavantType.statSmall)
+                    .foregroundStyle(SavantPalette.inkSecondary)
                     .frame(width: 50, alignment: .leading)
-                
+                    .monospacedDigit()
+
                 // Player info
-                HStack(spacing: 8) {
-                    AsyncImage(url: player.headshotURL) { image in
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                    } placeholder: {
-                        Circle()
-                            .fill(SavantPalette.hairline)
-                    }
-                    .frame(width: 36, height: 36)
-                    .clipShape(Circle())
-                    
+                HStack(spacing: 10) {
+                    PlayerHeadshot(url: player.headshotURL, initials: player.initials, size: 36)
                     VStack(alignment: .leading, spacing: 2) {
                         Text(player.name)
                             .font(SavantType.bodyBold)
                             .foregroundStyle(SavantPalette.ink)
                             .lineLimit(1)
-                        Text("\(player.team) · \(player.position)")
-                            .font(SavantType.small)
-                            .foregroundStyle(SavantPalette.inkSecondary)
+                        Text(player.position)
+                            .font(SavantType.micro)
+                            .tracking(0.4)
+                            .foregroundStyle(SavantPalette.inkTertiary)
                     }
                 }
-                
-                Spacer()
-                
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                // Team with color dot
+                HStack(spacing: 4) {
+                    TeamColorDot(abbr: player.team, size: 6)
+                    Text(player.team)
+                        .font(SavantType.small)
+                        .foregroundStyle(SavantPalette.inkSecondary)
+                }
+                .frame(width: 50, alignment: .leading)
+
                 // Stat value
                 Text(statDisplay(for: player))
                     .font(SavantType.statMed)
                     .foregroundStyle(SavantPalette.savantRed)
-                    .frame(width: 60, alignment: .trailing)
+                    .frame(width: 70, alignment: .trailing)
+                    .monospacedDigit()
             }
-            .padding(.horizontal, SavantGeo.padInline)
             .frame(height: SavantGeo.rowHeight)
+            .padding(.horizontal, SavantGeo.padInline)
             .background(rank % 2 == 1 ? SavantPalette.surface : SavantPalette.surfaceAlt)
             .overlay(
                 Rectangle()

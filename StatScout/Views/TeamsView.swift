@@ -81,8 +81,9 @@ struct TeamsView: View {
         }
         .scrollBounceBehavior(.basedOnSize)
         .background(SavantPalette.canvas.ignoresSafeArea())
+        .navigationBarTitleDisplayMode(.inline)
     }
-    
+
     private var headerBar: some View {
         HStack {
             Text("TEAMS")

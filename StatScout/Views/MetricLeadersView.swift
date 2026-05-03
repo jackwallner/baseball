@@ -34,7 +34,9 @@ struct MetricLeadersView: View {
                 }
             }
         }
+        .scrollBounceBehavior(.basedOnSize)
         .background(SavantPalette.canvas.ignoresSafeArea())
+        .navigationBarTitleDisplayMode(.inline)
     }
 
     private func categoryCard(_ group: (MetricCategory, [(label: String, category: MetricCategory, best: (player: Player, value: Int)?, worst: (player: Player, value: Int)?)])) -> some View {

@@ -7,11 +7,13 @@ struct DashboardView: View {
         ZStack {
             ScrollView {
                 VStack(spacing: 0) {
+                    seasonSelector
                     CategoryFilter(selectedCategory: $viewModel.selectedCategory)
 
                     leaderboardSection
                 }
             }
+            .scrollBounceBehavior(.basedOnSize)
             .refreshable {
                 await viewModel.load()
             }
@@ -22,6 +24,31 @@ struct DashboardView: View {
             }
         }
         .background(SavantPalette.canvas.ignoresSafeArea())
+    }
+
+    private var seasonSelector: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(viewModel.availableSeasons, id: \.self) { season in
+                    Button(action: {
+                        viewModel.selectedSeason = season
+                    }) {
+                        Text("\(season)")
+                            .font(SavantType.bodyBold)
+                            .foregroundStyle(viewModel.selectedSeason == season ? .white : SavantPalette.ink)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            .background(
+                                viewModel.selectedSeason == season ? SavantPalette.savantRed : SavantPalette.surface
+                            )
+                            .clipShape(Capsule())
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+        }
     }
 
     private var leaderboardSection: some View {

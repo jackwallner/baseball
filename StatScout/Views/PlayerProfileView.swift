@@ -43,6 +43,7 @@ struct PlayerProfileView: View {
                 }
             }
         }
+        .scrollBounceBehavior(.basedOnSize)
         .background(SavantPalette.canvas.ignoresSafeArea())
         .navigationTitle(player.name)
         .navigationBarTitleDisplayMode(.inline)
@@ -78,6 +79,8 @@ struct PlayerProfileView: View {
             withAnimation(.easeInOut(duration: 0.2)) {
                 selectedTab = .statcast
             }
+            let generator = UIImpactFeedbackGenerator(style: .light)
+            generator.impactOccurred()
         }) {
             Text(PlayerStatTab.statcast.rawValue)
                 .font(SavantType.bodyBold)
@@ -96,6 +99,8 @@ struct PlayerProfileView: View {
             withAnimation(.easeInOut(duration: 0.2)) {
                 selectedTab = .standard
             }
+            let generator = UIImpactFeedbackGenerator(style: .light)
+            generator.impactOccurred()
         }) {
             Text(PlayerStatTab.standard.rawValue)
                 .font(SavantType.bodyBold)
@@ -114,6 +119,8 @@ struct PlayerProfileView: View {
             withAnimation(.easeInOut(duration: 0.2)) {
                 selectedTab = .yearCompare
             }
+            let generator = UIImpactFeedbackGenerator(style: .light)
+            generator.impactOccurred()
         }) {
             Text(PlayerStatTab.yearCompare.rawValue)
                 .font(SavantType.bodyBold)
