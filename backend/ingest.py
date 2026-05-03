@@ -213,7 +213,9 @@ class ActualValueStore:
 
         # Batter expected stats (xwOBA, xBA, xSLG)
         try:
-            df = statcast_batter_expected_stats(self.season, minPA=100)
+            # Use minimal threshold - if Baseball Savant provides a percentile,
+            # we should provide the corresponding actual value
+            df = statcast_batter_expected_stats(self.season, minPA=1)
             df["player_id"] = pd.to_numeric(df["player_id"], errors="coerce")
             self._data["batter_expected"] = {}
             for _, row in df.iterrows():
@@ -231,9 +233,9 @@ class ActualValueStore:
 
         # Batter exit velocity
         try:
-            # Lower threshold for early season data (96 BBE needed for qualification)
-            min_bbe = 50 if self.season >= 2026 else 100
-            df = statcast_batter_exitvelo_barrels(self.season, minBBE=min_bbe)
+            # Use minimal threshold - if Baseball Savant provides a percentile,
+            # we should provide the corresponding actual value
+            df = statcast_batter_exitvelo_barrels(self.season, minBBE=1)
             df["player_id"] = pd.to_numeric(df["player_id"], errors="coerce")
             self._data["batter_exitvelo"] = {}
             for _, row in df.iterrows():
@@ -253,7 +255,9 @@ class ActualValueStore:
 
         # Sprint speed
         try:
-            df = statcast_sprint_speed(self.season, min_opp=25)
+            # Use minimal threshold - if Baseball Savant provides a percentile,
+            # we should provide the corresponding actual value
+            df = statcast_sprint_speed(self.season, min_opp=1)
             df["player_id"] = pd.to_numeric(df["player_id"], errors="coerce")
             self._data["sprint_speed"] = {}
             for _, row in df.iterrows():
@@ -270,7 +274,9 @@ class ActualValueStore:
 
         # Outs above average (fielding)
         try:
-            df = statcast_outs_above_average(self.season, pos="all", min_att=25)
+            # Use minimal threshold - if Baseball Savant provides a percentile,
+            # we should provide the corresponding actual value
+            df = statcast_outs_above_average(self.season, pos="all", min_att=1)
             df["player_id"] = pd.to_numeric(df["player_id"], errors="coerce")
             self._data["oaa"] = {}
             for _, row in df.iterrows():
@@ -287,7 +293,9 @@ class ActualValueStore:
 
         # Pitcher expected stats
         try:
-            df = statcast_pitcher_expected_stats(self.season, minPA=50)
+            # Use minimal threshold - if Baseball Savant provides a percentile,
+            # we should provide the corresponding actual value
+            df = statcast_pitcher_expected_stats(self.season, minPA=1)
             df["player_id"] = pd.to_numeric(df["player_id"], errors="coerce")
             self._data["pitcher_expected"] = {}
             for _, row in df.iterrows():
@@ -306,8 +314,9 @@ class ActualValueStore:
 
         # Pitcher exit velocity against
         try:
-            min_bbe = 25 if self.season >= 2026 else 50
-            df = statcast_pitcher_exitvelo_barrels(self.season, minBBE=min_bbe)
+            # Use minimal threshold - if Baseball Savant provides a percentile,
+            # we should provide the corresponding actual value
+            df = statcast_pitcher_exitvelo_barrels(self.season, minBBE=1)
             df["player_id"] = pd.to_numeric(df["player_id"], errors="coerce")
             self._data["pitcher_exitvelo"] = {}
             for _, row in df.iterrows():
@@ -326,7 +335,9 @@ class ActualValueStore:
 
         # Pitcher arsenal
         try:
-            df = statcast_pitcher_pitch_arsenal(self.season, minP=100)
+            # Use minimal threshold - if Baseball Savant provides a percentile,
+            # we should provide the corresponding actual value
+            df = statcast_pitcher_pitch_arsenal(self.season, minP=1)
             df["pitcher"] = pd.to_numeric(df["pitcher"], errors="coerce")
             self._data["pitcher_arsenal"] = {}
             for _, row in df.iterrows():
@@ -355,6 +366,16 @@ class ActualValueStore:
                         "swing_length": row.get("swing_length"),
                         "whiff_percent": row.get("whiff_percent"),
                         "chase_percent": row.get("chase_percent"),
+                        "exit_velocity": row.get("exit_velocity"),
+                        "max_ev": row.get("max_ev"),
+                        "hard_hit_percent": row.get("hard_hit_percent"),
+                        "brl_percent": row.get("brl_percent"),
+                        "launch_angle_sweet_spot": row.get("launch_angle_sweet_spot"),
+                        "xwoba": row.get("xwoba"),
+                        "xba": row.get("xba"),
+                        "xslg": row.get("xslg"),
+                        "xiso": row.get("xiso"),
+                        "xobp": row.get("xobp"),
                     }
                 logger.info("Loaded %d batter aggregated stats", len(self._data["batter_agg"]))
 
@@ -387,11 +408,21 @@ class ActualValueStore:
                     v = src[player_id].get("est_woba")
                     if pd.notna(v):
                         value = f"{v:.3f}"
+                # Fallback to aggregated data
+                if not value and player_id in self._data.get("batter_agg", {}):
+                    v = self._data["batter_agg"][player_id].get("xwoba")
+                    if pd.notna(v):
+                        value = f"{v:.3f}"
 
             elif metric_key == "xba":
                 src = self._data["batter_expected"] if player_type == "batter" else self._data["pitcher_expected"]
                 if player_id in src:
                     v = src[player_id].get("est_ba")
+                    if pd.notna(v):
+                        value = f"{v:.3f}"
+                # Fallback to aggregated data
+                if not value and player_id in self._data.get("batter_agg", {}):
+                    v = self._data["batter_agg"][player_id].get("xba")
                     if pd.notna(v):
                         value = f"{v:.3f}"
 
@@ -401,11 +432,22 @@ class ActualValueStore:
                     v = src[player_id].get("est_slg")
                     if pd.notna(v):
                         value = f"{v:.3f}"
+                # Fallback to aggregated data
+                if not value and player_id in self._data.get("batter_agg", {}):
+                    v = self._data["batter_agg"][player_id].get("xslg")
+                    if pd.notna(v):
+                        value = f"{v:.3f}"
 
             elif metric_key == "exit_velocity":
                 src = self._data["batter_exitvelo"] if player_type == "batter" else self._data["pitcher_exitvelo"]
                 if player_id in src:
                     v = src[player_id].get("avg_hit_speed")
+                    if pd.notna(v):
+                        value = f"{v:.1f}"
+                        unit = " mph"
+                # Fallback to aggregated data
+                if not value and player_id in self._data.get("batter_agg", {}):
+                    v = self._data["batter_agg"][player_id].get("exit_velocity")
                     if pd.notna(v):
                         value = f"{v:.1f}"
                         unit = " mph"
@@ -417,11 +459,23 @@ class ActualValueStore:
                     if pd.notna(v):
                         value = f"{v:.1f}"
                         unit = "%"
+                # Fallback to aggregated data
+                if not value and player_id in self._data.get("batter_agg", {}):
+                    v = self._data["batter_agg"][player_id].get("brl_percent")
+                    if pd.notna(v):
+                        value = f"{v:.1f}"
+                        unit = "%"
 
             elif metric_key == "hard_hit_percent":
                 src = self._data["batter_exitvelo"] if player_type == "batter" else self._data["pitcher_exitvelo"]
                 if player_id in src:
                     v = src[player_id].get("ev95percent")
+                    if pd.notna(v):
+                        value = f"{v:.1f}"
+                        unit = "%"
+                # Fallback to aggregated data
+                if not value and player_id in self._data.get("batter_agg", {}):
+                    v = self._data["batter_agg"][player_id].get("hard_hit_percent")
                     if pd.notna(v):
                         value = f"{v:.1f}"
                         unit = "%"
@@ -433,10 +487,22 @@ class ActualValueStore:
                     if pd.notna(v):
                         value = f"{v:.1f}"
                         unit = " mph"
+                # Fallback to aggregated data
+                if not value and player_id in self._data.get("batter_agg", {}):
+                    v = self._data["batter_agg"][player_id].get("max_ev")
+                    if pd.notna(v):
+                        value = f"{v:.1f}"
+                        unit = " mph"
 
             elif metric_key == "launch_angle_sweet_spot":
                 if player_id in self._data["batter_exitvelo"]:
                     v = self._data["batter_exitvelo"][player_id].get("anglesweetspotpercent")
+                    if pd.notna(v):
+                        value = f"{v:.1f}"
+                        unit = "%"
+                # Fallback to aggregated data
+                if not value and player_id in self._data.get("batter_agg", {}):
+                    v = self._data["batter_agg"][player_id].get("launch_angle_sweet_spot")
                     if pd.notna(v):
                         value = f"{v:.1f}"
                         unit = "%"
@@ -495,6 +561,20 @@ class ActualValueStore:
                         value = f"{v:.1f}"
                         unit = "%"
 
+            elif metric_key == "xiso":
+                # Only from aggregated data (not available in pybaseball directly)
+                if player_id in self._data.get("batter_agg", {}):
+                    v = self._data["batter_agg"][player_id].get("xiso")
+                    if pd.notna(v):
+                        value = f"{v:.3f}"
+
+            elif metric_key == "xobp":
+                # Only from aggregated data (not available in pybaseball directly)
+                if player_id in self._data.get("batter_agg", {}):
+                    v = self._data["batter_agg"][player_id].get("xobp")
+                    if pd.notna(v):
+                        value = f"{v:.3f}"
+
             elif metric_key == "fb_spin":
                 if player_id in self._data.get("pitcher_agg", {}):
                     v = self._data["pitcher_agg"][player_id].get("fastball_spin")
@@ -524,7 +604,11 @@ def build_metrics_with_values(
     player_id: int,
     value_store: ActualValueStore,
 ) -> list[dict[str, Any]]:
-    """Build metrics with both percentile and actual values."""
+    """Build metrics with both percentile and actual values.
+
+    Only includes metrics that have both a valid percentile AND an actual value.
+    This prevents showing metrics with empty values in the app.
+    """
     metrics: list[dict[str, Any]] = []
 
     for key, label, category in metric_defs:
@@ -537,19 +621,19 @@ def build_metrics_with_values(
 
         actual_value = value_store.get_value(player_id, key, player_type)
 
+        # Skip metrics without actual values to prevent empty value issues
+        if not actual_value:
+            continue
+
         metric = {
             "id": f"{player_type}-{player_id}-{key}",
             "label": label,
-            "value": actual_value if actual_value else "",
+            "value": actual_value,
             "percentile": percentile,
             "category": category,
+            "actual_value": actual_value,
+            "display_value": f"{actual_value} · {percentile}th",
         }
-
-        if actual_value:
-            metric["actual_value"] = actual_value
-            metric["display_value"] = f"{actual_value} · {percentile}th"
-        else:
-            metric["display_value"] = f"{percentile}th percentile"
 
         metrics.append(metric)
 
