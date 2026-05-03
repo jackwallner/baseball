@@ -77,7 +77,7 @@ struct SampleData {
             metrics: [
                 Metric(id: "witt-sprint", label: "Sprint Speed", value: "30.5 ft/s", percentile: 100, category: .running),
                 Metric(id: "witt-xba", label: "xBA", value: ".329", percentile: 99, category: .hitting),
-                Metric(id: "witt-oaa", label: "OAA", value: "+15", percentile: 98, category: .fielding),
+                Metric(id: "witt-oaa", label: "Range (OAA)", value: "+15", percentile: 98, category: .fielding),
                 Metric(id: "witt-ev", label: "Avg EV", value: "92.1", percentile: 87, category: .hitting)
             ],
             standardStats: [

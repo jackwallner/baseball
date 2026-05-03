@@ -91,11 +91,14 @@ struct DashboardView: View {
                 .frame(minHeight: 200)
             } else {
                 LeaderboardTableHeader(sortDescending: viewModel.sortDescending, sortLabel: viewModel.sortLabel)
+                let sortMetric = viewModel.currentSortMetricForDisplay
                 ForEach(Array(viewModel.leaderboard.enumerated()), id: \.element.id) { index, player in
                     NavigationLink(value: player) {
                         LeaderboardTableRow(
                             rank: index + 1,
-                            player: player
+                            player: player,
+                            metricLabel: sortMetric.label,
+                            metricCategory: sortMetric.category
                         )
                     }
                     .buttonStyle(.plain)

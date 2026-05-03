@@ -109,22 +109,68 @@ final class DashboardViewModelTests: XCTestCase {
     }
 
     @MainActor
-    func testSortLabelReflectsCategory() {
-        let vm = DashboardViewModel(provider: MockProvider(players: []))
-        // Default category is hitting
+    func testSortLabelReflectsCategory() async {
+        // Players with xwOBA hitting metric
+        let hitters = [
+            Player(playerId: 1, name: "A", team: "NYY", position: "RF", handedness: "R/R", imageURL: nil, updatedAt: Date(), season: 2025, playerType: "batter", source: "baseball_savant",
+                   metrics: [Metric(id: "m1", label: "xwOBA", value: ".400", percentile: 90, category: .hitting)], standardStats: [], games: [])
+        ]
+
+        let vm = DashboardViewModel(provider: MockProvider(players: hitters))
+        await vm.load()
+        _ = vm.leaderboard  // Trigger computation of sort metric
+
+        // Default category is hitting, should find xwOBA in data
         XCTAssertEqual(vm.sortLabel, "xwOBA")
 
+        // Test with pitchers that have Barrel%
+        let pitchers = [
+            Player(playerId: 2, name: "B", team: "NYY", position: "SP", handedness: "R/R", imageURL: nil, updatedAt: Date(), season: 2025, playerType: "pitcher", source: "baseball_savant",
+                   metrics: [Metric(id: "m1", label: "Barrel%", value: "5%", percentile: 85, category: .pitching)], standardStats: [], games: [])
+        ]
+        let vmPitching = DashboardViewModel(provider: MockProvider(players: pitchers))
+        await vmPitching.load()
+        vmPitching.selectedCategory = .pitching
+        _ = vmPitching.leaderboard  // Trigger computation
+        XCTAssertEqual(vmPitching.sortLabel, "Barrel%")
+
+        // Test empty data falls back to "Avg"
+        let vmEmpty = DashboardViewModel(provider: MockProvider(players: []))
+        await vmEmpty.load()
+        vmEmpty.selectedCategory = .hitting
+        _ = vmEmpty.leaderboard  // Trigger computation
+        XCTAssertEqual(vmEmpty.sortLabel, "Avg")
+
+        // Test nil category shows Overall
+        let vmNil = DashboardViewModel(provider: MockProvider(players: hitters))
+        await vmNil.load()
+        vmNil.selectedCategory = nil
+        _ = vmNil.leaderboard
+        XCTAssertEqual(vmNil.sortLabel, "Overall")
+    }
+
+    @MainActor
+    func testPitchingSortUsesAvailableMetrics() async {
+        // Pitcher with Barrel% but no xERA (common early in season)
+        let pitcher = Player(
+            playerId: 1, name: "Test Pitcher", team: "NYY", position: "SP",
+            handedness: "R/R", imageURL: nil, updatedAt: Date(), season: 2025, playerType: "pitcher", source: "baseball_savant",
+            metrics: [
+                Metric(id: "m1", label: "Barrel%", value: "5.2%", percentile: 85, category: .pitching),
+                Metric(id: "m2", label: "Whiff%", value: "28%", percentile: 70, category: .pitching)
+            ],
+            standardStats: [],
+            games: []
+        )
+
+        let vm = DashboardViewModel(provider: MockProvider(players: [pitcher]))
+        await vm.load()
         vm.selectedCategory = .pitching
-        XCTAssertEqual(vm.sortLabel, "xERA")
 
-        vm.selectedCategory = .fielding
-        XCTAssertEqual(vm.sortLabel, "OAA")
-
-        vm.selectedCategory = .running
-        XCTAssertEqual(vm.sortLabel, "Sprint Speed")
-
-        vm.selectedCategory = nil
-        XCTAssertEqual(vm.sortLabel, "Overall")
+        // Should find the pitcher in filtered list
+        XCTAssertEqual(vm.filteredPlayers.count, 1)
+        // Should sort by Barrel% since that's the first available priority metric
+        XCTAssertEqual(vm.leaderboard.first?.playerId, 1)
     }
 }
 

@@ -31,8 +31,11 @@ Migrations are in `supabase/migrations/` and should be applied after any schema 
 ## Build & TestFlight Upload
 
 Credentials are stored in `~/.baseball_credentials`:
-- SUPABASE_URL: https://kxlybsrsbibqkexffqmg.supabase.co
-- SUPABASE_ANON_KEY: [see ~/.baseball_credentials]
+- SUPABASE_URL: https://babzqsbmcunrezsdpyng.supabase.co (updated May 3, 2026)
+- SUPABASE_ANON_KEY: [see ~/.baseball_credentials - get from Supabase dashboard]
+
+**Note**: The Supabase project was changed on April 28, 2026. The new project is `babzqsbmcunrezsdpyng`. 
+You must update your `~/.baseball_credentials` file with the new ANON_KEY from the Supabase dashboard.
 
 To upload to TestFlight:
 ```bash

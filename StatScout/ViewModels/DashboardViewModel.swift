@@ -13,19 +13,11 @@ final class DashboardViewModel {
     var selectedCategory: MetricCategory? = .hitting
     var sortDescending = true
 
-    // Label shown in the sort button - reflects primary sort metric
+    // Label shown in the sort button - reflects actual metric being used
     var sortLabel: String {
-        guard let category = selectedCategory else { return "Overall" }
-        switch category {
-        case .hitting:
-            return "xwOBA"
-        case .pitching:
-            return "Barrel%"  // Most commonly available pitching metric
-        case .fielding:
-            return "OAA"
-        case .running:
-            return "Sprint Speed"
-        }
+        guard selectedCategory != nil else { return "Overall" }
+        // Use the dynamically determined metric, or fall back to generic label
+        return currentSortMetricLabel ?? "Avg"
     }
     var isLoading = false
     var errorMessage: String?
@@ -60,29 +52,51 @@ final class DashboardViewModel {
         }
     }
 
-    // Baseball Savant-style sorting: use key metric for each category
+    // The metric label currently used for sorting all players (determined by availability)
+    private var currentSortMetricLabel: String?
+
+    // Baseball Savant-style sorting: use consistent key metric for ALL players
     var leaderboard: [Player] {
-        filteredPlayers.sorted { p1, p2 in
-            let p1Score = keyMetricPercentile(for: p1)
-            let p2Score = keyMetricPercentile(for: p2)
+        // Determine which metric to use based on what's available in the filtered set
+        let sortLabel = determineSortMetricLabel()
+        currentSortMetricLabel = sortLabel
+
+        return filteredPlayers.sorted { p1, p2 in
+            let p1Score = playerSortScore(player: p1, metricLabel: sortLabel)
+            let p2Score = playerSortScore(player: p2, metricLabel: sortLabel)
             return sortDescending ? p1Score > p2Score : p1Score < p2Score
         }
     }
 
-    // Get the key metric percentile for sorting - Baseball Savant style
-    private func keyMetricPercentile(for player: Player) -> Int {
+    // Determine which metric label to use for consistent sorting across all players
+    private func determineSortMetricLabel() -> String? {
+        guard let category = selectedCategory else { return nil }
+
+        // Find the first priority metric that ANY player in the filtered set has
+        for metricLabel in priorityMetrics(for: category) {
+            let hasMetric = filteredPlayers.contains { player in
+                player.metrics.contains { $0.label == metricLabel && $0.category == category }
+            }
+            if hasMetric {
+                return metricLabel
+            }
+        }
+        return nil
+    }
+
+    // Get the sort score for a player using a specific metric label
+    private func playerSortScore(player: Player, metricLabel: String?) -> Int {
         guard let category = selectedCategory else {
             return player.overallPercentile
         }
-
-        // Find the first available priority metric for this player
-        for metricLabel in priorityMetrics(for: category) {
-            if let metric = player.metrics.first(where: { $0.label == metricLabel && $0.category == category }) {
-                return metric.percentile
-            }
+        guard let label = metricLabel else {
+            return player.percentile(for: category) ?? player.overallPercentile
         }
 
-        // Fall back to category average or overall
+        // Use the specific metric if available, otherwise fall back
+        if let metric = player.metrics.first(where: { $0.label == label && $0.category == category }) {
+            return metric.percentile
+        }
         return player.percentile(for: category) ?? player.overallPercentile
     }
 
@@ -95,29 +109,16 @@ final class DashboardViewModel {
             // xERA has minimum thresholds (25 PA) - use more commonly available metrics first
             return ["Barrel%", "xwOBA", "K%", "Whiff%", "Chase%"]
         case .fielding:
-            return ["OAA", "Range (OAA)", "Arm Strength"]
+            // Backend uses "Range (OAA)" as the label
+            return ["Range (OAA)", "Arm Strength", "Arm Value"]
         case .running:
             return ["Sprint Speed"]
         }
     }
 
-    // Returns the actual metric being used for sorting (for display purposes)
-    func actualSortMetric(for player: Player? = nil) -> String {
-        guard let category = selectedCategory else { return "Overall" }
-
-        // If we have a specific player, show what metric THEY are sorted by
-        if let player = player {
-            for metricLabel in priorityMetrics(for: category) {
-                if player.metrics.contains(where: { $0.label == metricLabel && $0.category == category }) {
-                    return metricLabel
-                }
-            }
-            return "Pitching Avg"  // Fallback for pitchers
-        }
-
-        // Default label shows first priority metric
-        let priorities = priorityMetrics(for: category)
-        return priorities.first ?? "Overall"
+    // Expose the current sort metric for row display
+    var currentSortMetricForDisplay: (label: String?, category: MetricCategory?) {
+        (currentSortMetricLabel, selectedCategory)
     }
 
     var allTeams: [String] {
