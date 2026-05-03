@@ -231,7 +231,9 @@ class ActualValueStore:
 
         # Batter exit velocity
         try:
-            df = statcast_batter_exitvelo_barrels(self.season, minBBE=100)
+            # Lower threshold for early season data (96 BBE needed for qualification)
+            min_bbe = 50 if self.season >= 2026 else 100
+            df = statcast_batter_exitvelo_barrels(self.season, minBBE=min_bbe)
             df["player_id"] = pd.to_numeric(df["player_id"], errors="coerce")
             self._data["batter_exitvelo"] = {}
             for _, row in df.iterrows():
@@ -304,7 +306,8 @@ class ActualValueStore:
 
         # Pitcher exit velocity against
         try:
-            df = statcast_pitcher_exitvelo_barrels(self.season, minBBE=50)
+            min_bbe = 25 if self.season >= 2026 else 50
+            df = statcast_pitcher_exitvelo_barrels(self.season, minBBE=min_bbe)
             df["player_id"] = pd.to_numeric(df["player_id"], errors="coerce")
             self._data["pitcher_exitvelo"] = {}
             for _, row in df.iterrows():
