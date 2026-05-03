@@ -12,6 +12,7 @@ final class DashboardViewModel {
     var searchText = ""
     var selectedCategory: MetricCategory? = .hitting
     var sortDescending = true
+    var selectedSeason: Int = Calendar.current.component(.year, from: Date())
 
     // Label shown in the sort button - reflects actual metric being used
     var sortLabel: String {
@@ -41,8 +42,24 @@ final class DashboardViewModel {
         self.cache = cache
     }
 
+    // All available seasons (2015-2026 based on data availability)
+    var availableSeasons: [Int] {
+        Array(2015...2026).sorted(by: >)
+    }
+
+    // Players filtered by selected season - pull from histories to get all years
+    var seasonPlayers: [Player] {
+        // Get all players for the selected season from histories
+        let allSeasonPlayers = playerHistories.values.flatMap { $0 }.filter { $0.season == selectedSeason }
+        // If no players found for this season, fall back to the current players list
+        guard !allSeasonPlayers.isEmpty else { return players }
+        // Remove duplicates by playerId (keep first occurrence)
+        var seenIds = Set<Int>()
+        return allSeasonPlayers.filter { seenIds.insert($0.playerId).inserted }
+    }
+
     var filteredPlayers: [Player] {
-        players.filter { player in
+        seasonPlayers.filter { player in
             let matchesSearch = searchText.isEmpty
                 || player.name.localizedCaseInsensitiveContains(searchText)
                 || player.team.localizedCaseInsensitiveContains(searchText)
@@ -122,12 +139,12 @@ final class DashboardViewModel {
     }
 
     var allTeams: [String] {
-        Array(Set(players.map { normalizedTeamAbbreviation($0.team) })).sorted()
+        Array(Set(seasonPlayers.map { normalizedTeamAbbreviation($0.team) })).sorted()
     }
 
     func players(forTeam team: String) -> [Player] {
         let normalized = normalizedTeamAbbreviation(team)
-        return players.filter { normalizedTeamAbbreviation($0.team) == normalized }
+        return seasonPlayers.filter { normalizedTeamAbbreviation($0.team) == normalized }
             .sorted { $0.overallPercentile > $1.overallPercentile }
     }
 
@@ -135,7 +152,7 @@ final class DashboardViewModel {
 
     private func updateAllMetrics() {
         var metricMap: [String: (category: MetricCategory, values: [(player: Player, value: Int)])] = [:]
-        for player in players {
+        for player in seasonPlayers {
             for metric in player.metrics {
                 let compositeKey = "\(metric.label)|\(metric.category.rawValue)"
                 if metricMap[compositeKey] == nil {
@@ -158,7 +175,7 @@ final class DashboardViewModel {
 
     private func updateDerivedState() {
         updateAllMetrics()
-        teamCounts = Dictionary(grouping: players) { normalizedTeamAbbreviation($0.team) }
+        teamCounts = Dictionary(grouping: seasonPlayers) { normalizedTeamAbbreviation($0.team) }
             .mapValues(\.count)
     }
 
