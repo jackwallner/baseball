@@ -133,63 +133,60 @@ struct MetricBar: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            // Label row
-            HStack(spacing: 8) {
-                Text(metric.label)
-                    .font(SavantType.bodyBold)
-                    .foregroundStyle(SavantPalette.ink)
+        HStack(spacing: 12) {
+            // Label column - left aligned
+            Text(metric.label)
+                .font(SavantType.bodyBold)
+                .foregroundStyle(SavantPalette.ink)
+                .frame(width: 70, alignment: .leading)
 
-                Spacer(minLength: 4)
-            }
-
-            // Percentile bar with value at the end - Baseball Savant style
+            // Percentile bar - takes remaining space
             let percentileValue = max(0, min(100, metric.percentile))
             GeometryReader { proxy in
-                let circleSize: CGFloat = 32
-                let trackWidth = proxy.size.width - circleSize - 60 // Leave room for value text
+                let circleSize: CGFloat = 28
+                let trackWidth = proxy.size.width - circleSize
                 let offset = (circleSize / 2) + (trackWidth * CGFloat(percentileValue) / 100.0)
 
                 ZStack(alignment: .leading) {
                     // Track
                     RoundedRectangle(cornerRadius: 4)
                         .fill(SavantPalette.hairline)
-                        .frame(height: 12)
+                        .frame(height: 10)
 
                     // Fill
                     RoundedRectangle(cornerRadius: 4)
                         .fill(SavantPalette.color(forPercentile: percentileValue))
-                        .frame(width: offset, height: 12)
+                        .frame(width: offset, height: 10)
 
-                    // Percentile circle - centered on the track (track height 12 centered in 32pt frame = y: 16)
+                    // Percentile circle
                     ZStack {
                         Circle()
                             .fill(SavantPalette.color(forPercentile: percentileValue))
                             .frame(width: circleSize, height: circleSize)
 
                         Text("\(percentileValue)")
-                            .font(.system(size: 12, weight: .bold))
+                            .font(.system(size: 11, weight: .bold))
                             .foregroundStyle(percentileValue >= 35 && percentileValue <= 75 ? SavantPalette.ink : .white)
                             .shadow(color: percentileValue >= 35 && percentileValue <= 75 ? Color.clear : Color.black.opacity(0.3), radius: 1, x: 0, y: 0.5)
                     }
-                    .position(x: offset, y: 16)
-
-                    // Stat value at the right end - Baseball Savant style
-                    if showValue && !metric.value.isEmpty {
-                        HStack {
-                            Spacer()
-                            Text(metric.value)
-                                .font(SavantType.statMed)
-                                .foregroundStyle(SavantPalette.ink)
-                                .frame(width: 55, alignment: .trailing)
-                        }
-                    }
+                    .position(x: offset, y: 14)
                 }
             }
-            .frame(height: 32)
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel(accessibilityLabel)
+            .frame(height: 28)
+
+            // Value column - far right, fixed width
+            if showValue && !metric.value.isEmpty {
+                Text(metric.value)
+                    .font(SavantType.statMed)
+                    .foregroundStyle(SavantPalette.ink)
+                    .frame(width: 50, alignment: .trailing)
+            } else {
+                Color.clear
+                    .frame(width: 50)
+            }
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(accessibilityLabel)
     }
 }
 
@@ -322,6 +319,7 @@ struct PercentileBarMini: View {
 struct LeaderboardTableHeader: View {
     let sortDescending: Bool
     var sortLabel: String = "OVERALL"
+    var onSort: () -> Void = {}
 
     var body: some View {
         HStack(spacing: 0) {
@@ -343,16 +341,20 @@ struct LeaderboardTableHeader: View {
                 .foregroundStyle(SavantPalette.inkTertiary)
                 .frame(width: 50, alignment: .leading)
 
-            HStack(spacing: 4) {
-                Text(sortLabel.uppercased())
-                    .font(SavantType.micro)
-                    .tracking(0.5)
-                    .foregroundStyle(SavantPalette.inkTertiary)
-                Image(systemName: sortDescending ? "arrow.down" : "arrow.up")
-                    .font(.system(size: 8, weight: .bold))
-                    .foregroundStyle(SavantPalette.savantRed)
+            Button(action: onSort) {
+                HStack(spacing: 4) {
+                    Text(sortLabel.uppercased())
+                        .font(SavantType.micro)
+                        .tracking(0.5)
+                        .foregroundStyle(SavantPalette.savantRed)
+                    Image(systemName: sortDescending ? "arrow.down" : "arrow.up")
+                        .font(.system(size: 8, weight: .bold))
+                        .foregroundStyle(SavantPalette.savantRed)
+                }
+                .frame(width: 80, alignment: .trailing)
+                .contentShape(Rectangle())
             }
-            .frame(width: 80, alignment: .trailing)
+            .buttonStyle(.plain)
         }
         .frame(height: SavantGeo.rowHeightHeader)
         .padding(.horizontal, SavantGeo.padInline)

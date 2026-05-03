@@ -121,7 +121,10 @@ private struct StandardDestinations: ViewModifier {
     func body(content: Content) -> some View {
         content
             .navigationDestination(for: Player.self) { player in
-                PlayerProfileView(player: player, history: viewModel.playerHistories[player.playerId] ?? [])
+                // Get player data for the currently selected season
+                let history = viewModel.playerHistories[player.playerId] ?? []
+                let seasonPlayer = history.first { $0.season == viewModel.selectedSeason } ?? player
+                PlayerProfileView(player: seasonPlayer, history: history)
                     .modifier(SavantNavBar())
             }
             .navigationDestination(for: TeamDestination.self) { dest in
@@ -129,7 +132,7 @@ private struct StandardDestinations: ViewModifier {
                     .modifier(SavantNavBar())
             }
             .navigationDestination(for: MetricRoute.self) { route in
-                MetricRankingView(metricLabel: route.label, metricCategory: route.category, players: viewModel.players)
+                MetricRankingView(metricLabel: route.label, metricCategory: route.category, players: viewModel.seasonPlayers)
                     .modifier(SavantNavBar())
             }
     }
