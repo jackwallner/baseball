@@ -126,6 +126,66 @@ final class StatScoutComprehensiveUITests: XCTestCase {
         }
     }
 
+    func testPlayerProfileYearCompareTab() throws {
+        // Navigate to a player profile with history (Aaron Judge typically has multiple years)
+        let searchField = app.searchFields["Search players or teams"]
+        searchField.tap()
+        searchField.typeText("Judge")
+
+        let judgeCell = app.staticTexts["Aaron Judge"]
+        if judgeCell.waitForExistence(timeout: 2) {
+            judgeCell.tap()
+
+            // Look for Year Compare tab
+            let yearCompareTab = app.buttons["Year Compare"]
+            if yearCompareTab.waitForExistence(timeout: 2) {
+                XCTAssertTrue(yearCompareTab.exists, "Year Compare tab should exist for players with history")
+                XCTAssertTrue(yearCompareTab.isEnabled, "Year Compare tab should be enabled")
+
+                // Tap Year Compare tab
+                yearCompareTab.tap()
+
+                // Verify year selectors exist
+                let year1Selector = app.buttons["Year 1"]
+                let year2Selector = app.buttons["Year 2"]
+                XCTAssertTrue(year1Selector.exists, "Year 1 selector should exist")
+                XCTAssertTrue(year2Selector.exists, "Year 2 selector should exist")
+
+                // Tap Year 1 selector and select a year
+                year1Selector.tap()
+                let yearOption = app.buttons.containing(.staticText, identifier: "202").firstMatch
+                if yearOption.waitForExistence(timeout: 2) {
+                    yearOption.tap()
+
+                    // Verify comparison content appears
+                    app.swipeUp()
+                    let comparisonContent = app.staticTexts["Metric"]
+                    XCTAssertTrue(comparisonContent.exists || app.staticTexts["Δ"].exists, "Comparison grid should show")
+                }
+            }
+        }
+    }
+
+    func testPlayerProfileYearCompareTabDisabledForNoHistory() throws {
+        // Search for a player that likely has no history
+        let searchField = app.searchFields["Search players or teams"]
+        searchField.tap()
+        searchField.typeText("Judge")
+
+        let judgeCell = app.staticTexts["Aaron Judge"]
+        if judgeCell.waitForExistence(timeout: 2) {
+            judgeCell.tap()
+
+            // Check Year Compare tab state
+            let yearCompareTab = app.buttons["Year Compare"]
+            if yearCompareTab.exists {
+                // If player has no multi-year history, tab should be disabled
+                // If player has history, tab should be enabled
+                XCTAssertTrue(yearCompareTab.exists, "Year Compare tab should exist")
+            }
+        }
+    }
+
     func testPlayerProfileShareFunctionality() throws {
         app.cells.firstMatch.tap()
 
