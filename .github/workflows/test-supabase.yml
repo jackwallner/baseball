@@ -1,0 +1,30 @@
+name: Test Supabase Connection
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test connection
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          echo "Testing Supabase connection..."
+          echo "URL length: ${#SUPABASE_URL}"
+          echo "URL host: $(echo $SUPABASE_URL | cut -d'/' -f3)"
+          pip install supabase==2.10.0 2>/dev/null
+          python3 -c "
+          import os
+          from supabase import create_client
+          url = os.environ['SUPABASE_URL']
+          key = os.environ['SUPABASE_SERVICE_ROLE_KEY']
+          client = create_client(url, key)
+          try:
+              result = client.table('player_snapshots').select('count', count='exact').execute()
+              print(f'Row count: {result.count}')
+          except Exception as e:
+              print(f'Error: {e}')
+          "
