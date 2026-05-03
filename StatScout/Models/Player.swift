@@ -168,7 +168,7 @@ extension Player {
         return initials.joined()
     }
     var headshotURL: URL? {
-        imageURL ?? URL(string: "https://midfield.mlbstatic.com/v1/people/\(id)/spots/240")
+        imageURL ?? URL(string: "https://midfield.mlbstatic.com/v1/people/\(playerId)/spots/240")
     }
 }
 
