@@ -35,6 +35,7 @@ def make_mock_value_store():
 def test_build_metrics_with_values_skips_missing_columns():
     row = pd.Series({"player_id": 1, "player_name": "Test", "xwoba": 90})
     store = make_mock_value_store()
+    store.get_value.return_value = "0.450"  # Provide actual value so metric is included
     metrics = ingest.build_metrics_with_values(row, "batter", ingest.BATTER_METRICS, 1, store)
     labels = [m["label"] for m in metrics]
     assert "xwOBA" in labels
