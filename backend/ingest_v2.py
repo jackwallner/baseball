@@ -28,6 +28,7 @@ from pybaseball import (
 )
 from pybaseball.statcast_fielding import statcast_outs_above_average
 from supabase import create_client
+from statcast_aggregator import build_complete_player_stats
 
 load_dotenv()
 
@@ -325,6 +326,41 @@ class ActualValueStore:
         except Exception as e:
             logger.warning("Failed to load pitcher arsenal: %s", e)
             self._data["pitcher_arsenal"] = {}
+        
+        # Fetch aggregated statcast data (bat speed, swing length, plate discipline, spin rates)
+        try:
+            logger.info("Fetching aggregated Statcast data (this may take a few minutes)...")
+            batter_agg, pitcher_agg = build_complete_player_stats(self.season)
+            
+            # Store batter aggregated stats
+            self._data["batter_agg"] = {}
+            if not batter_agg.empty:
+                for _, row in batter_agg.iterrows():
+                    pid = int(row["player_id"])
+                    self._data["batter_agg"][pid] = {
+                        "bat_speed": row.get("bat_speed"),
+                        "swing_length": row.get("swing_length"),
+                        "whiff_percent": row.get("whiff_percent"),
+                        "chase_percent": row.get("chase_percent"),
+                    }
+                logger.info("Loaded %d batter aggregated stats", len(self._data["batter_agg"]))
+            
+            # Store pitcher aggregated stats
+            self._data["pitcher_agg"] = {}
+            if not pitcher_agg.empty:
+                for _, row in pitcher_agg.iterrows():
+                    pid = int(row["player_id"])
+                    self._data["pitcher_agg"][pid] = {
+                        "avg_spin_rate": row.get("avg_spin_rate"),
+                        "fastball_spin": row.get("fastball_spin"),
+                        "breaking_spin": row.get("breaking_spin"),
+                        "offspeed_spin": row.get("offspeed_spin"),
+                    }
+                logger.info("Loaded %d pitcher aggregated stats", len(self._data["pitcher_agg"]))
+        except Exception as e:
+            logger.warning("Failed to load aggregated Statcast data: %s", e)
+            self._data["batter_agg"] = {}
+            self._data["pitcher_agg"] = {}
     
     def get_value(self, player_id: int, metric_key: str, player_type: str) -> Optional[str]:
         """Get formatted actual value for a metric."""
@@ -417,6 +453,51 @@ class ActualValueStore:
                     if pd.notna(v):
                         value = f"{v:.1f}"
                         unit = " mph"
+            
+            # New: Bat speed, swing length from aggregated statcast
+            elif metric_key == "bat_speed":
+                if player_id in self._data.get("batter_agg", {}):
+                    v = self._data["batter_agg"][player_id].get("bat_speed")
+                    if pd.notna(v):
+                        value = f"{v:.1f}"
+                        unit = " mph"
+            
+            elif metric_key == "swing_length":
+                if player_id in self._data.get("batter_agg", {}):
+                    v = self._data["batter_agg"][player_id].get("swing_length")
+                    if pd.notna(v):
+                        value = f"{v:.2f}"
+                        unit = " ft"
+            
+            # New: Plate discipline from aggregated statcast
+            elif metric_key == "whiff_percent":
+                if player_id in self._data.get("batter_agg", {}):
+                    v = self._data["batter_agg"][player_id].get("whiff_percent")
+                    if pd.notna(v):
+                        value = f"{v:.1f}"
+                        unit = "%"
+            
+            elif metric_key == "chase_percent":
+                if player_id in self._data.get("batter_agg", {}):
+                    v = self._data["batter_agg"][player_id].get("chase_percent")
+                    if pd.notna(v):
+                        value = f"{v:.1f}"
+                        unit = "%"
+            
+            # New: Spin rates from aggregated statcast
+            elif metric_key == "fb_spin":
+                if player_id in self._data.get("pitcher_agg", {}):
+                    v = self._data["pitcher_agg"][player_id].get("fastball_spin")
+                    if pd.notna(v):
+                        value = f"{int(v)}"
+                        unit = " rpm"
+            
+            elif metric_key == "curve_spin":
+                if player_id in self._data.get("pitcher_agg", {}):
+                    v = self._data["pitcher_agg"][player_id].get("breaking_spin")
+                    if pd.notna(v):
+                        value = f"{int(v)}"
+                        unit = " rpm"
             
         except Exception as e:
             logger.debug("Error getting value for %s/%s: %s", player_id, metric_key, e)
