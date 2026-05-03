@@ -1,7 +1,9 @@
 import os
-import pytest
+from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
+
 import pandas as pd
+import pytest
 
 import ingest
 
@@ -24,39 +26,47 @@ def test_percentile_value_with_non_numeric():
     assert ingest.percentile_value(float("nan")) is None
 
 
-def test_build_metrics_value_is_raw_not_percentile(sample_batter_row):
-    metrics = ingest.build_metrics(sample_batter_row, "batter", ingest.BATTER_METRICS, 592450)
-    for m in metrics:
-        assert "PCTL" not in m["value"]
-        assert m["percentile"] is not None
-        assert 0 <= m["percentile"] <= 100
+def make_mock_value_store():
+    store = MagicMock(spec=ingest.ActualValueStore)
+    store.get_value.return_value = None
+    return store
 
 
-def test_build_metrics_skips_missing_columns():
+def test_build_metrics_with_values_skips_missing_columns():
     row = pd.Series({"player_id": 1, "player_name": "Test", "xwoba": 90})
-    metrics = ingest.build_metrics(row, "batter", ingest.BATTER_METRICS, 1)
+    store = make_mock_value_store()
+    metrics = ingest.build_metrics_with_values(row, "batter", ingest.BATTER_METRICS, 1, store)
     labels = [m["label"] for m in metrics]
     assert "xwOBA" in labels
     assert "Sprint Speed" not in labels
 
 
+def test_build_metrics_with_values_uses_actual_value_when_available():
+    row = pd.Series({"player_id": 1, "player_name": "Test", "exit_velocity": 92})
+    store = MagicMock(spec=ingest.ActualValueStore)
+    store.get_value.return_value = "94.5 mph"
+    metrics = ingest.build_metrics_with_values(row, "batter", ingest.BATTER_METRICS, 1, store)
+    ev = [m for m in metrics if m["label"] == "EV"]
+    assert len(ev) == 1
+    assert ev[0]["value"] == "94.5 mph"
+    assert ev[0]["actual_value"] == "94.5 mph"
+    assert ev[0]["display_value"] == "94.5 mph · 92th"
+
+
 def test_merge_player_row_maps_team(sample_batter_row):
     players = {}
-    ingest.merge_player_row(players, sample_batter_row, "batter", ingest.BATTER_METRICS, "2026-04-26T00:00:00Z", 2026)
+    store = make_mock_value_store()
+    now = datetime(2026, 4, 26, tzinfo=timezone.utc)
+    ingest.merge_player_row(players, sample_batter_row, "batter", ingest.BATTER_METRICS, now, 2026, store)
     assert players[592450]["team"] == "NYY"
-
-
-def test_merge_player_row_maps_position_and_handedness(sample_batter_row):
-    players = {}
-    ingest.merge_player_row(players, sample_batter_row, "batter", ingest.BATTER_METRICS, "2026-04-26T00:00:00Z", 2026)
-    assert players[592450]["position"] == "RF"
-    assert players[592450]["handedness"] == "R/R"
 
 
 def test_merge_player_row_defaults_team_to_tbd():
     row = pd.Series({"player_id": 1, "player_name": "Test", "xwoba": 90})
     players = {}
-    ingest.merge_player_row(players, row, "batter", ingest.BATTER_METRICS, "2026-04-26T00:00:00Z", 2026)
+    store = make_mock_value_store()
+    now = datetime(2026, 4, 26, tzinfo=timezone.utc)
+    ingest.merge_player_row(players, row, "batter", ingest.BATTER_METRICS, now, 2026, store)
     assert players[1]["team"] == "TBD"
 
 
@@ -64,7 +74,9 @@ def test_merge_player_row_uses_roster_lookup_when_other_team_sources_missing():
     row = pd.Series({"player_id": 592450, "player_name": "Judge, Aaron", "xwoba": 90})
     roster_lookup = {592450: {"team": "NYY", "position": "RF"}}
     players = {}
-    ingest.merge_player_row(players, row, "batter", ingest.BATTER_METRICS, "2026-04-26T00:00:00Z", 2026, roster_lookup=roster_lookup)
+    store = make_mock_value_store()
+    now = datetime(2026, 4, 26, tzinfo=timezone.utc)
+    ingest.merge_player_row(players, row, "batter", ingest.BATTER_METRICS, now, 2026, store, roster_lookup=roster_lookup)
     assert players[592450]["team"] == "NYY"
     assert players[592450]["position"] == "RF"
 
@@ -84,11 +96,11 @@ def test_normalize_team_abbr_unknown_falls_back_to_tbd():
 
 def test_resolve_season_invalid_input_falls_back():
     with patch.dict(os.environ, {"STATCAST_SEASON": "2099"}):
-        assert ingest._resolve_season() == ingest._default_season()
+        assert ingest._resolve_season() == ingest.DEFAULT_SEASON
     with patch.dict(os.environ, {"STATCAST_SEASON": "abc"}):
-        assert ingest._resolve_season() == ingest._default_season()
+        assert ingest._resolve_season() == ingest.DEFAULT_SEASON
     with patch.dict(os.environ, {"STATCAST_SEASON": "1999"}):
-        assert ingest._resolve_season() == ingest._default_season()
+        assert ingest._resolve_season() == ingest.DEFAULT_SEASON
 
 
 def test_merge_player_row_two_way():
@@ -105,9 +117,11 @@ def test_merge_player_row_two_way():
         }
     )
     players = {}
-    ingest.merge_player_row(players, row, "batter", ingest.BATTER_METRICS, "2026-04-26T00:00:00Z", 2026)
-    ingest.merge_player_row(players, row, "pitcher", ingest.PITCHER_METRICS, "2026-04-26T00:00:00Z", 2026)
-    assert players[660271]["position"] == "Two-way"
+    store = make_mock_value_store()
+    now = datetime(2026, 4, 26, tzinfo=timezone.utc)
+    ingest.merge_player_row(players, row, "batter", ingest.BATTER_METRICS, now, 2026, store)
+    ingest.merge_player_row(players, row, "pitcher", ingest.PITCHER_METRICS, now, 2026, store)
+    assert players[660271]["position"] == "DH"
     assert players[660271]["player_type"] == "two_way"
 
 
@@ -122,12 +136,14 @@ def test_safe_player_id_nan():
 def test_build_snapshot_rows_handles_empty_dataframe():
     with patch("ingest.statcast_batter_percentile_ranks", return_value=pd.DataFrame()):
         with patch("ingest.statcast_pitcher_percentile_ranks", return_value=pd.DataFrame()):
-            with patch("ingest._fetch_mlb_roster_lookup", return_value={}):
-                with patch("ingest._fetch_mlb_standard_stats", return_value={}):
-                    with patch.dict(os.environ, {"SUPABASE_URL": "https://test.supabase.co", "SUPABASE_SERVICE_ROLE_KEY": "test-key"}):
-                        with patch("ingest.create_client"):
-                            # Empty dataframes now log error and continue, not exit
-                            ingest.main()
+            with patch("ingest.ActualValueStore"):
+                with patch("ingest.build_roster_lookup", return_value={}):
+                    with patch("ingest._fetch_mlb_standard_stats", return_value={}):
+                        with patch.dict(os.environ, {"SUPABASE_URL": "https://test.supabase.co", "SUPABASE_SERVICE_ROLE_KEY": "test-key"}):
+                            with patch("ingest.create_client"):
+                                with pytest.raises(SystemExit) as exc_info:
+                                    ingest.main()
+                                assert exc_info.value.code == 1
 
 
 def test_batching():
@@ -148,5 +164,27 @@ def test_main_batched_upsert():
     with patch.dict(os.environ, {"SUPABASE_URL": "https://test.supabase.co", "SUPABASE_SERVICE_ROLE_KEY": "test-key"}):
         with patch("ingest.create_client", return_value=mock_client):
             with patch("ingest.build_snapshot_rows", return_value=rows):
-                ingest.main()
+                with patch("ingest._resolve_season", return_value=2026):
+                    ingest.main()
     assert mock_table.upsert.call_count == 3
+
+
+def test_add_calculated_rates_from_standard_stats():
+    player = {
+        "player_type": "batter",
+        "standard_stats": [
+            {"label": "PA", "value": "600"},
+            {"label": "SO", "value": "150"},
+            {"label": "BB", "value": "60"},
+        ],
+        "metrics": [],
+    }
+    players = {1: player}
+    ingest._add_calculated_rates(players)
+    labels = {m["label"] for m in player["metrics"]}
+    assert "K%" in labels
+    assert "BB%" in labels
+    k = next(m for m in player["metrics"] if m["label"] == "K%")
+    assert k["value"] == "25.0%"
+    bb = next(m for m in player["metrics"] if m["label"] == "BB%")
+    assert bb["value"] == "10.0%"

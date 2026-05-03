@@ -1,3 +1,10 @@
+"""
+Enhanced ingest script that fetches both percentile rankings AND actual values.
+
+This version fetches from multiple pybaseball endpoints to get actual stat values
+to display alongside percentiles (e.g., "95.4 mph · 100th percentile").
+"""
+
 import logging
 import os
 import sys
@@ -8,62 +15,49 @@ import pandas as pd
 import requests
 from dotenv import load_dotenv
 from pybaseball import (
-    batting_stats,
-    pitching_stats,
     statcast_batter_percentile_ranks,
     statcast_pitcher_percentile_ranks,
+    statcast_sprint_speed,
+    statcast_batter_expected_stats,
+    statcast_batter_exitvelo_barrels,
+    statcast_pitcher_expected_stats,
+    statcast_pitcher_exitvelo_barrels,
+    statcast_pitcher_pitch_arsenal,
 )
+from pybaseball.statcast_fielding import statcast_outs_above_average
 from supabase import create_client
+from statcast_aggregator import build_complete_player_stats
 
 load_dotenv()
 
 UTC = timezone.utc
 logger = logging.getLogger(__name__)
 
-# Lazy env-var access so tests can import the module without real secrets.
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
 SUPABASE_SERVICE_ROLE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
 
+DEFAULT_SEASON = datetime.now(UTC).year if datetime.now(UTC).month >= 4 else datetime.now(UTC).year - 1
 
-def _default_season() -> int:
-    today = datetime.now(UTC)
-    return today.year if today.month >= 4 else today.year - 1
-
-
-def _resolve_season() -> int:
-    raw = os.environ.get("STATCAST_SEASON")
-    fallback = _default_season()
-    if raw is None or raw == "":
-        return fallback
-    try:
-        season = int(raw)
-    except ValueError:
-        logger.warning("Invalid STATCAST_SEASON=%r; using %d", raw, fallback)
-        return fallback
-    if season < 2015 or season > fallback:
-        logger.warning("STATCAST_SEASON=%d out of range [2015, %d]; clamping to %d", season, fallback, fallback)
-        return fallback
-    return season
-
+MLB_TEAM_WHITELIST: set[str] = {
+    "ARI", "ATL", "BAL", "BOS", "CHC", "CWS", "CIN", "CLE", "COL", "DET",
+    "HOU", "KC", "LAA", "LAD", "MIA", "MIL", "MIN", "NYM", "NYY", "OAK",
+    "PHI", "PIT", "SD", "SEA", "SF", "STL", "TB", "TEX", "TOR", "WSH",
+}
 
 BATTER_METRICS = [
-    # Baseball Savant order: expected stats first
     ("xwoba", "xwOBA", "Hitting"),
     ("xba", "xBA", "Hitting"),
     ("xslg", "xSLG", "Hitting"),
     ("xiso", "xISO", "Hitting"),
     ("xobp", "xOBP", "Hitting"),
-    # Quality of contact
     ("exit_velocity", "EV", "Hitting"),
     ("brl_percent", "Barrel%", "Hitting"),
     ("hard_hit_percent", "Hard-Hit%", "Hitting"),
     ("launch_angle_sweet_spot", "LA Sweet Spot%", "Hitting"),
     ("max_ev", "Max EV", "Hitting"),
-    # Swing characteristics
     ("bat_speed", "Bat Speed", "Hitting"),
     ("squared_up_rate", "Squared-Up%", "Hitting"),
     ("swing_length", "Swing Length", "Hitting"),
-    # Plate discipline (Savant order: Chase, Whiff, K, BB)
     ("chase_percent", "Chase%", "Hitting"),
     ("whiff_percent", "Whiff%", "Hitting"),
     ("k_percent", "K%", "Hitting"),
@@ -81,75 +75,37 @@ FIELDING_METRICS = [
 ]
 
 PITCHER_METRICS = [
-    # Expected stats
     ("xera", "xERA", "Pitching"),
     ("xwoba", "xwOBA", "Pitching"),
     ("xba", "xBA", "Pitching"),
     ("xslg", "xSLG", "Pitching"),
     ("xiso", "xISO", "Pitching"),
     ("xobp", "xOBP", "Pitching"),
-    # Quality of contact against
     ("brl_percent", "Barrel%", "Pitching"),
     ("exit_velocity", "Avg EV Against", "Pitching"),
     ("hard_hit_percent", "Hard-Hit%", "Pitching"),
     ("max_ev", "Max EV Against", "Pitching"),
-    # Plate discipline
     ("k_percent", "K%", "Pitching"),
     ("bb_percent", "BB%", "Pitching"),
     ("whiff_percent", "Whiff%", "Pitching"),
     ("chase_percent", "Chase%", "Pitching"),
-    # Pitch characteristics
     ("fb_velocity", "Fastball Velo", "Pitching"),
     ("fb_spin", "Fastball Spin", "Pitching"),
     ("curve_spin", "Curve Spin", "Pitching"),
 ]
 
-# Standard (traditional) stats from FanGraphs leaderboards
-HITTER_STANDARD_STATS = [
-    ("AVG", "AVG"),
-    ("OBP", "OBP"),
-    ("SLG", "SLG"),
-    ("OPS", "OPS"),
-    ("HR", "HR"),
-    ("RBI", "RBI"),
-    ("R", "R"),
-    ("H", "H"),
-    ("2B", "2B"),
-    ("3B", "3B"),
-    ("BB", "BB"),
-    ("SO", "SO"),
-    ("SB", "SB"),
-    ("CS", "CS"),
-    ("PA", "PA"),
-    ("AB", "AB"),
-]
 
-PITCHER_STANDARD_STATS = [
-    ("ERA", "ERA"),
-    ("WHIP", "WHIP"),
-    ("W", "W"),
-    ("L", "L"),
-    ("SV", "SV"),
-    ("IP", "IP"),
-    ("H", "H"),
-    ("R", "R"),
-    ("ER", "ER"),
-    ("HR", "HR"),
-    ("BB", "BB"),
-    ("SO", "SO"),
-    ("K/9", "K/9"),
-    ("BB/9", "BB/9"),
-    ("K/BB", "K/BB"),
-    ("QS", "QS"),
-    ("G", "G"),
-    ("GS", "GS"),
-]
-
-
-def _all_metric_defs(player_type: str) -> list[tuple[str, str, str]]:
-    if player_type == "batter":
-        return BATTER_METRICS + RUNNING_METRICS + FIELDING_METRICS
-    return PITCHER_METRICS
+def _resolve_season() -> int:
+    raw = os.environ.get("STATCAST_SEASON")
+    if raw is None or raw == "":
+        return DEFAULT_SEASON
+    try:
+        season = int(raw)
+    except ValueError:
+        return DEFAULT_SEASON
+    if season < 2015 or season > DEFAULT_SEASON:
+        return DEFAULT_SEASON
+    return season
 
 
 def display_name(player_name: Any) -> str:
@@ -159,10 +115,53 @@ def display_name(player_name: Any) -> str:
     parts = [p.strip() for p in value.split(",")]
     if len(parts) == 2:
         return f"{parts[1]} {parts[0]}"
-    # More than one comma: assume last part is suffix (e.g. Jr., III)
     last = parts[0]
     first_and_suffix = ", ".join(parts[1:])
     return f"{first_and_suffix} {last}"
+
+
+def normalize_team_abbr(value: Any) -> str:
+    raw = str(value).strip()
+    if not raw:
+        return "TBD"
+    upper = raw.upper()
+    aliases = {
+        "ARIZONA DIAMONDBACKS": "ARI", "AZ": "ARI",
+        "ATLANTA BRAVES": "ATL",
+        "BALTIMORE ORIOLES": "BAL",
+        "BOSTON RED SOX": "BOS",
+        "CHICAGO CUBS": "CHC",
+        "CHICAGO WHITE SOX": "CWS", "CHW": "CWS", "CHW0": "CWS",
+        "CINCINNATI REDS": "CIN",
+        "CLEVELAND GUARDIANS": "CLE", "CLEVELAND INDIANS": "CLE",
+        "COLORADO ROCKIES": "COL",
+        "DETROIT TIGERS": "DET",
+        "HOUSTON ASTROS": "HOU",
+        "KANSAS CITY ROYALS": "KC", "KCR": "KC",
+        "LOS ANGELES ANGELS": "LAA", "ANAHEIM ANGELS": "LAA",
+        "LOS ANGELES DODGERS": "LAD",
+        "MIAMI MARLINS": "MIA",
+        "MILWAUKEE BREWERS": "MIL",
+        "MINNESOTA TWINS": "MIN",
+        "NEW YORK METS": "NYM",
+        "NEW YORK YANKEES": "NYY",
+        "OAKLAND ATHLETICS": "OAK",
+        "PHILADELPHIA PHILLIES": "PHI",
+        "PITTSBURGH PIRATES": "PIT",
+        "SAN DIEGO PADRES": "SD", "SDP": "SD",
+        "SAN FRANCISCO GIANTS": "SF", "SFG": "SF",
+        "SEATTLE MARINERS": "SEA",
+        "ST LOUIS CARDINALS": "STL", "ST. LOUIS CARDINALS": "STL",
+        "TAMPA BAY RAYS": "TB", "TBR": "TB",
+        "TEXAS RANGERS": "TEX",
+        "TORONTO BLUE JAYS": "TOR",
+        "WASHINGTON NATIONALS": "WSH",
+    }
+    canonical = aliases.get(upper, upper)
+    if canonical not in MLB_TEAM_WHITELIST:
+        logger.warning("Unrecognized team string %r — falling back to TBD", value)
+        return "TBD"
+    return canonical
 
 
 def percentile_value(value: Any) -> Optional[int]:
@@ -174,61 +173,9 @@ def percentile_value(value: Any) -> Optional[int]:
         return None
 
 
-def raw_stat_value(row: pd.Series, key: str) -> Optional[str]:
-    # If a companion raw column exists (e.g. 'xwoba_value'), use it.
-    raw_key = f"{key}_value"
-    if raw_key in row:
-        raw = row[raw_key]
-        if pd.notna(raw):
-            return str(raw)
-
-    # If the key itself has a '_percentile' suffix, the bare key might be raw.
-    base_key = key.replace("_percentile", "")
-    if base_key != key and base_key in row:
-        raw = row[base_key]
-        if pd.notna(raw):
-            return str(raw)
-
-    if key in row:
-        val = row[key]
-        if pd.notna(val):
-            try:
-                f = float(val)
-                if f != int(f):
-                    return str(val)
-                if f < 0 or f > 100:
-                    return str(val)
-            except (ValueError, TypeError):
-                pass
-    return None
-
-
-def build_metrics(row: pd.Series, player_type: str, metric_defs: list[tuple[str, str, str]], player_id: int) -> list[dict[str, Any]]:
-    metrics: list[dict[str, Any]] = []
-    for key, label, category in metric_defs:
-        if key not in row:
-            logger.debug("Skipping metric %s/%s for player %s: column missing", label, category, player_id)
-            continue
-        percentile = percentile_value(row[key])
-        if percentile is None:
-            continue
-        raw_value = raw_stat_value(row, key)
-        value = raw_value if raw_value is not None else ""
-        metrics.append(
-            {
-                "id": f"{player_type}-{player_id}-{key}",
-                "label": label,
-                "value": value,
-                "percentile": percentile,
-                "category": category,
-            }
-        )
-    return metrics
-
-
 def safe_player_id(row: pd.Series) -> Optional[int]:
     try:
-        val = row["player_id"]
+        val = row.get("player_id") or row.get("resp_fielder_id")
         if pd.isna(val):
             return None
         return int(val)
@@ -237,298 +184,375 @@ def safe_player_id(row: pd.Series) -> Optional[int]:
 
 
 def team_from_row(row: pd.Series) -> str:
-    for col in ("team", "team_name", "player_team", "Team"):
+    for col in ("team", "team_name", "player_team", "Team", "display_team_name"):
         if col in row and pd.notna(row[col]):
             return normalize_team_abbr(str(row[col]))
     return "TBD"
 
 
-def normalize_team_abbr(value: Any) -> str:
-    raw = str(value).strip()
-    if not raw:
-        return "TBD"
-    upper = raw.upper()
-    aliases = {
-        "ARIZONA DIAMONDBACKS": "ARI",
-        "AZ": "ARI",
-        "ATLANTA BRAVES": "ATL",
-        "BALTIMORE ORIOLES": "BAL",
-        "BOSTON RED SOX": "BOS",
-        "CHICAGO CUBS": "CHC",
-        "CHICAGO WHITE SOX": "CWS",
-        "CHW": "CWS",
-        "CHW0": "CWS",
-        "CINCINNATI REDS": "CIN",
-        "CLEVELAND GUARDIANS": "CLE",
-        "CLEVELAND INDIANS": "CLE",
-        "COLORADO ROCKIES": "COL",
-        "DETROIT TIGERS": "DET",
-        "HOUSTON ASTROS": "HOU",
-        "KANSAS CITY ROYALS": "KC",
-        "KCR": "KC",
-        "LOS ANGELES ANGELS": "LAA",
-        "ANAHEIM ANGELS": "LAA",
-        "LOS ANGELES DODGERS": "LAD",
-        "MIAMI MARLINS": "MIA",
-        "MILWAUKEE BREWERS": "MIL",
-        "MINNESOTA TWINS": "MIN",
-        "NEW YORK METS": "NYM",
-        "NEW YORK YANKEES": "NYY",
-        "ATHLETICS": "OAK",
-        "OAKLAND ATHLETICS": "OAK",
-        "ATH": "OAK",
-        "PHILADELPHIA PHILLIES": "PHI",
-        "PITTSBURGH PIRATES": "PIT",
-        "SAN DIEGO PADRES": "SD",
-        "SDP": "SD",
-        "SEATTLE MARINERS": "SEA",
-        "SAN FRANCISCO GIANTS": "SF",
-        "SFG": "SF",
-        "ST. LOUIS CARDINALS": "STL",
-        "ST LOUIS CARDINALS": "STL",
-        "TAMPA BAY RAYS": "TB",
-        "TBR": "TB",
-        "TEXAS RANGERS": "TEX",
-        "TORONTO BLUE JAYS": "TOR",
-        "WASHINGTON NATIONALS": "WSH",
-        "WSN": "WSH",
-    }
-    canonical = aliases.get(upper, upper)
-    if canonical not in MLB_TEAM_WHITELIST:
-        logger.warning("Unrecognized team string %r — falling back to TBD", value)
-        return "TBD"
-    return canonical
-
-
-MLB_TEAM_WHITELIST: set[str] = {
-    "ARI", "ATL", "BAL", "BOS", "CHC", "CWS", "CIN", "CLE", "COL", "DET",
-    "HOU", "KC", "LAA", "LAD", "MIA", "MIL", "MIN", "NYM", "NYY", "OAK",
-    "PHI", "PIT", "SD", "SEA", "SF", "STL", "TB", "TEX", "TOR", "WSH",
-}
-
-
-def position_from_row(row: pd.Series, player_type: str) -> str:
-    for col in ("position", "player_position", "pos", "Pos"):
+def position_from_row(row: pd.Series) -> str:
+    for col in ("position", "primary_pos_formatted", "pos"):
         if col in row and pd.notna(row[col]):
-            return str(row[col]).strip()
-    return "Hitter" if player_type == "batter" else "Pitcher"
+            return str(row[col])
+    return ""
 
 
-def handedness_from_row(row: pd.Series) -> str:
-    bats = ""
-    throws = ""
-    for col in ("bats", "bat_side", "batting_side"):
-        if col in row and pd.notna(row[col]):
-            bats = str(row[col]).strip()
-            break
-    for col in ("throws", "throw_side", "throwing_side"):
-        if col in row and pd.notna(row[col]):
-            throws = str(row[col]).strip()
-            break
-    if bats and throws:
-        return f"{bats}/{throws}"
-    return bats or throws or ""
+class ActualValueStore:
+    """Pre-fetches and stores all actual values for efficient lookup."""
 
+    def __init__(self, season: int):
+        self.season = season
+        self._data: dict[str, dict[int, dict[str, Any]]] = {}
+        self._prefetch_all()
 
-def _normalize_name(name: str) -> str:
-    """Normalize a player name for cross-source matching."""
-    return str(name).strip().lower().replace(".", "").replace("'", "")
+    def _prefetch_all(self):
+        """Prefetch all actual value data from all sources."""
+        logger.info("Prefetching all actual value data for season %s...", self.season)
 
-
-def _build_standard_stats(row: pd.Series, stat_defs: list[tuple[str, str]]) -> list[dict[str, Any]]:
-    """Build standard_stats JSON from a FanGraphs stats row."""
-    stats: list[dict[str, Any]] = []
-    for col, label in stat_defs:
-        if col in row and pd.notna(row[col]):
-            val = row[col]
-            # Format numbers nicely
-            if isinstance(val, (int, float)):
-                if label in ("AVG", "OBP", "SLG", "OPS", "ERA", "WHIP"):
-                    val_str = f"{float(val):.3f}"
-                elif label in ("K/9", "BB/9", "K/BB"):
-                    val_str = f"{float(val):.2f}"
-                else:
-                    val_str = str(int(val)) if float(val).is_integer() else str(float(val))
-            else:
-                val_str = str(val)
-            stats.append({"id": f"std-{label}", "label": label, "value": val_str})
-    return stats
-
-
-def _fetch_mlb_standard_stats(player_ids: list[int], season: int) -> dict[int, dict[str, Any]]:
-    """Fetch traditional stats from MLB Stats API for a list of player IDs.
-    
-    Returns a dict mapping player_id to their stats dict with keys like:
-    - For hitters: avg, obp, slg, ops, hr, rbi, r, h, doubles, triples, bb, so, sb, cs, pa, ab
-    - For pitchers: era, whip, wins, losses, saves, ip, h, r, er, hr, bb, so, k9, bb9, kbb, qs, g, gs
-    """
-    stats_by_player: dict[int, dict[str, Any]] = {}
-    
-    # MLB Stats API can handle multiple player IDs in one request
-    # Split into batches of 50 to avoid URL length issues
-    batch_size = 50
-    for i in range(0, len(player_ids), batch_size):
-        batch = player_ids[i:i + batch_size]
-        ids_param = ",".join(str(pid) for pid in batch)
-        
+        # Batter expected stats (xwOBA, xBA, xSLG)
         try:
-            # Fetch hitting stats
-            hit_url = f"https://statsapi.mlb.com/api/v1/people"
-            hit_params = {
-                "personIds": ids_param,
-                "hydrate": f"stats(type=season,season={season},group=hitting)",
-            }
-            hit_resp = requests.get(hit_url, params=hit_params, timeout=30)
-            hit_resp.raise_for_status()
-            hit_data = hit_resp.json()
-            
-            for person in hit_data.get("people", []):
-                pid = person.get("id")
-                if not pid:
-                    continue
-                
-                # Extract hitting stats
-                stats_list = person.get("stats", [])
-                for stat_group in stats_list:
-                    group_data = stat_group.get("group", {})
-                    if isinstance(group_data, dict) and group_data.get("displayName") == "hitting":
-                        for split in stat_group.get("splits", []):
-                            stat = split.get("stat", {})
-                            if stat:
-                                stats_by_player[pid] = {
-                                    "avg": stat.get("avg", ""),
-                                    "obp": stat.get("obp", ""),
-                                    "slg": stat.get("slg", ""),
-                                    "ops": stat.get("ops", ""),
-                                    "hr": stat.get("homeRuns", 0),
-                                    "rbi": stat.get("rbi", 0),
-                                    "r": stat.get("runs", 0),
-                                    "h": stat.get("hits", 0),
-                                    "doubles": stat.get("doubles", 0),
-                                    "triples": stat.get("triples", 0),
-                                    "bb": stat.get("baseOnBalls", 0),
-                                    "so": stat.get("strikeOuts", 0),
-                                    "sb": stat.get("stolenBases", 0),
-                                    "cs": stat.get("caughtStealing", 0),
-                                    "pa": stat.get("plateAppearances", 0),
-                                    "ab": stat.get("atBats", 0),
-                                    "player_type": "batter",
-                                }
-            
-            # Fetch pitching stats
-            pitch_url = f"https://statsapi.mlb.com/api/v1/people"
-            pitch_params = {
-                "personIds": ids_param,
-                "hydrate": f"stats(type=season,season={season},group=pitching)",
-            }
-            pitch_resp = requests.get(pitch_url, params=pitch_params, timeout=30)
-            pitch_resp.raise_for_status()
-            pitch_data = pitch_resp.json()
-            
-            for person in pitch_data.get("people", []):
-                pid = person.get("id")
-                if not pid:
-                    continue
-                
-                # Extract pitching stats
-                stats_list = person.get("stats", [])
-                for stat_group in stats_list:
-                    group_data = stat_group.get("group", {})
-                    if isinstance(group_data, dict) and group_data.get("displayName") == "pitching":
-                        for split in stat_group.get("splits", []):
-                            stat = split.get("stat", {})
-                            if stat:
-                                # If player already has hitting stats, they're two-way
-                                existing = stats_by_player.get(pid, {})
-                                existing.update({
-                                    "era": stat.get("era", ""),
-                                    "whip": stat.get("whip", ""),
-                                    "wins": stat.get("wins", 0),
-                                    "losses": stat.get("losses", 0),
-                                    "saves": stat.get("saves", 0),
-                                    "ip": stat.get("inningsPitched", ""),
-                                    "h": stat.get("hits", 0),
-                                    "r": stat.get("runs", 0),
-                                    "er": stat.get("earnedRuns", 0),
-                                    "hr": stat.get("homeRuns", 0),
-                                    "bb": stat.get("baseOnBalls", 0),
-                                    "so": stat.get("strikeOuts", 0),
-                                    "k9": stat.get("strikeoutsPer9Inn", ""),
-                                    "bb9": stat.get("walksPer9Inn", ""),
-                                    "kbb": stat.get("strikeoutWalkRatio", ""),
-                                    "qs": stat.get("qualityStarts", 0),
-                                    "g": stat.get("gamesPlayed", 0),
-                                    "gs": stat.get("gamesStarted", 0),
-                                    "player_type": "two_way" if existing.get("player_type") == "batter" else "pitcher",
-                                })
-                                stats_by_player[pid] = existing
-                                
-        except Exception:
-            logger.exception("Failed to fetch MLB stats for batch %d", i // batch_size)
+            df = statcast_batter_expected_stats(self.season, minPA=100)
+            df["player_id"] = pd.to_numeric(df["player_id"], errors="coerce")
+            self._data["batter_expected"] = {}
+            for _, row in df.iterrows():
+                pid = int(row["player_id"]) if pd.notna(row["player_id"]) else None
+                if pid:
+                    self._data["batter_expected"][pid] = {
+                        "est_woba": row.get("est_woba"),
+                        "est_ba": row.get("est_ba"),
+                        "est_slg": row.get("est_slg"),
+                    }
+            logger.info("Loaded %d batter expected stats", len(self._data["batter_expected"]))
+        except Exception as e:
+            logger.warning("Failed to load batter expected stats: %s", e)
+            self._data["batter_expected"] = {}
+
+        # Batter exit velocity
+        try:
+            df = statcast_batter_exitvelo_barrels(self.season, minBBE=100)
+            df["player_id"] = pd.to_numeric(df["player_id"], errors="coerce")
+            self._data["batter_exitvelo"] = {}
+            for _, row in df.iterrows():
+                pid = int(row["player_id"]) if pd.notna(row["player_id"]) else None
+                if pid:
+                    self._data["batter_exitvelo"][pid] = {
+                        "avg_hit_speed": row.get("avg_hit_speed"),
+                        "brl_percent": row.get("brl_percent"),
+                        "hard_hit_percent": row.get("ev95percent"),
+                        "max_hit_speed": row.get("max_hit_speed"),
+                        "anglesweetspotpercent": row.get("anglesweetspotpercent"),
+                    }
+            logger.info("Loaded %d batter exit velo stats", len(self._data["batter_exitvelo"]))
+        except Exception as e:
+            logger.warning("Failed to load batter exit velo: %s", e)
+            self._data["batter_exitvelo"] = {}
+
+        # Sprint speed
+        try:
+            df = statcast_sprint_speed(self.season, min_opp=25)
+            df["player_id"] = pd.to_numeric(df["player_id"], errors="coerce")
+            self._data["sprint_speed"] = {}
+            for _, row in df.iterrows():
+                pid = int(row["player_id"]) if pd.notna(row["player_id"]) else None
+                if pid:
+                    self._data["sprint_speed"][pid] = {
+                        "sprint_speed": row.get("sprint_speed"),
+                        "hp_to_1b": row.get("hp_to_1b"),
+                    }
+            logger.info("Loaded %d sprint speed stats", len(self._data["sprint_speed"]))
+        except Exception as e:
+            logger.warning("Failed to load sprint speed: %s", e)
+            self._data["sprint_speed"] = {}
+
+        # Outs above average (fielding)
+        try:
+            df = statcast_outs_above_average(self.season, pos="all", min_att=25)
+            df["player_id"] = pd.to_numeric(df["player_id"], errors="coerce")
+            self._data["oaa"] = {}
+            for _, row in df.iterrows():
+                pid = int(row["player_id"]) if pd.notna(row["player_id"]) else None
+                if pid:
+                    self._data["oaa"][pid] = {
+                        "outs_above_average": row.get("outs_above_average"),
+                        "fielding_runs_prevented": row.get("fielding_runs_prevented"),
+                    }
+            logger.info("Loaded %d OAA stats", len(self._data["oaa"]))
+        except Exception as e:
+            logger.warning("Failed to load OAA: %s", e)
+            self._data["oaa"] = {}
+
+        # Pitcher expected stats
+        try:
+            df = statcast_pitcher_expected_stats(self.season, minPA=50)
+            df["player_id"] = pd.to_numeric(df["player_id"], errors="coerce")
+            self._data["pitcher_expected"] = {}
+            for _, row in df.iterrows():
+                pid = int(row["player_id"]) if pd.notna(row["player_id"]) else None
+                if pid:
+                    self._data["pitcher_expected"][pid] = {
+                        "xera": row.get("xera"),
+                        "est_woba": row.get("est_woba"),
+                        "est_ba": row.get("est_ba"),
+                        "est_slg": row.get("est_slg"),
+                    }
+            logger.info("Loaded %d pitcher expected stats", len(self._data["pitcher_expected"]))
+        except Exception as e:
+            logger.warning("Failed to load pitcher expected stats: %s", e)
+            self._data["pitcher_expected"] = {}
+
+        # Pitcher exit velocity against
+        try:
+            df = statcast_pitcher_exitvelo_barrels(self.season, minBBE=50)
+            df["player_id"] = pd.to_numeric(df["player_id"], errors="coerce")
+            self._data["pitcher_exitvelo"] = {}
+            for _, row in df.iterrows():
+                pid = int(row["player_id"]) if pd.notna(row["player_id"]) else None
+                if pid:
+                    self._data["pitcher_exitvelo"][pid] = {
+                        "avg_hit_speed": row.get("avg_hit_speed"),
+                        "brl_percent": row.get("brl_percent"),
+                        "ev95percent": row.get("ev95percent"),
+                        "max_hit_speed": row.get("max_hit_speed"),
+                    }
+            logger.info("Loaded %d pitcher exit velo stats", len(self._data["pitcher_exitvelo"]))
+        except Exception as e:
+            logger.warning("Failed to load pitcher exit velo: %s", e)
+            self._data["pitcher_exitvelo"] = {}
+
+        # Pitcher arsenal
+        try:
+            df = statcast_pitcher_pitch_arsenal(self.season, minP=100)
+            df["pitcher"] = pd.to_numeric(df["pitcher"], errors="coerce")
+            self._data["pitcher_arsenal"] = {}
+            for _, row in df.iterrows():
+                pid = int(row["pitcher"]) if pd.notna(row["pitcher"]) else None
+                if pid:
+                    self._data["pitcher_arsenal"][pid] = {
+                        "ff_avg_speed": row.get("ff_avg_speed"),
+                    }
+            logger.info("Loaded %d pitcher arsenal stats", len(self._data["pitcher_arsenal"]))
+        except Exception as e:
+            logger.warning("Failed to load pitcher arsenal: %s", e)
+            self._data["pitcher_arsenal"] = {}
+
+        # Fetch aggregated statcast data (bat speed, swing length, plate discipline, spin rates)
+        try:
+            logger.info("Fetching aggregated Statcast data (this may take a few minutes)...")
+            batter_agg, pitcher_agg = build_complete_player_stats(self.season)
+
+            # Store batter aggregated stats
+            self._data["batter_agg"] = {}
+            if not batter_agg.empty:
+                for _, row in batter_agg.iterrows():
+                    pid = int(row["player_id"])
+                    self._data["batter_agg"][pid] = {
+                        "bat_speed": row.get("bat_speed"),
+                        "swing_length": row.get("swing_length"),
+                        "whiff_percent": row.get("whiff_percent"),
+                        "chase_percent": row.get("chase_percent"),
+                    }
+                logger.info("Loaded %d batter aggregated stats", len(self._data["batter_agg"]))
+
+            # Store pitcher aggregated stats
+            self._data["pitcher_agg"] = {}
+            if not pitcher_agg.empty:
+                for _, row in pitcher_agg.iterrows():
+                    pid = int(row["player_id"])
+                    self._data["pitcher_agg"][pid] = {
+                        "avg_spin_rate": row.get("avg_spin_rate"),
+                        "fastball_spin": row.get("fastball_spin"),
+                        "breaking_spin": row.get("breaking_spin"),
+                        "offspeed_spin": row.get("offspeed_spin"),
+                    }
+                logger.info("Loaded %d pitcher aggregated stats", len(self._data["pitcher_agg"]))
+        except Exception as e:
+            logger.warning("Failed to load aggregated Statcast data: %s", e)
+            self._data["batter_agg"] = {}
+            self._data["pitcher_agg"] = {}
+
+    def get_value(self, player_id: int, metric_key: str, player_type: str) -> Optional[str]:
+        """Get formatted actual value for a metric."""
+        value = None
+        unit = ""
+
+        try:
+            if metric_key == "xwoba":
+                src = self._data["batter_expected"] if player_type == "batter" else self._data["pitcher_expected"]
+                if player_id in src:
+                    v = src[player_id].get("est_woba")
+                    if pd.notna(v):
+                        value = f"{v:.3f}"
+
+            elif metric_key == "xba":
+                src = self._data["batter_expected"] if player_type == "batter" else self._data["pitcher_expected"]
+                if player_id in src:
+                    v = src[player_id].get("est_ba")
+                    if pd.notna(v):
+                        value = f"{v:.3f}"
+
+            elif metric_key == "xslg":
+                src = self._data["batter_expected"] if player_type == "batter" else self._data["pitcher_expected"]
+                if player_id in src:
+                    v = src[player_id].get("est_slg")
+                    if pd.notna(v):
+                        value = f"{v:.3f}"
+
+            elif metric_key == "exit_velocity":
+                src = self._data["batter_exitvelo"] if player_type == "batter" else self._data["pitcher_exitvelo"]
+                if player_id in src:
+                    v = src[player_id].get("avg_hit_speed")
+                    if pd.notna(v):
+                        value = f"{v:.1f}"
+                        unit = " mph"
+
+            elif metric_key == "brl_percent":
+                src = self._data["batter_exitvelo"] if player_type == "batter" else self._data["pitcher_exitvelo"]
+                if player_id in src:
+                    v = src[player_id].get("brl_percent")
+                    if pd.notna(v):
+                        value = f"{v:.1f}"
+                        unit = "%"
+
+            elif metric_key == "hard_hit_percent":
+                src = self._data["batter_exitvelo"] if player_type == "batter" else self._data["pitcher_exitvelo"]
+                if player_id in src:
+                    v = src[player_id].get("ev95percent")
+                    if pd.notna(v):
+                        value = f"{v:.1f}"
+                        unit = "%"
+
+            elif metric_key == "max_ev":
+                src = self._data["batter_exitvelo"] if player_type == "batter" else self._data["pitcher_exitvelo"]
+                if player_id in src:
+                    v = src[player_id].get("max_hit_speed")
+                    if pd.notna(v):
+                        value = f"{v:.1f}"
+                        unit = " mph"
+
+            elif metric_key == "launch_angle_sweet_spot":
+                if player_id in self._data["batter_exitvelo"]:
+                    v = self._data["batter_exitvelo"][player_id].get("anglesweetspotpercent")
+                    if pd.notna(v):
+                        value = f"{v:.1f}"
+                        unit = "%"
+
+            elif metric_key == "sprint_speed":
+                if player_id in self._data["sprint_speed"]:
+                    v = self._data["sprint_speed"][player_id].get("sprint_speed")
+                    if pd.notna(v):
+                        value = f"{v:.1f}"
+                        unit = " ft/s"
+
+            elif metric_key == "oaa":
+                if player_id in self._data["oaa"]:
+                    v = self._data["oaa"][player_id].get("outs_above_average")
+                    if pd.notna(v):
+                        value = f"{int(v):+d}"
+
+            elif metric_key == "xera":
+                if player_id in self._data["pitcher_expected"]:
+                    v = self._data["pitcher_expected"][player_id].get("xera")
+                    if pd.notna(v):
+                        value = f"{v:.2f}"
+
+            elif metric_key == "fb_velocity":
+                if player_id in self._data["pitcher_arsenal"]:
+                    v = self._data["pitcher_arsenal"][player_id].get("ff_avg_speed")
+                    if pd.notna(v):
+                        value = f"{v:.1f}"
+                        unit = " mph"
+
+            elif metric_key == "bat_speed":
+                if player_id in self._data.get("batter_agg", {}):
+                    v = self._data["batter_agg"][player_id].get("bat_speed")
+                    if pd.notna(v):
+                        value = f"{v:.1f}"
+                        unit = " mph"
+
+            elif metric_key == "swing_length":
+                if player_id in self._data.get("batter_agg", {}):
+                    v = self._data["batter_agg"][player_id].get("swing_length")
+                    if pd.notna(v):
+                        value = f"{v:.2f}"
+                        unit = " ft"
+
+            elif metric_key == "whiff_percent":
+                if player_id in self._data.get("batter_agg", {}):
+                    v = self._data["batter_agg"][player_id].get("whiff_percent")
+                    if pd.notna(v):
+                        value = f"{v:.1f}"
+                        unit = "%"
+
+            elif metric_key == "chase_percent":
+                if player_id in self._data.get("batter_agg", {}):
+                    v = self._data["batter_agg"][player_id].get("chase_percent")
+                    if pd.notna(v):
+                        value = f"{v:.1f}"
+                        unit = "%"
+
+            elif metric_key == "fb_spin":
+                if player_id in self._data.get("pitcher_agg", {}):
+                    v = self._data["pitcher_agg"][player_id].get("fastball_spin")
+                    if pd.notna(v):
+                        value = f"{int(v)}"
+                        unit = " rpm"
+
+            elif metric_key == "curve_spin":
+                if player_id in self._data.get("pitcher_agg", {}):
+                    v = self._data["pitcher_agg"][player_id].get("breaking_spin")
+                    if pd.notna(v):
+                        value = f"{int(v)}"
+                        unit = " rpm"
+
+        except Exception as e:
+            logger.debug("Error getting value for %s/%s: %s", player_id, metric_key, e)
+
+        if value:
+            return value + unit
+        return None
+
+
+def build_metrics_with_values(
+    row: pd.Series,
+    player_type: str,
+    metric_defs: list[tuple[str, str, str]],
+    player_id: int,
+    value_store: ActualValueStore,
+) -> list[dict[str, Any]]:
+    """Build metrics with both percentile and actual values."""
+    metrics: list[dict[str, Any]] = []
+
+    for key, label, category in metric_defs:
+        if key not in row:
             continue
-    
-    logger.info("Fetched MLB standard stats for %d players", len(stats_by_player))
-    return stats_by_player
+
+        percentile = percentile_value(row[key])
+        if percentile is None:
+            continue
+
+        actual_value = value_store.get_value(player_id, key, player_type)
+
+        metric = {
+            "id": f"{player_type}-{player_id}-{key}",
+            "label": label,
+            "value": actual_value if actual_value else "",
+            "percentile": percentile,
+            "category": category,
+        }
+
+        if actual_value:
+            metric["actual_value"] = actual_value
+            metric["display_value"] = f"{actual_value} · {percentile}th"
+        else:
+            metric["display_value"] = f"{percentile}th percentile"
+
+        metrics.append(metric)
+
+    return metrics
 
 
-def _build_standard_stats_from_mlb(stats: dict[str, Any]) -> list[dict[str, str]]:
-    """Convert MLB Stats API data to standard_stats JSON format."""
-    result: list[dict[str, str]] = []
-    
-    # Hitting stats
-    if stats.get("player_type") in ("batter", "two_way"):
-        hitters = [
-            ("avg", "AVG"), ("obp", "OBP"), ("slg", "SLG"), ("ops", "OPS"),
-            ("hr", "HR"), ("rbi", "RBI"), ("r", "R"), ("h", "H"),
-            ("doubles", "2B"), ("triples", "3B"), ("bb", "BB"), ("so", "SO"),
-            ("sb", "SB"), ("cs", "CS"), ("pa", "PA"), ("ab", "AB"),
-        ]
-        for key, label in hitters:
-            val = stats.get(key)
-            if val is not None and val != "":
-                # Format decimals properly
-                if key in ("avg", "obp", "slg", "ops") and val != "":
-                    try:
-                        val_str = f"{float(val):.3f}"
-                    except (ValueError, TypeError):
-                        val_str = str(val)
-                else:
-                    val_str = str(int(val)) if isinstance(val, (int, float)) and float(val).is_integer() else str(val)
-                result.append({"id": f"std-{label}", "label": label, "value": val_str})
-    
-    # Pitching stats
-    if stats.get("player_type") in ("pitcher", "two_way"):
-        pitchers = [
-            ("era", "ERA"), ("whip", "WHIP"), ("wins", "W"), ("losses", "L"), ("saves", "SV"),
-            ("ip", "IP"), ("h", "H"), ("r", "R"), ("er", "ER"), ("hr", "HR"),
-            ("bb", "BB"), ("so", "SO"), ("k9", "K/9"), ("bb9", "BB/9"), ("kbb", "K/BB"),
-            ("qs", "QS"), ("g", "G"), ("gs", "GS"),
-        ]
-        # Avoid duplicates for two-way players
-        existing_labels = {s["label"] for s in result}
-        for key, label in pitchers:
-            if label in existing_labels:
-                continue
-            val = stats.get(key)
-            if val is not None and val != "":
-                if key in ("era", "whip"):
-                    try:
-                        val_str = f"{float(val):.2f}"
-                    except (ValueError, TypeError):
-                        val_str = str(val)
-                elif key in ("k9", "bb9", "kbb"):
-                    try:
-                        val_str = f"{float(val):.2f}"
-                    except (ValueError, TypeError):
-                        val_str = str(val)
-                else:
-                    val_str = str(int(val)) if isinstance(val, (int, float)) and float(val).is_integer() else str(val)
-                result.append({"id": f"std-{label}", "label": label, "value": val_str})
-    
-    return result
-
-
-def _fetch_mlb_roster_lookup(season: int) -> dict[int, dict[str, str]]:
+def build_roster_lookup(season: int) -> dict[int, dict[str, str]]:
+    """Build a lookup of player_id -> {team, position} from MLB Stats API rosters."""
     lookup: dict[int, dict[str, str]] = {}
     try:
         teams_response = requests.get(
@@ -567,147 +591,359 @@ def _fetch_mlb_roster_lookup(season: int) -> dict[int, dict[str, str]]:
     return lookup
 
 
-def merge_player_row(players: dict[int, dict[str, Any]], row: pd.Series, player_type: str, metric_defs: list[tuple[str, str, str]], now: str, season: int, standard_lookup: Optional[dict[str, pd.Series]] = None, roster_lookup: Optional[dict[int, dict[str, str]]] = None) -> None:
-    player_id = safe_player_id(row)
-    if player_id is None:
-        logger.warning("Skipping row with missing or invalid player_id: %s", row.to_dict())
+def merge_player_row(
+    players: dict[int, dict],
+    row: pd.Series,
+    player_type: str,
+    metric_defs: list[tuple[str, str, str]],
+    now: datetime,
+    season: int,
+    value_store: ActualValueStore,
+    roster_lookup: Optional[dict[int, dict[str, str]]] = None,
+) -> None:
+    """Merge a data row into the players dictionary with actual values."""
+    pid = safe_player_id(row)
+    if pid is None:
         return
 
-    metrics = build_metrics(row, player_type, metric_defs, player_id)
-    if not metrics:
-        return
+    name = display_name(row.get("last_name, first_name") or row.get("player_name", ""))
+    team = team_from_row(row)
+    if team == "TBD" and roster_lookup and pid in roster_lookup:
+        team = normalize_team_abbr(roster_lookup[pid].get("team", ""))
+    position = position_from_row(row)
+    if not position and roster_lookup and pid in roster_lookup:
+        position = roster_lookup[pid].get("position", "")
 
-    if player_id not in players:
-        player_name = display_name(row.get("player_name", ""))
-        norm_name = _normalize_name(player_name)
-        standard_row = standard_lookup.get(norm_name) if standard_lookup else None
-        standard_stats: list[dict[str, Any]] = []
-        if standard_row is not None:
-            stat_defs = PITCHER_STANDARD_STATS if player_type == "pitcher" else HITTER_STANDARD_STATS
-            standard_stats = _build_standard_stats(standard_row, stat_defs)
+    now_str = now.isoformat()
 
-        team = team_from_row(row)
-        if team == "TBD" and standard_row is not None:
-            team = team_from_row(standard_row)
-        if team == "TBD" and roster_lookup and player_id in roster_lookup:
-            team = normalize_team_abbr(roster_lookup[player_id].get("team", ""))
-        position = position_from_row(row, player_type)
-        if position in ("Hitter", "Pitcher") and standard_row is not None:
-            position = position_from_row(standard_row, player_type)
-        if position in ("Hitter", "Pitcher") and roster_lookup and player_id in roster_lookup:
-            position = roster_lookup[player_id].get("position", position)
-
-        players[player_id] = {
-            "id": player_id,
-            "name": player_name,
+    if pid not in players:
+        players[pid] = {
+            "id": pid,
+            "name": name,
             "team": team,
             "position": position,
-            "handedness": handedness_from_row(row),
-            "image_url": f"https://img.mlbstatic.com/mlb-photos/image/upload/w_180,q_100/v1/people/{player_id}/headshot/67/current",
-            "updated_at": now,
-            "season": season,
+            "handedness": "",
+            "image_url": None,
             "player_type": player_type,
-            "source": "baseball_savant_percentile_rankings",
-            "metrics": metrics,
-            "standard_stats": standard_stats,
+            "season": season,
+            "source": "baseball_savant_enhanced",
+            "metrics": [],
+            "standard_stats": [],
             "games": [],
+            "updated_at": now_str,
         }
-        return
+    else:
+        if players[pid]["name"] in ("", "Unknown") and name:
+            players[pid]["name"] = name
+        if players[pid]["team"] in ("", "TBD") and team:
+            players[pid]["team"] = team
+        if not players[pid]["position"] and position:
+            players[pid]["position"] = position
+        existing_type = players[pid].get("player_type")
+        if existing_type and existing_type != player_type:
+            players[pid]["player_type"] = "two_way"
+        players[pid]["updated_at"] = now_str
 
-    existing = players[player_id]
-    existing["position"] = "Two-way"
-    existing["player_type"] = "two_way"
-    existing["metrics"].extend(metrics)
+    metrics = build_metrics_with_values(row, player_type, metric_defs, pid, value_store)
+
+    existing_ids = {m["id"] for m in players[pid]["metrics"]}
+    for m in metrics:
+        if m["id"] not in existing_ids:
+            players[pid]["metrics"].append(m)
 
 
-def chunks(lst: list, n: int) -> Iterator[list]:
-    for i in range(0, len(lst), n):
-        yield lst[i:i + n]
+def _add_calculated_rates(players: dict[int, dict]) -> None:
+    """Calculate K% and BB% from standard stats and update existing metrics."""
+    for pid, player in players.items():
+        pa = None
+        so = None
+        bb = None
+        bf = None
+
+        for s in player.get("standard_stats", []):
+            label = s["label"]
+            try:
+                if label == "PA":
+                    pa = int(s["value"])
+                elif label == "SO":
+                    so = int(s["value"])
+                elif label == "BB":
+                    bb = int(s["value"])
+                elif label == "BF":
+                    bf = int(s["value"])
+            except (ValueError, TypeError):
+                pass
+
+        if pa is None and bf is not None:
+            pa = bf
+
+        if pa is None or pa <= 0:
+            continue
+
+        player_type = player.get("player_type", "batter")
+        is_pitcher = player_type == "pitcher" or (player_type == "two_way" and bf is not None)
+        prefix = "pitcher" if is_pitcher else "batter"
+        category = "Pitching" if is_pitcher else "Hitting"
+
+        existing_metrics = {m["label"]: m for m in player.get("metrics", [])}
+
+        if so is not None:
+            k_rate = (so / pa) * 100
+            k_value = f"{k_rate:.1f}%"
+
+            if "K%" in existing_metrics:
+                existing_metrics["K%"]["value"] = k_value
+                existing_metrics["K%"]["actual_value"] = k_value
+                if existing_metrics["K%"].get("percentile"):
+                    existing_metrics["K%"]["display_value"] = f"{k_value} · {existing_metrics['K%']['percentile']}th"
+            else:
+                player["metrics"].append({
+                    "id": f"{prefix}-{pid}-k_percent",
+                    "label": "K%",
+                    "value": k_value,
+                    "actual_value": k_value,
+                    "percentile": 0,
+                    "category": category,
+                })
+
+        if bb is not None:
+            bb_rate = (bb / pa) * 100
+            bb_value = f"{bb_rate:.1f}%"
+
+            if "BB%" in existing_metrics:
+                existing_metrics["BB%"]["value"] = bb_value
+                existing_metrics["BB%"]["actual_value"] = bb_value
+                if existing_metrics["BB%"].get("percentile"):
+                    existing_metrics["BB%"]["display_value"] = f"{bb_value} · {existing_metrics['BB%']['percentile']}th"
+            else:
+                player["metrics"].append({
+                    "id": f"{prefix}-{pid}-bb_percent",
+                    "label": "BB%",
+                    "value": bb_value,
+                    "actual_value": bb_value,
+                    "percentile": 0,
+                    "category": category,
+                })
 
 
-def build_snapshot_rows(season: int) -> list[dict[str, Any]]:
-    now = datetime.now(UTC).isoformat()
-    players: dict[int, dict[str, Any]] = {}
+def build_snapshot_rows(season: int) -> list[dict]:
+    """Build snapshot rows with both percentiles and actual values."""
+    logger.info("Building snapshot rows for season %s with actual values...", season)
 
-    logger.info("Fetching batter percentile ranks for season %s", season)
-    try:
-        batter_rows = statcast_batter_percentile_ranks(season)
-        logger.info("Batter rows: %d", len(batter_rows))
-        if batter_rows.empty:
-            logger.warning("Empty batter DataFrame returned")
-    except Exception:
-        logger.exception("Failed to fetch batter percentile ranks")
-        raise
+    now = datetime.now(UTC)
+    players: dict[int, dict] = {}
 
-    logger.info("Fetching pitcher percentile ranks for season %s", season)
-    try:
-        pitcher_rows = statcast_pitcher_percentile_ranks(season)
-        logger.info("Pitcher rows: %d", len(pitcher_rows))
-        if pitcher_rows.empty:
-            logger.warning("Empty pitcher DataFrame returned")
-    except Exception:
-        logger.exception("Failed to fetch pitcher percentile ranks")
-        raise
+    value_store = ActualValueStore(season)
 
-    # Log available columns for debugging
-    logger.info("Batter columns: %s", list(batter_rows.columns))
-    logger.info("Pitcher columns: %s", list(pitcher_rows.columns))
+    logger.info("Fetching MLB roster lookup...")
+    roster_lookup = build_roster_lookup(season)
 
-    missing_batter = {m[0] for m in _all_metric_defs("batter")} - set(batter_rows.columns)
-    missing_pitcher = {m[0] for m in _all_metric_defs("pitcher")} - set(pitcher_rows.columns)
-    if missing_batter:
-        logger.warning("Missing batter columns: %s", missing_batter)
-    if missing_pitcher:
-        logger.warning("Missing pitcher columns: %s", missing_pitcher)
+    logger.info("Fetching percentile rankings...")
+    batter_rows = statcast_batter_percentile_ranks(season)
+    pitcher_rows = statcast_pitcher_percentile_ranks(season)
 
-    # Fetch roster lookup from MLB API
-    roster_lookup = _fetch_mlb_roster_lookup(season)
-    
-    # Process Statcast data to build player records
-    batter_metrics = _all_metric_defs("batter")
-    pitcher_metrics = _all_metric_defs("pitcher")
-    
+    logger.info("Batter percentile rows: %d", len(batter_rows))
+    logger.info("Pitcher percentile rows: %d", len(pitcher_rows))
+
+    batter_metrics = BATTER_METRICS + RUNNING_METRICS + FIELDING_METRICS
     skipped = 0
     for _, row in batter_rows.iterrows():
         try:
-            merge_player_row(players, row, "batter", batter_metrics, now, season, None, roster_lookup)
+            merge_player_row(players, row, "batter", batter_metrics, now, season, value_store, roster_lookup)
         except Exception:
             skipped += 1
             logger.exception("Failed to process batter row")
-    
+
+    pitcher_metrics = PITCHER_METRICS
     for _, row in pitcher_rows.iterrows():
         try:
-            merge_player_row(players, row, "pitcher", pitcher_metrics, now, season, None, roster_lookup)
+            merge_player_row(players, row, "pitcher", pitcher_metrics, now, season, value_store, roster_lookup)
         except Exception:
             skipped += 1
             logger.exception("Failed to process pitcher row")
-    
-    # Fetch standard stats from MLB Stats API for all players
+
+    logger.info(
+        "Total players: %d (batters: %d, pitchers: %d, two-way: %d, skipped: %d)",
+        len(players),
+        sum(1 for p in players.values() if p.get("player_type") == "batter"),
+        sum(1 for p in players.values() if p.get("player_type") == "pitcher"),
+        sum(1 for p in players.values() if p.get("player_type") == "two_way"),
+        skipped,
+    )
+
     all_player_ids = list(players.keys())
-    logger.info("Fetching standard stats from MLB Stats API for %d players", len(all_player_ids))
+    logger.info("Fetching standard stats from MLB Stats API for %d players...", len(all_player_ids))
     mlb_stats = _fetch_mlb_standard_stats(all_player_ids, season)
-    
-    # Attach standard stats to players
+
     with_std = 0
     for pid, stats in mlb_stats.items():
         if pid in players:
             players[pid]["standard_stats"] = _build_standard_stats_from_mlb(stats)
             with_std += 1
-    
+
     logger.info("Attached standard stats to %d players", with_std)
 
-    two_way = sum(1 for p in players.values() if p.get("player_type") == "two_way")
-    logger.info(
-        "Total players for %s: %d (batters: %d, pitchers: %d, two-way: %d, skipped rows: %d)",
-        season,
-        len(players),
-        sum(1 for p in players.values() if p.get("player_type") == "batter"),
-        sum(1 for p in players.values() if p.get("player_type") == "pitcher"),
-        two_way,
-        skipped,
-    )
+    _add_calculated_rates(players)
 
     return list(players.values())
+
+
+def _fetch_mlb_standard_stats(player_ids: list[int], season: int) -> dict[int, dict[str, Any]]:
+    """Fetch standard stats from MLB Stats API."""
+    stats_by_player: dict[int, dict[str, Any]] = {}
+
+    batch_size = 50
+    for i in range(0, len(player_ids), batch_size):
+        batch = player_ids[i:i + batch_size]
+        ids_param = ",".join(str(pid) for pid in batch)
+
+        try:
+            hit_url = f"https://statsapi.mlb.com/api/v1/people"
+            hit_params = {
+                "personIds": ids_param,
+                "hydrate": f"stats(type=season,season={season},group=hitting)",
+            }
+            hit_resp = requests.get(hit_url, params=hit_params, timeout=30)
+            hit_resp.raise_for_status()
+            hit_data = hit_resp.json()
+
+            for person in hit_data.get("people", []):
+                pid = person.get("id")
+                if not pid:
+                    continue
+
+                stats_list = person.get("stats", [])
+                for stat_group in stats_list:
+                    group_data = stat_group.get("group", {})
+                    if isinstance(group_data, dict) and group_data.get("displayName") == "hitting":
+                        for split in stat_group.get("splits", []):
+                            stat = split.get("stat", {})
+                            if stat:
+                                stats_by_player[pid] = {
+                                    "avg": stat.get("avg", ""),
+                                    "obp": stat.get("obp", ""),
+                                    "slg": stat.get("slg", ""),
+                                    "ops": stat.get("ops", ""),
+                                    "hr": stat.get("homeRuns", 0),
+                                    "rbi": stat.get("rbi", 0),
+                                    "r": stat.get("runs", 0),
+                                    "h": stat.get("hits", 0),
+                                    "doubles": stat.get("doubles", 0),
+                                    "triples": stat.get("triples", 0),
+                                    "bb": stat.get("baseOnBalls", 0),
+                                    "so": stat.get("strikeOuts", 0),
+                                    "sb": stat.get("stolenBases", 0),
+                                    "cs": stat.get("caughtStealing", 0),
+                                    "pa": stat.get("plateAppearances", 0),
+                                    "ab": stat.get("atBats", 0),
+                                    "player_type": "batter",
+                                }
+
+            pitch_url = f"https://statsapi.mlb.com/api/v1/people"
+            pitch_params = {
+                "personIds": ids_param,
+                "hydrate": f"stats(type=season,season={season},group=pitching)",
+            }
+            pitch_resp = requests.get(pitch_url, params=pitch_params, timeout=30)
+            pitch_resp.raise_for_status()
+            pitch_data = pitch_resp.json()
+
+            for person in pitch_data.get("people", []):
+                pid = person.get("id")
+                if not pid:
+                    continue
+
+                stats_list = person.get("stats", [])
+                for stat_group in stats_list:
+                    group_data = stat_group.get("group", {})
+                    if isinstance(group_data, dict) and group_data.get("displayName") == "pitching":
+                        for split in stat_group.get("splits", []):
+                            stat = split.get("stat", {})
+                            if stat:
+                                existing = stats_by_player.get(pid, {})
+                                existing.update({
+                                    "era": stat.get("era", ""),
+                                    "whip": stat.get("whip", ""),
+                                    "wins": stat.get("wins", 0),
+                                    "losses": stat.get("losses", 0),
+                                    "saves": stat.get("saves", 0),
+                                    "ip": stat.get("inningsPitched", ""),
+                                    "h": stat.get("hits", 0),
+                                    "r": stat.get("runs", 0),
+                                    "er": stat.get("earnedRuns", 0),
+                                    "hr": stat.get("homeRuns", 0),
+                                    "bb": stat.get("baseOnBalls", 0),
+                                    "so": stat.get("strikeOuts", 0),
+                                    "k9": stat.get("strikeoutsPer9Inn", ""),
+                                    "bb9": stat.get("walksPer9Inn", ""),
+                                    "kbb": stat.get("strikeoutWalkRatio", ""),
+                                    "qs": stat.get("qualityStarts", 0),
+                                    "g": stat.get("gamesPlayed", 0),
+                                    "gs": stat.get("gamesStarted", 0),
+                                    "bf": stat.get("battersFaced", 0),
+                                    "player_type": "two_way" if existing.get("player_type") == "batter" else "pitcher",
+                                })
+                                stats_by_player[pid] = existing
+
+        except Exception:
+            logger.exception("Failed to fetch MLB stats for batch %d", i // batch_size)
+            continue
+
+    logger.info("Fetched MLB standard stats for %d players", len(stats_by_player))
+    return stats_by_player
+
+
+def _build_standard_stats_from_mlb(stats: dict[str, Any]) -> list[dict[str, str]]:
+    """Convert MLB Stats API data to standard_stats JSON format."""
+    result: list[dict[str, str]] = []
+
+    if stats.get("player_type") in ("batter", "two_way"):
+        hitters = [
+            ("avg", "AVG"), ("obp", "OBP"), ("slg", "SLG"), ("ops", "OPS"),
+            ("hr", "HR"), ("rbi", "RBI"), ("r", "R"), ("h", "H"),
+            ("doubles", "2B"), ("triples", "3B"), ("bb", "BB"), ("so", "SO"),
+            ("sb", "SB"), ("cs", "CS"), ("pa", "PA"), ("ab", "AB"),
+        ]
+        for key, label in hitters:
+            val = stats.get(key)
+            if val is not None and val != "":
+                if key in ("avg", "obp", "slg", "ops") and val != "":
+                    try:
+                        val_str = f"{float(val):.3f}"
+                    except (ValueError, TypeError):
+                        val_str = str(val)
+                else:
+                    val_str = str(int(val)) if isinstance(val, (int, float)) and float(val).is_integer() else str(val)
+                result.append({"id": f"std-{label}", "label": label, "value": val_str})
+
+    if stats.get("player_type") in ("pitcher", "two_way"):
+        pitchers = [
+            ("era", "ERA"), ("whip", "WHIP"), ("wins", "W"), ("losses", "L"), ("saves", "SV"),
+            ("ip", "IP"), ("h", "H"), ("r", "R"), ("er", "ER"), ("hr", "HR"),
+            ("bb", "BB"), ("so", "SO"), ("k9", "K/9"), ("bb9", "BB/9"), ("kbb", "K/BB"),
+            ("qs", "QS"), ("g", "G"), ("gs", "GS"), ("bf", "BF"),
+        ]
+        existing_labels = {s["label"] for s in result}
+        for key, label in pitchers:
+            if label in existing_labels:
+                continue
+            val = stats.get(key)
+            if val is not None and val != "":
+                if key in ("era", "whip", "k9", "bb9", "kbb"):
+                    try:
+                        val_str = f"{float(val):.2f}"
+                    except (ValueError, TypeError):
+                        val_str = str(val)
+                else:
+                    val_str = str(int(val)) if isinstance(val, (int, float)) and float(val).is_integer() else str(val)
+                result.append({"id": f"std-{label}", "label": label, "value": val_str})
+
+    return result
+
+
+def chunks(lst: list, n: int) -> Iterator[list]:
+    for i in range(0, len(lst), n):
+        yield lst[i:i + n]
 
 
 def main() -> None:
@@ -720,40 +956,34 @@ def main() -> None:
         sys.exit(1)
 
     client = create_client(url, key)
+    season = _resolve_season()
 
-    fetch_all = os.environ.get("FETCH_ALL_TIME", "false").lower() == "true"
-    end_season = _default_season()
-    seasons_to_fetch = list(range(2015, end_season + 1)) if fetch_all else [_resolve_season()]
+    logger.info("=== Processing season %s with actual values ===", season)
+    try:
+        rows = build_snapshot_rows(season)
+        if not rows:
+            logger.error("No rows to upsert for %s.", season)
+            sys.exit(1)
 
-    for season in seasons_to_fetch:
-        logger.info("=== Processing season %s ===", season)
-        try:
-            rows = build_snapshot_rows(season)
-            if not rows:
-                logger.error("No rows to upsert for %s.", season)
-                continue
+        batch_size = 150
+        for i, batch in enumerate(chunks(rows, batch_size)):
+            logger.info("Upserting batch %d (%d rows) for %s...", i + 1, len(batch), season)
+            try:
+                client.table("player_snapshots").upsert(batch, on_conflict="id,season").execute()
+            except Exception as e:
+                error_str = str(e)
+                if "no unique or exclusion constraint" in error_str or "ON CONFLICT" in error_str:
+                    logger.warning("Upsert failed due to missing constraint, falling back to delete+insert")
+                    for row in batch:
+                        client.table("player_snapshots").delete().eq("id", row["id"]).eq("season", row["season"]).execute()
+                    client.table("player_snapshots").insert(batch).execute()
+                else:
+                    raise
 
-            batch_size = 150
-            for i, batch in enumerate(chunks(rows, batch_size)):
-                logger.info("Upserting batch %d (%d rows) for %s...", i + 1, len(batch), season)
-                try:
-                    client.table("player_snapshots").upsert(batch, on_conflict="id,season").execute()
-                except Exception as e:
-                    error_str = str(e)
-                    if "no unique or exclusion constraint" in error_str or "ON CONFLICT" in error_str:
-                        logger.warning("Upsert failed due to missing constraint, falling back to delete+insert")
-                        # Fallback: delete existing rows for these (id, season) pairs, then insert
-                        for row in batch:
-                            client.table("player_snapshots").delete().eq("id", row["id"]).eq("season", row["season"]).execute()
-                        client.table("player_snapshots").insert(batch).execute()
-                    else:
-                        raise
-
-            logger.info("Successfully upserted %d player snapshots for %s.", len(rows), season)
-        except Exception:
-            logger.exception("Failed to process season %s", season)
-            if not fetch_all:
-                sys.exit(1)
+        logger.info("Successfully upserted %d player snapshots with actual values for %s.", len(rows), season)
+    except Exception:
+        logger.exception("Failed to process season %s", season)
+        sys.exit(1)
 
 
 if __name__ == "__main__":
