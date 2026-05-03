@@ -90,4 +90,22 @@ final class PlayerTests: XCTestCase {
 
         XCTAssertEqual(player.weeklyDelta, 3)
     }
+
+    func testSavantURL() {
+        let player = Player(
+            playerId: 12345, name: "Aaron Judge", team: "NYY", position: "RF",
+            handedness: "R/R", imageURL: nil,
+            updatedAt: Date(), metrics: [], standardStats: [], games: []
+        )
+        XCTAssertEqual(player.savantURL?.absoluteString, "https://baseballsavant.mlb.com/savant-player/aaron-judge-12345")
+    }
+
+    func testSavantURLHandlesMultiWordNames() {
+        let player = Player(
+            playerId: 67890, name: "Shohei Ohtani", team: "LAD", position: "DH",
+            handedness: "L/R", imageURL: nil,
+            updatedAt: Date(), metrics: [], standardStats: [], games: []
+        )
+        XCTAssertEqual(player.savantURL?.absoluteString, "https://baseballsavant.mlb.com/savant-player/shohei-ohtani-67890")
+    }
 }

@@ -202,9 +202,17 @@ struct SearchField: View {
         HStack(spacing: 10) {
             Image(systemName: "magnifyingglass")
                 .foregroundStyle(SavantPalette.inkSecondary)
-            TextField("Search players or teams", text: $text)
-                .textInputAutocapitalization(.never)
-                .foregroundStyle(SavantPalette.ink)
+            ZStack(alignment: .leading) {
+                if text.isEmpty {
+                    Text("Search players or teams")
+                        .font(SavantType.body)
+                        .foregroundStyle(SavantPalette.inkSecondary)
+                        .allowsHitTesting(false)
+                }
+                TextField("", text: $text)
+                    .textInputAutocapitalization(.never)
+                    .foregroundStyle(SavantPalette.ink)
+            }
         }
         .padding(.horizontal, 12)
         .frame(height: 36)

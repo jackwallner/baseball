@@ -107,6 +107,25 @@ final class DashboardViewModelTests: XCTestCase {
         await vm.load()
         XCTAssertEqual(vm.players.map { $0.id }, ["99-0"], "Cached players should be shown even when refresh fails")
     }
+
+    @MainActor
+    func testSortLabelReflectsCategory() {
+        let vm = DashboardViewModel(provider: MockProvider(players: []))
+        // Default category is hitting
+        XCTAssertEqual(vm.sortLabel, "xwOBA")
+
+        vm.selectedCategory = .pitching
+        XCTAssertEqual(vm.sortLabel, "xERA")
+
+        vm.selectedCategory = .fielding
+        XCTAssertEqual(vm.sortLabel, "OAA")
+
+        vm.selectedCategory = .running
+        XCTAssertEqual(vm.sortLabel, "Sprint Speed")
+
+        vm.selectedCategory = nil
+        XCTAssertEqual(vm.sortLabel, "Overall")
+    }
 }
 
 final class InMemoryPlayerCache: PlayerCaching, @unchecked Sendable {

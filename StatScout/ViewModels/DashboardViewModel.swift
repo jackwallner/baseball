@@ -13,15 +13,19 @@ final class DashboardViewModel {
     var selectedCategory: MetricCategory? = .hitting
     var sortDescending = true
 
+    // Label shown in the sort button - reflects primary sort metric
     var sortLabel: String {
         guard let category = selectedCategory else { return "Overall" }
-        let priorityMetrics: [MetricCategory: String] = [
-            .hitting: "xwOBA",
-            .pitching: "xERA",
-            .fielding: "OAA",
-            .running: "Sprint Speed"
-        ]
-        return priorityMetrics[category] ?? "Overall"
+        switch category {
+        case .hitting:
+            return "xwOBA"
+        case .pitching:
+            return "Barrel%"  // Most commonly available pitching metric
+        case .fielding:
+            return "OAA"
+        case .running:
+            return "Sprint Speed"
+        }
     }
     var isLoading = false
     var errorMessage: String?
@@ -71,18 +75,8 @@ final class DashboardViewModel {
             return player.overallPercentile
         }
 
-        // Baseball Savant priority metrics for each category
-        let priorityMetrics: [MetricCategory: [String]] = [
-            .hitting: ["xwOBA", "xSLG", "xBA"],
-            .pitching: ["xERA", "xwOBA", "K%"],
-            .fielding: ["OAA", "Arm Strength"],
-            .running: ["Sprint Speed"]
-        ]
-
-        let metrics = priorityMetrics[category] ?? []
-
-        // Find the first available priority metric
-        for metricLabel in metrics {
+        // Find the first available priority metric for this player
+        for metricLabel in priorityMetrics(for: category) {
             if let metric = player.metrics.first(where: { $0.label == metricLabel && $0.category == category }) {
                 return metric.percentile
             }
@@ -90,6 +84,40 @@ final class DashboardViewModel {
 
         // Fall back to category average or overall
         return player.percentile(for: category) ?? player.overallPercentile
+    }
+
+    // Baseball Savant priority metrics for each category
+    private func priorityMetrics(for category: MetricCategory) -> [String] {
+        switch category {
+        case .hitting:
+            return ["xwOBA", "xSLG", "xBA"]
+        case .pitching:
+            // xERA has minimum thresholds (25 PA) - use more commonly available metrics first
+            return ["Barrel%", "xwOBA", "K%", "Whiff%", "Chase%"]
+        case .fielding:
+            return ["OAA", "Range (OAA)", "Arm Strength"]
+        case .running:
+            return ["Sprint Speed"]
+        }
+    }
+
+    // Returns the actual metric being used for sorting (for display purposes)
+    func actualSortMetric(for player: Player? = nil) -> String {
+        guard let category = selectedCategory else { return "Overall" }
+
+        // If we have a specific player, show what metric THEY are sorted by
+        if let player = player {
+            for metricLabel in priorityMetrics(for: category) {
+                if player.metrics.contains(where: { $0.label == metricLabel && $0.category == category }) {
+                    return metricLabel
+                }
+            }
+            return "Pitching Avg"  // Fallback for pitchers
+        }
+
+        // Default label shows first priority metric
+        let priorities = priorityMetrics(for: category)
+        return priorities.first ?? "Overall"
     }
 
     var allTeams: [String] {

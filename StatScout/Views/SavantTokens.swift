@@ -1,14 +1,14 @@
 import SwiftUI
 
 enum SavantPalette {
-    static let canvas       = Color(red: 0.96, green: 0.96, blue: 0.96)
+    static let canvas       = Color(red: 0.94, green: 0.94, blue: 0.95)
     static let surface      = Color.white
-    static let surfaceAlt   = Color(red: 0.97, green: 0.97, blue: 0.98)
-    static let surfaceSunk  = Color(red: 0.93, green: 0.93, blue: 0.94)
-    static let hairline     = Color(red: 0.86, green: 0.86, blue: 0.87)
-    static let divider      = Color(red: 0.91, green: 0.91, blue: 0.92)
+    static let surfaceAlt   = Color(red: 0.96, green: 0.96, blue: 0.97)
+    static let surfaceSunk  = Color(red: 0.91, green: 0.91, blue: 0.92)
+    static let hairline     = Color(red: 0.78, green: 0.78, blue: 0.80)
+    static let divider      = Color(red: 0.85, green: 0.85, blue: 0.87)
     static let ink          = Color(red: 0.10, green: 0.10, blue: 0.11)
-    static let inkSecondary = Color(red: 0.36, green: 0.36, blue: 0.39)
+    static let inkSecondary = Color(red: 0.25, green: 0.25, blue: 0.28)
     static let inkTertiary  = Color(red: 0.40, green: 0.40, blue: 0.43)
     static let inkOnDark    = Color.white
     static let savantNavy   = Color(red: 0.06, green: 0.13, blue: 0.32)
