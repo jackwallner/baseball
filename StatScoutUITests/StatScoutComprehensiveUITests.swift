@@ -485,28 +485,16 @@ final class StatScoutComprehensiveUITests: XCTestCase {
         }
         teamsTab.tap()
 
-        // Find team list and select a team
-        let teamCell = app.cells.firstMatch
-        guard teamCell.waitForExistence(timeout: 5) else {
-            return // No teams loaded
-        }
-        teamCell.tap()
-
-        // Verify star button exists and tap it
-        let starButton = app.buttons["star"]
-        guard starButton.waitForExistence(timeout: 2) else {
-            // Try alternative identifier
-            let favButton = app.buttons.matching(NSPredicate(format: "label CONTAINS 'star'")).firstMatch
-            guard favButton.waitForExistence(timeout: 2) else {
-                return
-            }
-            favButton.tap()
-            return
+        // Find team list and tap the star button on a team row
+        let starButton = app.buttons.matching(NSPredicate(format: "label CONTAINS 'star'")).element(boundBy: 0)
+        guard starButton.waitForExistence(timeout: 5) else {
+            return // No star buttons found
         }
         starButton.tap()
 
-        // Verify team is marked as favorite (star fills)
-        XCTAssertTrue(starButton.exists, "Star button should still exist after tap")
+        // Verify FAVORITE TEAM section appears
+        let favoritesHeader = app.staticTexts["FAVORITE TEAM"]
+        XCTAssertTrue(favoritesHeader.waitForExistence(timeout: 2), "Should show favorites section after setting favorite")
     }
 
     func testFavoriteTeamMovesToTop() throws {
@@ -517,29 +505,20 @@ final class StatScoutComprehensiveUITests: XCTestCase {
         }
         teamsTab.tap()
 
-        // Get first team name
-        let firstCell = app.cells.firstMatch
-        guard firstCell.waitForExistence(timeout: 5) else {
-            return
-        }
-
-        // Tap on it to favorite
-        firstCell.tap()
-
-        let starButton = app.buttons["star"]
-        guard starButton.waitForExistence(timeout: 2) else {
+        // Get first team row and tap its star button
+        let starButton = app.buttons.matching(NSPredicate(format: "label CONTAINS 'star'")).element(boundBy: 0)
+        guard starButton.waitForExistence(timeout: 5) else {
             return
         }
         starButton.tap()
 
-        // Go back and check if it's at top
-        app.navigationBars.buttons.firstMatch.tap()
-
         // Verify the favorited team appears in favorites section
-        let favoritesHeader = app.staticTexts["Favorite Team"]
-        if favoritesHeader.waitForExistence(timeout: 2) {
-            XCTAssertTrue(favoritesHeader.exists, "Should show favorites section")
-        }
+        let favoritesHeader = app.staticTexts["FAVORITE TEAM"]
+        XCTAssertTrue(favoritesHeader.waitForExistence(timeout: 2), "Should show favorites section")
+
+        // Verify ALL TEAMS section still exists
+        let allTeamsHeader = app.staticTexts["ALL TEAMS"]
+        XCTAssertTrue(allTeamsHeader.waitForExistence(timeout: 2), "Should show all teams section")
     }
 
     func testRemoveFavoriteTeam() throws {
@@ -550,24 +529,57 @@ final class StatScoutComprehensiveUITests: XCTestCase {
         }
         teamsTab.tap()
 
-        // First favorite a team
-        let teamCell = app.cells.firstMatch
-        guard teamCell.waitForExistence(timeout: 5) else {
-            return
-        }
-        teamCell.tap()
-
-        let starButton = app.buttons["star"]
-        guard starButton.waitForExistence(timeout: 2) else {
+        // First favorite a team by tapping star on first row
+        let starButton = app.buttons.matching(NSPredicate(format: "label CONTAINS 'star'")).element(boundBy: 0)
+        guard starButton.waitForExistence(timeout: 5) else {
             return
         }
         starButton.tap()
 
-        // Now un-favorite it
-        starButton.tap()
+        // Verify FAVORITE TEAM section appears
+        let favoritesHeader = app.staticTexts["FAVORITE TEAM"]
+        guard favoritesHeader.waitForExistence(timeout: 2) else {
+            return
+        }
 
-        // Verify star is now unfilled
-        XCTAssertTrue(starButton.exists, "Star button should exist after un-favoriting")
+        // Remove favorite using the Remove button in favorites section
+        let removeButton = app.buttons["Remove"]
+        guard removeButton.waitForExistence(timeout: 2) else {
+            // Try finding by label containing star.slash
+            let altRemove = app.buttons.matching(NSPredicate(format: "label CONTAINS 'Remove'")).firstMatch
+            guard altRemove.waitForExistence(timeout: 2) else {
+                return
+            }
+            altRemove.tap()
+            XCTAssertTrue(altRemove.exists, "Remove button should exist")
+            return
+        }
+        removeButton.tap()
+
+        // Verify FAVORITE TEAM section disappears (reverts to just "TEAMS")
+        let teamsHeader = app.staticTexts["TEAMS"]
+        XCTAssertTrue(teamsHeader.waitForExistence(timeout: 2), "Should show TEAMS header after removing favorite")
+    }
+
+    func testTeamSearch() throws {
+        // Navigate to Teams tab
+        let teamsTab = app.buttons["Teams"]
+        guard teamsTab.waitForExistence(timeout: 5) else {
+            return
+        }
+        teamsTab.tap()
+
+        // Find search field and enter text
+        let searchField = app.searchFields.firstMatch
+        guard searchField.waitForExistence(timeout: 5) else {
+            return
+        }
+        searchField.tap()
+        searchField.typeText("Yankees")
+
+        // Verify filtered results
+        let yankeesText = app.staticTexts["New York Yankees"]
+        XCTAssertTrue(yankeesText.waitForExistence(timeout: 2), "Should find Yankees in search results")
     }
 
     // MARK: - AboutView Tests
