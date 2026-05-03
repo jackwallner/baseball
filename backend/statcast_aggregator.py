@@ -90,16 +90,16 @@ def compute_batter_stats(df: pd.DataFrame) -> pd.DataFrame:
         bat_speed = swings_tracked['bat_speed'].mean() if len(swings_tracked) > 0 else None
         swing_length = swings_tracked['swing_length'].mean() if len(swings_tracked) > 0 else None
         
-        # Plate discipline (need minimum swings to be meaningful)
+        # Plate discipline - calculate for any player with data
+        # No minimum thresholds: if Baseball Savant provides a percentile,
+        # we should provide the corresponding actual value
         total_swings = group['is_swing'].sum()
         total_whiffs = group['is_whiff'].sum()
         pitches_outside = group['is_outside'].sum()
         total_chases = group['is_chase'].sum()
 
-        # Lower thresholds for early season data - calculate if we have any data
-        # but require minimum samples for meaningful rates
-        whiff_percent = (total_whiffs / total_swings * 100) if total_swings >= 10 else None
-        chase_percent = (total_chases / pitches_outside * 100) if pitches_outside >= 20 else None
+        whiff_percent = (total_whiffs / total_swings * 100) if total_swings > 0 else None
+        chase_percent = (total_chases / pitches_outside * 100) if pitches_outside > 0 else None
         
         batter_stats.append({
             'player_id': int(batter_id),
