@@ -23,6 +23,8 @@ from pybaseball import (
     statcast_pitcher_expected_stats,
     statcast_pitcher_exitvelo_barrels,
     statcast_pitcher_pitch_arsenal,
+    batting_stats_bref,
+    pitching_stats_bref,
 )
 from pybaseball.statcast_fielding import statcast_outs_above_average
 from supabase import create_client
@@ -772,13 +774,46 @@ def build_snapshot_rows(season: int) -> list[dict]:
     )
 
     all_player_ids = list(players.keys())
+
+    # Fetch standard stats from MLB Stats API
     logger.info("Fetching standard stats from MLB Stats API for %d players...", len(all_player_ids))
     mlb_stats = _fetch_mlb_standard_stats(all_player_ids, season)
 
+    # Fetch Baseball-Reference stats as fallback for early-season players
+    logger.info("Fetching standard stats from Baseball-Reference as fallback...")
+    bref_stats = _fetch_bref_standard_stats(season)
+
     with_std = 0
-    for pid, stats in mlb_stats.items():
-        if pid in players:
-            players[pid]["standard_stats"] = _build_standard_stats_from_mlb(stats)
+    for pid in all_player_ids:
+        mlb_data = mlb_stats.get(pid, {})
+        bref_data = bref_stats.get(pid, {})
+
+        # Use MLB Stats API data as primary, but fall back to Baseball-Reference
+        # for rate stats if they're empty (early season issue)
+        merged = mlb_data.copy() if mlb_data else {}
+
+        # Check if rate stats are missing/empty from MLB API
+        rate_stats_missing = (
+            not merged.get("avg") and not merged.get("obp") and
+            not merged.get("slg") and not merged.get("ops")
+        ) or (merged.get("player_type") == "pitcher" and not merged.get("era"))
+
+        if rate_stats_missing and bref_data:
+            # Use Baseball-Reference rate stats
+            for key in ["avg", "obp", "slg", "ops", "era", "whip"]:
+                if not merged.get(key) and bref_data.get(key):
+                    merged[key] = bref_data[key]
+            # Use bref counting stats if mlb is missing them
+            for key in ["hr", "rbi", "r", "h", "doubles", "triples", "bb", "so", "sb", "cs", "pa", "ab",
+                       "wins", "losses", "saves", "ip", "er", "qs", "g", "gs", "bf"]:
+                if merged.get(key, 0) == 0 and bref_data.get(key, 0) != 0:
+                    merged[key] = bref_data[key]
+            # Update player_type if bref has more specific info
+            if bref_data.get("player_type") and merged.get("player_type") == "batter":
+                merged["player_type"] = bref_data["player_type"]
+
+        if merged:
+            players[pid]["standard_stats"] = _build_standard_stats_from_mlb(merged)
             with_std += 1
 
     logger.info("Attached standard stats to %d players", with_std)
@@ -890,6 +925,95 @@ def _fetch_mlb_standard_stats(player_ids: list[int], season: int) -> dict[int, d
             continue
 
     logger.info("Fetched MLB standard stats for %d players", len(stats_by_player))
+    return stats_by_player
+
+
+def _fetch_bref_standard_stats(season: int) -> dict[int, dict[str, Any]]:
+    """Fetch standard stats from Baseball-Reference as fallback for early-season data.
+
+    Returns a dict mapping player_id to their stats dict.
+    """
+    stats_by_player: dict[int, dict[str, Any]] = {}
+
+    # Fetch batting stats
+    try:
+        batting_df = batting_stats_bref(season)
+        batting_df["mlbID"] = pd.to_numeric(batting_df["mlbID"], errors="coerce")
+        for _, row in batting_df.iterrows():
+            pid = int(row["mlbID"]) if pd.notna(row["mlbID"]) else None
+            if not pid:
+                continue
+
+            # Get rate stats, handling empty/NaN values
+            avg = row.get("BA", "")
+            obp = row.get("OBP", "")
+            slg = row.get("SLG", "")
+            ops = row.get("OPS", "")
+
+            stats_by_player[pid] = {
+                "avg": str(avg) if pd.notna(avg) and avg != "" else "",
+                "obp": str(obp) if pd.notna(obp) and obp != "" else "",
+                "slg": str(slg) if pd.notna(slg) and slg != "" else "",
+                "ops": str(ops) if pd.notna(ops) and ops != "" else "",
+                "hr": int(row.get("HR", 0)) if pd.notna(row.get("HR")) else 0,
+                "rbi": int(row.get("RBI", 0)) if pd.notna(row.get("RBI")) else 0,
+                "r": int(row.get("R", 0)) if pd.notna(row.get("R")) else 0,
+                "h": int(row.get("H", 0)) if pd.notna(row.get("H")) else 0,
+                "doubles": int(row.get("2B", 0)) if pd.notna(row.get("2B")) else 0,
+                "triples": int(row.get("3B", 0)) if pd.notna(row.get("3B")) else 0,
+                "bb": int(row.get("BB", 0)) if pd.notna(row.get("BB")) else 0,
+                "so": int(row.get("SO", 0)) if pd.notna(row.get("SO")) else 0,
+                "sb": int(row.get("SB", 0)) if pd.notna(row.get("SB")) else 0,
+                "cs": int(row.get("CS", 0)) if pd.notna(row.get("CS")) else 0,
+                "pa": int(row.get("PA", 0)) if pd.notna(row.get("PA")) else 0,
+                "ab": int(row.get("AB", 0)) if pd.notna(row.get("AB")) else 0,
+                "player_type": "batter",
+            }
+        logger.info("Loaded %d batting stats from Baseball-Reference", len(batting_df))
+    except Exception as e:
+        logger.warning("Failed to load batting stats from Baseball-Reference: %s", e)
+
+    # Fetch pitching stats
+    try:
+        pitching_df = pitching_stats_bref(season)
+        pitching_df["mlbID"] = pd.to_numeric(pitching_df["mlbID"], errors="coerce")
+        for _, row in pitching_df.iterrows():
+            pid = int(row["mlbID"]) if pd.notna(row["mlbID"]) else None
+            if not pid:
+                continue
+
+            era = row.get("ERA", "")
+            whip = row.get("WHIP", "")
+
+            existing = stats_by_player.get(pid, {})
+            existing.update({
+                "era": str(era) if pd.notna(era) and era != "" else "",
+                "whip": str(whip) if pd.notna(whip) and whip != "" else "",
+                "wins": int(row.get("W", 0)) if pd.notna(row.get("W")) else 0,
+                "losses": int(row.get("L", 0)) if pd.notna(row.get("L")) else 0,
+                "saves": int(row.get("SV", 0)) if pd.notna(row.get("SV")) else 0,
+                "ip": str(row.get("IP", "")) if pd.notna(row.get("IP")) else "",
+                "h": int(row.get("H", 0)) if pd.notna(row.get("H")) else 0,
+                "r": int(row.get("R", 0)) if pd.notna(row.get("R")) else 0,
+                "er": int(row.get("ER", 0)) if pd.notna(row.get("ER")) else 0,
+                "hr": int(row.get("HR", 0)) if pd.notna(row.get("HR")) else 0,
+                "bb": int(row.get("BB", 0)) if pd.notna(row.get("BB")) else 0,
+                "so": int(row.get("SO", 0)) if pd.notna(row.get("SO")) else 0,
+                "k9": "",  # Not directly available in bref
+                "bb9": "",  # Not directly available in bref
+                "kbb": "",  # Not directly available in bref
+                "qs": int(row.get("QS", 0)) if pd.notna(row.get("QS")) else 0,
+                "g": int(row.get("G", 0)) if pd.notna(row.get("G")) else 0,
+                "gs": int(row.get("GS", 0)) if pd.notna(row.get("GS")) else 0,
+                "bf": 0,  # Not directly available in bref
+                "player_type": "two_way" if existing.get("player_type") == "batter" else "pitcher",
+            })
+            stats_by_player[pid] = existing
+        logger.info("Loaded %d pitching stats from Baseball-Reference", len(pitching_df))
+    except Exception as e:
+        logger.warning("Failed to load pitching stats from Baseball-Reference: %s", e)
+
+    logger.info("Fetched Baseball-Reference standard stats for %d players", len(stats_by_player))
     return stats_by_player
 
 
