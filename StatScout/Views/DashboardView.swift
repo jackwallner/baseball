@@ -33,7 +33,7 @@ struct DashboardView: View {
                     Button(action: {
                         viewModel.selectedSeason = season
                     }) {
-                        Text("\(season)")
+                        Text(String(season))
                             .font(SavantType.bodyBold)
                             .foregroundStyle(viewModel.selectedSeason == season ? .white : SavantPalette.ink)
                             .padding(.horizontal, 16)

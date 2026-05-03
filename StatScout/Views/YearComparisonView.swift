@@ -211,12 +211,12 @@ struct YearComparisonView: View {
 
             Spacer()
 
-            Text("\(year2)")
+            Text(String(year2))
                 .font(SavantType.micro)
                 .foregroundStyle(SavantPalette.inkSecondary)
                 .frame(width: 50)
 
-            Text("\(year1)")
+            Text(String(year1))
                 .font(SavantType.micro)
                 .foregroundStyle(SavantPalette.inkSecondary)
                 .frame(width: 50)

@@ -26,7 +26,7 @@ struct MetricRankingView: View {
                     trailing: AnyView(
                         HStack(spacing: 12) {
                             if let season {
-                                Text("\(season)")
+                                Text(String(season))
                                     .font(SavantType.micro)
                                     .foregroundStyle(SavantPalette.inkSecondary)
                             }
