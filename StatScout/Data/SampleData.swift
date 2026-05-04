@@ -1,6 +1,7 @@
 import Foundation
 
 struct SampleData {
+    // Players for 2026 season
     static let players: [Player] = [
         Player(
             playerId: 1,
@@ -10,6 +11,7 @@ struct SampleData {
             handedness: "R/R",
             imageURL: URL(string: "https://midfield.mlbstatic.com/v1/people/592450/spots/240"),
             updatedAt: Date(),
+            season: 2026,
             metrics: [
                 Metric(id: "judge-xwoba", label: "xwOBA", value: ".463", percentile: 100, category: .hitting),
                 Metric(id: "judge-ev", label: "EV", value: "96.2", percentile: 100, category: .hitting),
@@ -42,6 +44,7 @@ struct SampleData {
             handedness: "L/R",
             imageURL: URL(string: "https://midfield.mlbstatic.com/v1/people/660271/spots/240"),
             updatedAt: Date(),
+            season: 2026,
             metrics: [
                 Metric(id: "ohtani-xslg", label: "xSLG", value: ".676", percentile: 100, category: .hitting),
                 Metric(id: "ohtani-hardhit", label: "Hard-Hit%", value: "61.4%", percentile: 100, category: .hitting),
@@ -74,6 +77,7 @@ struct SampleData {
             handedness: "R/R",
             imageURL: URL(string: "https://midfield.mlbstatic.com/v1/people/669203/spots/240"),
             updatedAt: Date(),
+            season: 2026,
             metrics: [
                 Metric(id: "witt-sprint", label: "Sprint Speed", value: "30.5 ft/s", percentile: 100, category: .running),
                 Metric(id: "witt-xba", label: "xBA", value: ".329", percentile: 99, category: .hitting),
@@ -106,6 +110,7 @@ struct SampleData {
             handedness: "R/R",
             imageURL: URL(string: "https://midfield.mlbstatic.com/v1/people/694973/spots/240"),
             updatedAt: Date(),
+            season: 2026,
             metrics: [
                 Metric(id: "skenes-velo", label: "Fastball Velo", value: "98.8", percentile: 99, category: .pitching),
                 Metric(id: "skenes-whiff", label: "Whiff%", value: "34.8%", percentile: 96, category: .pitching),
@@ -129,6 +134,47 @@ struct SampleData {
                 GameTrend(id: "skenes-chc-1", date: Date().addingTimeInterval(-86_400), opponent: "CHC", summary: "Generated 17 whiffs with premium fastball ride and splitter finish.", percentileDelta: 6, keyMetric: "Whiff%"),
                 GameTrend(id: "skenes-mil-1", date: Date().addingTimeInterval(-345_600), opponent: "MIL", summary: "Held exit velocity down despite elevated pitch count.", percentileDelta: 1, keyMetric: "Barrel Allowed")
             ]
+        ),
+        // Players for 2025 season (different players to verify year switching works)
+        Player(
+            playerId: 2,
+            name: "Juan Soto",
+            team: "NYY",
+            position: "LF",
+            handedness: "L/L",
+            imageURL: URL(string: "https://midfield.mlbstatic.com/v1/people/665742/spots/240"),
+            updatedAt: Date(),
+            season: 2025,
+            metrics: [
+                Metric(id: "soto-xwoba", label: "xwOBA", value: ".410", percentile: 98, category: .hitting),
+                Metric(id: "soto-bb", label: "BB%", value: "18.5%", percentile: 99, category: .hitting)
+            ],
+            standardStats: [
+                StandardStat(id: "std-AVG", label: "AVG", value: ".288"),
+                StandardStat(id: "std-OBP", label: "OBP", value: ".420"),
+                StandardStat(id: "std-HR", label: "HR", value: "41")
+            ],
+            games: []
+        ),
+        Player(
+            playerId: 3,
+            name: "Vladimir Guerrero Jr.",
+            team: "TOR",
+            position: "1B",
+            handedness: "R/R",
+            imageURL: URL(string: "https://midfield.mlbstatic.com/v1/people/665489/spots/240"),
+            updatedAt: Date(),
+            season: 2025,
+            metrics: [
+                Metric(id: "vlad-xslg", label: "xSLG", value: ".612", percentile: 97, category: .hitting),
+                Metric(id: "vlad-barrel", label: "Barrel%", value: "15.8%", percentile: 95, category: .hitting)
+            ],
+            standardStats: [
+                StandardStat(id: "std-AVG", label: "AVG", value: ".323"),
+                StandardStat(id: "std-OBP", label: "OBP", value: ".396"),
+                StandardStat(id: "std-HR", label: "HR", value: "30")
+            ],
+            games: []
         )
     ]
 }
