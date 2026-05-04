@@ -58,14 +58,6 @@ struct RootTabView: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .modifier(SavantNavBar())
                 .modifier(StandardDestinations(viewModel: viewModel))
-                .toolbar {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button(action: { showingAbout = true }) {
-                            Image(systemName: "gear")
-                        }
-                        .tint(.white)
-                    }
-                }
         }
     }
 
@@ -76,14 +68,6 @@ struct RootTabView: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .modifier(SavantNavBar())
                 .modifier(StandardDestinations(viewModel: viewModel))
-                .toolbar {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button(action: { showingAbout = true }) {
-                            Image(systemName: "gear")
-                        }
-                        .tint(.white)
-                    }
-                }
         }
     }
 
@@ -94,14 +78,6 @@ struct RootTabView: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .modifier(SavantNavBar())
                 .modifier(StandardDestinations(viewModel: viewModel))
-                .toolbar {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button(action: { showingAbout = true }) {
-                            Image(systemName: "gear")
-                        }
-                        .tint(.white)
-                    }
-                }
         }
     }
 }

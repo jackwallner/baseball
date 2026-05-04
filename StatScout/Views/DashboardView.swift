@@ -2,15 +2,15 @@ import SwiftUI
 
 struct DashboardView: View {
     @Bindable var viewModel: DashboardViewModel
+    @State private var showingAbout = false
 
     var body: some View {
         ZStack {
             ScrollView {
                 VStack(spacing: 0) {
-                    seasonSelector
-                    CategoryFilter(selectedCategory: $viewModel.selectedCategory)
-
+                    unifiedControlBar
                     leaderboardSection
+                    aboutFooter
                 }
             }
             .scrollBounceBehavior(.basedOnSize)
@@ -24,68 +24,79 @@ struct DashboardView: View {
             }
         }
         .background(SavantPalette.canvas.ignoresSafeArea())
+        .sheet(isPresented: $showingAbout) {
+            NavigationStack {
+                AboutView(lastUpdated: viewModel.lastUpdated)
+                    .navigationTitle("About")
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            Button("Done") { showingAbout = false }
+                        }
+                    }
+            }
+            .presentationDragIndicator(.visible)
+        }
     }
 
-    private var seasonSelector: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                ForEach(viewModel.availableSeasons, id: \.self) { season in
-                    Button(action: {
-                        viewModel.selectedSeason = season
-                    }) {
-                        Text(String(season))
-                            .font(SavantType.bodyBold)
-                            .foregroundStyle(viewModel.selectedSeason == season ? .white : SavantPalette.ink)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 8)
-                            .background(
-                                viewModel.selectedSeason == season ? SavantPalette.savantRed : SavantPalette.surface
-                            )
-                            .clipShape(Capsule())
-                    }
-                    .buttonStyle(.plain)
-                }
+    private var aboutFooter: some View {
+        Button(action: { showingAbout = true }) {
+            Text("About StatScout")
+                .font(SavantType.micro)
+                .tracking(0.4)
+                .foregroundStyle(SavantPalette.inkTertiary)
+                .padding(.vertical, 16)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var unifiedControlBar: some View {
+        VStack(spacing: 8) {
+            HStack(spacing: 10) {
+                seasonMenu
+                CategoryFilter(selectedCategory: $viewModel.selectedCategory)
+                    .layoutPriority(1)
             }
             .padding(.horizontal, 12)
+
+            SearchField(text: $viewModel.searchText)
+                .padding(.horizontal, 12)
+        }
+        .padding(.top, 8)
+    }
+
+    private var seasonMenu: some View {
+        Menu {
+            ForEach(viewModel.availableSeasons, id: \.self) { season in
+                Button {
+                    viewModel.selectedSeason = season
+                } label: {
+                    HStack {
+                        Text(String(season))
+                        if viewModel.selectedSeason == season {
+                            Image(systemName: "checkmark")
+                        }
+                    }
+                }
+            }
+        } label: {
+            HStack(spacing: 4) {
+                Text(String(viewModel.selectedSeason))
+                    .font(SavantType.bodyBold)
+                    .foregroundStyle(.white)
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundStyle(.white.opacity(0.85))
+            }
+            .padding(.horizontal, 14)
             .padding(.vertical, 8)
+            .background(SavantPalette.savantRed)
+            .clipShape(Capsule())
         }
     }
 
     private var leaderboardSection: some View {
         VStack(spacing: 0) {
-            SavantSectionBar(
-                title: "LEADERBOARD",
-                trailing: AnyView(
-                    HStack(spacing: 12) {
-                        Button(action: {
-                            viewModel.sortDescending.toggle()
-                            let generator = UIImpactFeedbackGenerator(style: .light)
-                            generator.impactOccurred()
-                        }) {
-                            HStack(spacing: 4) {
-                                Text(viewModel.sortLabel)
-                                Image(systemName: viewModel.sortDescending ? "arrow.down" : "arrow.up")
-                            }
-                            .font(SavantType.micro)
-                            .foregroundStyle(SavantPalette.inkSecondary)
-                            .padding(.vertical, 12)
-                            .padding(.horizontal, 8)
-                            .contentShape(Rectangle())
-                        }
-                        if let text = viewModel.freshnessText {
-                            Text(text)
-                                .font(SavantType.micro)
-                                .tracking(0.4)
-                                .foregroundStyle(SavantPalette.inkSecondary)
-                        }
-                    }
-                )
-            )
-
-            SearchField(text: $viewModel.searchText)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
-
             if viewModel.leaderboard.isEmpty && !viewModel.searchText.isEmpty {
                 ContentUnavailableView {
                     Label("No players found", systemImage: "magnifyingglass")
@@ -117,7 +128,13 @@ struct DashboardView: View {
                 .padding(.vertical, 24)
                 .frame(minHeight: 200)
             } else {
-                LeaderboardTableHeader(sortDescending: viewModel.sortDescending, sortLabel: viewModel.sortLabel)
+                Button(action: {
+                    viewModel.sortDescending.toggle()
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                }) {
+                    LeaderboardTableHeader(sortDescending: viewModel.sortDescending, sortLabel: viewModel.sortLabel)
+                }
+                .buttonStyle(.plain)
                 let sortMetric = viewModel.currentSortMetricForDisplay
                 ForEach(Array(viewModel.leaderboard.enumerated()), id: \.element.id) { index, player in
                     NavigationLink(value: player) {
@@ -129,6 +146,14 @@ struct DashboardView: View {
                         )
                     }
                     .buttonStyle(.plain)
+                }
+                if let text = viewModel.freshnessText {
+                    Text(text)
+                        .font(SavantType.micro)
+                        .tracking(0.4)
+                        .foregroundStyle(SavantPalette.inkTertiary)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding(.vertical, 10)
                 }
             }
         }

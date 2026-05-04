@@ -10,9 +10,10 @@ final class YearAuditUITests: XCTestCase {
     }
 
     func testAllYearsSelectable() throws {
-        // Wait for initial load
-        let leaderboard = app.staticTexts["LEADERBOARD"]
-        XCTAssertTrue(leaderboard.waitForExistence(timeout: 15), "Leaderboard should appear")
+        // Wait for initial load — use the leaderboard table header as the anchor since
+        // the redesigned top bar no longer surfaces a "LEADERBOARD" section title.
+        let header = app.staticTexts["RANK"]
+        XCTAssertTrue(header.waitForExistence(timeout: 15), "Leaderboard should appear")
 
         // Test key years
         let yearsToTest = [2026, 2025, 2024]

@@ -14,23 +14,34 @@ struct StatcastAPI: StatcastProviding {
     }
 
     func fetchPlayers() async throws -> [Player] {
-        let endpoint = baseURL
-            .appending(path: "rest/v1/player_snapshots")
-            .appending(queryItems: [
-                URLQueryItem(name: "select", value: "*"),
-                URLQueryItem(name: "order", value: "updated_at.desc")
-            ])
-        var request = URLRequest(url: endpoint)
-        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
-        request.setValue(apiKey, forHTTPHeaderField: "apikey")
-        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        var all: [Player] = []
+        let pageSize = 1000
+        var offset = 0
+        while true {
+            let endpoint = baseURL
+                .appending(path: "rest/v1/player_snapshots")
+                .appending(queryItems: [
+                    URLQueryItem(name: "select", value: "*"),
+                    URLQueryItem(name: "order", value: "updated_at.desc")
+                ])
+            var request = URLRequest(url: endpoint)
+            request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+            request.setValue(apiKey, forHTTPHeaderField: "apikey")
+            request.setValue("application/json", forHTTPHeaderField: "Accept")
+            request.setValue("\(offset)-\(offset + pageSize - 1)", forHTTPHeaderField: "Range")
 
-        let (data, response) = try await URLSession.shared.data(for: request)
-        guard let httpResponse = response as? HTTPURLResponse, 200..<300 ~= httpResponse.statusCode else {
-            throw URLError(.badServerResponse)
+            let (data, response) = try await URLSession.shared.data(for: request)
+            guard let httpResponse = response as? HTTPURLResponse,
+                  200..<300 ~= httpResponse.statusCode || httpResponse.statusCode == 206 else {
+                throw URLError(.badServerResponse)
+            }
+
+            let page = try JSONDecoder.statScout.decode([Player].self, from: data)
+            all.append(contentsOf: page)
+            if page.count < pageSize { break }
+            offset += pageSize
         }
-
-        return try JSONDecoder.statScout.decode([Player].self, from: data)
+        return all
     }
 }
 

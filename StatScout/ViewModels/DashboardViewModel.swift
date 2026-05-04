@@ -23,7 +23,11 @@ final class DashboardViewModel {
     var isLoading = false
     var errorMessage: String?
     var lastFetchFailed = false
-    var teamCounts: [String: Int] = [:]
+
+    var teamCounts: [String: Int] {
+        Dictionary(grouping: seasonPlayers) { normalizedTeamAbbreviation($0.team) }
+            .mapValues(\.count)
+    }
 
     var lastUpdated: Date? {
         players.map(\.updatedAt).max()
@@ -42,18 +46,20 @@ final class DashboardViewModel {
         self.cache = cache
     }
 
-    // All available seasons (2015-2026 based on data availability)
+    // Seasons present in fetched data, descending. Falls back to the current year while loading.
     var availableSeasons: [Int] {
-        Array(2015...2026).sorted(by: >)
+        let seasons = Set(playerHistories.values.flatMap { $0 }.compactMap(\.season))
+        guard !seasons.isEmpty else {
+            return [Calendar.current.component(.year, from: Date())]
+        }
+        return seasons.sorted(by: >)
     }
 
-    // Players filtered by selected season - pull from histories to get all years
+    // Players filtered by selected season - pull from histories to get all years.
+    // Returns empty when the selected season has no data so callers render an empty state
+    // instead of falling back to a stale "latest snapshot" set.
     var seasonPlayers: [Player] {
-        // Get all players for the selected season from histories
         let allSeasonPlayers = playerHistories.values.flatMap { $0 }.filter { $0.season == selectedSeason }
-        // If no players found for this season, fall back to the current players list
-        guard !allSeasonPlayers.isEmpty else { return players }
-        // Remove duplicates by playerId (keep first occurrence)
         var seenIds = Set<Int>()
         return allSeasonPlayers.filter { seenIds.insert($0.playerId).inserted }
     }
@@ -148,9 +154,7 @@ final class DashboardViewModel {
             .sorted { $0.overallPercentile > $1.overallPercentile }
     }
 
-    var allMetrics: [(label: String, category: MetricCategory, best: (player: Player, value: Int)?, worst: (player: Player, value: Int)?)] = []
-
-    private func updateAllMetrics() {
+    var allMetrics: [(label: String, category: MetricCategory, best: (player: Player, value: Int)?, worst: (player: Player, value: Int)?)] {
         var metricMap: [String: (category: MetricCategory, values: [(player: Player, value: Int)])] = [:]
         for player in seasonPlayers {
             for metric in player.metrics {
@@ -161,7 +165,7 @@ final class DashboardViewModel {
                 metricMap[compositeKey]?.values.append((player: player, value: metric.percentile))
             }
         }
-        allMetrics = metricMap.map { (key, data) in
+        return metricMap.map { (key, data) in
             let sorted = data.values.sorted { $0.value > $1.value }
             let label = key.split(separator: "|").first.map(String.init) ?? key
             return (
@@ -173,16 +177,12 @@ final class DashboardViewModel {
         }.sorted { $0.label < $1.label }
     }
 
-    private func updateDerivedState() {
-        updateAllMetrics()
-        teamCounts = Dictionary(grouping: seasonPlayers) { normalizedTeamAbbreviation($0.team) }
-            .mapValues(\.count)
-    }
-
     func load() async {
         if players.isEmpty, let cached = try? cache?.loadPlayers(), !cached.isEmpty {
             players = cached
-            updateDerivedState()
+            playerHistories = Dictionary(grouping: cached, by: \.playerId).mapValues {
+                $0.sorted { ($0.season ?? 0) > ($1.season ?? 0) }
+            }
         }
         isLoading = players.isEmpty
         errorMessage = nil
@@ -219,7 +219,13 @@ final class DashboardViewModel {
             self.playerHistories = histories
             self.players = latestPlayers
 
-            updateDerivedState()
+            // If the currently selected season has no data, snap to the most recent season that does.
+            let seasonsWithData = Set(histories.values.flatMap { $0 }.compactMap(\.season))
+            if !seasonsWithData.contains(selectedSeason),
+               let mostRecent = seasonsWithData.sorted(by: >).first {
+                selectedSeason = mostRecent
+            }
+
             try? cache?.savePlayers(fetched)
         } catch is DecodingError {
             errorMessage = "Data format changed — app may need an update."

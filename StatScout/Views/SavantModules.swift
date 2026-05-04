@@ -4,7 +4,7 @@ import SwiftUI
 
 struct PlayerIdentityStrip: View {
     let player: Player
-    var showOverallBadge: Bool = true
+    var showOverallBadge: Bool = false
 
     var body: some View {
         HStack(alignment: .center, spacing: 14) {
@@ -18,7 +18,7 @@ struct PlayerIdentityStrip: View {
                 Text(teamFullName(player.team))
                     .font(SavantType.bodyBold)
                     .foregroundStyle(.white.opacity(0.85))
-                Text("\(player.position) · \(player.handedness)")
+                Text("\(player.displayPosition) · \(player.handedness)")
                     .font(SavantType.small)
                     .foregroundStyle(.white.opacity(0.65))
             }

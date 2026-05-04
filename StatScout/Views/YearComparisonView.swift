@@ -2,11 +2,14 @@ import SwiftUI
 
 struct YearComparisonView: View {
     let history: [Player]
-    @State private var selectedYear1: Int = 2026
-    @State private var selectedYear2: Int = 2025
+    @State private var selectedYear1: Int = Calendar.current.component(.year, from: Date())
+    @State private var selectedYear2: Int = Calendar.current.component(.year, from: Date()) - 1
 
-    // Static available years - 2024, 2025, 2026
-    private let availableYears: [Int] = [2026, 2025, 2024, 2023, 2022]
+    private var availableYears: [Int] {
+        history.compactMap(\.season).sorted(by: >).reduce(into: []) { acc, year in
+            if !acc.contains(year) { acc.append(year) }
+        }
+    }
 
     private var sortedHistory: [Player] {
         history.sorted {
@@ -35,6 +38,17 @@ struct YearComparisonView: View {
         }
         .padding(.horizontal, 12)
         .padding(.top, 12)
+        .onAppear(perform: snapSelectionsToAvailableYears)
+    }
+
+    private func snapSelectionsToAvailableYears() {
+        let years = availableYears
+        if !years.contains(selectedYear1) {
+            selectedYear1 = years.first ?? selectedYear1
+        }
+        if !years.contains(selectedYear2) || selectedYear2 == selectedYear1 {
+            selectedYear2 = years.first(where: { $0 != selectedYear1 }) ?? selectedYear2
+        }
     }
 
     private var noDataForYearView: some View {

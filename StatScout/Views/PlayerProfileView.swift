@@ -49,14 +49,11 @@ struct PlayerProfileView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                HStack(spacing: 12) {
-                    if let url = player.savantURL {
-                        Link(destination: url) {
-                            Image(systemName: "safari")
-                                .foregroundStyle(SavantPalette.linkBlue)
-                        }
+                if let url = player.savantURL {
+                    Link(destination: url) {
+                        Image(systemName: "safari")
+                            .foregroundStyle(.white)
                     }
-                    ShareLink(item: player.shareSummary)
                 }
             }
         }
@@ -294,39 +291,28 @@ struct PlayerProfileView: View {
                 )
                 .padding(.vertical, 24)
             } else {
-                let cols = (player.standardStats ?? []).chunked(into: 2)
-                ForEach(Array(cols.enumerated()), id: \.offset) { rowIndex, pair in
-                    HStack(spacing: 0) {
-                        ForEach(Array(pair.enumerated()), id: \.element.id) { colIndex, stat in
-                            HStack {
-                                Text(stat.label)
-                                    .font(SavantType.micro)
-                                    .tracking(0.4)
-                                    .foregroundStyle(SavantPalette.inkTertiary)
-                                Spacer()
-                                Text(stat.value)
-                                    .font(SavantType.statMed)
-                                    .foregroundStyle(SavantPalette.ink)
-                            }
-                            .padding(.horizontal, SavantGeo.padCard)
-                            .padding(.vertical, 12)
-                            .frame(maxWidth: .infinity)
-                            .background((rowIndex * 2 + colIndex) % 2 == 0 ? SavantPalette.surface : SavantPalette.surfaceAlt)
-                            .overlay(
-                                Rectangle()
-                                    .fill(SavantPalette.divider)
-                                    .frame(height: SavantGeo.hairline),
-                                alignment: .bottom
-                            )
-                            .overlay(
-                                Rectangle()
-                                    .fill(SavantPalette.divider)
-                                    .frame(width: SavantGeo.hairline)
-                                    .opacity(colIndex > 0 ? 1 : 0),
-                                alignment: .leading
-                            )
-                        }
+                let stats = player.standardStats ?? []
+                ForEach(Array(stats.enumerated()), id: \.element.id) { index, stat in
+                    HStack(spacing: 12) {
+                        Text(stat.label)
+                            .font(SavantType.bodyBold)
+                            .foregroundStyle(SavantPalette.inkSecondary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        Text(stat.value)
+                            .font(SavantType.statMed)
+                            .foregroundStyle(SavantPalette.ink)
+                            .lineLimit(1)
+                            .monospacedDigit()
                     }
+                    .padding(.horizontal, SavantGeo.padCard)
+                    .frame(height: SavantGeo.rowHeight)
+                    .background(index % 2 == 0 ? SavantPalette.surface : SavantPalette.surfaceAlt)
+                    .overlay(
+                        Rectangle()
+                            .fill(SavantPalette.divider)
+                            .frame(height: SavantGeo.hairline),
+                        alignment: .bottom
+                    )
                 }
             }
         }

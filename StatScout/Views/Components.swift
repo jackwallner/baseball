@@ -174,15 +174,17 @@ struct MetricBar: View {
             }
             .frame(height: 28)
 
-            // Value column - far right, fixed width
+            // Value column - far right, fixed width (sized for "30.0 ft/s" / "0.421" range)
             if showValue && !metric.value.isEmpty {
                 Text(metric.value)
                     .font(SavantType.statMed)
                     .foregroundStyle(SavantPalette.ink)
-                    .frame(width: 50, alignment: .trailing)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                    .frame(width: 72, alignment: .trailing)
             } else {
                 Color.clear
-                    .frame(width: 50)
+                    .frame(width: 72)
             }
         }
         .accessibilityElement(children: .ignore)
@@ -387,7 +389,7 @@ struct LeaderboardTableRow: View {
                         .font(SavantType.bodyBold)
                         .foregroundStyle(SavantPalette.ink)
                         .lineLimit(1)
-                    Text(player.position)
+                    Text(player.displayPosition)
                         .font(SavantType.micro)
                         .tracking(0.4)
                         .foregroundStyle(SavantPalette.inkTertiary)

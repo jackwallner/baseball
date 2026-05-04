@@ -5,6 +5,13 @@ struct StatScoutApp: App {
     private let api: StatcastAPI?
 
     init() {
+        // 64 MB memory + 256 MB disk image cache so headshots stick around between launches.
+        URLCache.shared = URLCache(
+            memoryCapacity: 64 * 1024 * 1024,
+            diskCapacity: 256 * 1024 * 1024,
+            directory: FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first?.appending(path: "image-cache")
+        )
+
         guard let urlString = Self.configValue(for: "SUPABASE_URL"),
               let url = URL(string: urlString),
               let key = Self.configValue(for: "SUPABASE_ANON_KEY") else {

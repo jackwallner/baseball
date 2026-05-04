@@ -152,6 +152,22 @@ struct TeamRoute: Hashable {
 }
 
 extension Player {
+    /// Position to surface in the UI. When the snapshot has no fielding position
+    /// (TBD / empty) but the player has metrics, fall back to the player type
+    /// label so we never show "TBD" next to real stats.
+    var displayPosition: String {
+        let trimmed = position.trimmingCharacters(in: .whitespaces).uppercased()
+        if !trimmed.isEmpty && trimmed != "TBD" && trimmed != "—" && trimmed != "-" {
+            return position
+        }
+        switch playerType?.lowercased() {
+        case "pitcher": return "P"
+        case "hitter", "batter": return "DH"
+        case "two_way": return "TWP"
+        default: return position
+        }
+    }
+
     var initials: String {
         let parts = name.split(separator: " ")
         guard let first = parts.first else { return "" }
