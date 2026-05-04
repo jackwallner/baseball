@@ -128,10 +128,13 @@ struct DashboardView: View {
                 .padding(.vertical, 24)
                 .frame(minHeight: 200)
             } else if viewModel.leaderboard.isEmpty {
+                let noCategoryData = viewModel.selectedCategory != nil && !viewModel.seasonPlayers.isEmpty
                 ContentUnavailableView {
-                    Label("No players yet", systemImage: "baseball")
+                    Label(noCategoryData ? "No players in category" : "No players yet", systemImage: "baseball")
                 } description: {
-                    Text("Check back after the nightly update.")
+                    Text(noCategoryData
+                         ? "No players match the selected category for the \(viewModel.selectedSeason) season."
+                         : "No player data is available for the \(viewModel.selectedSeason) season.")
                 }
                 .padding(.vertical, 24)
                 .frame(minHeight: 200)

@@ -104,7 +104,7 @@ private struct StandardDestinations: ViewModifier {
                     .modifier(SavantNavBar())
             }
             .navigationDestination(for: TeamDestination.self) { dest in
-                TeamView(team: dest.abbr, players: viewModel.players(forTeam: dest.abbr))
+                TeamView(team: dest.abbr, players: viewModel.players(forTeam: dest.abbr), season: viewModel.selectedSeason)
                     .modifier(SavantNavBar())
             }
             .navigationDestination(for: MetricRoute.self) { route in

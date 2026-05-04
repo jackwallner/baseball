@@ -3,9 +3,14 @@ import SwiftUI
 struct TeamView: View {
     let team: String
     let players: [Player]
+    var season: Int? = nil
     @State private var searchText = ""
     @State private var selectedCategory: MetricCategory? = nil
     @State private var sortDescending = true
+
+    private var displaySeason: Int {
+        season ?? players.compactMap(\.season).max() ?? Calendar.current.component(.year, from: Date())
+    }
 
     private var sortMetric: (label: String, category: MetricCategory)? {
         guard let category = selectedCategory else { return nil }
@@ -46,7 +51,7 @@ struct TeamView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
-                TeamIdentityStrip(team: team, season: players.compactMap(\.season).max())
+                TeamIdentityStrip(team: team, season: displaySeason)
 
                 CategoryFilter(selectedCategory: $selectedCategory)
 
@@ -92,7 +97,7 @@ struct TeamView: View {
                 emptyStateView(
                     icon: "person.2.slash",
                     title: "No players tracked",
-                    description: "No players are currently tracked for \(teamFullName(team)). Check back after the nightly update."
+                    description: "No players are tracked for \(teamFullName(team)) in the \(displaySeason) season."
                 )
             } else {
                 SearchField(text: $searchText)
@@ -159,7 +164,8 @@ struct TeamView: View {
     NavigationStack {
         TeamView(
             team: "NYY",
-            players: SampleData.players.filter { $0.team == "NYY" }
+            players: SampleData.players.filter { $0.team == "NYY" },
+            season: 2026
         )
     }
 }

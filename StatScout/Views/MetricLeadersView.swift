@@ -19,7 +19,7 @@ struct MetricLeadersView: View {
                     ContentUnavailableView {
                         Label("No metric data", systemImage: "chart.bar")
                     } description: {
-                        Text("Check back after the nightly update.")
+                        Text("No metrics are available for the current season.")
                     }
                     .padding(.vertical, 48)
                 } else {

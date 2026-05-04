@@ -42,8 +42,14 @@ struct TeamsView: View {
         "PHI", "PIT", "SD", "SEA", "SF", "STL", "TB", "TEX", "TOR", "WSH"
     ]
 
+    /// Only show teams that have players for the currently selected season.
+    private var teamsWithData: [String] {
+        let available = Set(viewModel.seasonPlayers.map { normalizedTeamAbbreviation($0.team) })
+        return Self.allTeams.filter { available.contains($0) }
+    }
+
     private var filteredTeams: [String] {
-        let teams = searchText.isEmpty ? Self.allTeams : Self.allTeams.filter {
+        let teams = searchText.isEmpty ? teamsWithData : teamsWithData.filter {
             teamFullName($0).localizedCaseInsensitiveContains(searchText) ||
             $0.localizedCaseInsensitiveContains(searchText)
         }
@@ -73,6 +79,10 @@ struct TeamsView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
+                seasonHeader
+                    .padding(.horizontal, 12)
+                    .padding(.bottom, 8)
+
                 // Favorite Team Section (if set and not filtered out)
                 if let favorite = teamsViewModel.favoriteTeam,
                    filteredTeams.contains(favorite),
@@ -88,6 +98,26 @@ struct TeamsView: View {
         .scrollBounceBehavior(.basedOnSize)
         .background(SavantPalette.canvas.ignoresSafeArea())
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private var seasonHeader: some View {
+        HStack {
+            Text("\(viewModel.selectedSeason) Season")
+                .font(SavantType.bodyBold)
+                .foregroundStyle(SavantPalette.ink)
+            Spacer()
+            Text("\(filteredTeams.count) teams")
+                .font(SavantType.small)
+                .foregroundStyle(SavantPalette.inkTertiary)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .background(SavantPalette.surface)
+        .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
+        .overlay(
+            RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
+                .stroke(SavantPalette.hairline, lineWidth: 0.5)
+        )
     }
 
     private func favoriteTeamSection(favorite: String) -> some View {
@@ -147,10 +177,13 @@ struct TeamsView: View {
                 .padding(.vertical, 8)
 
             if filteredTeams.isEmpty {
+                let noDataForSeason = searchText.isEmpty && teamsWithData.isEmpty
                 ContentUnavailableView {
-                    Label("No teams found", systemImage: "magnifyingglass")
+                    Label(noDataForSeason ? "No teams available" : "No teams found", systemImage: "magnifyingglass")
                 } description: {
-                    Text("Try a different search term.")
+                    Text(noDataForSeason
+                         ? "No teams have player data for the \(viewModel.selectedSeason) season. Try selecting a different season from the Leaders tab."
+                         : "Try a different search term.")
                 }
                 .padding(.vertical, 48)
             } else {
