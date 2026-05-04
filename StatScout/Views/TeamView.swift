@@ -4,7 +4,7 @@ struct TeamView: View {
     let team: String
     let players: [Player]
     @State private var searchText = ""
-    @State private var selectedCategory: MetricCategory? = .hitting
+    @State private var selectedCategory: MetricCategory? = nil
     @State private var sortDescending = true
 
     private var sortMetric: (label: String, category: MetricCategory)? {

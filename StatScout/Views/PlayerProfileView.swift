@@ -150,62 +150,6 @@ struct PlayerProfileView: View {
         YearComparisonView(history: history)
     }
 
-    private var historyContent: some View {
-        VStack(spacing: 12) {
-            historyCard
-        }
-        .padding(.horizontal, 12)
-        .padding(.top, 12)
-    }
-
-    private var historyCard: some View {
-        VStack(spacing: 0) {
-            SavantSectionBar(title: "YEAR OVER YEAR")
-
-            ForEach(Array(history.sorted {
-                guard let s1 = $0.season, let s2 = $1.season else {
-                    if $0.season == nil && $1.season == nil { return false }
-                    return $0.season != nil
-                }
-                return s1 > s2
-            }.enumerated()), id: \.element.id) { index, pastPlayer in
-                HStack {
-                    Text(pastPlayer.season.map(String.init) ?? "—")
-                        .font(SavantType.bodyBold)
-                        .foregroundStyle(SavantPalette.ink)
-                        .frame(width: 60, alignment: .leading)
-                    
-                    Spacer()
-                    
-                    let pctl = pastPlayer.overallPercentile
-                    HStack(spacing: 6) {
-                        PercentileBarMini(percentile: pctl)
-                        Text("\(pctl)")
-                            .font(SavantType.statSmall)
-                            .foregroundStyle(SavantPalette.inkSecondary)
-                            .frame(width: 24, alignment: .trailing)
-                    }
-                    .frame(width: 140, alignment: .trailing)
-                }
-                .frame(height: SavantGeo.rowHeight)
-                .padding(.horizontal, SavantGeo.padInline)
-                .background(index % 2 == 0 ? SavantPalette.surface : SavantPalette.surfaceAlt)
-                .overlay(
-                    Rectangle()
-                        .fill(SavantPalette.divider)
-                        .frame(height: SavantGeo.hairline),
-                    alignment: .bottom
-                )
-            }
-        }
-        .background(SavantPalette.surface)
-        .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
-        .overlay(
-            RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
-                .stroke(SavantPalette.hairline, lineWidth: 0.5)
-        )
-    }
-
     private func emptyStateCard(icon: String, title: String, description: String) -> some View {
         VStack(spacing: 12) {
             ContentUnavailableView {

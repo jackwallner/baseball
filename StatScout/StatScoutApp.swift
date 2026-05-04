@@ -56,9 +56,11 @@ struct ConfigMissingView: View {
                 .font(SavantType.body)
                 .foregroundStyle(SavantPalette.inkSecondary)
                 .multilineTextAlignment(.center)
-            Link("Contact Support", destination: URL(string: "https://jackwallner.github.io/baseball/support.html")!)
-                .buttonStyle(.borderedProminent)
-                .tint(SavantPalette.savantRed)
+            if let supportURL = URL(string: "https://jackwallner.github.io/baseball/support.html") {
+                Link("Contact Support", destination: supportURL)
+                    .buttonStyle(.borderedProminent)
+                    .tint(SavantPalette.savantRed)
+            }
         }
         .padding(24)
         .frame(maxWidth: .infinity, maxHeight: .infinity)

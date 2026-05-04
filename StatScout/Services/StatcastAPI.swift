@@ -22,13 +22,15 @@ struct StatcastAPI: StatcastProviding {
                 .appending(path: "rest/v1/player_snapshots")
                 .appending(queryItems: [
                     URLQueryItem(name: "select", value: "*"),
-                    URLQueryItem(name: "order", value: "updated_at.desc")
+                    URLQueryItem(name: "order", value: "updated_at.desc"),
+                    URLQueryItem(name: "limit", value: String(pageSize)),
+                    URLQueryItem(name: "offset", value: String(offset))
                 ])
-            var request = URLRequest(url: endpoint)
+            // Bypass URLCache so the shared headshot cache can't serve a stale page.
+            var request = URLRequest(url: endpoint, cachePolicy: .reloadIgnoringLocalCacheData)
             request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
             request.setValue(apiKey, forHTTPHeaderField: "apikey")
             request.setValue("application/json", forHTTPHeaderField: "Accept")
-            request.setValue("\(offset)-\(offset + pageSize - 1)", forHTTPHeaderField: "Range")
 
             let (data, response) = try await URLSession.shared.data(for: request)
             guard let httpResponse = response as? HTTPURLResponse,

@@ -67,32 +67,40 @@ struct DashboardView: View {
 
     private var seasonMenu: some View {
         Menu {
-            ForEach(viewModel.availableSeasons, id: \.self) { season in
-                Button {
-                    viewModel.selectedSeason = season
-                } label: {
-                    HStack {
-                        Text(String(season))
-                        if viewModel.selectedSeason == season {
-                            Image(systemName: "checkmark")
-                        }
-                    }
+            Picker("Season", selection: $viewModel.selectedSeason) {
+                ForEach(viewModel.availableSeasons, id: \.self) { season in
+                    Text(String(season)).tag(season)
                 }
             }
         } label: {
-            HStack(spacing: 4) {
-                Text(String(viewModel.selectedSeason))
-                    .font(SavantType.bodyBold)
-                    .foregroundStyle(.white)
-                Image(systemName: "chevron.down")
-                    .font(.system(size: 10, weight: .bold))
-                    .foregroundStyle(.white.opacity(0.85))
-            }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 8)
-            .background(SavantPalette.savantRed)
-            .clipShape(Capsule())
+            seasonMenuLabel
         }
+        .menuOrder(.fixed)
+        .accessibilityLabel("Season")
+        .accessibilityValue(String(viewModel.selectedSeason))
+        .accessibilityHint("Choose which season's stats to view")
+    }
+
+    private var seasonMenuLabel: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "calendar")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(.white.opacity(0.9))
+            Text("Season")
+                .font(SavantType.micro)
+                .tracking(0.5)
+                .foregroundStyle(.white.opacity(0.85))
+            Text(String(viewModel.selectedSeason))
+                .font(SavantType.bodyBold)
+                .foregroundStyle(.white)
+            Image(systemName: "chevron.down")
+                .font(.system(size: 10, weight: .bold))
+                .foregroundStyle(.white.opacity(0.85))
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 9)
+        .background(SavantPalette.savantRed)
+        .clipShape(Capsule())
     }
 
     private var leaderboardSection: some View {

@@ -78,25 +78,29 @@ struct AboutView: View {
     private var linkCard: some View {
         VStack(spacing: 0) {
             SavantSectionBar(title: "SUPPORT & PRIVACY")
-            Link(destination: URL(string: "https://jackwallner.github.io/baseball/support.html")!) {
-                row(
-                    icon: "envelope.fill",
-                    title: "Contact Support",
-                    subtitle: "support@statscout.app"
-                )
+            if let supportURL = URL(string: "https://jackwallner.github.io/baseball/support.html") {
+                Link(destination: supportURL) {
+                    row(
+                        icon: "envelope.fill",
+                        title: "Contact Support",
+                        subtitle: "support@statscout.app"
+                    )
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
             
             Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline)
             
-            Link(destination: URL(string: "https://jackwallner.github.io/baseball/privacy-policy.html")!) {
-                row(
-                    icon: "shield.lefthalf.filled",
-                    title: "Privacy Policy",
-                    subtitle: "No data collection. No tracking."
-                )
+            if let privacyURL = URL(string: "https://jackwallner.github.io/baseball/privacy-policy.html") {
+                Link(destination: privacyURL) {
+                    row(
+                        icon: "shield.lefthalf.filled",
+                        title: "Privacy Policy",
+                        subtitle: "No data collection. No tracking."
+                    )
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
         }
         .background(SavantPalette.surface)
         .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))

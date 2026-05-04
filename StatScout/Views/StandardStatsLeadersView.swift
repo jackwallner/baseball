@@ -202,7 +202,7 @@ struct StandardStatsLeadersView: View {
                             .font(SavantType.bodyBold)
                             .foregroundStyle(SavantPalette.ink)
                             .lineLimit(1)
-                        Text(player.position)
+                        Text(player.displayPosition)
                             .font(SavantType.micro)
                             .tracking(0.4)
                             .foregroundStyle(SavantPalette.inkTertiary)

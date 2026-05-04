@@ -17,8 +17,7 @@ final class DashboardViewModel {
     // Label shown in the sort button - reflects actual metric being used
     var sortLabel: String {
         guard selectedCategory != nil else { return "Overall" }
-        // Use the dynamically determined metric, or fall back to generic label
-        return currentSortMetricLabel ?? "Avg"
+        return determineSortMetricLabel() ?? "Avg"
     }
     var isLoading = false
     var errorMessage: String?
@@ -75,15 +74,9 @@ final class DashboardViewModel {
         }
     }
 
-    // The metric label currently used for sorting all players (determined by availability)
-    private var currentSortMetricLabel: String?
-
     // Baseball Savant-style sorting: use consistent key metric for ALL players
     var leaderboard: [Player] {
-        // Determine which metric to use based on what's available in the filtered set
         let sortLabel = determineSortMetricLabel()
-        currentSortMetricLabel = sortLabel
-
         return filteredPlayers.sorted { p1, p2 in
             let p1Score = playerSortScore(player: p1, metricLabel: sortLabel)
             let p2Score = playerSortScore(player: p2, metricLabel: sortLabel)
@@ -141,7 +134,7 @@ final class DashboardViewModel {
 
     // Expose the current sort metric for row display
     var currentSortMetricForDisplay: (label: String?, category: MetricCategory?) {
-        (currentSortMetricLabel, selectedCategory)
+        (determineSortMetricLabel(), selectedCategory)
     }
 
     var allTeams: [String] {
