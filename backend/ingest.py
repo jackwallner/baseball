@@ -741,8 +741,32 @@ def merge_player_row(
             players[pid]["metrics"].append(m)
 
 
+def _rank_percentiles(values: dict[int, float], lower_better: bool) -> dict[int, int]:
+    """Compute league-relative percentiles from a {pid: rate} mapping.
+
+    Uses pandas rank with average tie-handling. If lower_better is True
+    (e.g., K% for batters, BB% for pitchers), lower values yield higher
+    percentiles.
+    """
+    if not values:
+        return {}
+    series = pd.Series(values, dtype=float)
+    ranks = series.rank(method="average", ascending=not lower_better, pct=True)
+    return {int(pid): max(1, min(100, int(round(pct * 100)))) for pid, pct in ranks.items()}
+
+
 def _add_calculated_rates(players: dict[int, dict]) -> None:
-    """Calculate K% and BB% from standard stats and update existing metrics."""
+    """Calculate K% and BB% from standard stats with true league-relative percentiles.
+
+    When upstream Baseball Savant percentile data is missing (common for
+    current/early-season years), this fallback computes K% and BB% from the
+    raw counting stats and assigns each player a percentile based on their
+    rank within the appropriate population (batters vs. pitchers). K% is
+    inversely ranked for batters (lower K% = higher percentile) and BB% is
+    inversely ranked for pitchers (lower BB% = higher percentile).
+    """
+    aggregates: list[dict[str, Any]] = []
+
     for pid, player in players.items():
         pa = None
         so = None
@@ -771,48 +795,99 @@ def _add_calculated_rates(players: dict[int, dict]) -> None:
 
         player_type = player.get("player_type", "batter")
         is_pitcher = player_type == "pitcher" or (player_type == "two_way" and bf is not None)
-        prefix = "pitcher" if is_pitcher else "batter"
-        category = "Pitching" if is_pitcher else "Hitting"
+
+        aggregates.append({
+            "pid": pid,
+            "pa": pa,
+            "is_pitcher": is_pitcher,
+            "prefix": "pitcher" if is_pitcher else "batter",
+            "category": "Pitching" if is_pitcher else "Hitting",
+            "k_rate": (so / pa) * 100 if so is not None else None,
+            "bb_rate": (bb / pa) * 100 if bb is not None else None,
+        })
+
+    if not aggregates:
+        return
+
+    # Build per-population rate pools for percentile computation.
+    batter_k: dict[int, float] = {}
+    batter_bb: dict[int, float] = {}
+    pitcher_k: dict[int, float] = {}
+    pitcher_bb: dict[int, float] = {}
+
+    for r in aggregates:
+        target_k = pitcher_k if r["is_pitcher"] else batter_k
+        target_bb = pitcher_bb if r["is_pitcher"] else batter_bb
+        if r["k_rate"] is not None:
+            target_k[r["pid"]] = r["k_rate"]
+        if r["bb_rate"] is not None:
+            target_bb[r["pid"]] = r["bb_rate"]
+
+    # K%: lower is better for batters; higher is better for pitchers.
+    # BB%: higher is better for batters; lower is better for pitchers.
+    batter_k_pct = _rank_percentiles(batter_k, lower_better=True)
+    batter_bb_pct = _rank_percentiles(batter_bb, lower_better=False)
+    pitcher_k_pct = _rank_percentiles(pitcher_k, lower_better=False)
+    pitcher_bb_pct = _rank_percentiles(pitcher_bb, lower_better=True)
+
+    for r in aggregates:
+        pid = r["pid"]
+        player = players[pid]
+        is_pitcher = r["is_pitcher"]
+        prefix = r["prefix"]
+        category = r["category"]
 
         existing_metrics = {m["label"]: m for m in player.get("metrics", [])}
 
-        if so is not None:
-            k_rate = (so / pa) * 100
-            k_value = f"{k_rate:.1f}%"
+        if r["k_rate"] is not None:
+            k_value = f"{r['k_rate']:.1f}%"
+            calc_k_pct = (pitcher_k_pct if is_pitcher else batter_k_pct).get(pid)
 
             if "K%" in existing_metrics:
-                existing_metrics["K%"]["value"] = k_value
-                existing_metrics["K%"]["actual_value"] = k_value
-                if existing_metrics["K%"].get("percentile"):
-                    existing_metrics["K%"]["display_value"] = f"{k_value} · {existing_metrics['K%']['percentile']}th"
+                metric = existing_metrics["K%"]
+                metric["value"] = k_value
+                metric["actual_value"] = k_value
+                pct = metric.get("percentile") or calc_k_pct
+                if pct:
+                    metric["percentile"] = pct
+                    metric["display_value"] = f"{k_value} · {pct}th"
             else:
-                player["metrics"].append({
+                metric = {
                     "id": f"{prefix}-{pid}-k_percent",
                     "label": "K%",
                     "value": k_value,
                     "actual_value": k_value,
-                    "percentile": 0,
+                    "percentile": calc_k_pct,
                     "category": category,
-                })
+                }
+                if calc_k_pct:
+                    metric["display_value"] = f"{k_value} · {calc_k_pct}th"
+                player["metrics"].append(metric)
 
-        if bb is not None:
-            bb_rate = (bb / pa) * 100
-            bb_value = f"{bb_rate:.1f}%"
+        if r["bb_rate"] is not None:
+            bb_value = f"{r['bb_rate']:.1f}%"
+            calc_bb_pct = (pitcher_bb_pct if is_pitcher else batter_bb_pct).get(pid)
 
             if "BB%" in existing_metrics:
-                existing_metrics["BB%"]["value"] = bb_value
-                existing_metrics["BB%"]["actual_value"] = bb_value
-                if existing_metrics["BB%"].get("percentile"):
-                    existing_metrics["BB%"]["display_value"] = f"{bb_value} · {existing_metrics['BB%']['percentile']}th"
+                metric = existing_metrics["BB%"]
+                metric["value"] = bb_value
+                metric["actual_value"] = bb_value
+                pct = metric.get("percentile") or calc_bb_pct
+                if pct:
+                    metric["percentile"] = pct
+                    metric["display_value"] = f"{bb_value} · {pct}th"
             else:
-                player["metrics"].append({
+                metric = {
                     "id": f"{prefix}-{pid}-bb_percent",
                     "label": "BB%",
                     "value": bb_value,
                     "actual_value": bb_value,
-                    "percentile": 0,
+                    "percentile": calc_bb_pct,
                     "category": category,
-                })
+                }
+                if calc_bb_pct:
+                    metric["display_value"] = f"{bb_value} · {calc_bb_pct}th"
+                player["metrics"].append(metric)
 
 
 def build_snapshot_rows(season: int) -> list[dict]:

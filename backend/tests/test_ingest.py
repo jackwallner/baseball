@@ -189,3 +189,59 @@ def test_add_calculated_rates_from_standard_stats():
     assert k["value"] == "25.0%"
     bb = next(m for m in player["metrics"] if m["label"] == "BB%")
     assert bb["value"] == "10.0%"
+
+
+def _make_batter(pid: int, pa: int, so: int, bb: int) -> dict:
+    return {
+        "player_type": "batter",
+        "standard_stats": [
+            {"label": "PA", "value": str(pa)},
+            {"label": "SO", "value": str(so)},
+            {"label": "BB", "value": str(bb)},
+        ],
+        "metrics": [],
+    }
+
+
+def test_add_calculated_rates_assigns_true_percentiles():
+    # Three batters: best, mid, worst K% / BB%.
+    # K% (lower better for batters): pid 1 has 10%, pid 2 has 20%, pid 3 has 30%
+    # BB% (higher better for batters): pid 1 has 5%, pid 2 has 10%, pid 3 has 15%
+    players = {
+        1: _make_batter(1, 500, 50, 25),
+        2: _make_batter(2, 500, 100, 50),
+        3: _make_batter(3, 500, 150, 75),
+    }
+    ingest._add_calculated_rates(players)
+
+    by_pid_k = {pid: next(m for m in p["metrics"] if m["label"] == "K%") for pid, p in players.items()}
+    by_pid_bb = {pid: next(m for m in p["metrics"] if m["label"] == "BB%") for pid, p in players.items()}
+
+    # Best K% (10%) should yield top percentile, worst (30%) the bottom.
+    assert by_pid_k[1]["percentile"] > by_pid_k[2]["percentile"] > by_pid_k[3]["percentile"]
+    # Best BB% (15%) should yield top percentile.
+    assert by_pid_bb[3]["percentile"] > by_pid_bb[2]["percentile"] > by_pid_bb[1]["percentile"]
+
+    # No hardcoded zeros — all should be > 0.
+    for m in list(by_pid_k.values()) + list(by_pid_bb.values()):
+        assert m["percentile"] > 0
+        assert "display_value" in m
+        assert "th" in m["display_value"]
+
+
+def test_add_calculated_rates_preserves_native_percentile():
+    # If the metric already exists with a real percentile, don't overwrite it.
+    player = {
+        "player_type": "batter",
+        "standard_stats": [
+            {"label": "PA", "value": "600"},
+            {"label": "SO", "value": "150"},
+            {"label": "BB", "value": "60"},
+        ],
+        "metrics": [
+            {"id": "batter-1-k_percent", "label": "K%", "value": "25.0%", "percentile": 42, "category": "Hitting"},
+        ],
+    }
+    ingest._add_calculated_rates({1: player})
+    k = next(m for m in player["metrics"] if m["label"] == "K%")
+    assert k["percentile"] == 42
