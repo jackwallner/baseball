@@ -2,8 +2,8 @@ import SwiftUI
 
 struct YearComparisonView: View {
     let history: [Player]
-    @State private var selectedYear1: Int = Calendar.current.component(.year, from: Date())
-    @State private var selectedYear2: Int = Calendar.current.component(.year, from: Date()) - 1
+    @State private var selectedYear1: Int = 0
+    @State private var selectedYear2: Int = 0
 
     private var availableYears: [Int] {
         history.compactMap(\.season).sorted(by: >).reduce(into: []) { acc, year in
@@ -43,8 +43,9 @@ struct YearComparisonView: View {
 
     private func snapSelectionsToAvailableYears() {
         let years = availableYears
+        guard !years.isEmpty else { return }
         if !years.contains(selectedYear1) {
-            selectedYear1 = years.first ?? selectedYear1
+            selectedYear1 = years.first ?? 0
         }
         if !years.contains(selectedYear2) || selectedYear2 == selectedYear1 {
             selectedYear2 = years.first(where: { $0 != selectedYear1 }) ?? selectedYear2
@@ -52,10 +53,16 @@ struct YearComparisonView: View {
     }
 
     private var noDataForYearView: some View {
-        ContentUnavailableView {
+        let description: String
+        if availableYears.isEmpty {
+            description = "No historical data is available for this player."
+        } else {
+            description = "Historical data for \(selectedYear1) or \(selectedYear2) is not available for this player."
+        }
+        return ContentUnavailableView {
             Label("No Data Available", systemImage: "calendar.badge.clock")
         } description: {
-            Text("Historical data for " + String(selectedYear1) + " or " + String(selectedYear2) + " is not available for this player.")
+            Text(description)
         }
         .padding(.vertical, 48)
         .frame(maxWidth: .infinity)
@@ -147,22 +154,6 @@ struct YearComparisonView: View {
             Spacer()
         }
         .padding(.top, 4)
-    }
-
-    private var placeholderContent: some View {
-        ContentUnavailableView {
-            Label("Select Two Years", systemImage: "calendar.badge.clock")
-        } description: {
-            Text("Choose two seasons above to compare metrics.")
-        }
-        .padding(.vertical, 48)
-        .frame(maxWidth: .infinity)
-        .background(SavantPalette.surface)
-        .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
-        .overlay(
-            RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
-                .stroke(SavantPalette.hairline, lineWidth: 0.5)
-        )
     }
 
     private func comparisonContent(p1: Player, p2: Player) -> some View {

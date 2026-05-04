@@ -166,7 +166,7 @@ struct StandardStatsLeadersView: View {
                 ContentUnavailableView {
                     Label("No data available", systemImage: "chart.bar")
                 } description: {
-                    Text("Standard stats are not available for the current season yet.")
+                    Text("No players have \(selectedStat) data for the current season.")
                 }
                 .padding(.vertical, 48)
                 .background(SavantPalette.surface)

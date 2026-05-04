@@ -50,7 +50,7 @@ struct MetricRankingView: View {
                     ContentUnavailableView {
                         Label("No rankings found", systemImage: "chart.bar")
                     } description: {
-                        Text("Check back after the nightly update.")
+                        Text("No players have the \(metricLabel) metric for this season.")
                     }
                     .padding(.vertical, 24)
                 } else {

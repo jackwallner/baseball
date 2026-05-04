@@ -13,7 +13,7 @@ struct PlayerProfileView: View {
     }
 
     private var seasonLabel: String {
-        player.season.map(String.init) ?? Calendar.current.component(.year, from: Date()).description
+        player.season.map(String.init) ?? "—"
     }
 
     private var groupedMetrics: [(category: MetricCategory, metrics: [Metric])] {
@@ -190,7 +190,15 @@ struct PlayerProfileView: View {
                 )
             )
 
-            ForEach(groupedMetrics, id: \.category) { group in
+            if groupedMetrics.isEmpty {
+                emptyStateCard(
+                    icon: "chart.bar",
+                    title: "No metrics available",
+                    description: "Percentile rankings are not available for this player in the \(seasonLabel) season."
+                )
+                .padding(.vertical, 24)
+            } else {
+                ForEach(groupedMetrics, id: \.category) { group in
                 let avg = player.percentile(for: group.category)
                 SavantSubSectionBar(
                     title: "\(group.category.rawValue.uppercased())",
@@ -212,6 +220,7 @@ struct PlayerProfileView: View {
                             )
                     }
                     .buttonStyle(.plain)
+                }
                 }
             }
         }

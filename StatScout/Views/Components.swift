@@ -216,7 +216,7 @@ struct SearchField: View {
         .padding(.horizontal, 12)
         .frame(height: 36)
         .background(SavantPalette.surface)
-        .cornerRadius(SavantGeo.radiusCard)
+        .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
         .overlay(
             RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
                 .stroke(SavantPalette.hairline, lineWidth: 1)
