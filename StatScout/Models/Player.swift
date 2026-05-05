@@ -171,17 +171,20 @@ extension Player {
     var initials: String {
         let parts = name.split(separator: " ")
         guard let first = parts.first else { return "" }
-        var initials = [String(first.prefix(1))]
-        if parts.count > 1 {
-            initials.append(String(parts[1].prefix(1)))
+        guard parts.count > 1 else { return String(first.prefix(1)) }
+
+        let last = parts.last!
+        let suffix = last.trimmingCharacters(in: .punctuationCharacters).uppercased()
+        let hasSuffix = ["JR", "SR", "II", "III", "IV", "V"].contains(suffix)
+
+        if hasSuffix && parts.count > 2 {
+            // Use part before suffix as last name (e.g., "Bobby Witt Jr." → "BW")
+            let lastName = parts[parts.count - 2]
+            return String(first.prefix(1)) + String(lastName.prefix(1))
         }
-        if let last = parts.last {
-            let suffix = last.trimmingCharacters(in: .punctuationCharacters).uppercased()
-            if ["JR", "SR", "II", "III", "IV", "V"].contains(suffix), parts.count > 2 {
-                initials.append(String(last.prefix(1)))
-            }
-        }
-        return initials.joined()
+
+        // Standard case: first initial + last initial
+        return String(first.prefix(1)) + String(last.prefix(1))
     }
     var headshotURL: URL? {
         imageURL ?? URL(string: "https://midfield.mlbstatic.com/v1/people/\(playerId)/spots/240")

@@ -45,7 +45,8 @@ struct StandardStatsLeadersView: View {
               let stat = stats.first(where: { $0.label == selectedStat }) else {
             return 0
         }
-        return Double(stat.value) ?? 0
+        let cleaned = stat.value.hasPrefix(".") ? "0" + stat.value : stat.value
+        return Double(cleaned) ?? 0
     }
     
     // Get formatted stat value for display

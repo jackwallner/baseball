@@ -53,7 +53,7 @@ struct TeamView: View {
             VStack(spacing: 0) {
                 TeamIdentityStrip(team: team, season: displaySeason)
 
-                CategoryFilter(selectedCategory: $selectedCategory)
+                CategoryFilter(selectedCategory: $selectedCategory, showAllOption: true)
 
                 rosterSection
             }
@@ -105,10 +105,13 @@ struct TeamView: View {
                     .padding(.vertical, 8)
 
                 if filteredPlayers.isEmpty {
+                    let noCategoryMatch = searchText.isEmpty && selectedCategory != nil
                     emptyStateView(
                         icon: "magnifyingglass",
                         title: "No players found",
-                        description: "Try a different search term."
+                        description: noCategoryMatch
+                            ? "No players match the selected category for this team."
+                            : "Try a different search term."
                     )
                 } else {
                     LeaderboardTableHeader(sortDescending: sortDescending, sortLabel: sortLabel)

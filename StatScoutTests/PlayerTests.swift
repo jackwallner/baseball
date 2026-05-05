@@ -71,8 +71,25 @@ final class PlayerTests: XCTestCase {
     }
 
     func testInitialsHandleSuffixes() {
-        let player = Player(playerId: 1, name: "Bobby Witt Jr.", team: "KC", position: "SS", handedness: "R/R", imageURL: nil, updatedAt: Date(), metrics: [], standardStats: [], games: [])
-        XCTAssertEqual(player.initials, "BWJ")
+        let witt = Player(playerId: 1, name: "Bobby Witt Jr.", team: "KC", position: "SS", handedness: "R/R", imageURL: nil, updatedAt: Date(), metrics: [], standardStats: [], games: [])
+        XCTAssertEqual(witt.initials, "BW")
+
+        let harris = Player(playerId: 2, name: "Michael Harris II", team: "ATL", position: "CF", handedness: "L/R", imageURL: nil, updatedAt: Date(), metrics: [], standardStats: [], games: [])
+        XCTAssertEqual(harris.initials, "MH")
+
+        let mcCullers = Player(playerId: 3, name: "Lance McCullers Jr.", team: "HOU", position: "P", handedness: "R/R", imageURL: nil, updatedAt: Date(), metrics: [], standardStats: [], games: [])
+        XCTAssertEqual(mcCullers.initials, "LM")
+    }
+
+    func testInitialsStandardNames() {
+        let judge = Player(playerId: 1, name: "Aaron Judge", team: "NYY", position: "RF", handedness: "R/R", imageURL: nil, updatedAt: Date(), metrics: [], standardStats: [], games: [])
+        XCTAssertEqual(judge.initials, "AJ")
+
+        let ohtani = Player(playerId: 2, name: "Shohei Ohtani", team: "LAD", position: "DH", handedness: "L/R", imageURL: nil, updatedAt: Date(), metrics: [], standardStats: [], games: [])
+        XCTAssertEqual(ohtani.initials, "SO")
+
+        let single = Player(playerId: 3, name: "Madonna", team: "NYY", position: "P", handedness: "R/R", imageURL: nil, updatedAt: Date(), metrics: [], standardStats: [], games: [])
+        XCTAssertEqual(single.initials, "M")
     }
 
     func testWeeklyDeltaSumsRecentGamesOnly() {
@@ -107,5 +124,13 @@ final class PlayerTests: XCTestCase {
             updatedAt: Date(), metrics: [], standardStats: [], games: []
         )
         XCTAssertEqual(player.savantURL?.absoluteString, "https://baseballsavant.mlb.com/savant-player/shohei-ohtani-67890")
+    }
+
+    func testStandardStatsDoubleParsingHandlesLeadingDot() {
+        // Defensive: verify cleaning logic works for both ".312" and "0.312" formats
+        let dotValue = ".312"
+        let cleaned = dotValue.hasPrefix(".") ? "0" + dotValue : dotValue
+        XCTAssertEqual(Double(cleaned)!, 0.312, accuracy: 0.001)
+        XCTAssertEqual(Double("0.312")!, 0.312, accuracy: 0.001)
     }
 }

@@ -6,7 +6,6 @@ struct PlayerHeadshot: View {
     let url: URL?
     let initials: String
     let size: CGFloat
-    @State private var isLoading = true
 
     var body: some View {
         ZStack {
@@ -17,10 +16,8 @@ struct PlayerHeadshot: View {
                     case .success(let image):
                         image.resizable().scaledToFill()
                             .frame(width: size, height: size)
-                            .onAppear { isLoading = false }
                     case .failure(_):
                         initialsView
-                            .onAppear { isLoading = false }
                     case .empty:
                         shimmerView
                     @unknown default:
@@ -229,17 +226,23 @@ struct SearchField: View {
 
 struct CategoryFilter: View {
     @Binding var selectedCategory: MetricCategory?
+    var showAllOption: Bool = false
 
     var body: some View {
-        let tabs = MetricCategory.allCases.map { $0.rawValue }
-        let selectedTab = selectedCategory?.rawValue ?? MetricCategory.hitting.rawValue
+        let categoryTabs = MetricCategory.allCases.map { $0.rawValue }
+        let tabs = showAllOption ? ["All"] + categoryTabs : categoryTabs
+        let selectedTab = selectedCategory?.rawValue ?? (showAllOption ? "All" : MetricCategory.hitting.rawValue)
 
         SavantTabs(
             tabs: tabs,
             selected: Binding(
                 get: { selectedTab },
                 set: { newValue in
-                    selectedCategory = MetricCategory.allCases.first { $0.rawValue == newValue }
+                    if showAllOption && newValue == "All" {
+                        selectedCategory = nil
+                    } else {
+                        selectedCategory = MetricCategory.allCases.first { $0.rawValue == newValue }
+                    }
                 }
             )
         )

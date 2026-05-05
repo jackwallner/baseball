@@ -137,10 +137,6 @@ final class DashboardViewModel {
         (determineSortMetricLabel(), selectedCategory)
     }
 
-    var allTeams: [String] {
-        Array(Set(seasonPlayers.map { normalizedTeamAbbreviation($0.team) })).sorted()
-    }
-
     func players(forTeam team: String) -> [Player] {
         let normalized = normalizedTeamAbbreviation(team)
         return seasonPlayers.filter { normalizedTeamAbbreviation($0.team) == normalized }
