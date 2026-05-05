@@ -13,11 +13,55 @@ final class DashboardViewModel {
     var selectedCategory: MetricCategory? = .hitting
     var sortDescending = true
     var selectedSeason: Int = Calendar.current.component(.year, from: Date())
+    // User-selected sort metric per category. Overrides the auto-priority pick when present
+    // and still valid for the current season's data.
+    var userSortMetricByCategory: [MetricCategory: String] = [:]
 
     // Label shown in the sort button - reflects actual metric being used
     var sortLabel: String {
         guard selectedCategory != nil else { return "Overall" }
-        return determineSortMetricLabel() ?? "Avg"
+        return currentSortMetric ?? "Avg"
+    }
+
+    // Resolved sort metric: user override (if still available) or auto-priority pick.
+    var currentSortMetric: String? {
+        guard let category = selectedCategory else { return nil }
+        if let user = userSortMetricByCategory[category],
+           availableSortMetrics.contains(user) {
+            return user
+        }
+        return determineSortMetricLabel()
+    }
+
+    // All metric labels available for the current category, priority metrics first.
+    var availableSortMetrics: [String] {
+        guard let category = selectedCategory else { return [] }
+        var allLabels = Set<String>()
+        for player in seasonPlayers {
+            for metric in player.metrics where metric.category == category {
+                allLabels.insert(metric.label)
+            }
+        }
+        var seen = Set<String>()
+        var ordered: [String] = []
+        for label in priorityMetrics(for: category) where allLabels.contains(label) {
+            if seen.insert(label).inserted {
+                ordered.append(label)
+            }
+        }
+        for label in allLabels.sorted() where seen.insert(label).inserted {
+            ordered.append(label)
+        }
+        return ordered
+    }
+
+    func setUserSortMetric(_ label: String?) {
+        guard let category = selectedCategory else { return }
+        if let label {
+            userSortMetricByCategory[category] = label
+        } else {
+            userSortMetricByCategory.removeValue(forKey: category)
+        }
     }
     var isLoading = false
     var errorMessage: String?
@@ -76,7 +120,7 @@ final class DashboardViewModel {
 
     // Baseball Savant-style sorting: use consistent key metric for ALL players
     var leaderboard: [Player] {
-        let sortLabel = determineSortMetricLabel()
+        let sortLabel = currentSortMetric
         return filteredPlayers.sorted { p1, p2 in
             let p1Score = playerSortScore(player: p1, metricLabel: sortLabel)
             let p2Score = playerSortScore(player: p2, metricLabel: sortLabel)
@@ -134,7 +178,7 @@ final class DashboardViewModel {
 
     // Expose the current sort metric for row display
     var currentSortMetricForDisplay: (label: String?, category: MetricCategory?) {
-        (determineSortMetricLabel(), selectedCategory)
+        (currentSortMetric, selectedCategory)
     }
 
     func players(forTeam team: String) -> [Player] {

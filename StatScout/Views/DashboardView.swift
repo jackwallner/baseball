@@ -106,6 +106,42 @@ struct DashboardView: View {
         .clipShape(Capsule())
     }
 
+    private var sortHeaderMenu: some View {
+        Menu {
+            let metrics = viewModel.availableSortMetrics
+            if !metrics.isEmpty {
+                Section("Sort by") {
+                    ForEach(metrics, id: \.self) { metric in
+                        Button {
+                            viewModel.setUserSortMetric(metric)
+                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                        } label: {
+                            if metric == viewModel.currentSortMetric {
+                                Label(metric, systemImage: "checkmark")
+                            } else {
+                                Text(metric)
+                            }
+                        }
+                    }
+                }
+            }
+            Section {
+                Button {
+                    viewModel.sortDescending.toggle()
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                } label: {
+                    Label(
+                        viewModel.sortDescending ? "Highest first" : "Lowest first",
+                        systemImage: viewModel.sortDescending ? "arrow.down" : "arrow.up"
+                    )
+                }
+            }
+        } label: {
+            LeaderboardTableHeader(sortDescending: viewModel.sortDescending, sortLabel: viewModel.sortLabel)
+        }
+        .menuOrder(.fixed)
+    }
+
     private var leaderboardSection: some View {
         VStack(spacing: 0) {
             if viewModel.leaderboard.isEmpty && !viewModel.searchText.isEmpty {
@@ -142,13 +178,7 @@ struct DashboardView: View {
                 .padding(.vertical, 24)
                 .frame(minHeight: 200)
             } else {
-                Button(action: {
-                    viewModel.sortDescending.toggle()
-                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                }) {
-                    LeaderboardTableHeader(sortDescending: viewModel.sortDescending, sortLabel: viewModel.sortLabel)
-                }
-                .buttonStyle(.plain)
+                sortHeaderMenu
                 let sortMetric = viewModel.currentSortMetricForDisplay
                 ForEach(Array(viewModel.leaderboard.enumerated()), id: \.element.id) { index, player in
                     NavigationLink(value: player) {
