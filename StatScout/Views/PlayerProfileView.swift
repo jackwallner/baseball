@@ -5,6 +5,7 @@ struct PlayerProfileView: View {
     let history: [Player]
     @State private var showPercentileInfo = false
     @State private var selectedTab: PlayerStatTab = .statcast
+    @State private var selectedPercentileSeason: Int? = nil
 
     enum PlayerStatTab: String, CaseIterable {
         case statcast = "Percentiles"
@@ -12,12 +13,28 @@ struct PlayerProfileView: View {
         case yearCompare = "Year Compare"
     }
 
+    private var availablePercentileSeasons: [Int] {
+        let fromHistory = history.compactMap(\.season)
+        var set = Set(fromHistory)
+        if let s = player.season { set.insert(s) }
+        return Array(set).sorted(by: >)
+    }
+
+    private var activeSeason: Int? {
+        selectedPercentileSeason ?? player.season
+    }
+
+    private var displayedPlayer: Player {
+        guard let season = activeSeason else { return player }
+        return history.first { $0.season == season } ?? player
+    }
+
     private var seasonLabel: String {
-        player.season.map(String.init) ?? "—"
+        activeSeason.map(String.init) ?? "—"
     }
 
     private var groupedMetrics: [(category: MetricCategory, metrics: [Metric])] {
-        let grouped = Dictionary(grouping: player.metrics) { $0.category }
+        let grouped = Dictionary(grouping: displayedPlayer.metrics) { $0.category }
         return MetricCategory.allCases.compactMap { cat in
             guard let m = grouped[cat], !m.isEmpty else { return nil }
             return (category: cat, metrics: m.sorted { $0.percentile > $1.percentile })
@@ -170,16 +187,47 @@ struct PlayerProfileView: View {
 
     // MARK: - Cards
 
+    private var percentileSeasonMenu: some View {
+        let seasons = availablePercentileSeasons
+        return Group {
+            if seasons.count > 1 {
+                Menu {
+                    Picker("Season", selection: Binding(
+                        get: { activeSeason ?? seasons.first ?? 0 },
+                        set: { selectedPercentileSeason = $0 }
+                    )) {
+                        ForEach(seasons, id: \.self) { season in
+                            Text(String(season)).tag(season)
+                        }
+                    }
+                } label: {
+                    HStack(spacing: 4) {
+                        Text(seasonLabel)
+                            .font(SavantType.micro)
+                            .tracking(0.5)
+                            .foregroundStyle(SavantPalette.inkSecondary)
+                        Image(systemName: "chevron.down")
+                            .font(.system(size: 9, weight: .bold))
+                            .foregroundStyle(SavantPalette.inkSecondary)
+                    }
+                }
+                .menuOrder(.fixed)
+            } else {
+                Text(seasonLabel)
+                    .font(SavantType.micro)
+                    .tracking(0.5)
+                    .foregroundStyle(SavantPalette.inkSecondary)
+            }
+        }
+    }
+
     private var percentileRankingsCard: some View {
         VStack(spacing: 0) {
             SavantSectionBar(
                 title: "PERCENTILE RANKINGS",
                 trailing: AnyView(
                     HStack(spacing: 4) {
-                        Text(seasonLabel)
-                            .font(SavantType.micro)
-                            .tracking(0.5)
-                            .foregroundStyle(SavantPalette.inkSecondary)
+                        percentileSeasonMenu
                         Button(action: { showPercentileInfo = true }) {
                             Text("ⓘ")
                                 .font(SavantType.micro)
@@ -199,7 +247,7 @@ struct PlayerProfileView: View {
                 .padding(.vertical, 24)
             } else {
                 ForEach(groupedMetrics, id: \.category) { group in
-                let avg = player.percentile(for: group.category)
+                let avg = displayedPlayer.percentile(for: group.category)
                 SavantSubSectionBar(
                     title: "\(group.category.rawValue.uppercased())",
                     trailing: avg.map { "AVG \($0)" },

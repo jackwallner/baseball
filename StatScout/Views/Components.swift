@@ -118,6 +118,14 @@ struct TeamColorDot: View {
     }
 }
 
+func displayTeamAbbr(_ abbr: String) -> String {
+    let trimmed = abbr.trimmingCharacters(in: .whitespaces).uppercased()
+    if trimmed.isEmpty || trimmed == "TBD" || trimmed == "—" || trimmed == "-" {
+        return "FA"
+    }
+    return abbr
+}
+
 // MARK: - Module 2: Percentile Bar Row (MetricBar) - Baseball Savant Style
 
 struct MetricBar: View {
@@ -402,7 +410,7 @@ struct LeaderboardTableRow: View {
 
             HStack(spacing: 4) {
                 TeamColorDot(abbr: player.team, size: 6)
-                Text(player.team)
+                Text(displayTeamAbbr(player.team))
                     .font(SavantType.small)
                     .foregroundStyle(SavantPalette.inkSecondary)
             }

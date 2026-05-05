@@ -1,5 +1,13 @@
 import SwiftUI
 
+private func displayTeamFullName(_ abbr: String) -> String {
+    let trimmed = abbr.trimmingCharacters(in: .whitespaces).uppercased()
+    if trimmed.isEmpty || trimmed == "TBD" || trimmed == "—" || trimmed == "-" {
+        return "Free Agent"
+    }
+    return teamFullName(abbr)
+}
+
 // MARK: - Module 1: Player Identity Strip
 
 struct PlayerIdentityStrip: View {
@@ -15,7 +23,7 @@ struct PlayerIdentityStrip: View {
                     .font(SavantType.playerName)
                     .foregroundStyle(SavantPalette.inkOnDark)
                     .lineLimit(1).minimumScaleFactor(0.7)
-                Text(teamFullName(player.team))
+                Text(displayTeamFullName(player.team))
                     .font(SavantType.bodyBold)
                     .foregroundStyle(.white.opacity(0.85))
                 Text("\(player.displayPosition) · \(player.handedness)")

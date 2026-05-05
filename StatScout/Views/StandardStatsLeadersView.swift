@@ -214,7 +214,7 @@ struct StandardStatsLeadersView: View {
                 // Team with color dot
                 HStack(spacing: 4) {
                     TeamColorDot(abbr: player.team, size: 6)
-                    Text(player.team)
+                    Text(displayTeamAbbr(player.team))
                         .font(SavantType.small)
                         .foregroundStyle(SavantPalette.inkSecondary)
                 }

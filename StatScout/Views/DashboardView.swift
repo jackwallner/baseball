@@ -76,6 +76,7 @@ struct DashboardView: View {
             seasonMenuLabel
         }
         .menuOrder(.fixed)
+        .fixedSize()
         .accessibilityLabel("Season")
         .accessibilityValue(String(viewModel.selectedSeason))
         .accessibilityHint("Choose which season's stats to view")
@@ -90,9 +91,11 @@ struct DashboardView: View {
                 .font(SavantType.micro)
                 .tracking(0.5)
                 .foregroundStyle(.white.opacity(0.85))
+                .lineLimit(1)
             Text(String(viewModel.selectedSeason))
                 .font(SavantType.bodyBold)
                 .foregroundStyle(.white)
+                .lineLimit(1)
             Image(systemName: "chevron.down")
                 .font(.system(size: 10, weight: .bold))
                 .foregroundStyle(.white.opacity(0.85))
@@ -133,8 +136,8 @@ struct DashboardView: View {
                     Label(noCategoryData ? "No players in category" : "No players yet", systemImage: "baseball")
                 } description: {
                     Text(noCategoryData
-                         ? "No players match the selected category for the \(viewModel.selectedSeason) season."
-                         : "No player data is available for the \(viewModel.selectedSeason) season.")
+                         ? "No players match the selected category for the \(String(viewModel.selectedSeason)) season."
+                         : "No player data is available for the \(String(viewModel.selectedSeason)) season.")
                 }
                 .padding(.vertical, 24)
                 .frame(minHeight: 200)

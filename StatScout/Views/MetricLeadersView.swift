@@ -48,7 +48,7 @@ struct MetricLeadersView: View {
                     .font(SavantType.micro)
                     .tracking(0.5)
                     .foregroundStyle(SavantPalette.inkTertiary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .frame(width: 88, alignment: .leading)
                 Text("BEST")
                     .font(SavantType.micro)
                     .tracking(0.5)
@@ -74,7 +74,7 @@ struct MetricLeadersView: View {
                         Text(item.label)
                             .font(SavantType.smallBold)
                             .foregroundStyle(SavantPalette.ink)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .frame(width: 88, alignment: .leading)
                     }
                     .buttonStyle(.plain)
 
@@ -89,7 +89,7 @@ struct MetricLeadersView: View {
                                         .lineLimit(1)
                                     HStack(spacing: 4) {
                                         TeamColorDot(abbr: best.player.team, size: 5)
-                                        Text(best.player.team)
+                                        Text(displayTeamAbbr(best.player.team))
                                             .font(SavantType.micro)
                                             .tracking(0.4)
                                             .foregroundStyle(SavantPalette.inkTertiary)
@@ -118,7 +118,7 @@ struct MetricLeadersView: View {
                                         .lineLimit(1)
                                     HStack(spacing: 4) {
                                         TeamColorDot(abbr: worst.player.team, size: 5)
-                                        Text(worst.player.team)
+                                        Text(displayTeamAbbr(worst.player.team))
                                             .font(SavantType.micro)
                                             .tracking(0.4)
                                             .foregroundStyle(SavantPalette.inkTertiary)

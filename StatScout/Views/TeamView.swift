@@ -4,6 +4,7 @@ struct TeamView: View {
     let team: String
     let players: [Player]
     var season: Int? = nil
+    var viewModel: DashboardViewModel? = nil
     @State private var searchText = ""
     @State private var selectedCategory: MetricCategory? = nil
     @State private var sortDescending = true
@@ -53,6 +54,12 @@ struct TeamView: View {
             VStack(spacing: 0) {
                 TeamIdentityStrip(team: team, season: displaySeason)
 
+                if let viewModel {
+                    teamSeasonMenu(viewModel: viewModel)
+                        .padding(.horizontal, 12)
+                        .padding(.top, 10)
+                }
+
                 CategoryFilter(selectedCategory: $selectedCategory, showAllOption: true)
 
                 rosterSection
@@ -97,7 +104,7 @@ struct TeamView: View {
                 emptyStateView(
                     icon: "person.2.slash",
                     title: "No players tracked",
-                    description: "No players are tracked for \(teamFullName(team)) in the \(displaySeason) season."
+                    description: "No players are tracked for \(teamFullName(team)) in the \(String(displaySeason)) season."
                 )
             } else {
                 SearchField(text: $searchText)
@@ -151,6 +158,45 @@ struct TeamView: View {
     private func savantTeamURL(for abbr: String) -> URL? {
         let normalized = normalizedTeamAbbreviation(abbr).lowercased()
         return URL(string: "https://baseballsavant.mlb.com/team/\(normalized)")
+    }
+
+    @ViewBuilder
+    private func teamSeasonMenu(viewModel: DashboardViewModel) -> some View {
+        @Bindable var bindable = viewModel
+        HStack {
+            Menu {
+                Picker("Season", selection: $bindable.selectedSeason) {
+                    ForEach(viewModel.availableSeasons, id: \.self) { season in
+                        Text(String(season)).tag(season)
+                    }
+                }
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: "calendar")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(.white.opacity(0.9))
+                    Text("Season")
+                        .font(SavantType.micro)
+                        .tracking(0.5)
+                        .foregroundStyle(.white.opacity(0.85))
+                        .lineLimit(1)
+                    Text(String(viewModel.selectedSeason))
+                        .font(SavantType.bodyBold)
+                        .foregroundStyle(.white)
+                        .lineLimit(1)
+                    Image(systemName: "chevron.down")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundStyle(.white.opacity(0.85))
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 9)
+                .background(SavantPalette.savantRed)
+                .clipShape(Capsule())
+            }
+            .menuOrder(.fixed)
+            .fixedSize()
+            Spacer()
+        }
     }
 
     private func priorityMetrics(for category: MetricCategory) -> [String] {

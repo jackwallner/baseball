@@ -102,7 +102,7 @@ struct TeamsView: View {
 
     private var seasonHeader: some View {
         HStack {
-            Text("\(viewModel.selectedSeason) Season")
+            Text("\(String(viewModel.selectedSeason)) Season")
                 .font(SavantType.bodyBold)
                 .foregroundStyle(SavantPalette.ink)
             Spacer()
@@ -182,7 +182,7 @@ struct TeamsView: View {
                     Label(noDataForSeason ? "No teams available" : "No teams found", systemImage: "magnifyingglass")
                 } description: {
                     Text(noDataForSeason
-                         ? "No teams have player data for the \(viewModel.selectedSeason) season. Try selecting a different season from the Leaders tab."
+                         ? "No teams have player data for the \(String(viewModel.selectedSeason)) season. Try selecting a different season from the Leaders tab."
                          : "Try a different search term.")
                 }
                 .padding(.vertical, 48)
