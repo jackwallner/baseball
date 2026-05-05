@@ -21,7 +21,7 @@ all_players = []
 
 while True:
     req = urllib.request.Request(
-        f"{url}?select=*&season=lt.2026&limit={page_size}&offset={offset}",
+        f"{url}?select=*&season=lt.2026&order=id.asc&limit={page_size}&offset={offset}",
         headers=headers,
     )
     with urllib.request.urlopen(req) as resp:
