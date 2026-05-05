@@ -2,6 +2,8 @@ import Foundation
 
 protocol StatcastProviding: Sendable {
     func fetchPlayers() async throws -> [Player]
+    func fetchHistoricalPlayers() async throws -> [Player]
+    func fetchCurrentPlayers() async throws -> [Player]
 }
 
 struct StatcastAPI: StatcastProviding {
@@ -14,6 +16,20 @@ struct StatcastAPI: StatcastProviding {
     }
 
     func fetchPlayers() async throws -> [Player] {
+        let historical = try await fetchHistoricalPlayers()
+        let current = try await fetchCurrentPlayers()
+        return historical + current
+    }
+
+    func fetchHistoricalPlayers() async throws -> [Player] {
+        try await fetchPlayers(seasonFilter: "lt.2026")
+    }
+
+    func fetchCurrentPlayers() async throws -> [Player] {
+        try await fetchPlayers(seasonFilter: "eq.2026")
+    }
+
+    private func fetchPlayers(seasonFilter: String) async throws -> [Player] {
         var all: [Player] = []
         let pageSize = 1000
         var offset = 0
@@ -22,6 +38,7 @@ struct StatcastAPI: StatcastProviding {
                 .appending(path: "rest/v1/player_snapshots")
                 .appending(queryItems: [
                     URLQueryItem(name: "select", value: "*"),
+                    URLQueryItem(name: "season", value: seasonFilter),
                     URLQueryItem(name: "order", value: "updated_at.desc"),
                     URLQueryItem(name: "limit", value: String(pageSize)),
                     URLQueryItem(name: "offset", value: String(offset))
@@ -50,6 +67,14 @@ struct StatcastAPI: StatcastProviding {
 struct PreviewStatcastAPI: StatcastProviding {
     func fetchPlayers() async throws -> [Player] {
         SampleData.players
+    }
+
+    func fetchHistoricalPlayers() async throws -> [Player] {
+        SampleData.players.filter { ($0.season ?? 0) < 2026 }
+    }
+
+    func fetchCurrentPlayers() async throws -> [Player] {
+        SampleData.players.filter { ($0.season ?? 0) >= 2026 }
     }
 }
 

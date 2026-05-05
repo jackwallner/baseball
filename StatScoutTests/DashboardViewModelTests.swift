@@ -262,4 +262,14 @@ struct MockProvider: StatcastProviding, @unchecked Sendable {
         if let error { throw error }
         return players ?? []
     }
+
+    func fetchHistoricalPlayers() async throws -> [Player] {
+        if let error { throw error }
+        return (players ?? []).filter { ($0.season ?? 0) < 2026 }
+    }
+
+    func fetchCurrentPlayers() async throws -> [Player] {
+        if let error { throw error }
+        return (players ?? []).filter { ($0.season ?? 0) >= 2026 }
+    }
 }

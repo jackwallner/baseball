@@ -167,55 +167,47 @@ final class DashboardViewModel {
     }
 
     func load() async {
+        // 1. Load from cache immediately so the UI isn't blank on launch.
         if players.isEmpty, let cached = try? cache?.loadPlayers(), !cached.isEmpty {
-            players = cached
-            playerHistories = Dictionary(grouping: cached, by: \.playerId).mapValues {
-                $0.sorted { ($0.season ?? 0) > ($1.season ?? 0) }
-            }
+            ingestPlayers(cached)
         }
+
         isLoading = players.isEmpty
         errorMessage = nil
         lastFetchFailed = false
+
         do {
-            let fetched = try await provider.fetchPlayers()
-            guard !fetched.isEmpty else {
-                errorMessage = "No players found for this season."
+            // 2. Determine if we already have historical data cached permanently.
+            let hasHistorical = !playerHistories.isEmpty &&
+                Set(playerHistories.values.flatMap { $0 }.compactMap(\.season)).contains(where: { $0 < 2026 })
+
+            var allPlayers: [Player] = []
+
+            if !hasHistorical {
+                // First install (or cache wiped): download all historical seasons.
+                let historical = try await provider.fetchHistoricalPlayers()
+                allPlayers.append(contentsOf: historical)
+            } else {
+                // Use permanently cached historical data (no network needed).
+                let cached = (try? cache?.loadPlayers()) ?? []
+                let historical = cached.filter { ($0.season ?? 0) < 2026 }
+                allPlayers.append(contentsOf: historical)
+            }
+
+            // 3. Always fetch the current season (2026) — this is the only data that refreshes.
+            let current = try await provider.fetchCurrentPlayers()
+            allPlayers.append(contentsOf: current)
+
+            guard !allPlayers.isEmpty else {
+                errorMessage = "No players found."
                 lastFetchFailed = true
                 isLoading = false
                 return
             }
 
-            let grouped = Dictionary(grouping: fetched, by: \.playerId)
-            var latestPlayers: [Player] = []
-            var histories: [Int: [Player]] = [:]
+            ingestPlayers(allPlayers)
+            try? cache?.savePlayers(allPlayers)
 
-            for (playerId, history) in grouped {
-                // Sort by season descending, with nil seasons at the end
-                let sortedHistory = history.sorted {
-                    guard let s1 = $0.season, let s2 = $1.season else {
-                        // If both nil, keep original order; if one nil, put it last
-                        if $0.season == nil && $1.season == nil { return false }
-                        return $0.season != nil // non-nil comes first
-                    }
-                    return s1 > s2
-                }
-                histories[playerId] = sortedHistory
-                if let latest = sortedHistory.first {
-                    latestPlayers.append(latest)
-                }
-            }
-
-            self.playerHistories = histories
-            self.players = latestPlayers
-
-            // If the currently selected season has no data, snap to the most recent season that does.
-            let seasonsWithData = Set(histories.values.flatMap { $0 }.compactMap(\.season))
-            if !seasonsWithData.contains(selectedSeason),
-               let mostRecent = seasonsWithData.sorted(by: >).first {
-                selectedSeason = mostRecent
-            }
-
-            try? cache?.savePlayers(fetched)
         } catch is DecodingError {
             errorMessage = "Data format changed — app may need an update."
             lastFetchFailed = true
@@ -227,5 +219,34 @@ final class DashboardViewModel {
             lastFetchFailed = true
         }
         isLoading = false
+    }
+
+    private func ingestPlayers(_ players: [Player]) {
+        let grouped = Dictionary(grouping: players, by: \.playerId)
+        var latestPlayers: [Player] = []
+        var histories: [Int: [Player]] = [:]
+
+        for (playerId, history) in grouped {
+            let sortedHistory = history.sorted {
+                guard let s1 = $0.season, let s2 = $1.season else {
+                    if $0.season == nil && $1.season == nil { return false }
+                    return $0.season != nil
+                }
+                return s1 > s2
+            }
+            histories[playerId] = sortedHistory
+            if let latest = sortedHistory.first {
+                latestPlayers.append(latest)
+            }
+        }
+
+        self.playerHistories = histories
+        self.players = latestPlayers
+
+        let seasonsWithData = Set(histories.values.flatMap { $0 }.compactMap(\.season))
+        if !seasonsWithData.contains(selectedSeason),
+           let mostRecent = seasonsWithData.sorted(by: >).first {
+            selectedSeason = mostRecent
+        }
     }
 }

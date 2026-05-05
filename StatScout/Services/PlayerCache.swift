@@ -7,22 +7,25 @@ protocol PlayerCaching: Sendable {
 
 struct DiskPlayerCache: PlayerCaching {
     private let fileURL: URL
-    private let maxAge: TimeInterval
+    private let maxAge: TimeInterval?
 
-    init(fileManager: FileManager = .default, maxAge: TimeInterval = 48 * 60 * 60) {
+    /// Pass `nil` for maxAge to disable expiration (permanent cache).
+    init(fileManager: FileManager = .default, maxAge: TimeInterval? = 48 * 60 * 60) {
         let directory = fileManager.urls(for: .cachesDirectory, in: .userDomainMask).first ?? fileManager.temporaryDirectory
         self.fileURL = directory.appending(path: "players-cache.json")
         self.maxAge = maxAge
     }
 
-    init(fileURL: URL, maxAge: TimeInterval = 48 * 60 * 60) {
+    init(fileURL: URL, maxAge: TimeInterval? = 48 * 60 * 60) {
         self.fileURL = fileURL
         self.maxAge = maxAge
     }
 
     func loadPlayers() throws -> [Player] {
         let attributes = try FileManager.default.attributesOfItem(atPath: fileURL.path)
-        if let modified = attributes[.modificationDate] as? Date, Date().timeIntervalSince(modified) > maxAge {
+        if let maxAge = maxAge,
+           let modified = attributes[.modificationDate] as? Date,
+           Date().timeIntervalSince(modified) > maxAge {
             throw URLError(.resourceUnavailable)
         }
         let data = try Data(contentsOf: fileURL)
@@ -33,6 +36,35 @@ struct DiskPlayerCache: PlayerCaching {
         let data = try JSONEncoder.statScout.encode(players)
         try FileManager.default.createDirectory(at: fileURL.deletingLastPathComponent(), withIntermediateDirectories: true)
         try data.write(to: fileURL, options: [.atomic])
+    }
+}
+
+/// Two-tier cache: permanent for historical data, expiring for current season.
+struct TwoTierPlayerCache: PlayerCaching {
+    private let historical: DiskPlayerCache
+    private let current: DiskPlayerCache
+
+    init(fileManager: FileManager = .default) {
+        let directory = fileManager.urls(for: .cachesDirectory, in: .userDomainMask).first ?? fileManager.temporaryDirectory
+        self.historical = DiskPlayerCache(fileURL: directory.appending(path: "players-historical.json"), maxAge: nil)
+        self.current = DiskPlayerCache(fileURL: directory.appending(path: "players-current.json"), maxAge: 48 * 60 * 60)
+    }
+
+    func loadPlayers() throws -> [Player] {
+        let historicalPlayers = (try? historical.loadPlayers()) ?? []
+        let currentPlayers = (try? current.loadPlayers()) ?? []
+        return historicalPlayers + currentPlayers
+    }
+
+    func savePlayers(_ players: [Player]) throws {
+        let historicalPlayers = players.filter { ($0.season ?? 0) < 2026 }
+        let currentPlayers = players.filter { ($0.season ?? 0) >= 2026 }
+        if !historicalPlayers.isEmpty {
+            try historical.savePlayers(historicalPlayers)
+        }
+        if !currentPlayers.isEmpty {
+            try current.savePlayers(currentPlayers)
+        }
     }
 }
 

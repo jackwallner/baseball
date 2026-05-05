@@ -33,7 +33,7 @@ struct StatScoutApp: App {
     var body: some Scene {
         WindowGroup {
             if let api {
-                RootTabView(viewModel: DashboardViewModel(provider: api, cache: DiskPlayerCache()))
+                RootTabView(viewModel: DashboardViewModel(provider: api, cache: TwoTierPlayerCache()))
                     .preferredColorScheme(.dark)
             } else {
                 ConfigMissingView()
