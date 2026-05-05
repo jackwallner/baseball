@@ -43,17 +43,36 @@ struct DiskPlayerCache: PlayerCaching {
 struct TwoTierPlayerCache: PlayerCaching {
     private let historical: DiskPlayerCache
     private let current: DiskPlayerCache
+    private let bundleResourceName: String
 
-    init(fileManager: FileManager = .default) {
+    init(fileManager: FileManager = .default, bundleResourceName: String = "players-historical") {
         let directory = fileManager.urls(for: .cachesDirectory, in: .userDomainMask).first ?? fileManager.temporaryDirectory
         self.historical = DiskPlayerCache(fileURL: directory.appending(path: "players-historical.json"), maxAge: nil)
         self.current = DiskPlayerCache(fileURL: directory.appending(path: "players-current.json"), maxAge: 48 * 60 * 60)
+        self.bundleResourceName = bundleResourceName
     }
 
     func loadPlayers() throws -> [Player] {
-        let historicalPlayers = (try? historical.loadPlayers()) ?? []
+        let historicalPlayers = loadHistoricalPlayers()
         let currentPlayers = (try? current.loadPlayers()) ?? []
         return historicalPlayers + currentPlayers
+    }
+
+    private func loadHistoricalPlayers() -> [Player] {
+        // 1. Try the permanent disk cache first.
+        if let cached = try? historical.loadPlayers(), !cached.isEmpty {
+            return cached
+        }
+        // 2. First install: seed from the bundled JSON shipped with the app.
+        guard let bundleURL = Bundle.main.url(forResource: bundleResourceName, withExtension: "json"),
+              let data = try? Data(contentsOf: bundleURL),
+              let players = try? JSONDecoder.statScout.decode([Player].self, from: data),
+              !players.isEmpty else {
+            return []
+        }
+        // Persist to disk cache so future launches are instant.
+        try? historical.savePlayers(players)
+        return players
     }
 
     func savePlayers(_ players: [Player]) throws {

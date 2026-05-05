@@ -270,6 +270,6 @@ struct MockProvider: StatcastProviding, @unchecked Sendable {
 
     func fetchCurrentPlayers() async throws -> [Player] {
         if let error { throw error }
-        return (players ?? []).filter { ($0.season ?? 0) >= 2026 }
+        return players ?? []
     }
 }

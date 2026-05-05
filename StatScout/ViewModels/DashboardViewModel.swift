@@ -168,6 +168,7 @@ final class DashboardViewModel {
 
     func load() async {
         // 1. Load from cache immediately so the UI isn't blank on launch.
+        //    TwoTierPlayerCache loads historical from bundle on first install.
         if players.isEmpty, let cached = try? cache?.loadPlayers(), !cached.isEmpty {
             ingestPlayers(cached)
         }
@@ -177,26 +178,13 @@ final class DashboardViewModel {
         lastFetchFailed = false
 
         do {
-            // 2. Determine if we already have historical data cached permanently.
-            let hasHistorical = !playerHistories.isEmpty &&
-                Set(playerHistories.values.flatMap { $0 }.compactMap(\.season)).contains(where: { $0 < 2026 })
-
-            var allPlayers: [Player] = []
-
-            if !hasHistorical {
-                // First install (or cache wiped): download all historical seasons.
-                let historical = try await provider.fetchHistoricalPlayers()
-                allPlayers.append(contentsOf: historical)
-            } else {
-                // Use permanently cached historical data (no network needed).
-                let cached = (try? cache?.loadPlayers()) ?? []
-                let historical = cached.filter { ($0.season ?? 0) < 2026 }
-                allPlayers.append(contentsOf: historical)
-            }
+            // 2. Historical data (pre-2026) is already in the app bundle — no network needed.
+            let historical = (try? cache?.loadPlayers().filter { ($0.season ?? 0) < 2026 }) ?? []
 
             // 3. Always fetch the current season (2026) — this is the only data that refreshes.
             let current = try await provider.fetchCurrentPlayers()
-            allPlayers.append(contentsOf: current)
+
+            let allPlayers = historical + current
 
             guard !allPlayers.isEmpty else {
                 errorMessage = "No players found."
