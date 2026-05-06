@@ -2,7 +2,9 @@ import SwiftUI
 
 struct DashboardView: View {
     @Bindable var viewModel: DashboardViewModel
+    let store: StoreManager
     @State private var showingAbout = false
+    @State private var showingPaywall = false
 
     var body: some View {
         ZStack {
@@ -28,7 +30,7 @@ struct DashboardView: View {
         .background(SavantPalette.canvas.ignoresSafeArea())
         .sheet(isPresented: $showingAbout) {
             NavigationStack {
-                AboutView(lastUpdated: viewModel.lastUpdated)
+                AboutView(lastUpdated: viewModel.lastUpdated, store: store)
                     .navigationTitle("About")
                     .navigationBarTitleDisplayMode(.inline)
                     .toolbar {
@@ -39,17 +41,40 @@ struct DashboardView: View {
             }
             .presentationDragIndicator(.visible)
         }
+        .sheet(isPresented: $showingPaywall) {
+            PaywallView(store: store)
+        }
     }
 
     private var aboutFooter: some View {
-        Button(action: { showingAbout = true }) {
-            Text("About StatScout")
-                .font(SavantType.micro)
-                .tracking(0.4)
-                .foregroundStyle(SavantPalette.inkTertiary)
-                .padding(.vertical, 16)
+        VStack(spacing: 8) {
+            if store.proStatus != .purchased {
+                Button(action: { showingPaywall = true }) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "crown.fill")
+                            .font(.system(size: 10))
+                        Text("Unlock Pro")
+                            .font(SavantType.micro)
+                            .tracking(0.4)
+                    }
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                    .background(SavantPalette.savantRed)
+                    .clipShape(Capsule())
+                }
+                .buttonStyle(.plain)
+            }
+            Button(action: { showingAbout = true }) {
+                Text("About StatScout")
+                    .font(SavantType.micro)
+                    .tracking(0.4)
+                    .foregroundStyle(SavantPalette.inkTertiary)
+                    .padding(.vertical, 8)
+            }
+            .buttonStyle(.plain)
         }
-        .buttonStyle(.plain)
+        .padding(.vertical, 8)
     }
 
     private var unifiedControlBar: some View {
@@ -217,6 +242,6 @@ struct DashboardView: View {
 
 #Preview {
     NavigationStack {
-        DashboardView(viewModel: DashboardViewModel())
+        DashboardView(viewModel: DashboardViewModel(), store: StoreManager())
     }
 }

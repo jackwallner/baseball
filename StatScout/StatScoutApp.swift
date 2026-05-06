@@ -3,6 +3,7 @@ import SwiftUI
 @main
 struct StatScoutApp: App {
     private let api: StatcastAPI?
+    @State private var store = StoreManager()
 
     init() {
         // 64 MB memory + 256 MB disk image cache so headshots stick around between launches.
@@ -33,7 +34,7 @@ struct StatScoutApp: App {
     var body: some Scene {
         WindowGroup {
             if let api {
-                RootTabView(viewModel: DashboardViewModel(provider: api, cache: TwoTierPlayerCache()))
+                RootTabView(viewModel: DashboardViewModel(provider: api, cache: TwoTierPlayerCache()), store: store)
                     .preferredColorScheme(.light)
             } else {
                 ConfigMissingView()

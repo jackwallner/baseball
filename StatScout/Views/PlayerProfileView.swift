@@ -3,9 +3,11 @@ import SwiftUI
 struct PlayerProfileView: View {
     let player: Player
     let history: [Player]
+    let store: StoreManager
     @State private var showPercentileInfo = false
     @State private var selectedTab: PlayerStatTab = .statcast
     @State private var selectedPercentileSeason: Int? = nil
+    @State private var showingPaywall = false
 
     enum PlayerStatTab: String, CaseIterable {
         case statcast = "Percentiles"
@@ -78,6 +80,9 @@ struct PlayerProfileView: View {
         .sheet(isPresented: $showPercentileInfo) {
             PercentileInfoSheet()
         }
+        .sheet(isPresented: $showingPaywall) {
+            PaywallView(store: store)
+        }
     }
 
     private var tabSelector: some View {
@@ -131,19 +136,29 @@ struct PlayerProfileView: View {
     private var yearCompareTabButton: some View {
         let isSelected = selectedTab == .yearCompare
         return Button(action: {
+            if store.proStatus != .purchased {
+                showingPaywall = true
+                return
+            }
             withAnimation(.easeInOut(duration: 0.2)) {
                 selectedTab = .yearCompare
             }
             let generator = UIImpactFeedbackGenerator(style: .light)
             generator.impactOccurred()
         }) {
-            Text(PlayerStatTab.yearCompare.rawValue)
-                .font(SavantType.bodyBold)
-                .foregroundStyle(isSelected ? .white : SavantPalette.ink)
-                .frame(maxWidth: .infinity)
-                .frame(height: 44)
-                .background(isSelected ? SavantPalette.savantRed : SavantPalette.surface)
-                .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
+            HStack(spacing: 4) {
+                if store.proStatus != .purchased {
+                    Image(systemName: "lock.fill")
+                        .font(.system(size: 10))
+                }
+                Text(PlayerStatTab.yearCompare.rawValue)
+                    .font(SavantType.bodyBold)
+            }
+            .foregroundStyle(isSelected ? .white : SavantPalette.ink)
+            .frame(maxWidth: .infinity)
+            .frame(height: 44)
+            .background(isSelected ? SavantPalette.savantRed : SavantPalette.surface)
+            .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
         }
         .buttonStyle(.plain)
     }
@@ -246,6 +261,21 @@ struct PlayerProfileView: View {
                     description: "Percentile rankings are not available for this player in the \(seasonLabel) season."
                 )
                 .padding(.vertical, 24)
+            } else if store.proStatus != .purchased {
+                VStack(spacing: 12) {
+                    OverallPercentileBadge(percentile: player.overallPercentile, size: 80)
+                        .padding(.vertical, 12)
+                    Text("Unlock Pro to see full metric breakdowns")
+                        .font(SavantType.body)
+                        .foregroundStyle(SavantPalette.inkSecondary)
+                    Button("Unlock Pro — \(store.proPrice)") {
+                        showingPaywall = true
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(SavantPalette.savantRed)
+                }
+                .padding(.vertical, 24)
+                .frame(maxWidth: .infinity)
             } else {
                 ForEach(groupedMetrics, id: \.category) { group in
                 let avg = displayedPlayer.percentile(for: group.category)
@@ -369,6 +399,6 @@ struct PercentileInfoSheet: View {
 
 #Preview {
     NavigationStack {
-        PlayerProfileView(player: SampleData.players[0], history: [SampleData.players[0]])
+        PlayerProfileView(player: SampleData.players[0], history: [SampleData.players[0]], store: StoreManager())
     }
 }

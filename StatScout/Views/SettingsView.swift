@@ -2,6 +2,8 @@ import SwiftUI
 
 struct AboutView: View {
     let lastUpdated: Date?
+    let store: StoreManager
+    @State private var showingPaywall = false
 
     private var version: String {
         let short = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
@@ -13,6 +15,7 @@ struct AboutView: View {
         ScrollView {
             VStack(spacing: 12) {
                 aboutCard
+                proStatusCard
                 refreshCard
                 linkCard
                 versionCard
@@ -23,6 +26,9 @@ struct AboutView: View {
             .padding(.bottom, 12)
         }
         .background(SavantPalette.canvas.ignoresSafeArea())
+        .sheet(isPresented: $showingPaywall) {
+            PaywallView(store: store)
+        }
     }
 
     private var aboutCard: some View {
@@ -43,6 +49,70 @@ struct AboutView: View {
                 Spacer()
             }
             .padding(SavantGeo.padCard)
+        }
+        .background(SavantPalette.surface)
+        .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
+        .overlay(
+            RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
+                .stroke(SavantPalette.hairline, lineWidth: 0.5)
+        )
+    }
+
+    private var proStatusCard: some View {
+        VStack(spacing: 0) {
+            SavantSectionBar(title: "STATSCOUT PRO")
+            VStack(spacing: 0) {
+                HStack {
+                    Image(systemName: store.proStatus == .purchased ? "crown.fill" : "crown")
+                        .font(.title2)
+                        .foregroundStyle(store.proStatus == .purchased ? Color.yellow : SavantPalette.inkTertiary)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(store.proStatus == .purchased ? "Pro Unlocked" : "Free Version")
+                            .font(SavantType.bodyBold)
+                            .foregroundStyle(SavantPalette.ink)
+                        Text(store.proStatus == .purchased ? "Full access to all features." : "Unlock teams, metrics, and more.")
+                            .font(SavantType.small)
+                            .foregroundStyle(SavantPalette.inkSecondary)
+                    }
+                    Spacer()
+                    if store.proStatus != .purchased {
+                        Button("Upgrade") {
+                            showingPaywall = true
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(SavantPalette.savantRed)
+                        .controlSize(.small)
+                    }
+                }
+                .padding(SavantGeo.padCard)
+
+                if store.proStatus == .purchased {
+                    Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline)
+                    Button {
+                        Task { await store.restorePurchases() }
+                    } label: {
+                        HStack {
+                            Image(systemName: "arrow.clockwise")
+                                .font(.caption)
+                            Text("Restore Purchases")
+                                .font(SavantType.smallBold)
+                        }
+                        .foregroundStyle(SavantPalette.linkBlue)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(SavantGeo.padCard)
+                    }
+                    .buttonStyle(.plain)
+                }
+
+                if let error = store.purchaseError {
+                    Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline)
+                    Text(error)
+                        .font(SavantType.small)
+                        .foregroundStyle(SavantPalette.savantRed)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(SavantGeo.padCard)
+                }
+            }
         }
         .background(SavantPalette.surface)
         .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
@@ -172,6 +242,6 @@ struct AboutView: View {
 
 #Preview {
     NavigationStack {
-        AboutView(lastUpdated: Date())
+        AboutView(lastUpdated: Date(), store: StoreManager())
     }
 }

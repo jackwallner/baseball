@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms of Use - StatScout</title>
+    <meta name="description" content="StatScout terms of use. Simple, fair terms for our baseball analytics app.">
+    <style>
+        :root {
+            --bg: #fafafa; --bg-elevated: #ffffff; --text: #1d1d1f;
+            --text-secondary: #6e6e73; --text-tertiary: #86868b;
+            --accent: #d32f2f; --border: rgba(0,0,0,0.06);
+            --radius: 18px; --max-width: 700px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
+            color: var(--text); background: var(--bg);
+            -webkit-font-smoothing: antialiased; line-height: 1.6;
+        }
+        .container { max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+        nav {
+            padding: 16px 0; border-bottom: 1px solid var(--border);
+            background: rgba(250,250,250,0.85); backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 10;
+        }
+        nav .container { display: flex; align-items: center; justify-content: space-between; }
+        .nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); font-weight: 600; font-size: 17px; }
+        .nav-brand::before {
+            content: ""; display: inline-block; width: 28px; height: 28px;
+            background: var(--accent); border-radius: 8px;
+        }
+        .nav-links { display: flex; gap: 8px; }
+        .nav-link { font-size: 14px; text-decoration: none; color: var(--text); padding: 6px 14px; border-radius: 980px; font-weight: 500; }
+        .nav-link:hover { background: rgba(0,0,0,0.04); }
+        .page-header { padding: 60px 0 20px; }
+        .page-header h1 { font-size: 36px; font-weight: 700; letter-spacing: -1px; margin-bottom: 4px; }
+        .page-header .date { color: var(--text-secondary); font-size: 15px; }
+        .content { padding-bottom: 80px; }
+        .content h2 { font-size: 22px; font-weight: 600; margin-top: 40px; margin-bottom: 12px; }
+        .content p { color: var(--text-secondary); margin-bottom: 12px; font-size: 15px; }
+        .content strong { color: var(--text); font-weight: 600; }
+        .content a { color: #0066cc; text-decoration: none; }
+        footer { text-align: center; padding: 40px 24px; font-size: 12px; color: var(--text-tertiary); border-top: 1px solid var(--border); }
+        footer a { color: var(--text-tertiary); text-decoration: none; margin: 0 10px; }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <a class="nav-brand" href="index.html">StatScout</a>
+            <div class="nav-links">
+                <a class="nav-link" href="index.html">Home</a>
+                <a class="nav-link" href="support.html">Support</a>
+                <a class="nav-link" href="privacy-policy.html">Privacy</a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="page-header">
+        <div class="container">
+            <h1>Terms of Use</h1>
+            <p class="date">Last updated: May 6, 2026</p>
+        </div>
+    </header>
+
+    <main class="content">
+        <div class="container">
+            <h2>Acceptance of Terms</h2>
+            <p>By using StatScout, you agree to these terms. If you do not agree, please do not use the app.</p>
+
+            <h2>Description of Service</h2>
+            <p>StatScout provides visual percentile rankings and leaderboards for Major League Baseball players using publicly available pitch-tracking data. The app is for informational and entertainment purposes only.</p>
+
+            <h2>In-App Purchases</h2>
+            <p>StatScout offers an optional one-time Pro Unlock purchase that provides access to additional features. All purchases are processed by Apple and are subject to Apple's terms and conditions. Purchases are non-refundable except as required by applicable law or Apple's refund policies.</p>
+
+            <h2>Intellectual Property</h2>
+            <p>All baseball statistics displayed in StatScout are sourced from publicly available data. Team names and logos are trademarks of Major League Baseball and are used for informational purposes only. StatScout is not affiliated with or endorsed by Major League Baseball.</p>
+
+            <h2>Disclaimer</h2>
+            <p>StatScout is provided "as is" without warranties of any kind. We strive for accuracy but do not guarantee the completeness or accuracy of the statistics displayed.</p>
+
+            <h2>Contact</h2>
+            <p>Questions about these terms? Contact <strong><a href="mailto:support@statscout.app">support@statscout.app</a></strong></p>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Jack Wallner</p>
+        <div style="margin-top: 10px;">
+            <a href="index.html">Home</a>
+            <a href="support.html">Support</a>
+            <a href="privacy-policy.html">Privacy</a>
+        </div>
+    </footer>
+</body>
+</html>
