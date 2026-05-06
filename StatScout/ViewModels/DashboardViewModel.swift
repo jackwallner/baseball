@@ -12,6 +12,8 @@ final class DashboardViewModel {
     var searchText = ""
     var selectedCategory: MetricCategory? = .hitting
     var sortDescending = true
+    // Defaults to current year, but `load()` will reset to the most recent season
+    // that actually has data once the cache/network resolves so first paint isn't an empty state.
     var selectedSeason: Int = Calendar.current.component(.year, from: Date())
     // User-selected sort metric per category. Overrides the auto-priority pick when present
     // and still valid for the current season's data.
@@ -63,7 +65,9 @@ final class DashboardViewModel {
             userSortMetricByCategory.removeValue(forKey: category)
         }
     }
-    var isLoading = false
+    // Start true so the very first frame shows a spinner, not a "No data for 2026" empty state
+    // before the bundled cache finishes decoding.
+    var isLoading = true
     var errorMessage: String?
     var lastFetchFailed = false
 

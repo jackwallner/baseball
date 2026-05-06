@@ -68,9 +68,10 @@ struct PlayerProfileView: View {
             ToolbarItem(placement: .topBarTrailing) {
                 if let url = player.savantURL {
                     Link(destination: url) {
-                        Image(systemName: "safari")
+                        Image(systemName: "arrow.up.right.square")
                             .foregroundStyle(.white)
                     }
+                    .accessibilityLabel("Open on Baseball Savant")
                 }
             }
         }

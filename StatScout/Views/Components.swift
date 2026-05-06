@@ -400,6 +400,7 @@ struct LeaderboardTableRow: View {
                         .font(SavantType.bodyBold)
                         .foregroundStyle(SavantPalette.ink)
                         .lineLimit(1)
+                        .minimumScaleFactor(0.75)
                     Text(player.displayPosition)
                         .font(SavantType.micro)
                         .tracking(0.4)

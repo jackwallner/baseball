@@ -87,6 +87,7 @@ struct MetricLeadersView: View {
                                         .font(SavantType.smallBold)
                                         .foregroundStyle(SavantPalette.ink)
                                         .lineLimit(1)
+                                        .minimumScaleFactor(0.7)
                                     HStack(spacing: 4) {
                                         TeamColorDot(abbr: best.player.team, size: 5)
                                         Text(displayTeamAbbr(best.player.team))
@@ -116,6 +117,7 @@ struct MetricLeadersView: View {
                                         .font(SavantType.smallBold)
                                         .foregroundStyle(SavantPalette.ink)
                                         .lineLimit(1)
+                                        .minimumScaleFactor(0.7)
                                     HStack(spacing: 4) {
                                         TeamColorDot(abbr: worst.player.team, size: 5)
                                         Text(displayTeamAbbr(worst.player.team))

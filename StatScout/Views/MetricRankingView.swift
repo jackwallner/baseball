@@ -54,7 +54,7 @@ struct MetricRankingView: View {
                     }
                     .padding(.vertical, 24)
                 } else {
-                    LeaderboardTableHeader(sortDescending: sortDescending)
+                    LeaderboardTableHeader(sortDescending: sortDescending, sortLabel: metricLabel)
                     ForEach(Array(rankedPlayers.enumerated()), id: \.element.id) { index, player in
                         NavigationLink(value: player) {
                             LeaderboardTableRow(

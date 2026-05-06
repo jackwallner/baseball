@@ -1,5 +1,14 @@
 import SwiftUI
 
+private func positionAndHandedness(_ player: Player) -> String {
+    let pos = player.displayPosition.trimmingCharacters(in: .whitespaces)
+    let hand = player.handedness.trimmingCharacters(in: CharacterSet.whitespaces.union(.punctuationCharacters))
+    if pos.isEmpty && hand.isEmpty { return "" }
+    if hand.isEmpty { return pos }
+    if pos.isEmpty { return hand }
+    return "\(pos) · \(hand)"
+}
+
 private func displayTeamFullName(_ abbr: String) -> String {
     let trimmed = abbr.trimmingCharacters(in: .whitespaces).uppercased()
     if trimmed.isEmpty || trimmed == "TBD" || trimmed == "—" || trimmed == "-" {
@@ -26,7 +35,7 @@ struct PlayerIdentityStrip: View {
                 Text(displayTeamFullName(player.team))
                     .font(SavantType.bodyBold)
                     .foregroundStyle(.white.opacity(0.85))
-                Text("\(player.displayPosition) · \(player.handedness)")
+                Text(positionAndHandedness(player))
                     .font(SavantType.small)
                     .foregroundStyle(.white.opacity(0.65))
             }

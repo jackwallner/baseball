@@ -10,7 +10,9 @@ struct DashboardView: View {
                 VStack(spacing: 0) {
                     unifiedControlBar
                     leaderboardSection
-                    aboutFooter
+                    if !viewModel.players.isEmpty {
+                        aboutFooter
+                    }
                 }
             }
             .scrollBounceBehavior(.basedOnSize)
@@ -54,13 +56,13 @@ struct DashboardView: View {
         VStack(spacing: 8) {
             HStack(spacing: 10) {
                 seasonMenu
-                CategoryFilter(selectedCategory: $viewModel.selectedCategory)
+                Spacer()
+                SearchField(text: $viewModel.searchText)
                     .layoutPriority(1)
             }
             .padding(.horizontal, 12)
 
-            SearchField(text: $viewModel.searchText)
-                .padding(.horizontal, 12)
+            CategoryFilter(selectedCategory: $viewModel.selectedCategory)
         }
         .padding(.top, 8)
     }
@@ -166,7 +168,7 @@ struct DashboardView: View {
                 }
                 .padding(.vertical, 24)
                 .frame(minHeight: 200)
-            } else if viewModel.leaderboard.isEmpty {
+            } else if viewModel.leaderboard.isEmpty && !viewModel.isLoading {
                 let noCategoryData = viewModel.selectedCategory != nil && !viewModel.seasonPlayers.isEmpty
                 ContentUnavailableView {
                     Label(noCategoryData ? "No players in category" : "No players yet", systemImage: "baseball")
