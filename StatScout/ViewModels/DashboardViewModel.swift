@@ -215,9 +215,13 @@ final class DashboardViewModel {
     }
 
     func load() async {
-        // 1. Load from cache immediately so the UI isn't blank on launch.
-        //    TwoTierPlayerCache loads historical from bundle on first install.
-        if players.isEmpty, let cached = try? cache?.loadPlayers(), !cached.isEmpty {
+        // Decode the 40MB+ historical cache off the main actor so the first frame
+        // isn't blocked behind it.
+        let cached: [Player] = await Task.detached { [cache] in
+            (try? cache?.loadPlayers()) ?? []
+        }.value
+
+        if players.isEmpty, !cached.isEmpty {
             ingestPlayers(cached)
         }
 
@@ -226,10 +230,7 @@ final class DashboardViewModel {
         lastFetchFailed = false
 
         do {
-            // 2. Historical data (pre-2026) is already in the app bundle — no network needed.
-            let historical = (try? cache?.loadPlayers().filter { ($0.season ?? 0) < 2026 }) ?? []
-
-            // 3. Always fetch the current season (2026) — this is the only data that refreshes.
+            let historical = cached.filter { ($0.season ?? 0) < 2026 }
             let current = try await provider.fetchCurrentPlayers()
 
             let allPlayers = historical + current
@@ -242,7 +243,9 @@ final class DashboardViewModel {
             }
 
             ingestPlayers(allPlayers)
-            try? cache?.savePlayers(allPlayers)
+            // Historical is permanent on disk (seeded from the bundle on first launch);
+            // only persist the current-season snapshot to avoid a 40MB rewrite per refresh.
+            try? cache?.savePlayers(current)
 
         } catch is DecodingError {
             errorMessage = "Data format changed — app may need an update."
