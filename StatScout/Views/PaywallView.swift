@@ -5,20 +5,26 @@ struct PaywallView: View {
     let store: StoreManager
 
     @State private var isPurchasing = false
+    @State private var selectedTier: ProTier = .yearly
+    @State private var purchaseSucceeded = false
 
     var body: some View {
         ZStack {
             SavantPalette.canvas.ignoresSafeArea()
 
-            ScrollView {
-                VStack(spacing: 0) {
-                    heroSection
-                    featureList
-                    purchaseSection
-                    footerSection
+            if purchaseSucceeded {
+                successSection
+            } else {
+                ScrollView {
+                    VStack(spacing: 0) {
+                        heroSection
+                        featureList
+                        purchaseSection
+                        footerSection
+                    }
                 }
+                .scrollBounceBehavior(.basedOnSize)
             }
-            .scrollBounceBehavior(.basedOnSize)
 
             VStack {
                 HStack {
@@ -52,7 +58,7 @@ struct PaywallView: View {
                 .font(SavantType.playerName)
                 .foregroundStyle(SavantPalette.ink)
 
-            Text("Unlock the full power of advanced MLB analytics. One purchase. Lifetime access.")
+            Text("Go deeper when you need the full read on a player. Core browsing stays free.")
                 .font(SavantType.body)
                 .foregroundStyle(SavantPalette.inkSecondary)
                 .multilineTextAlignment(.center)
@@ -67,38 +73,14 @@ struct PaywallView: View {
             VStack(spacing: 0) {
                 FeatureRow(
                     icon: "chart.bar.fill",
-                    title: "Full Metric Access",
-                    subtitle: "Every advanced metric for every player — xwOBA, Barrel%, Sprint Speed, OAA, and more."
-                )
-                DividerRow()
-                FeatureRow(
-                    icon: "shield.lefthalf.filled",
-                    title: "Team Rosters & Rankings",
-                    subtitle: "Browse all 30 MLB team rosters with full percentile breakdowns per player."
+                    title: "Full Percentile Breakdowns",
+                    subtitle: "Move beyond the preview and see every tracked metric for each player."
                 )
                 DividerRow()
                 FeatureRow(
                     icon: "arrow.left.arrow.right",
                     title: "Year-over-Year Compare",
-                    subtitle: "See how players trend across seasons with historical percentile data."
-                )
-                DividerRow()
-                FeatureRow(
-                    icon: "person.2.fill",
-                    title: "Metric Leaderboards",
-                    subtitle: "Discover who leads the league in every tracked metric across all categories."
-                )
-                DividerRow()
-                FeatureRow(
-                    icon: "square.and.arrow.up",
-                    title: "Share Player Cards",
-                    subtitle: "Send player stat summaries to friends, group chats, or social media."
-                )
-                DividerRow()
-                FeatureRow(
-                    icon: "photo.fill",
-                    title: "Player Headshots",
-                    subtitle: "Official MLB headshots on every card, row, and profile."
+                    subtitle: "Compare seasons side by side to spot changes, trends, and breakouts."
                 )
             }
             .background(SavantPalette.surface)
@@ -114,13 +96,41 @@ struct PaywallView: View {
 
     private var purchaseSection: some View {
         VStack(spacing: 12) {
+            VStack(spacing: 10) {
+                TierOptionRow(
+                    title: "Yearly",
+                    badge: "Best Value",
+                    price: priceText(for: .yearly),
+                    cadence: "per year",
+                    isSelected: selectedTier == .yearly
+                ) { selectedTier = .yearly }
+
+                TierOptionRow(
+                    title: "Monthly",
+                    badge: nil,
+                    price: priceText(for: .monthly),
+                    cadence: "per month",
+                    isSelected: selectedTier == .monthly
+                ) { selectedTier = .monthly }
+
+                TierOptionRow(
+                    title: "Lifetime",
+                    badge: "One-Time",
+                    price: priceText(for: .lifetime),
+                    cadence: "forever",
+                    isSelected: selectedTier == .lifetime
+                ) { selectedTier = .lifetime }
+            }
+            .padding(.horizontal, 12)
+
             Button {
                 isPurchasing = true
                 Task {
-                    await store.purchase()
+                    await store.purchase(tier: selectedTier)
                     isPurchasing = false
                     if store.proStatus == .purchased {
-                        dismiss()
+                        purchaseSucceeded = true
+                        UINotificationFeedbackGenerator().notificationOccurred(.success)
                     }
                 }
             } label: {
@@ -129,7 +139,7 @@ struct PaywallView: View {
                         ProgressView()
                             .tint(.white)
                     }
-                    Text(isPurchasing ? "Processing..." : "Unlock Pro — \(store.proPrice)")
+                    Text(isPurchasing ? "Processing..." : "Continue — \(priceText(for: selectedTier))")
                         .font(SavantType.bodyBold)
                 }
                 .frame(maxWidth: .infinity)
@@ -140,9 +150,16 @@ struct PaywallView: View {
             }
             .disabled(isPurchasing)
             .padding(.horizontal, 12)
+            .padding(.top, 4)
 
             Button {
-                Task { await store.restorePurchases() }
+                Task {
+                    await store.restorePurchases()
+                    if store.proStatus == .purchased {
+                        purchaseSucceeded = true
+                        UINotificationFeedbackGenerator().notificationOccurred(.success)
+                    }
+                }
             } label: {
                 Text("Restore Purchases")
                     .font(SavantType.smallBold)
@@ -160,11 +177,58 @@ struct PaywallView: View {
         .padding(.top, 20)
     }
 
+    private var successSection: some View {
+        VStack(spacing: 18) {
+            Spacer()
+            ZStack {
+                Circle()
+                    .fill(SavantPalette.savantRed)
+                    .frame(width: 88, height: 88)
+                Image(systemName: "checkmark")
+                    .font(.system(size: 42, weight: .bold))
+                    .foregroundStyle(.white)
+            }
+            Text("Pro Unlocked")
+                .font(SavantType.playerName)
+                .foregroundStyle(SavantPalette.ink)
+            Text("Full metric breakdowns and year-over-year comparisons are ready.")
+                .font(SavantType.body)
+                .foregroundStyle(SavantPalette.inkSecondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 28)
+            Button("Start using Pro") {
+                dismiss()
+            }
+            .font(SavantType.bodyBold)
+            .frame(maxWidth: .infinity)
+            .frame(height: 52)
+            .background(SavantPalette.savantRed)
+            .foregroundStyle(.white)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .padding(.horizontal, 12)
+            Spacer()
+        }
+        .padding(.vertical, 32)
+    }
+
+    private func priceText(for tier: ProTier) -> String {
+        if let product = store.product(for: tier) {
+            return product.displayPrice
+        }
+        switch tier {
+        case .monthly: return "$1.99"
+        case .yearly: return "$14.99"
+        case .lifetime: return store.proPrice
+        }
+    }
+
     private var footerSection: some View {
         VStack(spacing: 8) {
-            Text("One-time purchase. No subscription. No ads. Ever.")
+            Text("Subscriptions auto-renew until cancelled. Manage in Settings.")
                 .font(SavantType.micro)
                 .foregroundStyle(SavantPalette.inkTertiary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 24)
 
             HStack(spacing: 16) {
                 if let privacyURL = URL(string: "https://jackwallner.github.io/baseball/privacy-policy.html") {
@@ -217,6 +281,59 @@ private struct DividerRow: View {
             .fill(SavantPalette.divider)
             .frame(height: SavantGeo.hairline)
             .padding(.leading, 58)
+    }
+}
+
+private struct TierOptionRow: View {
+    let title: String
+    let badge: String?
+    let price: String
+    let cadence: String
+    let isSelected: Bool
+    let onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
+            HStack(spacing: 12) {
+                Image(systemName: isSelected ? "largecircle.fill.circle" : "circle")
+                    .font(.system(size: 22))
+                    .foregroundStyle(isSelected ? SavantPalette.savantRed : SavantPalette.inkTertiary)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 6) {
+                        Text(title)
+                            .font(SavantType.bodyBold)
+                            .foregroundStyle(SavantPalette.ink)
+                        if let badge {
+                            Text(badge)
+                                .font(SavantType.micro)
+                                .tracking(0.4)
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(SavantPalette.savantRed)
+                                .clipShape(Capsule())
+                        }
+                    }
+                    Text(cadence)
+                        .font(SavantType.small)
+                        .foregroundStyle(SavantPalette.inkSecondary)
+                }
+                Spacer()
+                Text(price)
+                    .font(SavantType.bodyBold)
+                    .foregroundStyle(SavantPalette.ink)
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 14)
+            .background(SavantPalette.surface)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(isSelected ? SavantPalette.savantRed : SavantPalette.hairline, lineWidth: isSelected ? 1.5 : 0.5)
+            )
+        }
+        .buttonStyle(.plain)
     }
 }
 

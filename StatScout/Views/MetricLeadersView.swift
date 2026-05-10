@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MetricLeadersView: View {
     let metrics: [(label: String, category: MetricCategory, best: (player: Player, value: Int)?, worst: (player: Player, value: Int)?)]
+    let store: StoreManager
 
     private var groupedByCategory: [(MetricCategory, [(label: String, category: MetricCategory, best: (player: Player, value: Int)?, worst: (player: Player, value: Int)?)])] {
         let grouped = Dictionary(grouping: metrics) { $0.category }
@@ -158,6 +159,6 @@ struct MetricLeadersView: View {
 
 #Preview {
     NavigationStack {
-        MetricLeadersView(metrics: [])
+        MetricLeadersView(metrics: [], store: StoreManager())
     }
 }

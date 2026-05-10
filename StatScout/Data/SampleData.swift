@@ -1,3 +1,4 @@
+#if DEBUG
 import Foundation
 
 struct SampleData {
@@ -178,3 +179,4 @@ struct SampleData {
         )
     ]
 }
+#endif

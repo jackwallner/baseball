@@ -33,6 +33,7 @@ final class TeamsViewModel {
 
 struct TeamsView: View {
     let viewModel: DashboardViewModel
+    let store: StoreManager
     @State private var teamsViewModel = TeamsViewModel()
     @State private var searchText = ""
 
@@ -336,8 +337,10 @@ struct TeamTile: View {
     }
 }
 
+#if DEBUG
 #Preview {
     NavigationStack {
-        TeamsView(viewModel: DashboardViewModel())
+        TeamsView(viewModel: DashboardViewModel(), store: StoreManager())
     }
 }
+#endif

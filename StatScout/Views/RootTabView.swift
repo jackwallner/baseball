@@ -28,21 +28,15 @@ struct RootTabView: View {
                 .tag(0)
 
             teamsTab
-                .tabItem { Label("Teams", systemImage: store.proStatus == .purchased ? "shield.lefthalf.filled" : "lock.shield.fill") }
+                .tabItem { Label("Teams", systemImage: "shield.lefthalf.filled") }
                 .tag(1)
 
             metricsTab
-                .tabItem { Label("Metrics", systemImage: store.proStatus == .purchased ? "chart.bar.fill" : "lock.fill") }
+                .tabItem { Label("Metrics", systemImage: "chart.bar.fill") }
                 .tag(2)
         }
         .tint(SavantPalette.savantRed)
         .task { await viewModel.load() }
-        .onChange(of: selection) { _, newValue in
-            if newValue != 0 && store.proStatus != .purchased {
-                selection = 0
-                showingPaywall = true
-            }
-        }
         .sheet(isPresented: $showingPaywall) {
             PaywallView(store: store)
         }
@@ -75,7 +69,7 @@ struct RootTabView: View {
 
     private var teamsTab: some View {
         NavigationStack {
-            TeamsView(viewModel: viewModel)
+            TeamsView(viewModel: viewModel, store: store)
                 .navigationTitle("Teams")
                 .navigationBarTitleDisplayMode(.inline)
                 .modifier(SavantNavBar())
@@ -85,7 +79,7 @@ struct RootTabView: View {
 
     private var metricsTab: some View {
         NavigationStack {
-            MetricLeadersView(metrics: viewModel.allMetrics)
+            MetricLeadersView(metrics: viewModel.allMetrics, store: store)
                 .navigationTitle("Metric Leaders")
                 .navigationBarTitleDisplayMode(.inline)
                 .modifier(SavantNavBar())

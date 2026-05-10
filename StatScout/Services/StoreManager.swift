@@ -24,10 +24,19 @@ enum ProStatus: Equatable {
     case loading
 }
 
+enum ProTier: String, CaseIterable {
+    case monthly = "com.jackwallner.baseball.pro.monthly"
+    case yearly = "com.jackwallner.baseball.pro.yearly"
+    case lifetime = "com.jackwallner.baseball.pro"
+}
+
 @MainActor
 @Observable
 final class StoreManager {
-    static let proUnlockID = "com.jackwallner.baseball.pro"
+    // Backwards-compatible alias used by callers that only know about the lifetime IAP.
+    static let proUnlockID = ProTier.lifetime.rawValue
+
+    private static let allProductIDs: Set<String> = Set(ProTier.allCases.map(\.rawValue))
 
     private(set) var products: [Product] = []
     private(set) var proStatus: ProStatus = .loading
@@ -35,12 +44,17 @@ final class StoreManager {
 
     private var transactionListener: Task<Void, Never>?
 
-    var proProduct: Product? {
-        products.first { $0.id == Self.proUnlockID }
+    func product(for tier: ProTier) -> Product? {
+        products.first { $0.id == tier.rawValue }
     }
 
+    var monthlyProduct: Product? { product(for: .monthly) }
+    var yearlyProduct: Product? { product(for: .yearly) }
+    var lifetimeProduct: Product? { product(for: .lifetime) }
+
+    // Kept so existing callers continue to display the lifetime price.
     var proPrice: String {
-        proProduct?.displayPrice ?? "$4.99"
+        lifetimeProduct?.displayPrice ?? "$4.99"
     }
 
     init() {
@@ -53,10 +67,12 @@ final class StoreManager {
 
     func loadProducts() async {
         do {
-            let ids: Set<String> = [Self.proUnlockID]
-            products = try await Product.products(for: ids)
+            products = try await Product.products(for: Self.allProductIDs)
+            if products.isEmpty {
+                purchaseError = "No products found. Verify product IDs in App Store Connect."
+            }
         } catch {
-            purchaseError = "Could not load products."
+            purchaseError = "Failed to load products: \(error.localizedDescription)"
         }
     }
 
@@ -64,18 +80,22 @@ final class StoreManager {
         proStatus = .loading
         for await result in Transaction.currentEntitlements {
             guard case .verified(let transaction) = result else { continue }
-            if transaction.productID == Self.proUnlockID {
-                if transaction.revocationDate == nil {
-                    proStatus = .purchased
-                    return
-                }
-            }
+            guard Self.allProductIDs.contains(transaction.productID) else { continue }
+            if transaction.revocationDate != nil { continue }
+            if let expiration = transaction.expirationDate, expiration < Date() { continue }
+            proStatus = .purchased
+            return
         }
         proStatus = .notPurchased
     }
 
+    // Legacy entry point used elsewhere — defaults to the lifetime tier.
     func purchase() async {
-        guard let product = proProduct else {
+        await purchase(tier: .lifetime)
+    }
+
+    func purchase(tier: ProTier) async {
+        guard let product = product(for: tier) else {
             purchaseError = "Product not available."
             return
         }
@@ -125,13 +145,8 @@ final class StoreManager {
     private func listenForTransactions() async {
         for await result in Transaction.updates {
             guard case .verified(let transaction) = result else { continue }
-            if transaction.productID == Self.proUnlockID {
-                if transaction.revocationDate == nil {
-                    await MainActor.run { proStatus = .purchased }
-                } else {
-                    await MainActor.run { proStatus = .notPurchased }
-                }
-            }
+            guard Self.allProductIDs.contains(transaction.productID) else { continue }
+            await checkEntitlement()
             await transaction.finish()
         }
     }

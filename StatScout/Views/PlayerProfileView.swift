@@ -5,7 +5,7 @@ struct PlayerProfileView: View {
     let history: [Player]
     let store: StoreManager
     @State private var showPercentileInfo = false
-    @State private var selectedTab: PlayerStatTab = .statcast
+    @State private var selectedTab: PlayerStatTab = .standard
     @State private var selectedPercentileSeason: Int? = nil
     @State private var showingPaywall = false
 
@@ -41,6 +41,10 @@ struct PlayerProfileView: View {
             guard let m = grouped[cat], !m.isEmpty else { return nil }
             return (category: cat, metrics: m.sorted { $0.percentile > $1.percentile })
         }
+    }
+
+    private var previewMetrics: [Metric] {
+        Array(groupedMetrics.flatMap { $0.metrics }.sorted { $0.percentile > $1.percentile }.prefix(3))
     }
 
     var body: some View {
@@ -136,10 +140,6 @@ struct PlayerProfileView: View {
     private var yearCompareTabButton: some View {
         let isSelected = selectedTab == .yearCompare
         return Button(action: {
-            if store.proStatus != .purchased {
-                showingPaywall = true
-                return
-            }
             withAnimation(.easeInOut(duration: 0.2)) {
                 selectedTab = .yearCompare
             }
@@ -179,8 +179,45 @@ struct PlayerProfileView: View {
         .padding(.top, 12)
     }
 
+    @ViewBuilder
     private var yearCompareContent: some View {
-        YearComparisonView(history: history)
+        if store.proStatus == .purchased {
+            YearComparisonView(history: history)
+        } else {
+            yearComparePreview
+        }
+    }
+
+    private var yearComparePreview: some View {
+        VStack(spacing: 12) {
+            VStack(spacing: 14) {
+                Image(systemName: "arrow.left.arrow.right.circle.fill")
+                    .font(.system(size: 44))
+                    .foregroundStyle(SavantPalette.savantRed)
+                Text("Compare seasons side by side")
+                    .font(SavantType.bodyBold)
+                    .foregroundStyle(SavantPalette.ink)
+                Text("Pro unlocks year-over-year percentile trends so you can see what changed, what held, and where a player is moving.")
+                    .font(SavantType.body)
+                    .foregroundStyle(SavantPalette.inkSecondary)
+                    .multilineTextAlignment(.center)
+                Button("Unlock Pro — \(store.proPrice)") {
+                    showingPaywall = true
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(SavantPalette.savantRed)
+            }
+            .padding(24)
+            .frame(maxWidth: .infinity)
+            .background(SavantPalette.surface)
+            .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
+            .overlay(
+                RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
+                    .stroke(SavantPalette.hairline, lineWidth: 0.5)
+            )
+        }
+        .padding(.horizontal, 12)
+        .padding(.top, 12)
     }
 
     private func emptyStateCard(icon: String, title: String, description: String) -> some View {
@@ -203,7 +240,7 @@ struct PlayerProfileView: View {
 
     // MARK: - Cards
 
-    private var percentileSeasonMenu: some View {
+    private var seasonMenu: some View {
         let seasons = availablePercentileSeasons
         return Group {
             if seasons.count > 1 {
@@ -243,7 +280,7 @@ struct PlayerProfileView: View {
                 title: "PERCENTILE RANKINGS",
                 trailing: AnyView(
                     HStack(spacing: 4) {
-                        percentileSeasonMenu
+                        seasonMenu
                         Button(action: { showPercentileInfo = true }) {
                             Text("ⓘ")
                                 .font(SavantType.micro)
@@ -262,19 +299,45 @@ struct PlayerProfileView: View {
                 )
                 .padding(.vertical, 24)
             } else if store.proStatus != .purchased {
-                VStack(spacing: 12) {
-                    OverallPercentileBadge(percentile: player.overallPercentile, size: 80)
+                VStack(spacing: 0) {
+                    OverallPercentileBadge(percentile: displayedPlayer.overallPercentile, size: 80)
                         .padding(.vertical, 12)
-                    Text("Unlock Pro to see full metric breakdowns")
-                        .font(SavantType.body)
-                        .foregroundStyle(SavantPalette.inkSecondary)
-                    Button("Unlock Pro — \(store.proPrice)") {
-                        showingPaywall = true
+
+                    if !previewMetrics.isEmpty {
+                        Text("Top metrics preview")
+                            .font(SavantType.smallBold)
+                            .foregroundStyle(SavantPalette.inkSecondary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal, SavantGeo.padCard)
+                            .padding(.bottom, 8)
+
+                        ForEach(Array(previewMetrics.enumerated()), id: \.element.id) { index, metric in
+                            MetricBar(metric: metric)
+                                .padding(.horizontal, SavantGeo.padCard)
+                                .padding(.vertical, 12)
+                                .background(index % 2 == 0 ? SavantPalette.surface : SavantPalette.surfaceAlt)
+                                .overlay(
+                                    Rectangle()
+                                        .fill(SavantPalette.divider)
+                                        .frame(height: SavantGeo.hairline),
+                                    alignment: .bottom
+                                )
+                        }
                     }
-                    .buttonStyle(.borderedProminent)
-                    .tint(SavantPalette.savantRed)
+
+                    VStack(spacing: 8) {
+                        Text("Unlock Pro to see every metric breakdown")
+                            .font(SavantType.body)
+                            .foregroundStyle(SavantPalette.inkSecondary)
+                        Button("Unlock Pro — \(store.proPrice)") {
+                            showingPaywall = true
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(SavantPalette.savantRed)
+                    }
+                    .padding(.vertical, 18)
+                    .frame(maxWidth: .infinity)
                 }
-                .padding(.vertical, 24)
                 .frame(maxWidth: .infinity)
             } else {
                 ForEach(groupedMetrics, id: \.category) { group in
@@ -313,9 +376,12 @@ struct PlayerProfileView: View {
 
     private var standardStatsGridCard: some View {
         VStack(spacing: 0) {
-            SavantSectionBar(title: "STANDARD STATS · \(seasonLabel)")
+            SavantSectionBar(
+                title: "STANDARD STATS · \(seasonLabel)",
+                trailing: AnyView(seasonMenu)
+            )
 
-            if (player.standardStats ?? []).isEmpty {
+            if (displayedPlayer.standardStats ?? []).isEmpty {
                 emptyStateCard(
                     icon: "chart.bar",
                     title: "Standard stats unavailable",
@@ -323,7 +389,7 @@ struct PlayerProfileView: View {
                 )
                 .padding(.vertical, 24)
             } else {
-                let stats = player.standardStats ?? []
+                let stats = displayedPlayer.standardStats ?? []
                 ForEach(Array(stats.enumerated()), id: \.element.id) { index, stat in
                     HStack(spacing: 12) {
                         Text(stat.label)
@@ -397,8 +463,10 @@ struct PercentileInfoSheet: View {
     }
 }
 
+#if DEBUG
 #Preview {
     NavigationStack {
         PlayerProfileView(player: SampleData.players[0], history: [SampleData.players[0]], store: StoreManager())
     }
 }
+#endif

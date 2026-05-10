@@ -202,13 +202,14 @@ struct TeamView: View {
     private func priorityMetrics(for category: MetricCategory) -> [String] {
         switch category {
         case .hitting: return ["xwOBA", "xSLG", "xBA"]
-        case .pitching: return ["Barrel%", "xwOBA", "K%", "Whiff%", "Chase%"]
+        case .pitching: return ["xwOBA", "K%", "Barrel%", "Whiff%", "Chase%"]
         case .fielding: return ["Range (OAA)", "Arm Strength", "Arm Value"]
         case .running: return ["Sprint Speed"]
         }
     }
 }
 
+#if DEBUG
 #Preview {
     NavigationStack {
         TeamView(
@@ -218,3 +219,4 @@ struct TeamView: View {
         )
     }
 }
+#endif

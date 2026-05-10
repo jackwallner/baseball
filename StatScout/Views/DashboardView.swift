@@ -79,6 +79,15 @@ struct DashboardView: View {
 
     private var unifiedControlBar: some View {
         VStack(spacing: 8) {
+            if let text = viewModel.freshnessText {
+                Text(text)
+                    .font(SavantType.micro)
+                    .tracking(0.4)
+                    .foregroundStyle(SavantPalette.inkTertiary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.horizontal, 12)
+            }
+
             HStack(spacing: 10) {
                 seasonMenu
                 Spacer()
@@ -218,14 +227,6 @@ struct DashboardView: View {
                     }
                     .buttonStyle(.plain)
                 }
-                if let text = viewModel.freshnessText {
-                    Text(text)
-                        .font(SavantType.micro)
-                        .tracking(0.4)
-                        .foregroundStyle(SavantPalette.inkTertiary)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .padding(.vertical, 10)
-                }
             }
         }
         .background(SavantPalette.surface)
@@ -240,8 +241,10 @@ struct DashboardView: View {
     }
 }
 
+#if DEBUG
 #Preview {
     NavigationStack {
         DashboardView(viewModel: DashboardViewModel(), store: StoreManager())
     }
 }
+#endif

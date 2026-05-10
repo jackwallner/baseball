@@ -85,13 +85,19 @@ final class DashboardViewModel {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         formatter.timeStyle = .none
-        return "Through \(formatter.string(from: lastUpdated))"
+        return "Updated through games played \(formatter.string(from: lastUpdated))"
     }
 
-    init(provider: StatcastProviding = PreviewStatcastAPI(), cache: PlayerCaching? = nil) {
+    init(provider: StatcastProviding, cache: PlayerCaching? = nil) {
         self.provider = provider
         self.cache = cache
     }
+
+    #if DEBUG
+    convenience init() {
+        self.init(provider: PreviewStatcastAPI())
+    }
+    #endif
 
     // Seasons present in fetched data, descending. Falls back to the current year while loading.
     var availableSeasons: [Int] {
@@ -170,8 +176,9 @@ final class DashboardViewModel {
         case .hitting:
             return ["xwOBA", "xSLG", "xBA"]
         case .pitching:
-            // xERA has minimum thresholds (25 PA) - use more commonly available metrics first
-            return ["Barrel%", "xwOBA", "K%", "Whiff%", "Chase%"]
+            // xwOBA against parallels the hitter xwOBA — it folds in K/BB and contact quality,
+            // so it's the right primary rank. xERA has a 25 PA minimum, so it stays out.
+            return ["xwOBA", "K%", "Barrel%", "Whiff%", "Chase%"]
         case .fielding:
             // Backend uses "Range (OAA)" as the label
             return ["Range (OAA)", "Arm Strength", "Arm Value"]

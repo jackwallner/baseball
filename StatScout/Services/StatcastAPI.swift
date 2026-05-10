@@ -64,6 +64,7 @@ struct StatcastAPI: StatcastProviding {
     }
 }
 
+#if DEBUG
 struct PreviewStatcastAPI: StatcastProviding {
     func fetchPlayers() async throws -> [Player] {
         SampleData.players
@@ -77,6 +78,7 @@ struct PreviewStatcastAPI: StatcastProviding {
         SampleData.players.filter { ($0.season ?? 0) >= 2026 }
     }
 }
+#endif
 
 extension JSONDecoder {
     static var statScout: JSONDecoder {

@@ -7,6 +7,7 @@ enum StandardStatCategory: String, CaseIterable {
 
 struct StandardStatsLeadersView: View {
     let players: [Player]
+    let store: StoreManager
     @State private var selectedCategory: StandardStatCategory = .hitting
     @State private var selectedStat: String = "AVG"
     @State private var sortDescending = true
@@ -241,9 +242,11 @@ struct StandardStatsLeadersView: View {
     }
 }
 
+#if DEBUG
 #Preview {
     NavigationStack {
-        StandardStatsLeadersView(players: SampleData.players)
+        StandardStatsLeadersView(players: SampleData.players, store: StoreManager())
             .navigationTitle("Standard Stats")
     }
 }
+#endif
