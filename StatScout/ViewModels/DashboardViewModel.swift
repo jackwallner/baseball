@@ -21,8 +21,8 @@ final class DashboardViewModel {
 
     // Label shown in the sort button - reflects actual metric being used
     var sortLabel: String {
-        guard selectedCategory != nil else { return "Overall" }
-        return currentSortMetric ?? "Avg"
+        guard selectedCategory != nil else { return "xwOBA" }
+        return currentSortMetric ?? "Top Category"
     }
 
     // Resolved sort metric: user override (if still available) or auto-priority pick.
@@ -70,6 +70,9 @@ final class DashboardViewModel {
     var isLoading = true
     var errorMessage: String?
     var lastFetchFailed = false
+    private var hasStartedLoading = false
+
+    var isReady: Bool { !players.isEmpty }
 
     var teamCounts: [String: Int] {
         Dictionary(grouping: seasonPlayers) { normalizedTeamAbbreviation($0.team) }
@@ -84,8 +87,9 @@ final class DashboardViewModel {
         guard let lastUpdated else { return nil }
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
-        formatter.timeStyle = .none
-        return "Updated through games played \(formatter.string(from: lastUpdated))"
+        formatter.timeStyle = .short
+        formatter.doesRelativeDateFormatting = true
+        return "Updated \(formatter.string(from: lastUpdated))"
     }
 
     init(provider: StatcastProviding, cache: PlayerCaching? = nil) {
@@ -124,7 +128,8 @@ final class DashboardViewModel {
                 || player.team.localizedCaseInsensitiveContains(searchText)
                 || teamFullName(player.team).localizedCaseInsensitiveContains(searchText)
             let matchesCategory = selectedCategory == nil || player.metrics.contains { $0.category == selectedCategory }
-            return matchesSearch && matchesCategory
+            let matchesType = player.matchesPlayerType(for: selectedCategory)
+            return matchesSearch && matchesCategory && matchesType
         }
     }
 
@@ -157,17 +162,17 @@ final class DashboardViewModel {
     // Get the sort score for a player using a specific metric label
     private func playerSortScore(player: Player, metricLabel: String?) -> Int {
         guard let category = selectedCategory else {
-            return player.overallPercentile
+            return player.metrics.first(where: { $0.label == "xwOBA" })?.percentile ?? 0
         }
         guard let label = metricLabel else {
-            return player.percentile(for: category) ?? player.overallPercentile
+            return player.percentile(for: category) ?? 0
         }
 
         // Use the specific metric if available, otherwise fall back
         if let metric = player.metrics.first(where: { $0.label == label && $0.category == category }) {
             return metric.percentile
         }
-        return player.percentile(for: category) ?? player.overallPercentile
+        return player.percentile(for: category) ?? 0
     }
 
     // Baseball Savant priority metrics for each category
@@ -195,22 +200,36 @@ final class DashboardViewModel {
     func players(forTeam team: String) -> [Player] {
         let normalized = normalizedTeamAbbreviation(team)
         return seasonPlayers.filter { normalizedTeamAbbreviation($0.team) == normalized }
-            .sorted { $0.overallPercentile > $1.overallPercentile }
+            .sorted { p0, p1 in
+                let s0 = p0.metrics.first(where: { $0.label == "xwOBA" })?.percentile ?? 0
+                let s1 = p1.metrics.first(where: { $0.label == "xwOBA" })?.percentile ?? 0
+                return s0 > s1
+            }
     }
 
-    var allMetrics: [(label: String, category: MetricCategory, best: (player: Player, value: Int)?, worst: (player: Player, value: Int)?)] {
-        var metricMap: [String: (category: MetricCategory, values: [(player: Player, value: Int)])] = [:]
+    func teamScore(_ abbr: String) -> Double {
+        let teamPlayers = seasonPlayers.filter { normalizedTeamAbbreviation($0.team) == normalizedTeamAbbreviation(abbr) }
+        guard !teamPlayers.isEmpty else { return 0 }
+        let scores = teamPlayers.compactMap { p in
+            p.metrics.first(where: { $0.label == "xwOBA" })?.percentile
+        }
+        guard !scores.isEmpty else { return 0 }
+        return Double(scores.reduce(0, +)) / Double(scores.count)
+    }
+
+    var allMetrics: [(label: String, category: MetricCategory, best: (player: Player, percentile: Int, actualValue: String)?, worst: (player: Player, percentile: Int, actualValue: String)?)] {
+        var metricMap: [String: (category: MetricCategory, values: [(player: Player, percentile: Int, actualValue: String)])] = [:]
         for player in seasonPlayers {
             for metric in player.metrics {
                 let compositeKey = "\(metric.label)|\(metric.category.rawValue)"
                 if metricMap[compositeKey] == nil {
                     metricMap[compositeKey] = (category: metric.category, values: [])
                 }
-                metricMap[compositeKey]?.values.append((player: player, value: metric.percentile))
+                metricMap[compositeKey]?.values.append((player: player, percentile: metric.percentile, actualValue: metric.value))
             }
         }
         return metricMap.map { (key, data) in
-            let sorted = data.values.sorted { $0.value > $1.value }
+            let sorted = data.values.sorted { $0.percentile > $1.percentile }
             let label = key.split(separator: "|").first.map(String.init) ?? key
             return (
                 label: label,
@@ -221,7 +240,14 @@ final class DashboardViewModel {
         }.sorted { $0.label < $1.label }
     }
 
+    func loadIfNeeded() async {
+        guard !hasStartedLoading else { return }
+        hasStartedLoading = true
+        await load()
+    }
+
     func load() async {
+        hasStartedLoading = true
         // Decode the 40MB+ historical cache off the main actor so the first frame
         // isn't blocked behind it.
         let cached: [Player] = await Task.detached { [cache] in

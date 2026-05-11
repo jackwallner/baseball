@@ -10,15 +10,14 @@ struct MetricRoute: Hashable {
 }
 
 struct RootTabView: View {
+    @EnvironmentObject private var store: StoreService
     @State private var viewModel: DashboardViewModel
-    let store: StoreManager
     @State private var selection = 0
     @State private var showingAbout = false
     @State private var showingPaywall = false
 
-    init(viewModel: DashboardViewModel, store: StoreManager) {
+    init(viewModel: DashboardViewModel) {
         _viewModel = State(initialValue: viewModel)
-        self.store = store
     }
 
     var body: some View {
@@ -34,15 +33,19 @@ struct RootTabView: View {
             metricsTab
                 .tabItem { Label("Metrics", systemImage: "chart.bar.fill") }
                 .tag(2)
+
+            standardStatsTab
+                .tabItem { Label("Stats", systemImage: "tablecells.fill") }
+                .tag(3)
         }
         .tint(SavantPalette.savantRed)
-        .task { await viewModel.load() }
+        .task { await viewModel.loadIfNeeded() }
         .sheet(isPresented: $showingPaywall) {
-            PaywallView(store: store)
+            PaywallView()
         }
         .sheet(isPresented: $showingAbout) {
             NavigationStack {
-                AboutView(lastUpdated: viewModel.lastUpdated, store: store)
+                AboutView(lastUpdated: viewModel.lastUpdated)
                     .navigationTitle("About")
                     .navigationBarTitleDisplayMode(.inline)
                     .modifier(SavantNavBar())
@@ -59,31 +62,41 @@ struct RootTabView: View {
 
     private var leadersTab: some View {
         NavigationStack {
-            DashboardView(viewModel: viewModel, store: store)
+            DashboardView(viewModel: viewModel)
                 .navigationTitle("Leaders")
                 .navigationBarTitleDisplayMode(.inline)
                 .modifier(SavantNavBar())
-                .modifier(StandardDestinations(viewModel: viewModel, store: store))
+                .modifier(StandardDestinations(viewModel: viewModel))
         }
     }
 
     private var teamsTab: some View {
         NavigationStack {
-            TeamsView(viewModel: viewModel, store: store)
+            TeamsView(viewModel: viewModel)
                 .navigationTitle("Teams")
                 .navigationBarTitleDisplayMode(.inline)
                 .modifier(SavantNavBar())
-                .modifier(StandardDestinations(viewModel: viewModel, store: store))
+                .modifier(StandardDestinations(viewModel: viewModel))
         }
     }
 
     private var metricsTab: some View {
         NavigationStack {
-            MetricLeadersView(metrics: viewModel.allMetrics, store: store)
+            MetricLeadersView(metrics: viewModel.allMetrics)
                 .navigationTitle("Metric Leaders")
                 .navigationBarTitleDisplayMode(.inline)
                 .modifier(SavantNavBar())
-                .modifier(StandardDestinations(viewModel: viewModel, store: store))
+                .modifier(StandardDestinations(viewModel: viewModel))
+        }
+    }
+
+    private var standardStatsTab: some View {
+        NavigationStack {
+            StandardStatsLeadersView(players: viewModel.seasonPlayers)
+                .navigationTitle("Standard Stats")
+                .navigationBarTitleDisplayMode(.inline)
+                .modifier(SavantNavBar())
+                .modifier(StandardDestinations(viewModel: viewModel))
         }
     }
 }
@@ -99,15 +112,13 @@ private struct SavantNavBar: ViewModifier {
 
 private struct StandardDestinations: ViewModifier {
     let viewModel: DashboardViewModel
-    let store: StoreManager
 
     func body(content: Content) -> some View {
         content
             .navigationDestination(for: Player.self) { player in
-                // Get player data for the currently selected season
                 let history = viewModel.playerHistories[player.playerId] ?? []
                 let seasonPlayer = history.first { $0.season == viewModel.selectedSeason } ?? player
-                PlayerProfileView(player: seasonPlayer, history: history, store: store)
+                PlayerProfileView(player: seasonPlayer, history: history, allPlayers: viewModel.seasonPlayers)
                     .modifier(SavantNavBar())
             }
             .navigationDestination(for: TeamDestination.self) { dest in
@@ -121,6 +132,10 @@ private struct StandardDestinations: ViewModifier {
             }
             .navigationDestination(for: MetricRoute.self) { route in
                 MetricRankingView(metricLabel: route.label, metricCategory: route.category, players: viewModel.seasonPlayers, season: viewModel.selectedSeason)
+                    .modifier(SavantNavBar())
+            }
+            .navigationDestination(for: ComparisonRoute.self) { route in
+                PlayerComparisonView(playerA: route.playerA, playerB: route.playerB)
                     .modifier(SavantNavBar())
             }
     }

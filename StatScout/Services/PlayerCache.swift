@@ -6,7 +6,7 @@ protocol PlayerCaching: Sendable {
 }
 
 struct DiskPlayerCache: PlayerCaching {
-    private let fileURL: URL
+    let fileURL: URL
     private let maxAge: TimeInterval?
 
     /// Pass `nil` for maxAge to disable expiration (permanent cache).
@@ -39,15 +39,38 @@ struct DiskPlayerCache: PlayerCaching {
     }
 }
 
+/// Binary-plist–backed cache for the heavyweight historical dataset.
+/// Plist decode is ~2–3× faster than JSON on the same payload, and the file is ~30% smaller.
+struct PlistPlayerCache: PlayerCaching {
+    private let fileURL: URL
+
+    init(fileURL: URL) {
+        self.fileURL = fileURL
+    }
+
+    func loadPlayers() throws -> [Player] {
+        let data = try Data(contentsOf: fileURL)
+        return try PropertyListDecoder.statScout.decode([Player].self, from: data)
+    }
+
+    func savePlayers(_ players: [Player]) throws {
+        let data = try PropertyListEncoder.statScout.encode(players)
+        try FileManager.default.createDirectory(at: fileURL.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try data.write(to: fileURL, options: [.atomic])
+    }
+}
+
 /// Two-tier cache: permanent for historical data, expiring for current season.
 struct TwoTierPlayerCache: PlayerCaching {
-    private let historical: DiskPlayerCache
+    private let historical: PlistPlayerCache
+    private let legacyHistorical: DiskPlayerCache
     private let current: DiskPlayerCache
     private let bundleResourceName: String
 
     init(fileManager: FileManager = .default, bundleResourceName: String = "players-historical") {
         let directory = fileManager.urls(for: .cachesDirectory, in: .userDomainMask).first ?? fileManager.temporaryDirectory
-        self.historical = DiskPlayerCache(fileURL: directory.appending(path: "players-historical.json"), maxAge: nil)
+        self.historical = PlistPlayerCache(fileURL: directory.appending(path: "players-historical.plist"))
+        self.legacyHistorical = DiskPlayerCache(fileURL: directory.appending(path: "players-historical.json"), maxAge: nil)
         self.current = DiskPlayerCache(fileURL: directory.appending(path: "players-current.json"), maxAge: 48 * 60 * 60)
         self.bundleResourceName = bundleResourceName
     }
@@ -59,20 +82,34 @@ struct TwoTierPlayerCache: PlayerCaching {
     }
 
     private func loadHistoricalPlayers() -> [Player] {
-        // 1. Try the permanent disk cache first.
+        // 1. Permanent disk cache (binary plist).
         if let cached = try? historical.loadPlayers(), !cached.isEmpty {
             return cached
         }
-        // 2. First install: seed from the bundled JSON shipped with the app.
-        guard let bundleURL = Bundle.main.url(forResource: bundleResourceName, withExtension: "json"),
-              let data = try? Data(contentsOf: bundleURL),
-              let players = try? JSONDecoder.statScout.decode([Player].self, from: data),
-              !players.isEmpty else {
-            return []
+        // 2. Bundled binary plist (shipped with the app).
+        if let bundleURL = Bundle.main.url(forResource: bundleResourceName, withExtension: "plist"),
+           let data = try? Data(contentsOf: bundleURL),
+           let players = try? PropertyListDecoder.statScout.decode([Player].self, from: data),
+           !players.isEmpty {
+            try? historical.savePlayers(players)
+            try? FileManager.default.removeItem(at: legacyHistorical.fileURL)
+            return players
         }
-        // Persist to disk cache so future launches are instant.
-        try? historical.savePlayers(players)
-        return players
+        // 3. Legacy on-disk JSON cache from older builds — migrate forward.
+        if let players = try? legacyHistorical.loadPlayers(), !players.isEmpty {
+            try? historical.savePlayers(players)
+            try? FileManager.default.removeItem(at: legacyHistorical.fileURL)
+            return players
+        }
+        // 4. Bundled JSON fallback (in case the plist asset is ever missing).
+        if let bundleURL = Bundle.main.url(forResource: bundleResourceName, withExtension: "json"),
+           let data = try? Data(contentsOf: bundleURL),
+           let players = try? JSONDecoder.statScout.decode([Player].self, from: data),
+           !players.isEmpty {
+            try? historical.savePlayers(players)
+            return players
+        }
+        return []
     }
 
     func savePlayers(_ players: [Player]) throws {
@@ -93,4 +130,17 @@ extension JSONEncoder {
         encoder.dateEncodingStrategy = .iso8601
         return encoder
     }
+}
+
+extension PropertyListEncoder {
+    static var statScout: PropertyListEncoder {
+        let encoder = PropertyListEncoder()
+        encoder.outputFormat = .binary
+        return encoder
+    }
+}
+
+extension PropertyListDecoder {
+    /// Conversion script stores dates as native plist Date values, so default decoding works.
+    static var statScout: PropertyListDecoder { PropertyListDecoder() }
 }

@@ -152,6 +152,15 @@ struct TeamRoute: Hashable {
 }
 
 extension Player {
+    func matchesPlayerType(for category: MetricCategory?) -> Bool {
+        guard let category else { return true }
+        switch category {
+        case .hitting: return playerType != "pitcher"
+        case .pitching: return playerType != "batter"
+        case .fielding, .running: return true
+        }
+    }
+
     /// Position to surface in the UI. When the snapshot has no fielding position
     /// (TBD / empty) but the player has metrics, fall back to the player type
     /// label so we never show "TBD" next to real stats.

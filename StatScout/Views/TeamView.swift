@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct TeamView: View {
+    @EnvironmentObject private var store: StoreService
     let team: String
     let players: [Player]
     var season: Int? = nil
@@ -8,6 +9,7 @@ struct TeamView: View {
     @State private var searchText = ""
     @State private var selectedCategory: MetricCategory? = nil
     @State private var sortDescending = true
+    @State private var showingPaywall = false
 
     private var displaySeason: Int {
         season ?? players.compactMap(\.season).max() ?? Calendar.current.component(.year, from: Date())
@@ -24,17 +26,18 @@ struct TeamView: View {
     }
 
     private var sortLabel: String {
-        sortMetric?.label ?? "Overall"
+        if selectedCategory == nil { return "xwOBA" }
+        return sortMetric?.label ?? "Top Category"
     }
 
     private func score(_ player: Player) -> Int {
         if let m = sortMetric, let metric = player.metrics.first(where: { $0.label == m.label && $0.category == m.category }) {
             return metric.percentile
         }
-        if let category = selectedCategory, let p = player.percentile(for: category) {
-            return p
+        if let category = selectedCategory {
+            if let p = player.percentile(for: category) { return p }
         }
-        return player.overallPercentile
+        return player.metrics.first(where: { $0.label == "xwOBA" })?.percentile ?? 0
     }
 
     private var filteredPlayers: [Player] {
@@ -78,6 +81,9 @@ struct TeamView: View {
                     }
                 }
             }
+        }
+        .sheet(isPresented: $showingPaywall) {
+            PaywallView()
         }
     }
 
@@ -162,12 +168,25 @@ struct TeamView: View {
 
     @ViewBuilder
     private func teamSeasonMenu(viewModel: DashboardViewModel) -> some View {
-        @Bindable var bindable = viewModel
         HStack {
             Menu {
-                Picker("Season", selection: $bindable.selectedSeason) {
-                    ForEach(viewModel.availableSeasons, id: \.self) { season in
-                        Text(String(season)).tag(season)
+                ForEach(viewModel.availableSeasons, id: \.self) { season in
+                    let isLocked = season != 2026 && !store.isPro
+                    Button {
+                        if isLocked {
+                            showingPaywall = true
+                        } else {
+                            viewModel.selectedSeason = season
+                        }
+                    } label: {
+                        HStack {
+                            Text(String(season))
+                            if isLocked {
+                                Image(systemName: "lock.fill")
+                                    .font(.system(size: 10))
+                                    .foregroundStyle(SavantPalette.inkTertiary)
+                            }
+                        }
                     }
                 }
             } label: {

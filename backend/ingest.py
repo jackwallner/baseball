@@ -8,7 +8,7 @@ to display alongside percentiles (e.g., "95.4 mph · 100th percentile").
 import logging
 import os
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any, Iterator, Optional
 
 import pandas as pd
@@ -894,7 +894,7 @@ def build_snapshot_rows(season: int) -> list[dict]:
     """Build snapshot rows with both percentiles and actual values."""
     logger.info("Building snapshot rows for season %s with actual values...", season)
 
-    now = datetime.now(UTC)
+    now = datetime.now(UTC) - timedelta(days=1)
     players: dict[int, dict] = {}
 
     value_store = ActualValueStore(season)

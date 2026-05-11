@@ -136,19 +136,19 @@ final class DashboardViewModelTests: XCTestCase {
         _ = vmPitching.leaderboard  // Trigger computation
         XCTAssertEqual(vmPitching.sortLabel, "Barrel%")
 
-        // Test empty data falls back to "Avg"
+        // Test empty data falls back to "Top Category"
         let vmEmpty = DashboardViewModel(provider: MockProvider(players: []))
         await vmEmpty.load()
         vmEmpty.selectedCategory = .hitting
         _ = vmEmpty.leaderboard  // Trigger computation
-        XCTAssertEqual(vmEmpty.sortLabel, "Avg")
+        XCTAssertEqual(vmEmpty.sortLabel, "Top Category")
 
-        // Test nil category shows Overall
+        // Test nil category shows xwOBA
         let vmNil = DashboardViewModel(provider: MockProvider(players: hitters))
         await vmNil.load()
         vmNil.selectedCategory = nil
         _ = vmNil.leaderboard
-        XCTAssertEqual(vmNil.sortLabel, "Overall")
+        XCTAssertEqual(vmNil.sortLabel, "xwOBA")
     }
 
     @MainActor

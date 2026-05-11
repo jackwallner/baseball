@@ -32,8 +32,8 @@ final class TeamsViewModel {
 }
 
 struct TeamsView: View {
+    @EnvironmentObject private var store: StoreService
     let viewModel: DashboardViewModel
-    let store: StoreManager
     @State private var teamsViewModel = TeamsViewModel()
     @State private var searchText = ""
 
@@ -55,9 +55,9 @@ struct TeamsView: View {
             $0.localizedCaseInsensitiveContains(searchText)
         }
 
-        // Sort: favorite first, then alphabetical
+        // Sort: favorite first, then by team score descending
         guard let favorite = teamsViewModel.favoriteTeam else {
-            return teams.sorted { teamFullName($0) < teamFullName($1) }
+            return teams.sorted { viewModel.teamScore($0) > viewModel.teamScore($1) }
         }
 
         return teams.sorted {
@@ -66,7 +66,7 @@ struct TeamsView: View {
             if isFav0 != isFav1 {
                 return isFav1 ? false : true
             }
-            return teamFullName($0) < teamFullName($1)
+            return viewModel.teamScore($0) > viewModel.teamScore($1)
         }
     }
 
@@ -146,7 +146,8 @@ struct TeamsView: View {
                 TeamRow(
                     abbr: favorite,
                     isFavorite: true,
-                    showFavoriteButton: false
+                    showFavoriteButton: false,
+                    teamScore: viewModel.teamScore(favorite)
                 )
             }
             .buttonStyle(.plain)
@@ -199,6 +200,7 @@ struct TeamsView: View {
                             abbr: abbr,
                             isFavorite: teamsViewModel.isFavorite(abbr),
                             showFavoriteButton: teamsViewModel.favoriteTeam != abbr,
+                            teamScore: viewModel.teamScore(abbr),
                             onFavoriteTap: {
                                 teamsViewModel.setFavorite(abbr)
                                 let generator = UIImpactFeedbackGenerator(style: .light)
@@ -232,6 +234,7 @@ struct TeamRow: View {
     let abbr: String
     let isFavorite: Bool
     let showFavoriteButton: Bool
+    let teamScore: Double?
     var onFavoriteTap: (() -> Void)? = nil
 
     var body: some View {
@@ -259,6 +262,18 @@ struct TeamRow: View {
                     .foregroundStyle(SavantPalette.inkTertiary)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
+
+            if let score = teamScore {
+                HStack(spacing: 3) {
+                    Text(String(format: "%.0f", score))
+                        .font(SavantType.statSmall)
+                        .foregroundStyle(SavantPalette.inkSecondary)
+                    Text("xwOBA")
+                        .font(SavantType.micro)
+                        .foregroundStyle(SavantPalette.inkTertiary)
+                }
+                .padding(.trailing, 8)
+            }
 
             // Favorite button (if showing)
             if showFavoriteButton {
@@ -340,7 +355,8 @@ struct TeamTile: View {
 #if DEBUG
 #Preview {
     NavigationStack {
-        TeamsView(viewModel: DashboardViewModel(), store: StoreManager())
+        TeamsView(viewModel: DashboardViewModel())
+            .environmentObject(StoreService.shared)
     }
 }
 #endif

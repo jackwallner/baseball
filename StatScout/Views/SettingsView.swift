@@ -1,8 +1,8 @@
 import SwiftUI
 
 struct AboutView: View {
+    @EnvironmentObject private var store: StoreService
     let lastUpdated: Date?
-    let store: StoreManager
     @State private var showingPaywall = false
 
     private var version: String {
@@ -27,7 +27,7 @@ struct AboutView: View {
         }
         .background(SavantPalette.canvas.ignoresSafeArea())
         .sheet(isPresented: $showingPaywall) {
-            PaywallView(store: store)
+            PaywallView()
         }
     }
 
@@ -63,19 +63,19 @@ struct AboutView: View {
             SavantSectionBar(title: "STATSCOUT PRO")
             VStack(spacing: 0) {
                 HStack {
-                    Image(systemName: store.proStatus == .purchased ? "crown.fill" : "crown")
+                    Image(systemName: store.isPro ? "crown.fill" : "crown")
                         .font(.title2)
-                        .foregroundStyle(store.proStatus == .purchased ? Color.yellow : SavantPalette.inkTertiary)
+                        .foregroundStyle(store.isPro ? Color.yellow : SavantPalette.inkTertiary)
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(store.proStatus == .purchased ? "Pro Unlocked" : "Free Version")
+                        Text(store.isPro ? "Pro Unlocked" : "Free Version")
                             .font(SavantType.bodyBold)
                             .foregroundStyle(SavantPalette.ink)
-                        Text(store.proStatus == .purchased ? "Full access to all features." : "Unlock teams, metrics, and more.")
+                        Text(store.isPro ? "Full access to all features." : "Unlock teams, metrics, and more.")
                             .font(SavantType.small)
                             .foregroundStyle(SavantPalette.inkSecondary)
                     }
                     Spacer()
-                    if store.proStatus != .purchased {
+                    if !store.isPro {
                         Button("Upgrade") {
                             showingPaywall = true
                         }
@@ -86,7 +86,7 @@ struct AboutView: View {
                 }
                 .padding(SavantGeo.padCard)
 
-                if store.proStatus == .purchased {
+                if store.isPro {
                     Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline)
                     Button {
                         Task { await store.restorePurchases() }
@@ -104,7 +104,7 @@ struct AboutView: View {
                     .buttonStyle(.plain)
                 }
 
-                if let error = store.purchaseError {
+                if let error = store.lastError {
                     Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline)
                     Text(error)
                         .font(SavantType.small)
@@ -242,6 +242,7 @@ struct AboutView: View {
 
 #Preview {
     NavigationStack {
-        AboutView(lastUpdated: Date(), store: StoreManager())
+        AboutView(lastUpdated: Date())
+            .environmentObject(StoreService.shared)
     }
 }

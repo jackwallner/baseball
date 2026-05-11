@@ -1,15 +1,15 @@
 import SwiftUI
 
 struct DashboardView: View {
+    @EnvironmentObject private var store: StoreService
     @Bindable var viewModel: DashboardViewModel
-    let store: StoreManager
     @State private var showingAbout = false
     @State private var showingPaywall = false
 
     var body: some View {
         ZStack {
             ScrollView {
-                VStack(spacing: 0) {
+                LazyVStack(spacing: 0, pinnedViews: []) {
                     unifiedControlBar
                     leaderboardSection
                     if !viewModel.players.isEmpty {
@@ -18,6 +18,7 @@ struct DashboardView: View {
                 }
             }
             .scrollBounceBehavior(.basedOnSize)
+            .scrollDismissesKeyboard(.interactively)
             .refreshable {
                 await viewModel.load()
             }
@@ -30,7 +31,7 @@ struct DashboardView: View {
         .background(SavantPalette.canvas.ignoresSafeArea())
         .sheet(isPresented: $showingAbout) {
             NavigationStack {
-                AboutView(lastUpdated: viewModel.lastUpdated, store: store)
+                AboutView(lastUpdated: viewModel.lastUpdated)
                     .navigationTitle("About")
                     .navigationBarTitleDisplayMode(.inline)
                     .toolbar {
@@ -42,13 +43,13 @@ struct DashboardView: View {
             .presentationDragIndicator(.visible)
         }
         .sheet(isPresented: $showingPaywall) {
-            PaywallView(store: store)
+            PaywallView()
         }
     }
 
     private var aboutFooter: some View {
         VStack(spacing: 8) {
-            if store.proStatus != .purchased {
+            if !store.isPro {
                 Button(action: { showingPaywall = true }) {
                     HStack(spacing: 6) {
                         Image(systemName: "crown.fill")
@@ -103,9 +104,23 @@ struct DashboardView: View {
 
     private var seasonMenu: some View {
         Menu {
-            Picker("Season", selection: $viewModel.selectedSeason) {
-                ForEach(viewModel.availableSeasons, id: \.self) { season in
-                    Text(String(season)).tag(season)
+            ForEach(viewModel.availableSeasons, id: \.self) { season in
+                let isLocked = season != 2026 && !store.isPro
+                Button {
+                    if isLocked {
+                        showingPaywall = true
+                    } else {
+                        viewModel.selectedSeason = season
+                    }
+                } label: {
+                    HStack {
+                        Text(String(season))
+                        if isLocked {
+                            Image(systemName: "lock.fill")
+                                .font(.system(size: 10))
+                                .foregroundStyle(SavantPalette.inkTertiary)
+                        }
+                    }
                 }
             }
         } label: {
@@ -216,16 +231,18 @@ struct DashboardView: View {
             } else {
                 sortHeaderMenu
                 let sortMetric = viewModel.currentSortMetricForDisplay
-                ForEach(Array(viewModel.leaderboard.enumerated()), id: \.element.id) { index, player in
-                    NavigationLink(value: player) {
-                        LeaderboardTableRow(
-                            rank: index + 1,
-                            player: player,
-                            metricLabel: sortMetric.label,
-                            metricCategory: sortMetric.category
-                        )
+                LazyVStack(spacing: 0) {
+                    ForEach(Array(viewModel.leaderboard.enumerated()), id: \.element.id) { index, player in
+                        NavigationLink(value: player) {
+                            LeaderboardTableRow(
+                                rank: index + 1,
+                                player: player,
+                                metricLabel: sortMetric.label,
+                                metricCategory: sortMetric.category
+                            )
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
                 }
             }
         }
@@ -244,7 +261,8 @@ struct DashboardView: View {
 #if DEBUG
 #Preview {
     NavigationStack {
-        DashboardView(viewModel: DashboardViewModel(), store: StoreManager())
+        DashboardView(viewModel: DashboardViewModel())
+            .environmentObject(StoreService.shared)
     }
 }
 #endif

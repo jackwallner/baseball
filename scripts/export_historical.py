@@ -39,3 +39,9 @@ with open(out_path, "w") as f:
 
 print(f"\nSaved {len(all_players)} rows to {out_path}")
 print(f"File size: {os.path.getsize(out_path) / (1024*1024):.1f} MB")
+
+# The app ships the binary-plist version (smaller, faster decode). Regenerate it
+# automatically so the JSON and the bundled plist never drift.
+import subprocess
+print("\nRegenerating binary plist for the iOS bundle...")
+subprocess.run(["swift", "scripts/convert_historical_to_plist.swift"], check=True)

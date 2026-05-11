@@ -6,8 +6,8 @@ enum StandardStatCategory: String, CaseIterable {
 }
 
 struct StandardStatsLeadersView: View {
+    @EnvironmentObject private var store: StoreService
     let players: [Player]
-    let store: StoreManager
     @State private var selectedCategory: StandardStatCategory = .hitting
     @State private var selectedStat: String = "AVG"
     @State private var sortDescending = true
@@ -26,8 +26,15 @@ struct StandardStatsLeadersView: View {
     var filteredPlayers: [Player] {
         players.filter { player in
             guard let stats = player.standardStats else { return false }
-            // Check if player has the selected stat
+            guard matchesPlayerType(player: player) else { return false }
             return stats.contains { $0.label == selectedStat }
+        }
+    }
+
+    private func matchesPlayerType(player: Player) -> Bool {
+        switch selectedCategory {
+        case .hitting: return player.playerType != "pitcher"
+        case .pitching: return player.playerType != "batter"
         }
     }
     
@@ -245,7 +252,8 @@ struct StandardStatsLeadersView: View {
 #if DEBUG
 #Preview {
     NavigationStack {
-        StandardStatsLeadersView(players: SampleData.players, store: StoreManager())
+        StandardStatsLeadersView(players: SampleData.players)
+            .environmentObject(StoreService.shared)
             .navigationTitle("Standard Stats")
     }
 }

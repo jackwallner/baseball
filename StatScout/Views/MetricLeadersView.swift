@@ -1,15 +1,16 @@
 import SwiftUI
 
-struct MetricLeadersView: View {
-    let metrics: [(label: String, category: MetricCategory, best: (player: Player, value: Int)?, worst: (player: Player, value: Int)?)]
-    let store: StoreManager
+typealias MetricLeaderEntry = (label: String, category: MetricCategory, best: (player: Player, percentile: Int, actualValue: String)?, worst: (player: Player, percentile: Int, actualValue: String)?)
 
-    private var groupedByCategory: [(MetricCategory, [(label: String, category: MetricCategory, best: (player: Player, value: Int)?, worst: (player: Player, value: Int)?)])] {
+struct MetricLeadersView: View {
+    @EnvironmentObject private var store: StoreService
+    let metrics: [MetricLeaderEntry]
+
+    private var groupedByCategory: [(MetricCategory, [MetricLeaderEntry])] {
         let grouped = Dictionary(grouping: metrics) { $0.category }
         return MetricCategory.allCases.compactMap { cat in
             guard let items = grouped[cat], !items.isEmpty else { return nil }
-            let mapped = items.map { (label: $0.label, category: $0.category, best: $0.best, worst: $0.worst) }
-            return (cat, mapped)
+            return (cat, items)
         }
     }
 
@@ -40,7 +41,7 @@ struct MetricLeadersView: View {
         .navigationBarTitleDisplayMode(.inline)
     }
 
-    private func categoryCard(_ group: (MetricCategory, [(label: String, category: MetricCategory, best: (player: Player, value: Int)?, worst: (player: Player, value: Int)?)])) -> some View {
+    private func categoryCard(_ group: (MetricCategory, [MetricLeaderEntry])) -> some View {
         VStack(spacing: 0) {
             SavantSectionBar(title: group.0.rawValue.uppercased())
 
@@ -89,13 +90,10 @@ struct MetricLeadersView: View {
                                         .foregroundStyle(SavantPalette.ink)
                                         .lineLimit(1)
                                         .minimumScaleFactor(0.7)
-                                    HStack(spacing: 4) {
-                                        TeamColorDot(abbr: best.player.team, size: 5)
-                                        Text(displayTeamAbbr(best.player.team))
-                                            .font(SavantType.micro)
-                                            .tracking(0.4)
-                                            .foregroundStyle(SavantPalette.inkTertiary)
-                                    }
+                                    Text(best.actualValue)
+                                        .font(SavantType.statSmall)
+                                        .foregroundStyle(SavantPalette.inkSecondary)
+                                        .lineLimit(1)
                                 }
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -119,13 +117,10 @@ struct MetricLeadersView: View {
                                         .foregroundStyle(SavantPalette.ink)
                                         .lineLimit(1)
                                         .minimumScaleFactor(0.7)
-                                    HStack(spacing: 4) {
-                                        TeamColorDot(abbr: worst.player.team, size: 5)
-                                        Text(displayTeamAbbr(worst.player.team))
-                                            .font(SavantType.micro)
-                                            .tracking(0.4)
-                                            .foregroundStyle(SavantPalette.inkTertiary)
-                                    }
+                                    Text(worst.actualValue)
+                                        .font(SavantType.statSmall)
+                                        .foregroundStyle(SavantPalette.inkSecondary)
+                                        .lineLimit(1)
                                 }
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -159,6 +154,7 @@ struct MetricLeadersView: View {
 
 #Preview {
     NavigationStack {
-        MetricLeadersView(metrics: [], store: StoreManager())
+        MetricLeadersView(metrics: [])
+            .environmentObject(StoreService.shared)
     }
 }

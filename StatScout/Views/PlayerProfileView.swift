@@ -1,13 +1,16 @@
 import SwiftUI
 
 struct PlayerProfileView: View {
+    @EnvironmentObject private var store: StoreService
     let player: Player
     let history: [Player]
-    let store: StoreManager
+    var allPlayers: [Player] = []
     @State private var showPercentileInfo = false
-    @State private var selectedTab: PlayerStatTab = .standard
+    @State private var selectedTab: PlayerStatTab = .statcast
     @State private var selectedPercentileSeason: Int? = nil
     @State private var showingPaywall = false
+    @State private var showingPlayerPicker = false
+    @State private var comparisonPlayer: Player?
 
     enum PlayerStatTab: String, CaseIterable {
         case statcast = "Percentiles"
@@ -72,12 +75,25 @@ struct PlayerProfileView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                if let url = player.savantURL {
-                    Link(destination: url) {
-                        Image(systemName: "arrow.up.right.square")
+                HStack(spacing: 12) {
+                    Button {
+                        if store.isPro {
+                            showingPlayerPicker = true
+                        } else {
+                            showingPaywall = true
+                        }
+                    } label: {
+                        Image(systemName: "person.2.fill")
                             .foregroundStyle(.white)
                     }
-                    .accessibilityLabel("Open on Baseball Savant")
+                    .accessibilityLabel("Compare with another player")
+                    if let url = player.savantURL {
+                        Link(destination: url) {
+                            Image(systemName: "arrow.up.right.square")
+                                .foregroundStyle(.white)
+                        }
+                        .accessibilityLabel("Open on Baseball Savant")
+                    }
                 }
             }
         }
@@ -85,7 +101,22 @@ struct PlayerProfileView: View {
             PercentileInfoSheet()
         }
         .sheet(isPresented: $showingPaywall) {
-            PaywallView(store: store)
+            PaywallView()
+        }
+        .sheet(isPresented: $showingPlayerPicker) {
+            PlayerPickerSheet(players: allPlayers.filter { $0.playerId != player.playerId }) { selected in
+                comparisonPlayer = selected
+            }
+        }
+        .background {
+            if let other = comparisonPlayer {
+                NavigationLink(
+                    value: ComparisonRoute(playerA: player, playerB: other),
+                    label: { EmptyView() }
+                )
+                .hidden()
+                .onDisappear { comparisonPlayer = nil }
+            }
         }
     }
 
@@ -147,7 +178,7 @@ struct PlayerProfileView: View {
             generator.impactOccurred()
         }) {
             HStack(spacing: 4) {
-                if store.proStatus != .purchased {
+                if !store.isPro {
                     Image(systemName: "lock.fill")
                         .font(.system(size: 10))
                 }
@@ -181,7 +212,7 @@ struct PlayerProfileView: View {
 
     @ViewBuilder
     private var yearCompareContent: some View {
-        if store.proStatus == .purchased {
+        if store.isPro {
             YearComparisonView(history: history)
         } else {
             yearComparePreview
@@ -245,12 +276,23 @@ struct PlayerProfileView: View {
         return Group {
             if seasons.count > 1 {
                 Menu {
-                    Picker("Season", selection: Binding(
-                        get: { activeSeason ?? seasons.first ?? 0 },
-                        set: { selectedPercentileSeason = $0 }
-                    )) {
-                        ForEach(seasons, id: \.self) { season in
-                            Text(String(season)).tag(season)
+                    ForEach(seasons, id: \.self) { season in
+                        let isLocked = season != 2026 && !store.isPro
+                        Button {
+                            if isLocked {
+                                showingPaywall = true
+                            } else {
+                                selectedPercentileSeason = season
+                            }
+                        } label: {
+                            HStack {
+                                Text(String(season))
+                                if isLocked {
+                                    Image(systemName: "lock.fill")
+                                        .font(.system(size: 10))
+                                        .foregroundStyle(SavantPalette.inkTertiary)
+                                }
+                            }
                         }
                     }
                 } label: {
@@ -298,47 +340,6 @@ struct PlayerProfileView: View {
                     description: "Percentile rankings are not available for this player in the \(seasonLabel) season."
                 )
                 .padding(.vertical, 24)
-            } else if store.proStatus != .purchased {
-                VStack(spacing: 0) {
-                    OverallPercentileBadge(percentile: displayedPlayer.overallPercentile, size: 80)
-                        .padding(.vertical, 12)
-
-                    if !previewMetrics.isEmpty {
-                        Text("Top metrics preview")
-                            .font(SavantType.smallBold)
-                            .foregroundStyle(SavantPalette.inkSecondary)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.horizontal, SavantGeo.padCard)
-                            .padding(.bottom, 8)
-
-                        ForEach(Array(previewMetrics.enumerated()), id: \.element.id) { index, metric in
-                            MetricBar(metric: metric)
-                                .padding(.horizontal, SavantGeo.padCard)
-                                .padding(.vertical, 12)
-                                .background(index % 2 == 0 ? SavantPalette.surface : SavantPalette.surfaceAlt)
-                                .overlay(
-                                    Rectangle()
-                                        .fill(SavantPalette.divider)
-                                        .frame(height: SavantGeo.hairline),
-                                    alignment: .bottom
-                                )
-                        }
-                    }
-
-                    VStack(spacing: 8) {
-                        Text("Unlock Pro to see every metric breakdown")
-                            .font(SavantType.body)
-                            .foregroundStyle(SavantPalette.inkSecondary)
-                        Button("Unlock Pro — \(store.proPrice)") {
-                            showingPaywall = true
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .tint(SavantPalette.savantRed)
-                    }
-                    .padding(.vertical, 18)
-                    .frame(maxWidth: .infinity)
-                }
-                .frame(maxWidth: .infinity)
             } else {
                 ForEach(groupedMetrics, id: \.category) { group in
                 let avg = displayedPlayer.percentile(for: group.category)
@@ -463,10 +464,58 @@ struct PercentileInfoSheet: View {
     }
 }
 
+private struct PlayerPickerSheet: View {
+    let players: [Player]
+    var onSelect: (Player) -> Void
+    @Environment(\.dismiss) private var dismiss
+    @State private var searchText = ""
+
+    var filteredPlayers: [Player] {
+        guard !searchText.isEmpty else { return players }
+        return players.filter {
+            $0.name.localizedCaseInsensitiveContains(searchText) ||
+            $0.team.localizedCaseInsensitiveContains(searchText)
+        }
+    }
+
+    var body: some View {
+        NavigationStack {
+            List(filteredPlayers) { player in
+                Button {
+                    dismiss()
+                    onSelect(player)
+                } label: {
+                    HStack(spacing: 12) {
+                        PlayerHeadshot(url: player.headshotURL, initials: player.initials, size: 36)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(player.name)
+                                .font(SavantType.bodyBold)
+                                .foregroundStyle(SavantPalette.ink)
+                            Text("\(player.team) · \(player.displayPosition)")
+                                .font(SavantType.small)
+                                .foregroundStyle(SavantPalette.inkTertiary)
+                        }
+                    }
+                    .padding(.vertical, 4)
+                }
+            }
+            .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search players")
+            .navigationTitle("Compare With")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+            }
+        }
+    }
+}
+
 #if DEBUG
 #Preview {
     NavigationStack {
-        PlayerProfileView(player: SampleData.players[0], history: [SampleData.players[0]], store: StoreManager())
+        PlayerProfileView(player: SampleData.players[0], history: [SampleData.players[0]])
+            .environmentObject(StoreService.shared)
     }
 }
 #endif
