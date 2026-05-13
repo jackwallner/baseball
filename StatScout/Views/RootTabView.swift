@@ -31,11 +31,11 @@ struct RootTabView: View {
                 .tag(1)
 
             metricsTab
-                .tabItem { Label("Metrics", systemImage: "chart.bar.fill") }
+                .tabItem { Label("Statcast", systemImage: "chart.bar.fill") }
                 .tag(2)
 
             standardStatsTab
-                .tabItem { Label("Stats", systemImage: "tablecells.fill") }
+                .tabItem { Label("Box Score", systemImage: "tablecells.fill") }
                 .tag(3)
         }
         .tint(SavantPalette.savantRed)
@@ -82,7 +82,7 @@ struct RootTabView: View {
     private var metricsTab: some View {
         NavigationStack {
             MetricLeadersView(metrics: selection == 2 ? viewModel.allMetrics : [])
-                .navigationTitle("Metric Leaders")
+                .navigationTitle("Statcast Leaders")
                 .navigationBarTitleDisplayMode(.inline)
                 .modifier(SavantNavBar())
                 .modifier(StandardDestinations(viewModel: viewModel))
@@ -92,7 +92,7 @@ struct RootTabView: View {
     private var standardStatsTab: some View {
         NavigationStack {
             StandardStatsLeadersView(players: selection == 3 ? viewModel.seasonPlayers : [])
-                .navigationTitle("Standard Stats")
+                .navigationTitle("Box Score Stats")
                 .navigationBarTitleDisplayMode(.inline)
                 .modifier(SavantNavBar())
                 .modifier(StandardDestinations(viewModel: viewModel))

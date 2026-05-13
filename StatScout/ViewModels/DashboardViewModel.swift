@@ -12,6 +12,7 @@ final class DashboardViewModel {
     var searchText = ""
     var selectedCategory: MetricCategory? = .hitting
     var sortDescending = true
+    var qualifiedOnly = true
     // Defaults to current year, but `load()` will reset to the most recent season
     // that actually has data once the cache/network resolves so first paint isn't an empty state.
     var selectedSeason: Int = Calendar.current.component(.year, from: Date())
@@ -147,9 +148,42 @@ final class DashboardViewModel {
                 || teamFullName(player.team).localizedCaseInsensitiveContains(searchText)
             let matchesCategory = selectedCategory == nil || player.metrics.contains { $0.category == selectedCategory }
             let matchesType = player.matchesPlayerType(for: selectedCategory)
-            return matchesSearch && matchesCategory && matchesType
+            let qualifies = !qualifiedOnly || isQualified(player, for: selectedCategory)
+            return matchesSearch && matchesCategory && matchesType && qualifies
         }
     }
+
+    func isQualified(_ player: Player, for category: MetricCategory?) -> Bool {
+        let stats = player.standardStats ?? []
+        switch category {
+        case .pitching:
+            return ipValue(in: stats) >= Self.minInningsPitched
+        case .hitting, .running, .none:
+            if player.playerType == "pitcher" {
+                return ipValue(in: stats) >= Self.minInningsPitched
+            }
+            return paValue(in: stats) >= Self.minPlateAppearances
+        case .fielding:
+            return paValue(in: stats) >= Self.minPlateAppearances
+                || ipValue(in: stats) >= Self.minInningsPitched
+        }
+    }
+
+    private static let minPlateAppearances = 50
+    private static let minInningsPitched = 10.0
+
+    private func paValue(in stats: [StandardStat]) -> Int {
+        guard let stat = stats.first(where: { Self.paLabels.contains($0.label.uppercased()) }) else { return 0 }
+        return Int(stat.value.filter { $0.isNumber }) ?? 0
+    }
+
+    private func ipValue(in stats: [StandardStat]) -> Double {
+        guard let stat = stats.first(where: { Self.ipLabels.contains($0.label.uppercased()) }) else { return 0 }
+        return Double(stat.value.trimmingCharacters(in: .whitespaces)) ?? 0
+    }
+
+    private static let paLabels: Set<String> = ["PA", "AB"]
+    private static let ipLabels: Set<String> = ["IP"]
 
     // Baseball Savant-style sorting: use consistent key metric for ALL players
     var leaderboard: [Player] {

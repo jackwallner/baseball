@@ -270,12 +270,17 @@ struct OnboardingCard: View {
             Spacer(minLength: 12)
 
             ZStack {
-                Circle()
-                    .fill(SavantPalette.savantRed.opacity(0.08))
-                    .frame(width: 120, height: 120)
-                Image(systemName: icon)
-                    .font(.system(size: 52, weight: .semibold))
-                    .foregroundStyle(SavantPalette.savantRed)
+                StatcastBarBackdrop()
+                    .frame(width: 220, height: 120)
+                ZStack {
+                    Circle()
+                        .fill(SavantPalette.savantNavy)
+                        .frame(width: 96, height: 96)
+                    Image(systemName: icon)
+                        .font(.system(size: 42, weight: .semibold))
+                        .foregroundStyle(.white)
+                }
+                .shadow(color: SavantPalette.savantNavy.opacity(0.25), radius: 12, y: 4)
             }
 
             Text(title)
@@ -316,6 +321,21 @@ struct OnboardingPage {
     let title: String
     let description: String
     let bullets: [BulletItem]
+}
+
+private struct StatcastBarBackdrop: View {
+    private let percentiles: [Int] = [92, 78, 65, 48, 32, 88, 71, 55, 42, 80]
+
+    var body: some View {
+        HStack(alignment: .bottom, spacing: 6) {
+            ForEach(Array(percentiles.enumerated()), id: \.offset) { _, pct in
+                RoundedRectangle(cornerRadius: 3)
+                    .fill(SavantPalette.color(forPercentile: pct).opacity(0.55))
+                    .frame(width: 14, height: CGFloat(pct) * 1.1)
+            }
+        }
+        .frame(maxHeight: .infinity, alignment: .bottom)
+    }
 }
 
 struct ConfigMissingView: View {

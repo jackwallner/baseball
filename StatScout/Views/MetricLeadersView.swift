@@ -73,10 +73,15 @@ struct MetricLeadersView: View {
             ForEach(Array(group.1.enumerated()), id: \.offset) { index, item in
                 HStack(spacing: 8) {
                     NavigationLink(value: MetricRoute(label: item.label, category: item.category)) {
-                        Text(item.label)
-                            .font(SavantType.smallBold)
-                            .foregroundStyle(SavantPalette.ink)
-                            .frame(width: 88, alignment: .leading)
+                        HStack(spacing: 2) {
+                            Text(item.label)
+                                .font(SavantType.smallBold)
+                                .foregroundStyle(SavantPalette.ink)
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 9, weight: .bold))
+                                .foregroundStyle(SavantPalette.inkTertiary)
+                        }
+                        .frame(width: 88, alignment: .leading)
                     }
                     .buttonStyle(.plain)
 

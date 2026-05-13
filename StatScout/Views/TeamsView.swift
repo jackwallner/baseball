@@ -71,6 +71,10 @@ struct TeamsView: View {
         return filteredTeams.filter { $0 != favorite }
     }
 
+    private var isInitiallyLoading: Bool {
+        viewModel.isLoading && viewModel.teamsWithData.isEmpty
+    }
+
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
@@ -78,21 +82,55 @@ struct TeamsView: View {
                     .padding(.horizontal, 12)
                     .padding(.bottom, 8)
 
-                // Favorite Team Section (if set and not filtered out)
-                if let favorite = teamsViewModel.favoriteTeam,
-                   filteredTeams.contains(favorite),
-                   searchText.isEmpty {
-                    favoriteTeamSection(favorite: favorite)
-                }
+                if isInitiallyLoading {
+                    teamsLoadingState
+                } else {
+                    if let favorite = teamsViewModel.favoriteTeam,
+                       filteredTeams.contains(favorite),
+                       searchText.isEmpty {
+                        favoriteTeamSection(favorite: favorite)
+                    }
 
-                // All Teams Section
-                allTeamsSection
+                    allTeamsSection
+                }
             }
             .padding(.top, 12)
         }
         .scrollBounceBehavior(.basedOnSize)
         .background(SavantPalette.canvas.ignoresSafeArea())
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private var teamsLoadingState: some View {
+        VStack(spacing: 12) {
+            ForEach(0..<6, id: \.self) { _ in
+                HStack(spacing: 12) {
+                    Circle()
+                        .fill(SavantPalette.surfaceAlt)
+                        .frame(width: 36, height: 36)
+                    VStack(alignment: .leading, spacing: 6) {
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(SavantPalette.surfaceAlt)
+                            .frame(width: 140, height: 12)
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(SavantPalette.surfaceAlt)
+                            .frame(width: 40, height: 10)
+                    }
+                    Spacer()
+                }
+                .padding(.horizontal, 12)
+                .frame(height: 56)
+            }
+        }
+        .padding(.horizontal, 12)
+        .background(SavantPalette.surface)
+        .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
+        .overlay(
+            RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
+                .stroke(SavantPalette.hairline, lineWidth: 0.5)
+        )
+        .padding(.horizontal, 12)
+        .redacted(reason: .placeholder)
     }
 
     private var seasonHeader: some View {

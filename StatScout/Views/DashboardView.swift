@@ -78,17 +78,18 @@ struct DashboardView: View {
 
     private var unifiedControlBar: some View {
         VStack(spacing: 8) {
-            if (viewModel.isLoading || viewModel.isHistoricalLoading) && !viewModel.players.isEmpty {
-                loadingStatusBar
-            }
-
-            if let text = viewModel.freshnessText {
-                Text(text)
-                    .font(SavantType.micro)
-                    .tracking(0.4)
-                    .foregroundStyle(SavantPalette.inkTertiary)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .padding(.horizontal, 12)
+            ZStack(alignment: .top) {
+                Color.clear.frame(height: 22)
+                if (viewModel.isLoading || viewModel.isHistoricalLoading) && !viewModel.players.isEmpty {
+                    loadingStatusBar
+                } else if let text = viewModel.freshnessText {
+                    Text(text)
+                        .font(SavantType.micro)
+                        .tracking(0.4)
+                        .foregroundStyle(SavantPalette.inkTertiary)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding(.horizontal, 12)
+                }
             }
 
             HStack(spacing: 10) {
@@ -100,8 +101,39 @@ struct DashboardView: View {
             .padding(.horizontal, 12)
 
             CategoryFilter(selectedCategory: $viewModel.selectedCategory)
+
+            qualifierToggle
         }
         .padding(.top, 8)
+    }
+
+    private var qualifierToggle: some View {
+        HStack(spacing: 8) {
+            Button {
+                viewModel.qualifiedOnly.toggle()
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: viewModel.qualifiedOnly ? "checkmark.circle.fill" : "circle")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(viewModel.qualifiedOnly ? SavantPalette.savantRed : SavantPalette.inkTertiary)
+                    Text("Qualified only")
+                        .font(SavantType.micro)
+                        .tracking(0.4)
+                        .foregroundStyle(SavantPalette.inkSecondary)
+                }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .background(SavantPalette.surface)
+                .clipShape(Capsule())
+                .overlay(
+                    Capsule().stroke(SavantPalette.hairline, lineWidth: 0.5)
+                )
+            }
+            .buttonStyle(.plain)
+            Spacer()
+        }
+        .padding(.horizontal, 12)
     }
 
     private var seasonMenu: some View {

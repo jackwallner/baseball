@@ -113,14 +113,16 @@ struct PlayerProfileView: View {
                 comparisonPlayer = selected
             }
         }
-        .background {
+        .navigationDestination(
+            isPresented: Binding(
+                get: { comparisonPlayer != nil },
+                set: { newValue in
+                    if !newValue { comparisonPlayer = nil }
+                }
+            )
+        ) {
             if let other = comparisonPlayer {
-                NavigationLink(
-                    value: ComparisonRoute(playerA: player, playerB: other),
-                    label: { EmptyView() }
-                )
-                .hidden()
-                .onDisappear { comparisonPlayer = nil }
+                PlayerComparisonView(playerA: player, playerB: other)
             }
         }
     }
