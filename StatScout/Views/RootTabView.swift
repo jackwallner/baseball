@@ -39,7 +39,6 @@ struct RootTabView: View {
                 .tag(3)
         }
         .tint(SavantPalette.savantRed)
-        .task { await viewModel.loadIfNeeded() }
         .sheet(isPresented: $showingPaywall) {
             PaywallView()
         }
@@ -82,7 +81,7 @@ struct RootTabView: View {
 
     private var metricsTab: some View {
         NavigationStack {
-            MetricLeadersView(metrics: viewModel.allMetrics)
+            MetricLeadersView(metrics: selection == 2 ? viewModel.allMetrics : [])
                 .navigationTitle("Metric Leaders")
                 .navigationBarTitleDisplayMode(.inline)
                 .modifier(SavantNavBar())
@@ -92,7 +91,7 @@ struct RootTabView: View {
 
     private var standardStatsTab: some View {
         NavigationStack {
-            StandardStatsLeadersView(players: viewModel.seasonPlayers)
+            StandardStatsLeadersView(players: selection == 3 ? viewModel.seasonPlayers : [])
                 .navigationTitle("Standard Stats")
                 .navigationBarTitleDisplayMode(.inline)
                 .modifier(SavantNavBar())
@@ -118,7 +117,16 @@ private struct StandardDestinations: ViewModifier {
             .navigationDestination(for: Player.self) { player in
                 let history = viewModel.playerHistories[player.playerId] ?? []
                 let seasonPlayer = history.first { $0.season == viewModel.selectedSeason } ?? player
-                PlayerProfileView(player: seasonPlayer, history: history, allPlayers: viewModel.seasonPlayers)
+                PlayerProfileView(
+                    player: seasonPlayer,
+                    history: history,
+                    allPlayers: viewModel.seasonPlayers,
+                    isHistoricalLoading: viewModel.isHistoricalLoading,
+                    hasLoadedHistorical: viewModel.hasLoadedHistorical,
+                    historicalLoadingMessage: viewModel.loadingMessage,
+                    historicalLoadingProgress: viewModel.loadingProgress,
+                    loadHistorical: { await viewModel.loadHistoricalIfNeeded() }
+                )
                     .modifier(SavantNavBar())
             }
             .navigationDestination(for: TeamDestination.self) { dest in

@@ -5,6 +5,11 @@ struct PlayerProfileView: View {
     let player: Player
     let history: [Player]
     var allPlayers: [Player] = []
+    var isHistoricalLoading = false
+    var hasLoadedHistorical = true
+    var historicalLoadingMessage = "Loading past seasons…"
+    var historicalLoadingProgress = 0.12
+    var loadHistorical: (() async -> Void)?
     @State private var showPercentileInfo = false
     @State private var selectedTab: PlayerStatTab = .statcast
     @State private var selectedPercentileSeason: Int? = nil
@@ -92,7 +97,7 @@ struct PlayerProfileView: View {
                             Image(systemName: "arrow.up.right.square")
                                 .foregroundStyle(.white)
                         }
-                        .accessibilityLabel("Open on Baseball Savant")
+                        .accessibilityLabel("Open source page")
                     }
                 }
             }
@@ -174,6 +179,9 @@ struct PlayerProfileView: View {
             withAnimation(.easeInOut(duration: 0.2)) {
                 selectedTab = .yearCompare
             }
+            if store.isPro, !hasLoadedHistorical, !isHistoricalLoading {
+                Task { await loadHistorical?() }
+            }
             let generator = UIImpactFeedbackGenerator(style: .light)
             generator.impactOccurred()
         }) {
@@ -213,10 +221,71 @@ struct PlayerProfileView: View {
     @ViewBuilder
     private var yearCompareContent: some View {
         if store.isPro {
-            YearComparisonView(history: history)
+            if isHistoricalLoading {
+                historicalLoadingCard
+            } else if !hasLoadedHistorical, loadHistorical != nil {
+                loadHistoricalCard
+            } else {
+                YearComparisonView(history: history)
+            }
         } else {
             yearComparePreview
         }
+    }
+
+    private var historicalLoadingCard: some View {
+        VStack(spacing: 14) {
+            ProgressView(value: min(max(historicalLoadingProgress, 0), 1), total: 1)
+                .progressViewStyle(.linear)
+                .tint(SavantPalette.savantRed)
+            Text(historicalLoadingMessage)
+                .font(SavantType.bodyBold)
+                .foregroundStyle(SavantPalette.ink)
+            Text("\(Int(min(max(historicalLoadingProgress, 0), 1) * 100))%")
+                .font(SavantType.micro)
+                .tracking(0.5)
+                .foregroundStyle(SavantPalette.inkTertiary)
+        }
+        .padding(24)
+        .frame(maxWidth: .infinity)
+        .background(SavantPalette.surface)
+        .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
+        .overlay(
+            RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
+                .stroke(SavantPalette.hairline, lineWidth: 0.5)
+        )
+        .padding(.horizontal, 12)
+        .padding(.top, 12)
+    }
+
+    private var loadHistoricalCard: some View {
+        VStack(spacing: 14) {
+            Image(systemName: "clock.arrow.circlepath")
+                .font(.system(size: 36))
+                .foregroundStyle(SavantPalette.savantRed)
+            Text("Load past seasons")
+                .font(SavantType.bodyBold)
+                .foregroundStyle(SavantPalette.ink)
+            Text("Year Compare loads historical data only when you need it.")
+                .font(SavantType.body)
+                .foregroundStyle(SavantPalette.inkSecondary)
+                .multilineTextAlignment(.center)
+            Button("Load History") {
+                Task { await loadHistorical?() }
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(SavantPalette.savantRed)
+        }
+        .padding(24)
+        .frame(maxWidth: .infinity)
+        .background(SavantPalette.surface)
+        .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
+        .overlay(
+            RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
+                .stroke(SavantPalette.hairline, lineWidth: 0.5)
+        )
+        .padding(.horizontal, 12)
+        .padding(.top, 12)
     }
 
     private var yearComparePreview: some View {
@@ -232,7 +301,7 @@ struct PlayerProfileView: View {
                     .font(SavantType.body)
                     .foregroundStyle(SavantPalette.inkSecondary)
                     .multilineTextAlignment(.center)
-                Button("Unlock Pro — \(store.proPrice)") {
+                Button(store.proPrice.map { "Unlock Pro — \($0)" } ?? "Unlock Pro") {
                     showingPaywall = true
                 }
                 .buttonStyle(.borderedProminent)
@@ -434,7 +503,7 @@ struct PercentileInfoSheet: View {
                         .font(SavantType.playerName)
                         .foregroundStyle(SavantPalette.ink)
 
-                    Text("Baseball Savant percentiles compare a player to all others at the same position. A 90th percentile means the player ranks in the top 10% of the league for that metric.")
+                    Text("Percentile rankings compare a player to others at the same position. A 90th percentile means the player ranks in the top 10% of the league for that metric.")
                         .font(SavantType.body)
                         .foregroundStyle(SavantPalette.inkSecondary)
 
@@ -451,7 +520,7 @@ struct PercentileInfoSheet: View {
                     }
                     .padding(.vertical, 8)
 
-                    Text("Data refreshes nightly from Baseball Savant percentile leaderboards. Not all metrics are available for every player due to qualifying thresholds.")
+                    Text("Data refreshes nightly from public baseball percentile leaderboards. Not all metrics are available for every player due to qualifying thresholds.")
                         .font(SavantType.small)
                         .foregroundStyle(SavantPalette.inkTertiary)
                 }

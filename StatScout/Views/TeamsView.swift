@@ -43,14 +43,8 @@ struct TeamsView: View {
         "PHI", "PIT", "SD", "SEA", "SF", "STL", "TB", "TEX", "TOR", "WSH"
     ]
 
-    /// Only show teams that have players for the currently selected season.
-    private var teamsWithData: [String] {
-        let available = Set(viewModel.seasonPlayers.map { normalizedTeamAbbreviation($0.team) })
-        return Self.allTeams.filter { available.contains($0) }
-    }
-
     private var filteredTeams: [String] {
-        let teams = searchText.isEmpty ? teamsWithData : teamsWithData.filter {
+        let teams = searchText.isEmpty ? viewModel.teamsWithData : viewModel.teamsWithData.filter {
             teamFullName($0).localizedCaseInsensitiveContains(searchText) ||
             $0.localizedCaseInsensitiveContains(searchText)
         }
@@ -179,7 +173,7 @@ struct TeamsView: View {
                 .padding(.vertical, 8)
 
             if filteredTeams.isEmpty {
-                let noDataForSeason = searchText.isEmpty && teamsWithData.isEmpty
+                let noDataForSeason = searchText.isEmpty && viewModel.teamsWithData.isEmpty
                 ContentUnavailableView {
                     Label(noDataForSeason ? "No teams available" : "No teams found", systemImage: "magnifyingglass")
                 } description: {
@@ -195,20 +189,31 @@ struct TeamsView: View {
                     : filteredTeams
 
                 ForEach(Array(teamsToShow.enumerated()), id: \.element) { index, abbr in
-                    NavigationLink(value: TeamDestination(abbr: abbr)) {
-                        TeamRow(
-                            abbr: abbr,
-                            isFavorite: teamsViewModel.isFavorite(abbr),
-                            showFavoriteButton: teamsViewModel.favoriteTeam != abbr,
-                            teamScore: viewModel.teamScore(abbr),
-                            onFavoriteTap: {
+                    HStack(spacing: 0) {
+                        NavigationLink(value: TeamDestination(abbr: abbr)) {
+                            TeamRowContent(
+                                abbr: abbr,
+                                isFavorite: teamsViewModel.isFavorite(abbr),
+                                teamScore: viewModel.teamScore(abbr)
+                            )
+                        }
+                        .buttonStyle(.plain)
+
+                        if teamsViewModel.favoriteTeam != abbr {
+                            Button {
                                 teamsViewModel.setFavorite(abbr)
-                                let generator = UIImpactFeedbackGenerator(style: .light)
-                                generator.impactOccurred()
+                                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                            } label: {
+                                Image(systemName: "star")
+                                    .font(.system(size: 18, weight: .medium))
+                                    .foregroundStyle(SavantPalette.inkTertiary)
+                                    .frame(width: 44, height: 44)
+                                    .contentShape(Rectangle())
                             }
-                        )
+                            .buttonStyle(.borderless)
+                        }
                     }
-                    .buttonStyle(.plain)
+                    .padding(.trailing, 12)
 
                     if index < teamsToShow.count - 1 {
                         Divider()
@@ -239,7 +244,30 @@ struct TeamRow: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            // Team logo/color circle
+            TeamRowContent(abbr: abbr, isFavorite: isFavorite, teamScore: teamScore)
+
+            if showFavoriteButton {
+                Button(action: { onFavoriteTap?() }) {
+                    Image(systemName: "star")
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundStyle(SavantPalette.inkTertiary)
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.borderless)
+            }
+        }
+        .padding(.trailing, 12)
+    }
+}
+
+struct TeamRowContent: View {
+    let abbr: String
+    let isFavorite: Bool
+    let teamScore: Double?
+
+    var body: some View {
+        HStack(spacing: 0) {
             Circle()
                 .fill(MLBTeamColor.color(abbr))
                 .frame(width: 36, height: 36)
@@ -250,7 +278,6 @@ struct TeamRow: View {
                 )
                 .padding(.trailing, 12)
 
-            // Team name
             VStack(alignment: .leading, spacing: 2) {
                 Text(teamFullName(abbr))
                     .font(SavantType.bodyBold)
@@ -275,29 +302,14 @@ struct TeamRow: View {
                 .padding(.trailing, 8)
             }
 
-            // Favorite button (if showing)
-            if showFavoriteButton {
-                Button(action: {
-                    onFavoriteTap?()
-                }) {
-                    Image(systemName: "star")
-                        .font(.system(size: 18, weight: .medium))
-                        .foregroundStyle(SavantPalette.inkTertiary)
-                        .frame(width: 44, height: 44)
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-            }
-
-            // Chevron
             Image(systemName: "chevron.right")
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundStyle(SavantPalette.inkTertiary)
-                .padding(.leading, 8)
         }
-        .padding(.horizontal, 12)
+        .padding(.leading, 12)
         .frame(height: 56)
-        .background(isFavorite && !showFavoriteButton ? SavantPalette.surfaceAlt : SavantPalette.surface)
+        .contentShape(Rectangle())
+        .background(isFavorite ? SavantPalette.surfaceAlt : SavantPalette.surface)
     }
 }
 

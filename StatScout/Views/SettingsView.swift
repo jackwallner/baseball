@@ -70,7 +70,7 @@ struct AboutView: View {
                         Text(store.isPro ? "Pro Unlocked" : "Free Version")
                             .font(SavantType.bodyBold)
                             .foregroundStyle(SavantPalette.ink)
-                        Text(store.isPro ? "Full access to all features." : "Unlock teams, metrics, and more.")
+                        Text(store.isPro ? "Pro features are unlocked." : "Unlock historical seasons and year-over-year comparisons.")
                             .font(SavantType.small)
                             .foregroundStyle(SavantPalette.inkSecondary)
                     }
@@ -86,23 +86,21 @@ struct AboutView: View {
                 }
                 .padding(SavantGeo.padCard)
 
-                if store.isPro {
-                    Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline)
-                    Button {
-                        Task { await store.restorePurchases() }
-                    } label: {
-                        HStack {
-                            Image(systemName: "arrow.clockwise")
-                                .font(.caption)
-                            Text("Restore Purchases")
-                                .font(SavantType.smallBold)
-                        }
-                        .foregroundStyle(SavantPalette.linkBlue)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(SavantGeo.padCard)
+                Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline)
+                Button {
+                    Task { await store.restorePurchases() }
+                } label: {
+                    HStack {
+                        Image(systemName: "arrow.clockwise")
+                            .font(.caption)
+                        Text("Restore Purchases")
+                            .font(SavantType.smallBold)
                     }
-                    .buttonStyle(.plain)
+                    .foregroundStyle(SavantPalette.linkBlue)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(SavantGeo.padCard)
                 }
+                .buttonStyle(.plain)
 
                 if let error = store.lastError {
                     Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline)
@@ -166,7 +164,7 @@ struct AboutView: View {
                     row(
                         icon: "shield.lefthalf.filled",
                         title: "Privacy Policy",
-                        subtitle: "No data collection. No tracking."
+                        subtitle: "No ads or tracking."
                     )
                 }
                 .buttonStyle(.plain)

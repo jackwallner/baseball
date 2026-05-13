@@ -56,7 +56,7 @@ struct PlayerComparisonView: View {
                 .foregroundStyle(SavantPalette.inkSecondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
-            Button("Unlock Pro — \(store.proPrice)") {
+            Button(store.proPrice.map { "Unlock Pro — \($0)" } ?? "Unlock Pro") {
                 showingPaywall = true
             }
             .buttonStyle(.borderedProminent)

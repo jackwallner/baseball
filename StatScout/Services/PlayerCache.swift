@@ -81,7 +81,11 @@ struct TwoTierPlayerCache: PlayerCaching {
         return historicalPlayers + currentPlayers
     }
 
-    private func loadHistoricalPlayers() -> [Player] {
+    func loadCurrentPlayers() throws -> [Player] {
+        try current.loadPlayers()
+    }
+
+    func loadHistoricalPlayers() -> [Player] {
         // 1. Permanent disk cache (binary plist).
         if let cached = try? historical.loadPlayers(), !cached.isEmpty {
             return cached

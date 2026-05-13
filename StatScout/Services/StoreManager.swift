@@ -53,8 +53,8 @@ final class StoreManager {
     var lifetimeProduct: Product? { product(for: .lifetime) }
 
     // Kept so existing callers continue to display the lifetime price.
-    var proPrice: String {
-        lifetimeProduct?.displayPrice ?? "$4.99"
+    var proPrice: String? {
+        lifetimeProduct?.displayPrice
     }
 
     init() {

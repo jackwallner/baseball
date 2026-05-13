@@ -141,8 +141,8 @@ final class StoreService: NSObject, ObservableObject {
     @Published private(set) var isLoadingProducts: Bool = false
     @Published private(set) var lastError: String?
 
-    var proPrice: String {
-        products.first(where: { $0.productKind == .lifetime })?.storeProduct.localizedPriceString ?? "$4.99"
+    var proPrice: String? {
+        products.first(where: { $0.productKind == .lifetime })?.storeProduct.localizedPriceString
     }
 
     private let logger = Logger(subsystem: "com.jackwallner.baseball", category: "Store")

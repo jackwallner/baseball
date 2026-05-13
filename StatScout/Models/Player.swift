@@ -99,11 +99,11 @@ struct Player: Identifiable, Codable, Hashable, Sendable {
     }
 
     var shareSummary: String {
-        let topSignal = headlineMetric.map { metric in
+        let headline = headlineMetric.map { metric in
             let valueText = metric.value.isEmpty ? "\(metric.percentile.ordinal) percentile" : "\(metric.value), \(metric.percentile.ordinal) percentile"
             return "\(metric.label) \(valueText)"
         } ?? "\(overallPercentile.ordinal) overall percentile"
-        return "\(name) · \(team) \(position)\nOverall: \(overallPercentile.ordinal) percentile\nTop signal: \(topSignal)\nStatScout"
+        return "\(name) · \(team) \(position)\nOverall: \(overallPercentile.ordinal) percentile\nTop stat: \(headline)\nStatScout"
     }
 
     var savantURL: URL? {

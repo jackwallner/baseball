@@ -79,6 +79,13 @@ struct ContentView: View {
     }
 }
 
+struct BulletItem: Identifiable {
+    let id = UUID()
+    let text: String
+    let icon: String
+    let color: Color
+}
+
 struct OnboardingCards: View {
     @EnvironmentObject private var store: StoreService
     let viewModel: DashboardViewModel
@@ -87,6 +94,7 @@ struct OnboardingCards: View {
     @State private var currentPage = 0
 
     private var isLastPage: Bool { currentPage == pages.count - 1 }
+    private var isPricingPage: Bool { currentPage == 2 }
     private var dataReady: Bool { viewModel.isReady }
 
     var body: some View {
@@ -123,7 +131,7 @@ struct OnboardingCards: View {
                 .tabViewStyle(.page(indexDisplayMode: .always))
                 .indexViewStyle(.page(backgroundDisplayMode: .always))
 
-                primaryButton
+                bottomButtons
                     .padding(.horizontal, 24)
                     .padding(.bottom, 32)
             }
@@ -131,17 +139,21 @@ struct OnboardingCards: View {
     }
 
     @ViewBuilder
-    private var primaryButton: some View {
+    private var bottomButtons: some View {
         if isLastPage {
             Button {
                 withAnimation { hasCompletedOnboarding = true }
             } label: {
                 HStack(spacing: 10) {
                     if !dataReady {
-                        ProgressView()
-                            .tint(.white)
-                            .controlSize(.small)
-                        Text("Loading 2024–2026 data…")
+                        VStack(spacing: 6) {
+                            ProgressView(value: min(max(viewModel.loadingProgress, 0), 1), total: 1)
+                                .progressViewStyle(.linear)
+                                .tint(.white)
+                            Text(viewModel.loadingMessage)
+                                .font(SavantType.micro)
+                                .tracking(0.4)
+                        }
                     } else {
                         Image(systemName: "baseball.fill")
                             .font(.system(size: 14, weight: .semibold))
@@ -157,6 +169,32 @@ struct OnboardingCards: View {
             }
             .buttonStyle(.plain)
             .disabled(!dataReady)
+        } else if isPricingPage {
+            VStack(spacing: 12) {
+                Button {
+                    showingPaywall = true
+                } label: {
+                    Text(store.proPrice.map { "Unlock Pro — \($0)" } ?? "See Plans")
+                        .font(SavantType.bodyBold)
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 52)
+                        .background(SavantPalette.savantRed)
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
+                }
+                .buttonStyle(.plain)
+
+                Button {
+                    withAnimation { currentPage += 1 }
+                } label: {
+                    Text("Maybe Later")
+                        .font(SavantType.bodyBold)
+                        .foregroundStyle(SavantPalette.inkSecondary)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 44)
+                }
+                .buttonStyle(.plain)
+            }
         } else {
             Button {
                 withAnimation { currentPage += 1 }
@@ -176,33 +214,46 @@ struct OnboardingCards: View {
     private let pages: [OnboardingPage] = [
         OnboardingPage(
             icon: "baseball.fill",
-            title: "Baseball Savant,\nin Your Pocket",
-            description: "MLB's percentile rankings — without the desktop view.",
+            title: "Your Pocket\nScout",
+            description: "Baseball percentile rankings built for a fast mobile view. Every qualified player, every metric, always up to date.",
             bullets: [
-                "Every qualified player ranked",
-                "xwOBA, Barrel%, Sprint Speed, and more",
-                "Updated daily"
+                BulletItem(text: "Every qualified player ranked", icon: "checkmark.circle.fill", color: SavantPalette.savantRed),
+                BulletItem(text: "xwOBA, Barrel%, Sprint Speed, and more", icon: "checkmark.circle.fill", color: SavantPalette.savantRed),
+                BulletItem(text: "Updated daily — fresh data, always", icon: "checkmark.circle.fill", color: SavantPalette.savantRed)
             ]
         ),
         OnboardingPage(
             icon: "chart.bar.fill",
-            title: "Find Signals Fast",
-            description: "Four tabs cover every angle.",
+            title: "Find Insights\nFast",
+            description: "Four tabs cover every angle of the game. See what's happening across the league in seconds.",
             bullets: [
-                "Leaders — sort the league by any metric",
-                "Teams — see who's hot, who's not",
-                "Metrics — best & worst at each stat",
-                "Stats — traditional numbers for the curious"
+                BulletItem(text: "Leaders — sort the league by any metric", icon: "checkmark.circle.fill", color: SavantPalette.savantRed),
+                BulletItem(text: "Teams — see who's hot, who's not", icon: "checkmark.circle.fill", color: SavantPalette.savantRed),
+                BulletItem(text: "Metrics — best & worst at each stat", icon: "checkmark.circle.fill", color: SavantPalette.savantRed),
+                BulletItem(text: "Stats — traditional numbers for the curious", icon: "checkmark.circle.fill", color: SavantPalette.savantRed)
             ]
         ),
         OnboardingPage(
             icon: "crown.fill",
-            title: "Free covers 2026.\nPro unlocks the rest.",
-            description: "History, comparisons, and the deep cuts.",
+            title: "Go Pro",
+            description: "Current season is free. Pro unlocks the trends that tell the full story — past seasons, year-over-year changes, and head-to-head comparisons.",
             bullets: [
-                "Past seasons (2024, 2025…)",
-                "Year-over-year player comparisons",
-                "Full metric rankings & team breakdowns"
+                BulletItem(text: "Current season leaderboard", icon: "checkmark.circle.fill", color: .green),
+                BulletItem(text: "Player profiles & percentiles", icon: "checkmark.circle.fill", color: .green),
+                BulletItem(text: "Past seasons on demand", icon: "crown.fill", color: .yellow),
+                BulletItem(text: "Year-over-year comparisons", icon: "crown.fill", color: .yellow),
+                BulletItem(text: "Head-to-head player matchups", icon: "crown.fill", color: .yellow),
+                BulletItem(text: "Full percentile history", icon: "crown.fill", color: .yellow)
+            ]
+        ),
+        OnboardingPage(
+            icon: "baseball.fill",
+            title: "Play Ball",
+            description: "Data is loading so you can jump right into the leaderboard. Your app, your team, your game.",
+            bullets: [
+                BulletItem(text: "Ready when the data loads", icon: "checkmark.circle.fill", color: SavantPalette.savantRed),
+                BulletItem(text: "No account required to get started", icon: "checkmark.circle.fill", color: SavantPalette.savantRed),
+                BulletItem(text: "Upgrade to Pro anytime from Settings", icon: "checkmark.circle.fill", color: SavantPalette.savantRed)
             ]
         )
     ]
@@ -212,7 +263,7 @@ struct OnboardingCard: View {
     let icon: String
     let title: String
     let description: String
-    let bullets: [String]
+    let bullets: [BulletItem]
 
     var body: some View {
         VStack(spacing: 20) {
@@ -239,12 +290,12 @@ struct OnboardingCard: View {
                 .padding(.horizontal, 32)
 
             VStack(alignment: .leading, spacing: 10) {
-                ForEach(bullets, id: \.self) { bullet in
+                ForEach(bullets) { bullet in
                     HStack(alignment: .firstTextBaseline, spacing: 10) {
-                        Image(systemName: "checkmark.circle.fill")
+                        Image(systemName: bullet.icon)
                             .font(.system(size: 14, weight: .bold))
-                            .foregroundStyle(SavantPalette.savantRed)
-                        Text(bullet)
+                            .foregroundStyle(bullet.color)
+                        Text(bullet.text)
                             .font(SavantType.body)
                             .foregroundStyle(SavantPalette.ink)
                         Spacer(minLength: 0)
@@ -264,7 +315,7 @@ struct OnboardingPage {
     let icon: String
     let title: String
     let description: String
-    let bullets: [String]
+    let bullets: [BulletItem]
 }
 
 struct ConfigMissingView: View {

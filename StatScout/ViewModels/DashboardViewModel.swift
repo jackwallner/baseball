@@ -66,13 +66,31 @@ final class DashboardViewModel {
         }
     }
     // Start true so the very first frame shows a spinner, not a "No data for 2026" empty state
-    // before the bundled cache finishes decoding.
+    // before saved players or the network feed resolves.
     var isLoading = true
+    var isHistoricalLoading = false
+    var hasLoadedHistorical = false
+    var loadingMessage = "Starting up…"
+    var loadingProgress = 0.05
     var errorMessage: String?
     var lastFetchFailed = false
     private var hasStartedLoading = false
 
     var isReady: Bool { !players.isEmpty }
+
+    private var _teamScores: [String: Double] = [:]
+    private var _teamsWithData: [String] = []
+    private var _teamCacheSeason: Int?
+
+    var teamScores: [String: Double] {
+        if _teamCacheSeason != selectedSeason { recomputeTeamCache() }
+        return _teamScores
+    }
+
+    var teamsWithData: [String] {
+        if _teamCacheSeason != selectedSeason { recomputeTeamCache() }
+        return _teamsWithData
+    }
 
     var teamCounts: [String: Int] {
         Dictionary(grouping: seasonPlayers) { normalizedTeamAbbreviation($0.team) }
@@ -208,13 +226,7 @@ final class DashboardViewModel {
     }
 
     func teamScore(_ abbr: String) -> Double {
-        let teamPlayers = seasonPlayers.filter { normalizedTeamAbbreviation($0.team) == normalizedTeamAbbreviation(abbr) }
-        guard !teamPlayers.isEmpty else { return 0 }
-        let scores = teamPlayers.compactMap { p in
-            p.metrics.first(where: { $0.label == "xwOBA" })?.percentile
-        }
-        guard !scores.isEmpty else { return 0 }
-        return Double(scores.reduce(0, +)) / Double(scores.count)
+        _teamScores[normalizedTeamAbbreviation(abbr)] ?? 0
     }
 
     var allMetrics: [(label: String, category: MetricCategory, best: (player: Player, percentile: Int, actualValue: String)?, worst: (player: Player, percentile: Int, actualValue: String)?)] {
@@ -248,36 +260,43 @@ final class DashboardViewModel {
 
     func load() async {
         hasStartedLoading = true
-        // Decode the 40MB+ historical cache off the main actor so the first frame
-        // isn't blocked behind it.
+        isLoading = players.isEmpty
+        loadingMessage = players.isEmpty ? "Loading saved players…" : "Refreshing player data…"
+        loadingProgress = players.isEmpty ? 0.12 : 0.2
+
         let cached: [Player] = await Task.detached { [cache] in
-            (try? cache?.loadPlayers()) ?? []
+            if let cache = cache as? TwoTierPlayerCache {
+                return (try? cache.loadCurrentPlayers()) ?? []
+            }
+            return (try? cache?.loadPlayers()) ?? []
         }.value
 
         if players.isEmpty, !cached.isEmpty {
             ingestPlayers(cached)
         }
 
+        loadingMessage = "Checking for updates…"
+        loadingProgress = 0.45
         isLoading = players.isEmpty
         errorMessage = nil
         lastFetchFailed = false
 
         do {
-            let historical = cached.filter { ($0.season ?? 0) < 2026 }
             let current = try await provider.fetchCurrentPlayers()
-
-            let allPlayers = historical + current
+            let fallbackPlayers = cached.isEmpty ? playerHistories.values.flatMap { $0 } : cached
+            let allPlayers = current.isEmpty ? fallbackPlayers : mergePlayers(replacing: current)
 
             guard !allPlayers.isEmpty else {
                 errorMessage = "No players found."
                 lastFetchFailed = true
                 isLoading = false
+                loadingProgress = 1
                 return
             }
 
+            loadingMessage = "Preparing leaderboard…"
+            loadingProgress = 0.85
             ingestPlayers(allPlayers)
-            // Historical is permanent on disk (seeded from the bundle on first launch);
-            // only persist the current-season snapshot to avoid a 40MB rewrite per refresh.
             try? cache?.savePlayers(current)
 
         } catch is DecodingError {
@@ -291,6 +310,32 @@ final class DashboardViewModel {
             lastFetchFailed = true
         }
         isLoading = false
+        loadingProgress = 1
+    }
+
+    func loadHistoricalIfNeeded() async {
+        guard !hasLoadedHistorical, !isHistoricalLoading else { return }
+        isHistoricalLoading = true
+        loadingMessage = "Loading past seasons…"
+        loadingProgress = 0.12
+
+        let historical: [Player] = await Task.detached { [cache] in
+            if let cache = cache as? TwoTierPlayerCache {
+                return cache.loadHistoricalPlayers()
+            }
+            return ((try? cache?.loadPlayers()) ?? []).filter { ($0.season ?? 0) < 2026 }
+        }.value
+
+        loadingMessage = "Preparing season history…"
+        loadingProgress = 0.78
+
+        if !historical.isEmpty {
+            ingestPlayers(mergePlayers(replacing: historical))
+            hasLoadedHistorical = true
+        }
+
+        isHistoricalLoading = false
+        loadingProgress = 1
     }
 
     private func ingestPlayers(_ players: [Player]) {
@@ -320,5 +365,42 @@ final class DashboardViewModel {
            let mostRecent = seasonsWithData.sorted(by: >).first {
             selectedSeason = mostRecent
         }
+
+        recomputeTeamCache()
+    }
+
+    private func recomputeTeamCache() {
+        let allSeasonPlayers = playerHistories.values.flatMap { $0 }.filter { $0.season == selectedSeason }
+        var seenIds = Set<Int>()
+        let uniquePlayers = allSeasonPlayers.filter { seenIds.insert($0.playerId).inserted }
+
+        var teams = Set<String>()
+        var teamScoresAccum: [String: (sum: Int, count: Int)] = [:]
+
+        for player in uniquePlayers {
+            let abbr = normalizedTeamAbbreviation(player.team)
+            teams.insert(abbr)
+            if let score = player.metrics.first(where: { $0.label == "xwOBA" })?.percentile {
+                var entry = teamScoresAccum[abbr] ?? (0, 0)
+                entry.sum += score
+                entry.count += 1
+                teamScoresAccum[abbr] = entry
+            }
+        }
+
+        _teamsWithData = teams.sorted()
+        _teamScores = teamScoresAccum.mapValues { Double($0.sum) / Double($0.count) }
+        _teamCacheSeason = selectedSeason
+    }
+
+    private func mergePlayers(replacing replacements: [Player]) -> [Player] {
+        var merged: [String: Player] = [:]
+        for player in playerHistories.values.flatMap({ $0 }) {
+            merged[player.id] = player
+        }
+        for player in replacements {
+            merged[player.id] = player
+        }
+        return Array(merged.values)
     }
 }

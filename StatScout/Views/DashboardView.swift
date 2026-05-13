@@ -23,9 +23,7 @@ struct DashboardView: View {
                 await viewModel.load()
             }
             if viewModel.isLoading && viewModel.players.isEmpty {
-                ProgressView()
-                    .scaleEffect(1.5)
-                    .tint(SavantPalette.inkTertiary)
+                loadingCard
             }
         }
         .background(SavantPalette.canvas.ignoresSafeArea())
@@ -80,6 +78,10 @@ struct DashboardView: View {
 
     private var unifiedControlBar: some View {
         VStack(spacing: 8) {
+            if (viewModel.isLoading || viewModel.isHistoricalLoading) && !viewModel.players.isEmpty {
+                loadingStatusBar
+            }
+
             if let text = viewModel.freshnessText {
                 Text(text)
                     .font(SavantType.micro)
@@ -104,6 +106,19 @@ struct DashboardView: View {
 
     private var seasonMenu: some View {
         Menu {
+            if viewModel.isHistoricalLoading {
+                Label("Loading past seasons…", systemImage: "hourglass")
+            } else if !viewModel.hasLoadedHistorical {
+                Button {
+                    if store.isPro {
+                        Task { await viewModel.loadHistoricalIfNeeded() }
+                    } else {
+                        showingPaywall = true
+                    }
+                } label: {
+                    Label(store.isPro ? "Load past seasons" : "Past seasons require Pro", systemImage: store.isPro ? "clock.arrow.circlepath" : "lock.fill")
+                }
+            }
             ForEach(viewModel.availableSeasons, id: \.self) { season in
                 let isLocked = season != 2026 && !store.isPro
                 Button {
@@ -255,6 +270,54 @@ struct DashboardView: View {
         .padding(.horizontal, 12)
         .padding(.top, 12)
         .padding(.bottom, 12)
+    }
+
+    private var loadingCard: some View {
+        VStack(spacing: 14) {
+            ProgressView(value: min(max(viewModel.loadingProgress, 0), 1), total: 1)
+                .progressViewStyle(.linear)
+                .tint(SavantPalette.savantRed)
+            Text(viewModel.loadingMessage)
+                .font(SavantType.bodyBold)
+                .foregroundStyle(SavantPalette.ink)
+            Text("\(Int(min(max(viewModel.loadingProgress, 0), 1) * 100))%")
+                .font(SavantType.micro)
+                .tracking(0.5)
+                .foregroundStyle(SavantPalette.inkTertiary)
+        }
+        .padding(22)
+        .frame(maxWidth: 300)
+        .background(SavantPalette.surface)
+        .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
+        .overlay(
+            RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
+                .stroke(SavantPalette.hairline, lineWidth: 0.5)
+        )
+        .shadow(color: .black.opacity(0.08), radius: 16, y: 8)
+        .padding(.horizontal, 24)
+    }
+
+    private var loadingStatusBar: some View {
+        HStack(spacing: 10) {
+            ProgressView(value: min(max(viewModel.loadingProgress, 0), 1), total: 1)
+                .progressViewStyle(.linear)
+                .tint(SavantPalette.savantRed)
+                .frame(maxWidth: .infinity)
+            Text(viewModel.loadingMessage)
+                .font(SavantType.micro)
+                .tracking(0.4)
+                .foregroundStyle(SavantPalette.inkSecondary)
+                .lineLimit(1)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(SavantPalette.surface)
+        .clipShape(Capsule())
+        .overlay(
+            Capsule()
+                .stroke(SavantPalette.hairline, lineWidth: 0.5)
+        )
+        .padding(.horizontal, 12)
     }
 }
 
