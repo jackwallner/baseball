@@ -4,7 +4,7 @@ struct DashboardView: View {
     @EnvironmentObject private var store: StoreService
     @Bindable var viewModel: DashboardViewModel
     @State private var showingAbout = false
-    @State private var showingPaywall = false
+    @State private var paywallTrigger: PaywallTrigger?
 
     var body: some View {
         ZStack {
@@ -40,15 +40,15 @@ struct DashboardView: View {
             }
             .presentationDragIndicator(.visible)
         }
-        .sheet(isPresented: $showingPaywall) {
-            PaywallView()
+        .sheet(item: $paywallTrigger) { trigger in
+            PaywallView(trigger: trigger)
         }
     }
 
     private var aboutFooter: some View {
         VStack(spacing: 8) {
             if !store.isPro {
-                Button(action: { showingPaywall = true }) {
+                Button(action: { paywallTrigger = .upgrade }) {
                     HStack(spacing: 6) {
                         Image(systemName: "crown.fill")
                             .font(.system(size: 10))
@@ -76,6 +76,38 @@ struct DashboardView: View {
         .padding(.vertical, 8)
     }
 
+    private var proUpsellBanner: some View {
+        Button {
+            paywallTrigger = .upgrade
+        } label: {
+            HStack(spacing: 10) {
+                Image(systemName: "crown.fill")
+                    .font(.system(size: 14))
+                    .foregroundStyle(Color.yellow)
+
+                Text("Unlock past seasons, comparisons & trends")
+                    .font(SavantType.small)
+                    .foregroundStyle(SavantPalette.ink)
+
+                Spacer(minLength: 4)
+
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundStyle(SavantPalette.inkTertiary)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+            .background(SavantPalette.surface)
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .overlay(
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(SavantPalette.hairline, lineWidth: 0.5)
+            )
+        }
+        .buttonStyle(.plain)
+        .padding(.horizontal, 12)
+    }
+
     private var unifiedControlBar: some View {
         VStack(spacing: 8) {
             ZStack(alignment: .top) {
@@ -90,6 +122,10 @@ struct DashboardView: View {
                         .frame(maxWidth: .infinity, alignment: .center)
                         .padding(.horizontal, 12)
                 }
+            }
+
+            if !store.isPro && !viewModel.players.isEmpty {
+                proUpsellBanner
             }
 
             HStack(spacing: 10) {
@@ -108,32 +144,8 @@ struct DashboardView: View {
     }
 
     private var qualifierToggle: some View {
-        HStack(spacing: 8) {
-            Button {
-                viewModel.qualifiedOnly.toggle()
-                UIImpactFeedbackGenerator(style: .light).impactOccurred()
-            } label: {
-                HStack(spacing: 6) {
-                    Image(systemName: viewModel.qualifiedOnly ? "checkmark.circle.fill" : "circle")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundStyle(viewModel.qualifiedOnly ? SavantPalette.savantRed : SavantPalette.inkTertiary)
-                    Text("Qualified only")
-                        .font(SavantType.micro)
-                        .tracking(0.4)
-                        .foregroundStyle(SavantPalette.inkSecondary)
-                }
-                .padding(.horizontal, 10)
-                .padding(.vertical, 6)
-                .background(SavantPalette.surface)
-                .clipShape(Capsule())
-                .overlay(
-                    Capsule().stroke(SavantPalette.hairline, lineWidth: 0.5)
-                )
-            }
-            .buttonStyle(.plain)
-            Spacer()
-        }
-        .padding(.horizontal, 12)
+        QualifierPicker(selection: $viewModel.qualifierLevel)
+            .padding(.horizontal, 12)
     }
 
     private var seasonMenu: some View {
@@ -145,17 +157,17 @@ struct DashboardView: View {
                     if store.isPro {
                         Task { await viewModel.loadHistoricalIfNeeded() }
                     } else {
-                        showingPaywall = true
+                        paywallTrigger = .pastSeasonsLoad
                     }
                 } label: {
-                    Label(store.isPro ? "Load past seasons" : "Past seasons require Pro", systemImage: store.isPro ? "clock.arrow.circlepath" : "lock.fill")
+                    Label(store.isPro ? "Load past seasons" : "Past seasons require Pro", systemImage: store.isPro ? "clock.arrow.circlepath" : "crown.fill")
                 }
             }
             ForEach(viewModel.availableSeasons, id: \.self) { season in
                 let isLocked = season != 2026 && !store.isPro
                 Button {
                     if isLocked {
-                        showingPaywall = true
+                        paywallTrigger = .pastSeason
                     } else {
                         viewModel.selectedSeason = season
                     }
@@ -163,7 +175,7 @@ struct DashboardView: View {
                     HStack {
                         Text(String(season))
                         if isLocked {
-                            Image(systemName: "lock.fill")
+                            Image(systemName: "crown.fill")
                                 .font(.system(size: 10))
                                 .foregroundStyle(SavantPalette.inkTertiary)
                         }

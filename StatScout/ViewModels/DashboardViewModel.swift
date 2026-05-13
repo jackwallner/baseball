@@ -12,7 +12,6 @@ final class DashboardViewModel {
     var searchText = ""
     var selectedCategory: MetricCategory? = .hitting
     var sortDescending = true
-    var qualifiedOnly = true
     // Defaults to current year, but `load()` will reset to the most recent season
     // that actually has data once the cache/network resolves so first paint isn't an empty state.
     var selectedSeason: Int = Calendar.current.component(.year, from: Date())
@@ -107,7 +106,6 @@ final class DashboardViewModel {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         formatter.timeStyle = .short
-        formatter.doesRelativeDateFormatting = true
         return "Updated \(formatter.string(from: lastUpdated))"
     }
 
@@ -148,29 +146,56 @@ final class DashboardViewModel {
                 || teamFullName(player.team).localizedCaseInsensitiveContains(searchText)
             let matchesCategory = selectedCategory == nil || player.metrics.contains { $0.category == selectedCategory }
             let matchesType = player.matchesPlayerType(for: selectedCategory)
-            let qualifies = !qualifiedOnly || isQualified(player, for: selectedCategory)
+            let qualifies = isQualified(player, for: selectedCategory)
             return matchesSearch && matchesCategory && matchesType && qualifies
         }
     }
 
-    func isQualified(_ player: Player, for category: MetricCategory?) -> Bool {
-        let stats = player.standardStats ?? []
-        switch category {
-        case .pitching:
-            return ipValue(in: stats) >= Self.minInningsPitched
-        case .hitting, .running, .none:
-            if player.playerType == "pitcher" {
-                return ipValue(in: stats) >= Self.minInningsPitched
+    enum QualifierLevel: String, CaseIterable, Identifiable {
+        case all = "All"
+        case any = "Any PA/IP"
+        case qualified = "Qualified"
+
+        var id: String { rawValue }
+
+        var minPA: Int {
+            switch self {
+            case .all: return 0
+            case .any: return 10
+            case .qualified: return 50
             }
-            return paValue(in: stats) >= Self.minPlateAppearances
-        case .fielding:
-            return paValue(in: stats) >= Self.minPlateAppearances
-                || ipValue(in: stats) >= Self.minInningsPitched
+        }
+
+        var minIP: Double {
+            switch self {
+            case .all: return 0
+            case .any: return 5
+            case .qualified: return 20
+            }
         }
     }
 
-    private static let minPlateAppearances = 50
-    private static let minInningsPitched = 10.0
+    var qualifierLevel: QualifierLevel = .qualified
+
+    var minPlateAppearances: Int { qualifierLevel.minPA }
+    var minInningsPitched: Double { qualifierLevel.minIP }
+
+    func isQualified(_ player: Player, for category: MetricCategory?) -> Bool {
+        guard qualifierLevel != .all else { return true }
+        let stats = player.standardStats ?? []
+        switch category {
+        case .pitching:
+            return ipValue(in: stats) >= minInningsPitched
+        case .hitting, .running, .none:
+            if player.playerType == "pitcher" {
+                return ipValue(in: stats) >= minInningsPitched
+            }
+            return paValue(in: stats) >= minPlateAppearances
+        case .fielding:
+            return paValue(in: stats) >= minPlateAppearances
+                || ipValue(in: stats) >= minInningsPitched
+        }
+    }
 
     private func paValue(in stats: [StandardStat]) -> Int {
         guard let stat = stats.first(where: { Self.paLabels.contains($0.label.uppercased()) }) else { return 0 }
@@ -263,10 +288,21 @@ final class DashboardViewModel {
         _teamScores[normalizedTeamAbbreviation(abbr)] ?? 0
     }
 
+    /// Players who meet the active qualifier for at least one category they appear in.
+    /// Used to filter the StatScout leaders and Box Score so unqualified samples don't pollute results.
+    var qualifiedSeasonPlayers: [Player] {
+        seasonPlayers.filter { player in
+            let categories = Set(player.metrics.map(\.category))
+            if categories.isEmpty { return isQualified(player, for: nil) }
+            return categories.contains { isQualified(player, for: $0) }
+        }
+    }
+
     var allMetrics: [(label: String, category: MetricCategory, best: (player: Player, percentile: Int, actualValue: String)?, worst: (player: Player, percentile: Int, actualValue: String)?)] {
         var metricMap: [String: (category: MetricCategory, values: [(player: Player, percentile: Int, actualValue: String)])] = [:]
         for player in seasonPlayers {
             for metric in player.metrics {
+                guard isQualified(player, for: metric.category) else { continue }
                 let compositeKey = "\(metric.label)|\(metric.category.rawValue)"
                 if metricMap[compositeKey] == nil {
                     metricMap[compositeKey] = (category: metric.category, values: [])

@@ -257,6 +257,37 @@ struct CategoryFilter: View {
     }
 }
 
+// MARK: - Qualifier Picker
+
+struct QualifierPicker: View {
+    @Binding var selection: DashboardViewModel.QualifierLevel
+
+    var body: some View {
+        HStack(spacing: 0) {
+            ForEach(DashboardViewModel.QualifierLevel.allCases) { level in
+                Button {
+                    selection = level
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                } label: {
+                    Text(level.rawValue)
+                        .font(SavantType.micro)
+                        .tracking(0.4)
+                        .foregroundStyle(selection == level ? .white : SavantPalette.inkSecondary)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 28)
+                        .background(selection == level ? SavantPalette.savantRed : Color.clear)
+                        .clipShape(Capsule())
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(2)
+        .background(SavantPalette.surface)
+        .clipShape(Capsule())
+        .overlay(Capsule().stroke(SavantPalette.hairline, lineWidth: 0.5))
+    }
+}
+
 // MARK: - Section Header (legacy, minimal use)
 
 struct SectionHeader: View {
@@ -363,7 +394,7 @@ struct LeaderboardTableHeader: View {
                     .font(.system(size: 8, weight: .bold))
                     .foregroundStyle(SavantPalette.savantRed)
             }
-            .frame(width: 80, alignment: .trailing)
+            .frame(width: 100, alignment: .trailing)
         }
         .frame(height: SavantGeo.rowHeightHeader)
         .padding(.horizontal, SavantGeo.padInline)
@@ -378,11 +409,20 @@ struct LeaderboardTableRow: View {
     var metricLabel: String? = nil
     var metricCategory: MetricCategory? = nil
 
+    private var displayMetric: Metric? {
+        guard let label = metricLabel, let category = metricCategory else { return nil }
+        return player.metrics.first { $0.label == label && $0.category == category }
+    }
+
     private var displayPercentile: Int {
-        if let label = metricLabel, let category = metricCategory {
-            return player.metrics.first { $0.label == label && $0.category == category }?.percentile ?? player.overallPercentile
+        displayMetric?.percentile ?? player.overallPercentile
+    }
+
+    private var displayValueText: String {
+        if let metric = displayMetric, !metric.value.isEmpty {
+            return metric.value
         }
-        return player.overallPercentile
+        return "\(displayPercentile)"
     }
 
     var body: some View {
@@ -419,14 +459,16 @@ struct LeaderboardTableRow: View {
 
             HStack(spacing: 8) {
                 PercentileBarMini(percentile: displayPercentile)
-                    .frame(width: 40)
-                Text("\(displayPercentile)")
+                    .frame(width: 36)
+                Text(displayValueText)
                     .font(SavantType.statSmall)
                     .foregroundStyle(SavantPalette.color(forPercentile: displayPercentile))
-                    .frame(width: 28, alignment: .trailing)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                    .frame(width: 56, alignment: .trailing)
                     .monospacedDigit()
             }
-            .frame(width: 80, alignment: .trailing)
+            .frame(width: 100, alignment: .trailing)
         }
         .frame(height: SavantGeo.rowHeight)
         .padding(.horizontal, SavantGeo.padInline)

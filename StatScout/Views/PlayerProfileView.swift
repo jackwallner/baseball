@@ -13,9 +13,9 @@ struct PlayerProfileView: View {
     @State private var showPercentileInfo = false
     @State private var selectedTab: PlayerStatTab = .statcast
     @State private var selectedPercentileSeason: Int? = nil
-    @State private var showingPaywall = false
+    @State private var paywallTrigger: PaywallTrigger?
     @State private var showingPlayerPicker = false
-    @State private var comparisonPlayer: Player?
+    @State private var comparisonRoute: ComparisonRoute?
 
     enum PlayerStatTab: String, CaseIterable {
         case statcast = "Percentiles"
@@ -47,12 +47,42 @@ struct PlayerProfileView: View {
         let grouped = Dictionary(grouping: displayedPlayer.metrics) { $0.category }
         return MetricCategory.allCases.compactMap { cat in
             guard let m = grouped[cat], !m.isEmpty else { return nil }
-            return (category: cat, metrics: m.sorted { $0.percentile > $1.percentile })
+            return (category: cat, metrics: m.sorted { cat.sortMetrics($0.label, $1.label) })
         }
     }
 
+    /// Baseball Savant's fixed metric ordering per category so the layout is consistent
+    /// across players — makes it easy to find the same stat in the same spot every time.
     private var previewMetrics: [Metric] {
         Array(groupedMetrics.flatMap { $0.metrics }.sorted { $0.percentile > $1.percentile }.prefix(3))
+    }
+
+    /// Players eligible for comparison: same player type (hitter↔hitter, pitcher↔pitcher),
+    /// sorted by xwOBA proximity to the current player so the closest match is first.
+    private var comparablePlayers: [Player] {
+        let myType = player.playerType
+        let pool = allPlayers.filter { other in
+            guard other.playerId != player.playerId else { return false }
+            switch myType {
+            case "pitcher": return other.playerType == "pitcher"
+            case "batter", "hitter": return other.playerType != "pitcher"
+            case "two_way": return true
+            default: return other.playerType == myType
+            }
+        }
+        let myXwoba = player.metrics.first { $0.label == "xwOBA" }?.percentile
+        guard let mine = myXwoba else { return pool }
+        return pool.sorted { a, b in
+            let ax = a.metrics.first { $0.label == "xwOBA" }?.percentile
+            let bx = b.metrics.first { $0.label == "xwOBA" }?.percentile
+            switch (ax, bx) {
+            case let (.some(av), .some(bv)):
+                return abs(av - mine) < abs(bv - mine)
+            case (.some, .none): return true
+            case (.none, .some): return false
+            case (.none, .none): return a.name < b.name
+            }
+        }
     }
 
     var body: some View {
@@ -85,7 +115,7 @@ struct PlayerProfileView: View {
                         if store.isPro {
                             showingPlayerPicker = true
                         } else {
-                            showingPaywall = true
+                            paywallTrigger = .playerComparison
                         }
                     } label: {
                         Image(systemName: "person.2.fill")
@@ -105,25 +135,16 @@ struct PlayerProfileView: View {
         .sheet(isPresented: $showPercentileInfo) {
             PercentileInfoSheet()
         }
-        .sheet(isPresented: $showingPaywall) {
-            PaywallView()
+        .sheet(item: $paywallTrigger) { trigger in
+            PaywallView(trigger: trigger)
         }
         .sheet(isPresented: $showingPlayerPicker) {
-            PlayerPickerSheet(players: allPlayers.filter { $0.playerId != player.playerId }) { selected in
-                comparisonPlayer = selected
+            PlayerPickerSheet(players: comparablePlayers) { selected in
+                comparisonRoute = ComparisonRoute(playerA: player, playerB: selected)
             }
         }
-        .navigationDestination(
-            isPresented: Binding(
-                get: { comparisonPlayer != nil },
-                set: { newValue in
-                    if !newValue { comparisonPlayer = nil }
-                }
-            )
-        ) {
-            if let other = comparisonPlayer {
-                PlayerComparisonView(playerA: player, playerB: other)
-            }
+        .navigationDestination(item: $comparisonRoute) { route in
+            PlayerComparisonView(playerA: route.playerA, playerB: route.playerB)
         }
     }
 
@@ -187,19 +208,13 @@ struct PlayerProfileView: View {
             let generator = UIImpactFeedbackGenerator(style: .light)
             generator.impactOccurred()
         }) {
-            HStack(spacing: 4) {
-                if !store.isPro {
-                    Image(systemName: "lock.fill")
-                        .font(.system(size: 10))
-                }
-                Text(PlayerStatTab.yearCompare.rawValue)
-                    .font(SavantType.bodyBold)
-            }
-            .foregroundStyle(isSelected ? .white : SavantPalette.ink)
-            .frame(maxWidth: .infinity)
-            .frame(height: 44)
-            .background(isSelected ? SavantPalette.savantRed : SavantPalette.surface)
-            .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
+            Text(PlayerStatTab.yearCompare.rawValue)
+                .font(SavantType.bodyBold)
+                .foregroundStyle(isSelected ? .white : SavantPalette.ink)
+                .frame(maxWidth: .infinity)
+                .frame(height: 44)
+                .background(isSelected ? SavantPalette.savantRed : SavantPalette.surface)
+                .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
         }
         .buttonStyle(.plain)
     }
@@ -207,9 +222,49 @@ struct PlayerProfileView: View {
     private var statcastContent: some View {
         VStack(spacing: 12) {
             percentileRankingsCard
+
+            if !store.isPro {
+                proUpsellCard
+            }
         }
         .padding(.horizontal, 12)
         .padding(.top, 12)
+    }
+
+    private var proUpsellCard: some View {
+        Button {
+            paywallTrigger = .upgrade
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: "crown.fill")
+                    .font(.system(size: 16))
+                    .foregroundStyle(Color.yellow)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Track year-over-year trends")
+                        .font(SavantType.smallBold)
+                        .foregroundStyle(SavantPalette.ink)
+                    Text("See how \(player.name)'s metrics evolved across seasons with Pro.")
+                        .font(SavantType.small)
+                        .foregroundStyle(SavantPalette.inkSecondary)
+                        .lineLimit(2)
+                }
+
+                Spacer(minLength: 8)
+
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(SavantPalette.inkTertiary)
+            }
+            .padding(12)
+            .background(SavantPalette.surface)
+            .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
+            .overlay(
+                RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
+                    .stroke(SavantPalette.hairline, lineWidth: 0.5)
+            )
+        }
+        .buttonStyle(.plain)
     }
 
     private var standardContent: some View {
@@ -231,7 +286,9 @@ struct PlayerProfileView: View {
                 YearComparisonView(history: history)
             }
         } else {
-            yearComparePreview
+            YearComparePreview(playerName: player.name) {
+                paywallTrigger = .yearCompare
+            }
         }
     }
 
@@ -290,38 +347,6 @@ struct PlayerProfileView: View {
         .padding(.top, 12)
     }
 
-    private var yearComparePreview: some View {
-        VStack(spacing: 12) {
-            VStack(spacing: 14) {
-                Image(systemName: "arrow.left.arrow.right.circle.fill")
-                    .font(.system(size: 44))
-                    .foregroundStyle(SavantPalette.savantRed)
-                Text("Compare seasons side by side")
-                    .font(SavantType.bodyBold)
-                    .foregroundStyle(SavantPalette.ink)
-                Text("Pro unlocks year-over-year percentile trends so you can see what changed, what held, and where a player is moving.")
-                    .font(SavantType.body)
-                    .foregroundStyle(SavantPalette.inkSecondary)
-                    .multilineTextAlignment(.center)
-                Button(store.proPrice.map { "Unlock Pro — \($0)" } ?? "Unlock Pro") {
-                    showingPaywall = true
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(SavantPalette.savantRed)
-            }
-            .padding(24)
-            .frame(maxWidth: .infinity)
-            .background(SavantPalette.surface)
-            .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
-            .overlay(
-                RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
-                    .stroke(SavantPalette.hairline, lineWidth: 0.5)
-            )
-        }
-        .padding(.horizontal, 12)
-        .padding(.top, 12)
-    }
-
     private func emptyStateCard(icon: String, title: String, description: String) -> some View {
         VStack(spacing: 12) {
             ContentUnavailableView {
@@ -351,7 +376,7 @@ struct PlayerProfileView: View {
                         let isLocked = season != 2026 && !store.isPro
                         Button {
                             if isLocked {
-                                showingPaywall = true
+                                paywallTrigger = .pastSeason
                             } else {
                                 selectedPercentileSeason = season
                             }
@@ -359,9 +384,9 @@ struct PlayerProfileView: View {
                             HStack {
                                 Text(String(season))
                                 if isLocked {
-                                    Image(systemName: "lock.fill")
+                                    Image(systemName: "crown.fill")
                                         .font(.system(size: 10))
-                                        .foregroundStyle(SavantPalette.inkTertiary)
+                                        .foregroundStyle(Color.yellow)
                                 }
                             }
                         }
@@ -413,11 +438,8 @@ struct PlayerProfileView: View {
                 .padding(.vertical, 24)
             } else {
                 ForEach(groupedMetrics, id: \.category) { group in
-                let avg = displayedPlayer.percentile(for: group.category)
                 SavantSubSectionBar(
-                    title: "\(group.category.rawValue.uppercased())",
-                    trailing: avg.map { "AVG \($0)" },
-                    trailingColor: avg.map { SavantPalette.color(forPercentile: $0) } ?? SavantPalette.inkSecondary
+                    title: "\(group.category.rawValue.uppercased())"
                 )
 
                 ForEach(Array(group.metrics.enumerated()), id: \.element.id) { index, metric in
@@ -462,28 +484,35 @@ struct PlayerProfileView: View {
                 .padding(.vertical, 24)
             } else {
                 let stats = displayedPlayer.standardStats ?? []
-                ForEach(Array(stats.enumerated()), id: \.element.id) { index, stat in
-                    HStack(spacing: 12) {
-                        Text(stat.label)
-                            .font(SavantType.bodyBold)
-                            .foregroundStyle(SavantPalette.inkSecondary)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                        Text(stat.value)
-                            .font(SavantType.statMed)
-                            .foregroundStyle(SavantPalette.ink)
-                            .lineLimit(1)
-                            .monospacedDigit()
+                LazyVGrid(
+                    columns: [
+                        GridItem(.flexible(), spacing: 1),
+                        GridItem(.flexible(), spacing: 1),
+                        GridItem(.flexible(), spacing: 1)
+                    ],
+                    spacing: 1
+                ) {
+                    ForEach(stats) { stat in
+                        VStack(spacing: 4) {
+                            Text(stat.label.uppercased())
+                                .font(SavantType.micro)
+                                .tracking(0.4)
+                                .foregroundStyle(SavantPalette.inkTertiary)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.7)
+                            Text(stat.value)
+                                .font(SavantType.statMed)
+                                .foregroundStyle(SavantPalette.ink)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.7)
+                                .monospacedDigit()
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .background(SavantPalette.surface)
                     }
-                    .padding(.horizontal, SavantGeo.padCard)
-                    .frame(height: SavantGeo.rowHeight)
-                    .background(index % 2 == 0 ? SavantPalette.surface : SavantPalette.surfaceAlt)
-                    .overlay(
-                        Rectangle()
-                            .fill(SavantPalette.divider)
-                            .frame(height: SavantGeo.hairline),
-                        alignment: .bottom
-                    )
                 }
+                .background(SavantPalette.divider)
             }
         }
         .background(SavantPalette.surface)

@@ -133,42 +133,47 @@ struct StandardStatsLeadersView: View {
     
     private var leadersList: some View {
         VStack(spacing: 0) {
-            // Header - matches LeaderboardTableHeader style
-            HStack(spacing: 0) {
-                Text("RANK")
-                    .font(SavantType.micro)
-                    .tracking(0.5)
-                    .foregroundStyle(SavantPalette.inkTertiary)
-                    .frame(width: 50, alignment: .leading)
-
-                Text("PLAYER")
-                    .font(SavantType.micro)
-                    .tracking(0.5)
-                    .foregroundStyle(SavantPalette.inkTertiary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-
-                Text("TEAM")
-                    .font(SavantType.micro)
-                    .tracking(0.5)
-                    .foregroundStyle(SavantPalette.inkTertiary)
-                    .frame(width: 50, alignment: .leading)
-
-                // Sort indicator - display only, use section bar controls to change
-                HStack(spacing: 4) {
-                    Text(selectedStat.uppercased())
+            // Header - tap stat column to toggle sort direction
+            Button {
+                sortDescending.toggle()
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            } label: {
+                HStack(spacing: 0) {
+                    Text("RANK")
                         .font(SavantType.micro)
                         .tracking(0.5)
-                        .foregroundStyle(SavantPalette.savantRed)
-                    Image(systemName: sortDescending ? "arrow.down" : "arrow.up")
-                        .font(.system(size: 8, weight: .bold))
-                        .foregroundStyle(SavantPalette.savantRed)
+                        .foregroundStyle(SavantPalette.inkTertiary)
+                        .frame(width: 50, alignment: .leading)
+
+                    Text("PLAYER")
+                        .font(SavantType.micro)
+                        .tracking(0.5)
+                        .foregroundStyle(SavantPalette.inkTertiary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+
+                    Text("TEAM")
+                        .font(SavantType.micro)
+                        .tracking(0.5)
+                        .foregroundStyle(SavantPalette.inkTertiary)
+                        .frame(width: 50, alignment: .leading)
+
+                    HStack(spacing: 4) {
+                        Text(selectedStat.uppercased())
+                            .font(SavantType.micro)
+                            .tracking(0.5)
+                            .foregroundStyle(SavantPalette.savantRed)
+                        Image(systemName: sortDescending ? "arrow.down" : "arrow.up")
+                            .font(.system(size: 8, weight: .bold))
+                            .foregroundStyle(SavantPalette.savantRed)
+                    }
+                    .frame(width: 80, alignment: .trailing)
                 }
-                .frame(width: 80, alignment: .trailing)
+                .frame(height: SavantGeo.rowHeightHeader)
+                .padding(.horizontal, SavantGeo.padInline)
+                .background(SavantPalette.surfaceAlt)
+                .overlay(Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline), alignment: .bottom)
             }
-            .frame(height: SavantGeo.rowHeightHeader)
-            .padding(.horizontal, SavantGeo.padInline)
-            .background(SavantPalette.surfaceAlt)
-            .overlay(Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline), alignment: .bottom)
+            .buttonStyle(.plain)
             
             // Players
             if sortedPlayers.isEmpty {

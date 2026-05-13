@@ -31,7 +31,7 @@ struct RootTabView: View {
                 .tag(1)
 
             metricsTab
-                .tabItem { Label("Statcast", systemImage: "chart.bar.fill") }
+                .tabItem { Label("StatScout", systemImage: "chart.bar.fill") }
                 .tag(2)
 
             standardStatsTab
@@ -40,7 +40,7 @@ struct RootTabView: View {
         }
         .tint(SavantPalette.savantRed)
         .sheet(isPresented: $showingPaywall) {
-            PaywallView()
+            PaywallView(trigger: .upgrade)
         }
         .sheet(isPresented: $showingAbout) {
             NavigationStack {
@@ -65,6 +65,7 @@ struct RootTabView: View {
                 .navigationTitle("Leaders")
                 .navigationBarTitleDisplayMode(.inline)
                 .modifier(SavantNavBar())
+                .modifier(ProToolbarButton())
                 .modifier(StandardDestinations(viewModel: viewModel))
         }
     }
@@ -75,6 +76,7 @@ struct RootTabView: View {
                 .navigationTitle("Teams")
                 .navigationBarTitleDisplayMode(.inline)
                 .modifier(SavantNavBar())
+                .modifier(ProToolbarButton())
                 .modifier(StandardDestinations(viewModel: viewModel))
         }
     }
@@ -82,19 +84,21 @@ struct RootTabView: View {
     private var metricsTab: some View {
         NavigationStack {
             MetricLeadersView(metrics: selection == 2 ? viewModel.allMetrics : [])
-                .navigationTitle("Statcast Leaders")
+                .navigationTitle("StatScout Leaders")
                 .navigationBarTitleDisplayMode(.inline)
                 .modifier(SavantNavBar())
+                .modifier(ProToolbarButton())
                 .modifier(StandardDestinations(viewModel: viewModel))
         }
     }
 
     private var standardStatsTab: some View {
         NavigationStack {
-            StandardStatsLeadersView(players: selection == 3 ? viewModel.seasonPlayers : [])
+            StandardStatsLeadersView(players: selection == 3 ? viewModel.qualifiedSeasonPlayers : [])
                 .navigationTitle("Box Score Stats")
                 .navigationBarTitleDisplayMode(.inline)
                 .modifier(SavantNavBar())
+                .modifier(ProToolbarButton())
                 .modifier(StandardDestinations(viewModel: viewModel))
         }
     }
@@ -106,6 +110,36 @@ private struct SavantNavBar: ViewModifier {
             .toolbarBackground(SavantPalette.savantNavy, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbarColorScheme(.dark, for: .navigationBar)
+    }
+}
+
+private struct ProToolbarButton: ViewModifier {
+    @EnvironmentObject private var store: StoreService
+    @State private var showingPaywall = false
+
+    func body(content: Content) -> some View {
+        content
+            .toolbar {
+                if !store.isPro {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            showingPaywall = true
+                        } label: {
+                            HStack(spacing: 3) {
+                                Image(systemName: "crown.fill")
+                                    .font(.system(size: 11))
+                                Text("Pro")
+                                    .font(SavantType.micro)
+                                    .tracking(0.3)
+                            }
+                            .foregroundStyle(Color.yellow)
+                        }
+                    }
+                }
+            }
+            .sheet(isPresented: $showingPaywall) {
+                PaywallView(trigger: .upgrade)
+            }
     }
 }
 

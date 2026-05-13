@@ -44,9 +44,10 @@ struct TeamView: View {
         let bySearch = searchText.isEmpty ? players : players.filter {
             $0.name.localizedCaseInsensitiveContains(searchText)
         }
+        let byType = bySearch.filter { $0.matchesPlayerType(for: selectedCategory) }
         let byCategory = selectedCategory == nil
-            ? bySearch
-            : bySearch.filter { p in p.metrics.contains { $0.category == selectedCategory } }
+            ? byType
+            : byType.filter { p in p.metrics.contains { $0.category == selectedCategory } }
         return byCategory.sorted {
             sortDescending ? score($0) > score($1) : score($0) < score($1)
         }
@@ -63,7 +64,7 @@ struct TeamView: View {
                         .padding(.top, 10)
                 }
 
-                CategoryFilter(selectedCategory: $selectedCategory, showAllOption: true)
+                CategoryFilter(selectedCategory: $selectedCategory)
 
                 rosterSection
             }
@@ -83,7 +84,7 @@ struct TeamView: View {
             }
         }
         .sheet(isPresented: $showingPaywall) {
-            PaywallView()
+            PaywallView(trigger: .teamView)
         }
     }
 
@@ -182,9 +183,9 @@ struct TeamView: View {
                         HStack {
                             Text(String(season))
                             if isLocked {
-                                Image(systemName: "lock.fill")
+                                Image(systemName: "crown.fill")
                                     .font(.system(size: 10))
-                                    .foregroundStyle(SavantPalette.inkTertiary)
+                                    .foregroundStyle(Color.yellow)
                             }
                         }
                     }

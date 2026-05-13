@@ -1,8 +1,9 @@
 import SwiftUI
 
-struct ComparisonRoute: Hashable {
+struct ComparisonRoute: Hashable, Identifiable {
     let playerA: Player
     let playerB: Player
+    var id: String { "\(playerA.id)-vs-\(playerB.id)" }
 }
 
 struct PlayerComparisonView: View {
@@ -22,7 +23,10 @@ struct PlayerComparisonView: View {
             let b = playerB.metrics.first { $0.label == metric.label && $0.category == metric.category }
             result.append((metric.label, metric.category, a, b))
         }
-        return result.sorted { $0.label < $1.label }
+        return result.sorted { $0.category == $1.category
+            ? $0.category.sortMetrics($0.label, $1.label)
+            : MetricCategory.allCases.firstIndex(of: $0.category)! < MetricCategory.allCases.firstIndex(of: $1.category)!
+        }
     }
 
     private var groupedComparison: [(MetricCategory, [(label: String, a: Metric?, b: Metric?)])] {
@@ -35,38 +39,68 @@ struct PlayerComparisonView: View {
     }
 
     var body: some View {
-        if !store.isPro {
-            lockedView
-        } else {
+        if store.isPro {
             comparisonContent
-        }
-    }
+        } else {
+            ZStack(alignment: .bottom) {
+                comparisonContent
+                    .blur(radius: 8)
+                    .overlay(
+                        LinearGradient(
+                            colors: [.clear, SavantPalette.canvas.opacity(0.9)],
+                            startPoint: .center,
+                            endPoint: .bottom
+                        )
+                    )
+                    .clipped()
 
-    private var lockedView: some View {
-        VStack(spacing: 24) {
-            Spacer()
-            Image(systemName: "lock.shield.fill")
-                .font(.system(size: 48))
-                .foregroundStyle(SavantPalette.savantRed)
-            Text("Player Comparisons")
-                .font(SavantType.pageTitle)
-                .foregroundStyle(SavantPalette.ink)
-            Text("Pro unlocks side-by-side player comparisons across every metric. See who leads in xwOBA, Barrel%, Sprint Speed, and more.")
-                .font(SavantType.body)
-                .foregroundStyle(SavantPalette.inkSecondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 32)
-            Button(store.proPrice.map { "Unlock Pro — \($0)" } ?? "Unlock Pro") {
-                showingPaywall = true
+                // CTA overlay
+                VStack(spacing: 10) {
+                    Image(systemName: "crown.fill")
+                        .font(.system(size: 22))
+                        .foregroundStyle(Color.yellow)
+
+                    Text("Find the Edge")
+                        .font(SavantType.cardTitle)
+                        .foregroundStyle(SavantPalette.ink)
+
+                    Text("Pro unlocks side-by-side player comparisons across every metric. See who leads in xwOBA, Barrel%, Sprint Speed, and more.")
+                        .font(SavantType.small)
+                        .foregroundStyle(SavantPalette.inkSecondary)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    Button {
+                        showingPaywall = true
+                    } label: {
+                        Text(store.proPrice.map { "Unlock Pro — \($0)" } ?? "Unlock Pro")
+                            .font(SavantType.bodyBold)
+                            .foregroundStyle(.white)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 48)
+                            .background(SavantPalette.savantRed)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(.horizontal, 24)
+                .padding(.vertical, 20)
+                .background(
+                    RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
+                        .fill(SavantPalette.surface)
+                        .shadow(color: .black.opacity(0.08), radius: 12, y: -4)
+                )
+                .overlay(alignment: .top) {
+                    Rectangle()
+                        .fill(SavantPalette.divider)
+                        .frame(height: SavantGeo.hairline)
+                }
+                .offset(y: -8)
             }
-            .buttonStyle(.borderedProminent)
-            .tint(SavantPalette.savantRed)
-            Spacer()
-        }
-        .frame(maxWidth: .infinity)
-        .background(SavantPalette.canvas.ignoresSafeArea())
-        .sheet(isPresented: $showingPaywall) {
-            PaywallView()
+            .background(SavantPalette.canvas.ignoresSafeArea())
+            .sheet(isPresented: $showingPaywall) {
+                PaywallView(trigger: .playerComparison)
+            }
         }
     }
 
@@ -167,7 +201,7 @@ struct PlayerComparisonView: View {
                     metricValueCell(metric: item.a, other: item.b)
                     metricValueCell(metric: item.b, other: item.a)
                 }
-                .frame(height: SavantGeo.rowHeight)
+                .frame(height: 56)
                 .padding(.horizontal, SavantGeo.padInline)
                 .background(index % 2 == 0 ? SavantPalette.surface : SavantPalette.surfaceAlt)
                 .overlay(
@@ -187,14 +221,28 @@ struct PlayerComparisonView: View {
     private func metricValueCell(metric: Metric?, other: Metric?) -> some View {
         Group {
             if let m = metric {
-                VStack(spacing: 2) {
-                    Text(m.value)
-                        .font(SavantType.statSmall)
-                        .foregroundStyle(cellColor(metric: m, other: other))
-                        .lineLimit(1)
-                    Text("\(m.percentile)th")
+                let isWinner = (other.map { m.percentile > $0.percentile }) ?? false
+                let pctColor = SavantPalette.color(forPercentile: m.percentile)
+                VStack(spacing: 4) {
+                    HStack(spacing: 4) {
+                        if isWinner {
+                            Image(systemName: "trophy.fill")
+                                .font(.system(size: 10, weight: .bold))
+                                .foregroundStyle(Color.yellow)
+                        }
+                        Text(m.value)
+                            .font(SavantType.statSmall)
+                            .foregroundStyle(SavantPalette.ink)
+                            .lineLimit(1)
+                    }
+                    Text("\(m.percentile)%")
                         .font(SavantType.micro)
-                        .foregroundStyle(SavantPalette.inkTertiary)
+                        .tracking(0.3)
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(pctColor)
+                        .clipShape(Capsule())
                 }
                 .frame(maxWidth: .infinity)
             } else {
@@ -204,16 +252,6 @@ struct PlayerComparisonView: View {
                     .frame(maxWidth: .infinity)
             }
         }
-    }
-
-    private func cellColor(metric: Metric, other: Metric?) -> Color {
-        guard let other else { return SavantPalette.ink }
-        if metric.percentile > other.percentile {
-            return SavantPalette.savantRed
-        } else if metric.percentile < other.percentile {
-            return SavantPalette.inkTertiary
-        }
-        return SavantPalette.ink
     }
 }
 

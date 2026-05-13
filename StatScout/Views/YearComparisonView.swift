@@ -2,67 +2,57 @@ import SwiftUI
 
 struct YearComparisonView: View {
     let history: [Player]
-    @State private var selectedYear1: Int = 0
-    @State private var selectedYear2: Int = 0
+    @State private var yearA: Int = 0
+    @State private var yearB: Int = 0
+
+    // yearA is the later (more recent) year, yearB is the earlier year
+    private var recentYear: Int { max(yearA, yearB) }
+    private var priorYear: Int { min(yearA, yearB) }
 
     private var availableYears: [Int] {
-        history.compactMap(\.season).sorted(by: >).reduce(into: []) { acc, year in
-            if !acc.contains(year) { acc.append(year) }
-        }
+        history.compactMap(\.season).uniqued().sorted(by: >)
     }
 
-    private var sortedHistory: [Player] {
-        history.sorted {
-            guard let s1 = $0.season, let s2 = $1.season else { return false }
-            return s1 > s2
-        }
+    private var playerYearA: Player? {
+        history.first { $0.season == recentYear }
     }
 
-    private var player1: Player? {
-        sortedHistory.first { $0.season == selectedYear1 }
-    }
-
-    private var player2: Player? {
-        sortedHistory.first { $0.season == selectedYear2 }
+    private var playerYearB: Player? {
+        history.first { $0.season == priorYear }
     }
 
     var body: some View {
         VStack(spacing: 12) {
-            yearSelectors
+            yearPickerCard
 
-            if let p1 = player1, let p2 = player2 {
+            if let p1 = playerYearA, let p2 = playerYearB {
+                overallChangeCard(p1: p1, p2: p2)
                 comparisonContent(p1: p1, p2: p2)
             } else {
-                noDataForYearView
+                noDataView
             }
         }
         .padding(.horizontal, 12)
         .padding(.top, 12)
-        .onAppear(perform: snapSelectionsToAvailableYears)
+        .onAppear(perform: snapSelections)
     }
 
-    private func snapSelectionsToAvailableYears() {
+    private func snapSelections() {
         let years = availableYears
         guard !years.isEmpty else { return }
-        if !years.contains(selectedYear1) {
-            selectedYear1 = years.first ?? 0
-        }
-        if !years.contains(selectedYear2) || selectedYear2 == selectedYear1 {
-            selectedYear2 = years.first(where: { $0 != selectedYear1 }) ?? selectedYear2
+        if !years.contains(yearA) { yearA = years.first ?? 0 }
+        if !years.contains(yearB) || yearB == yearA {
+            yearB = years.first(where: { $0 != yearA }) ?? yearB
         }
     }
 
-    private var noDataForYearView: some View {
-        let description: String
-        if availableYears.isEmpty {
-            description = "No historical data is available for this player."
-        } else {
-            description = "Historical data for \(selectedYear1) or \(selectedYear2) is not available for this player."
-        }
-        return ContentUnavailableView {
+    private var noDataView: some View {
+        ContentUnavailableView {
             Label("No Data Available", systemImage: "calendar.badge.clock")
         } description: {
-            Text(description)
+            Text(availableYears.isEmpty
+                 ? "No historical data is available for this player."
+                 : "Data for \(recentYear) or \(priorYear) is not available.")
         }
         .padding(.vertical, 48)
         .frame(maxWidth: .infinity)
@@ -74,18 +64,19 @@ struct YearComparisonView: View {
         )
     }
 
-    private var yearSelectors: some View {
-        VStack(spacing: 8) {
-            HStack(spacing: 12) {
-                yearPicker(title: "Year 1", selection: $selectedYear1, exclude: selectedYear2)
-                yearPicker(title: "Year 2", selection: $selectedYear2, exclude: selectedYear1)
-            }
+    // MARK: - Year Picker Card
 
-            if let p1 = player1, let p2 = player2 {
-                summaryRow(p1: p1, p2: p2)
+    private var yearPickerCard: some View {
+        VStack(spacing: 12) {
+            HStack(spacing: 12) {
+                yearButton(year: $yearA, otherYear: yearB, label: yearA > 0 ? String(yearA) : "Select")
+                Image(systemName: "arrow.right")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(SavantPalette.inkTertiary)
+                yearButton(year: $yearB, otherYear: yearA, label: yearB > 0 ? String(yearB) : "Select")
             }
         }
-        .padding(12)
+        .padding(16)
         .background(SavantPalette.surface)
         .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
         .overlay(
@@ -94,86 +85,109 @@ struct YearComparisonView: View {
         )
     }
 
-    private func yearPicker(title: String, selection: Binding<Int>, exclude: Int) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(title)
-                .font(SavantType.micro)
-                .foregroundStyle(SavantPalette.inkSecondary)
-
-            Menu {
-                ForEach(availableYears.filter { $0 != exclude }, id: \.self) { year in
-                    Button {
-                        selection.wrappedValue = year
-                    } label: {
-                        HStack {
-                            Text(String(year))
-                            if selection.wrappedValue == year {
-                                Image(systemName: "checkmark")
-                            }
+    private func yearButton(year: Binding<Int>, otherYear: Int, label: String) -> some View {
+        Menu {
+            ForEach(availableYears.filter { $0 != otherYear }, id: \.self) { y in
+                Button {
+                    year.wrappedValue = y
+                } label: {
+                    HStack {
+                        Text(String(y))
+                        if year.wrappedValue == y {
+                            Image(systemName: "checkmark")
                         }
                     }
                 }
-            } label: {
+            }
+        } label: {
+            VStack(spacing: 2) {
+                Text(label)
+                    .font(SavantType.statLarge)
+                    .foregroundStyle(SavantPalette.ink)
+                Text(year.wrappedValue == recentYear ? "Recent" : "Prior")
+                    .font(SavantType.micro)
+                    .tracking(0.3)
+                    .foregroundStyle(SavantPalette.inkTertiary)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+            .background(SavantPalette.surfaceAlt)
+            .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
+            .overlay(
                 HStack {
-                    Text(String(selection.wrappedValue))
-                        .font(SavantType.bodyBold)
-                        .foregroundStyle(SavantPalette.ink)
                     Spacer()
                     Image(systemName: "chevron.down")
-                        .font(.system(size: 12))
+                        .font(.system(size: 10, weight: .bold))
                         .foregroundStyle(SavantPalette.inkTertiary)
-                }
-                .padding(.horizontal, 12)
-                .frame(height: 40)
-                .background(SavantPalette.surfaceAlt)
-                .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
-            }
+                        .padding(.trailing, 8)
+                },
+                alignment: .trailing
+            )
         }
-        .frame(maxWidth: .infinity)
     }
 
-    private func summaryRow(p1: Player, p2: Player) -> some View {
-        let change = p1.overallPercentile - p2.overallPercentile
-        let changeColor: Color = change > 0 ? .green : (change < 0 ? SavantPalette.savantRed : SavantPalette.inkSecondary)
-        let arrow = change > 0 ? "↑" : (change < 0 ? "↓" : "→")
+    // MARK: - Overall Change Card
 
-        return HStack {
-            Spacer()
-            VStack(spacing: 2) {
-                Text("Overall Change")
-                    .font(SavantType.micro)
+    private func overallChangeCard(p1: Player, p2: Player) -> some View {
+        let delta = p1.overallPercentile - p2.overallPercentile
+        let isUp = delta > 0
+        let isDown = delta < 0
+        let color: Color = isUp ? .green : (isDown ? SavantPalette.savantRed : SavantPalette.inkSecondary)
+        let icon = isUp ? "arrow.up.circle.fill" : (isDown ? "arrow.down.circle.fill" : "minus.circle.fill")
+
+        return HStack(spacing: 16) {
+            Image(systemName: icon)
+                .font(.system(size: 32))
+                .foregroundStyle(color)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Overall Average")
+                    .font(SavantType.small)
                     .foregroundStyle(SavantPalette.inkSecondary)
-                HStack(spacing: 4) {
-                    Text("\(abs(change))")
-                        .font(SavantType.statMed)
-                    Text(arrow)
-                        .font(.system(size: 16, weight: .bold))
-                }
-                .foregroundStyle(changeColor)
+                Text("\(p2.overallPercentile)% (\(String(priorYear))) → \(p1.overallPercentile)% (\(String(recentYear)))")
+                    .font(SavantType.bodyBold)
+                    .foregroundStyle(SavantPalette.ink)
             }
+
             Spacer()
+
+            HStack(spacing: 2) {
+                Text(isUp ? "+\(delta)%" : "\(delta)%")
+                    .font(SavantType.statLarge)
+            }
+            .foregroundStyle(color)
         }
-        .padding(.top, 4)
+        .padding(16)
+        .background(SavantPalette.surface)
+        .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
+        .overlay(
+            RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
+                .stroke(SavantPalette.hairline, lineWidth: 0.5)
+        )
     }
+
+    // MARK: - Comparison Content
 
     private func comparisonContent(p1: Player, p2: Player) -> some View {
         let comparisons = buildComparisons(p1: p1, p2: p2)
         let grouped = Dictionary(grouping: comparisons) { $0.category }
 
         if comparisons.isEmpty {
-            return AnyView(noCommonMetricsView)
+            return AnyView(noMetricsView)
         }
 
-        return AnyView(VStack(spacing: 12) {
-            ForEach(MetricCategory.allCases, id: \.self) { category in
-                if let items = grouped[category], !items.isEmpty {
-                    categoryComparisonCard(category: category, items: items, year1: p1.season ?? 0, year2: p2.season ?? 0)
+        return AnyView(
+            LazyVStack(spacing: 12) {
+                ForEach(MetricCategory.allCases, id: \.self) { category in
+                    if let items = grouped[category], !items.isEmpty {
+                        categoryCard(category: category, items: items)
+                    }
                 }
             }
-        })
+        )
     }
 
-    private var noCommonMetricsView: some View {
+    private var noMetricsView: some View {
         ContentUnavailableView {
             Label("No Comparable Metrics", systemImage: "chart.bar.xaxis")
         } description: {
@@ -189,14 +203,16 @@ struct YearComparisonView: View {
         )
     }
 
-    private func categoryComparisonCard(category: MetricCategory, items: [MetricComparison], year1: Int, year2: Int) -> some View {
+    // MARK: - Category Card
+
+    private func categoryCard(category: MetricCategory, items: [MetricComparison]) -> some View {
         VStack(spacing: 0) {
             SavantSubSectionBar(title: category.rawValue.uppercased())
 
-            comparisonGridHeader(year1: year1, year2: year2)
+            columnHeader
 
-            ForEach(Array(items.enumerated()), id: \.element.metricLabel) { index, item in
-                comparisonRow(item: item, isAltRow: index % 2 == 1)
+            ForEach(Array(items.enumerated()), id: \.element.metricLabel) { idx, item in
+                comparisonRow(item: item, isAlt: idx % 2 == 1)
             }
         }
         .background(SavantPalette.surface)
@@ -207,87 +223,76 @@ struct YearComparisonView: View {
         )
     }
 
-    private func comparisonGridHeader(year1: Int, year2: Int) -> some View {
+    private var columnHeader: some View {
         HStack(spacing: 0) {
             Text("Metric")
                 .font(SavantType.micro)
                 .foregroundStyle(SavantPalette.inkSecondary)
-                .frame(width: 80, alignment: .leading)
+                .frame(maxWidth: .infinity, alignment: .leading)
 
-            Spacer()
-
-            Text(String(year2))
+            Text(String(priorYear))
                 .font(SavantType.micro)
                 .foregroundStyle(SavantPalette.inkSecondary)
-                .frame(width: 50)
+                .frame(width: 72)
 
-            Text(String(year1))
+            Text(String(recentYear))
                 .font(SavantType.micro)
                 .foregroundStyle(SavantPalette.inkSecondary)
-                .frame(width: 50)
+                .frame(width: 72)
 
             Text("Δ")
                 .font(SavantType.micro)
                 .foregroundStyle(SavantPalette.inkSecondary)
-                .frame(width: 40)
+                .frame(width: 48)
         }
         .padding(.horizontal, SavantGeo.padInline)
         .frame(height: 28)
         .background(SavantPalette.surfaceAlt)
     }
 
-    private func comparisonRow(item: MetricComparison, isAltRow: Bool) -> some View {
-        let changeColor: Color = item.change > 0 ? .green : (item.change < 0 ? SavantPalette.savantRed : SavantPalette.inkSecondary)
-        let arrow = item.change > 0 ? "↑" : (item.change < 0 ? "↓" : "→")
+    private func comparisonRow(item: MetricComparison, isAlt: Bool) -> some View {
+        let isUp = item.change > 0
+        let isDown = item.change < 0
+        let deltaColor: Color = isUp ? .green : (isDown ? SavantPalette.savantRed : SavantPalette.inkSecondary)
+        let arrow = isUp ? "↑" : (isDown ? "↓" : "→")
 
         return HStack(spacing: 0) {
+            // Metric label
             Text(item.metricLabel)
                 .font(SavantType.body)
                 .foregroundStyle(SavantPalette.ink)
-                .frame(width: 80, alignment: .leading)
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .lineLimit(1)
 
-            Spacer()
+            // Prior year (earlier)
+            yearValueColumn(
+                percentile: item.percentileB,
+                value: item.valueB,
+                isFaded: true
+            )
+            .frame(width: 72)
 
-            // Year 2 (earlier year) - faded
-            VStack(spacing: 0) {
-                Text("\(item.percentile2)")
-                    .font(SavantType.bodyBold)
-                    .foregroundStyle(SavantPalette.inkSecondary)
-                if !item.value2.isEmpty {
-                    Text(item.value2)
-                        .font(SavantType.micro)
-                        .foregroundStyle(SavantPalette.inkTertiary)
-                }
-            }
-            .frame(width: 50)
+            // Recent year (later) - emphasized with color
+            yearValueColumn(
+                percentile: item.percentileA,
+                value: item.valueA,
+                isFaded: false
+            )
+            .frame(width: 72)
 
-            // Year 1 (later year) - emphasized
-            VStack(spacing: 0) {
-                Text("\(item.percentile1)")
-                    .font(SavantType.bodyBold)
-                    .foregroundStyle(SavantPalette.color(forPercentile: item.percentile1))
-                if !item.value1.isEmpty {
-                    Text(item.value1)
-                        .font(SavantType.micro)
-                        .foregroundStyle(SavantPalette.inkTertiary)
-                }
-            }
-            .frame(width: 50)
-
-            // Change indicator
+            // Delta (in percentile points)
             HStack(spacing: 2) {
-                Text("\(abs(item.change))")
-                    .font(SavantType.bodyBold)
                 Text(arrow)
                     .font(.system(size: 12, weight: .bold))
+                Text("\(abs(item.change))%")
+                    .font(SavantType.bodyBold)
             }
-            .foregroundStyle(changeColor)
-            .frame(width: 40)
+            .foregroundStyle(deltaColor)
+            .frame(width: 48)
         }
+        .frame(height: 48)
         .padding(.horizontal, SavantGeo.padInline)
-        .frame(height: 44)
-        .background(isAltRow ? SavantPalette.surfaceAlt : SavantPalette.surface)
+        .background(isAlt ? SavantPalette.surfaceAlt : SavantPalette.surface)
         .overlay(
             Rectangle()
                 .fill(SavantPalette.divider)
@@ -296,38 +301,60 @@ struct YearComparisonView: View {
         )
     }
 
+    private func yearValueColumn(percentile: Int, value: String, isFaded: Bool) -> some View {
+        VStack(spacing: 1) {
+            HStack(spacing: 4) {
+                Text("\(percentile)")
+                    .font(SavantType.bodyBold)
+                    .foregroundStyle(isFaded ? SavantPalette.inkTertiary : SavantPalette.color(forPercentile: percentile))
+                // Mini bar
+                RoundedRectangle(cornerRadius: 1)
+                    .fill(SavantPalette.color(forPercentile: percentile))
+                    .frame(width: CGFloat(percentile) * 0.3, height: 4)
+                    .opacity(isFaded ? 0.5 : 1)
+            }
+            if !value.isEmpty {
+                Text(value)
+                    .font(SavantType.micro)
+                    .foregroundStyle(isFaded ? SavantPalette.inkTertiary : SavantPalette.inkSecondary)
+                    .lineLimit(1)
+            }
+        }
+    }
+
+    // MARK: - Comparisons Builder
+
     private func buildComparisons(p1: Player, p2: Player) -> [MetricComparison] {
         let metrics1 = Dictionary(grouping: p1.metrics) { $0.label }
         let metrics2 = Dictionary(grouping: p2.metrics) { $0.label }
         let allLabels = Set(metrics1.keys).union(metrics2.keys)
 
         return allLabels.compactMap { label in
-            let m1 = metrics1[label]?.first
-            let m2 = metrics2[label]?.first
-
-            // Skip if metric doesn't exist in both years
-            guard let metric1 = m1, let metric2 = m2 else { return nil }
-
+            guard let m1 = metrics1[label]?.first, let m2 = metrics2[label]?.first else { return nil }
             return MetricComparison(
                 metricLabel: label,
-                category: metric1.category,
-                percentile1: metric1.percentile,
-                percentile2: metric2.percentile,
-                value1: metric1.value,
-                value2: metric2.value,
-                change: metric1.percentile - metric2.percentile
+                category: m1.category,
+                percentileA: m1.percentile,
+                percentileB: m2.percentile,
+                valueA: m1.value,
+                valueB: m2.value,
+                change: m1.percentile - m2.percentile
             )
-        }.sorted { abs($0.change) > abs($1.change) }
+        }.sorted { a, b in
+            a.category == b.category
+                ? a.category.sortMetrics(a.metricLabel, b.metricLabel)
+                : MetricCategory.allCases.firstIndex(of: a.category)! < MetricCategory.allCases.firstIndex(of: b.category)!
+        }
     }
 }
 
 private struct MetricComparison {
     let metricLabel: String
     let category: MetricCategory
-    let percentile1: Int
-    let percentile2: Int
-    let value1: String
-    let value2: String
+    let percentileA: Int
+    let percentileB: Int
+    let valueA: String
+    let valueB: String
     let change: Int
 }
 
