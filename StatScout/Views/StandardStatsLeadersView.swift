@@ -143,7 +143,7 @@ struct StandardStatsLeadersView: View {
                         .font(SavantType.micro)
                         .tracking(0.5)
                         .foregroundStyle(SavantPalette.inkTertiary)
-                        .frame(width: 50, alignment: .leading)
+                        .frame(width: 42, alignment: .leading)
 
                     Text("PLAYER")
                         .font(SavantType.micro)
@@ -155,7 +155,7 @@ struct StandardStatsLeadersView: View {
                         .font(SavantType.micro)
                         .tracking(0.5)
                         .foregroundStyle(SavantPalette.inkTertiary)
-                        .frame(width: 50, alignment: .leading)
+                        .frame(width: 44, alignment: .leading)
 
                     HStack(spacing: 4) {
                         Text(selectedStat.uppercased())
@@ -205,7 +205,7 @@ struct StandardStatsLeadersView: View {
                 Text("\(rank)")
                     .font(SavantType.statSmall)
                     .foregroundStyle(SavantPalette.inkSecondary)
-                    .frame(width: 50, alignment: .leading)
+                    .frame(width: 36, alignment: .leading)
                     .monospacedDigit()
 
                 // Player info
@@ -216,6 +216,8 @@ struct StandardStatsLeadersView: View {
                             .font(SavantType.bodyBold)
                             .foregroundStyle(SavantPalette.ink)
                             .lineLimit(1)
+                            .minimumScaleFactor(0.85)
+                            .truncationMode(.tail)
                         Text(player.displayPosition)
                             .font(SavantType.micro)
                             .tracking(0.4)
@@ -231,7 +233,7 @@ struct StandardStatsLeadersView: View {
                         .font(SavantType.small)
                         .foregroundStyle(SavantPalette.inkSecondary)
                 }
-                .frame(width: 50, alignment: .leading)
+                .frame(width: 44, alignment: .leading)
 
                 // Stat value
                 Text(statDisplay(for: player))

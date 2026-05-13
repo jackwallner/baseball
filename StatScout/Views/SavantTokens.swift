@@ -131,16 +131,16 @@ func normalizedTeamAbbreviation(_ team: String) -> String {
 
 func teamFullName(_ abbr: String) -> String {
     let map: [String: String] = [
-        "ARI":"Arizona Diamondbacks","ATL":"Atlanta Braves","BAL":"Baltimore Orioles",
-        "BOS":"Boston Red Sox","CHC":"Chicago Cubs","CWS":"Chicago White Sox",
-        "CIN":"Cincinnati Reds","CLE":"Cleveland Guardians","COL":"Colorado Rockies",
-        "DET":"Detroit Tigers","HOU":"Houston Astros","KC":"Kansas City Royals",
-        "LAA":"Los Angeles Angels","LAD":"Los Angeles Dodgers","MIA":"Miami Marlins",
-        "MIL":"Milwaukee Brewers","MIN":"Minnesota Twins","NYM":"New York Mets",
-        "NYY":"New York Yankees","OAK":"Oakland Athletics","PHI":"Philadelphia Phillies",
-        "PIT":"Pittsburgh Pirates","SD":"San Diego Padres","SEA":"Seattle Mariners",
-        "SF":"San Francisco Giants","STL":"St. Louis Cardinals","TB":"Tampa Bay Rays",
-        "TEX":"Texas Rangers","TOR":"Toronto Blue Jays","WSH":"Washington Nationals"
+        "ARI":"Arizona","ATL":"Atlanta","BAL":"Baltimore",
+        "BOS":"Boston","CHC":"Chicago (NL)","CWS":"Chicago (AL)",
+        "CIN":"Cincinnati","CLE":"Cleveland","COL":"Colorado",
+        "DET":"Detroit","HOU":"Houston","KC":"Kansas City",
+        "LAA":"Los Angeles (AL)","LAD":"Los Angeles (NL)","MIA":"Miami",
+        "MIL":"Milwaukee","MIN":"Minnesota","NYM":"New York (NL)",
+        "NYY":"New York (AL)","OAK":"Oakland","PHI":"Philadelphia",
+        "PIT":"Pittsburgh","SD":"San Diego","SEA":"Seattle",
+        "SF":"San Francisco","STL":"St. Louis","TB":"Tampa Bay",
+        "TEX":"Texas","TOR":"Toronto","WSH":"Washington"
     ]
     let normalized = normalizedTeamAbbreviation(abbr)
     return map[normalized] ?? abbr

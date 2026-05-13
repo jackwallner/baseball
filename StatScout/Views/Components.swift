@@ -344,7 +344,7 @@ struct LeaderboardTableHeader: View {
                 .font(SavantType.micro)
                 .tracking(0.5)
                 .foregroundStyle(SavantPalette.inkTertiary)
-                .frame(width: 50, alignment: .leading)
+                .frame(width: 42, alignment: .leading)
 
             Text("PLAYER")
                 .font(SavantType.micro)
@@ -356,7 +356,7 @@ struct LeaderboardTableHeader: View {
                 .font(SavantType.micro)
                 .tracking(0.5)
                 .foregroundStyle(SavantPalette.inkTertiary)
-                .frame(width: 50, alignment: .leading)
+                .frame(width: 44, alignment: .leading)
 
             // Sort indicator - display only, tap SavantSectionBar to change sort
             HStack(spacing: 4) {
@@ -368,7 +368,7 @@ struct LeaderboardTableHeader: View {
                     .font(.system(size: 8, weight: .bold))
                     .foregroundStyle(SavantPalette.savantRed)
             }
-            .frame(width: 100, alignment: .trailing)
+            .frame(width: 92, alignment: .trailing)
         }
         .frame(height: SavantGeo.rowHeightHeader)
         .padding(.horizontal, SavantGeo.padInline)
@@ -404,7 +404,7 @@ struct LeaderboardTableRow: View {
             Text("\(rank)")
                 .font(SavantType.statSmall)
                 .foregroundStyle(SavantPalette.inkSecondary)
-                .frame(width: 50, alignment: .leading)
+                .frame(width: 42, alignment: .leading)
                 .monospacedDigit()
 
             HStack(spacing: 10) {
@@ -414,7 +414,8 @@ struct LeaderboardTableRow: View {
                         .font(SavantType.bodyBold)
                         .foregroundStyle(SavantPalette.ink)
                         .lineLimit(1)
-                        .minimumScaleFactor(0.75)
+                        .minimumScaleFactor(0.85)
+                        .truncationMode(.tail)
                     Text(player.displayPosition)
                         .font(SavantType.micro)
                         .tracking(0.4)
@@ -429,7 +430,7 @@ struct LeaderboardTableRow: View {
                     .font(SavantType.small)
                     .foregroundStyle(SavantPalette.inkSecondary)
             }
-            .frame(width: 50, alignment: .leading)
+            .frame(width: 44, alignment: .leading)
 
             HStack(spacing: 8) {
                 PercentileBarMini(percentile: displayPercentile)
@@ -439,10 +440,10 @@ struct LeaderboardTableRow: View {
                     .foregroundStyle(SavantPalette.color(forPercentile: displayPercentile))
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
-                    .frame(width: 56, alignment: .trailing)
+                    .frame(width: 48, alignment: .trailing)
                     .monospacedDigit()
             }
-            .frame(width: 100, alignment: .trailing)
+            .frame(width: 92, alignment: .trailing)
         }
         .frame(height: SavantGeo.rowHeight)
         .padding(.horizontal, SavantGeo.padInline)
