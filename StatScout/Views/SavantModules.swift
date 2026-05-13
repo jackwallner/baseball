@@ -25,7 +25,7 @@ struct PlayerIdentityStrip: View {
 
     var body: some View {
         HStack(alignment: .center, spacing: 14) {
-            PlayerHeadshot(url: player.headshotURL, initials: player.initials, size: 72)
+            PlayerHeadshot(team: player.team, initials: player.initials, size: 72)
                 .overlay(Circle().stroke(.white, lineWidth: 2))
             VStack(alignment: .leading, spacing: 4) {
                 Text(player.name)

@@ -36,6 +36,7 @@ struct TeamsView: View {
     let viewModel: DashboardViewModel
     @State private var teamsViewModel = TeamsViewModel()
     @State private var searchText = ""
+    @State private var showingPaywall = false
 
     private static let allTeams: [String] = [
         "ARI", "ATL", "BAL", "BOS", "CHC", "CWS", "CIN", "CLE", "COL", "DET",
@@ -99,6 +100,12 @@ struct TeamsView: View {
         .scrollBounceBehavior(.basedOnSize)
         .background(SavantPalette.canvas.ignoresSafeArea())
         .navigationBarTitleDisplayMode(.inline)
+        .refreshable {
+            await viewModel.load()
+        }
+        .sheet(isPresented: $showingPaywall) {
+            PaywallView(trigger: .teamView)
+        }
     }
 
     private var teamsLoadingState: some View {
@@ -135,9 +142,7 @@ struct TeamsView: View {
 
     private var seasonHeader: some View {
         HStack {
-            Text("\(String(viewModel.selectedSeason)) Season")
-                .font(SavantType.bodyBold)
-                .foregroundStyle(SavantPalette.ink)
+            seasonMenu
             Spacer()
             Text("\(filteredTeams.count) teams")
                 .font(SavantType.small)
@@ -151,6 +156,61 @@ struct TeamsView: View {
             RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
                 .stroke(SavantPalette.hairline, lineWidth: 0.5)
         )
+    }
+
+    private var seasonMenu: some View {
+        Menu {
+            if viewModel.isHistoricalLoading {
+                Label("Loading past seasons…", systemImage: "hourglass")
+            } else if !viewModel.hasLoadedHistorical {
+                Button {
+                    if store.isPro {
+                        Task { await viewModel.loadHistoricalIfNeeded() }
+                    } else {
+                        showingPaywall = true
+                    }
+                } label: {
+                    Label(store.isPro ? "Load past seasons" : "Past seasons require Pro",
+                          systemImage: store.isPro ? "clock.arrow.circlepath" : "crown.fill")
+                }
+            }
+            ForEach(viewModel.availableSeasons, id: \.self) { season in
+                let isLocked = season != 2026 && !store.isPro
+                Button {
+                    if isLocked {
+                        showingPaywall = true
+                    } else {
+                        viewModel.selectedSeason = season
+                    }
+                } label: {
+                    HStack {
+                        Text(String(season))
+                        if isLocked {
+                            Image(systemName: "crown.fill")
+                                .font(.system(size: 10))
+                                .foregroundStyle(SavantPalette.inkTertiary)
+                        }
+                    }
+                }
+            }
+        } label: {
+            HStack(spacing: 6) {
+                Image(systemName: "calendar")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(SavantPalette.savantRed)
+                Text("Season")
+                    .font(SavantType.micro)
+                    .tracking(0.5)
+                    .foregroundStyle(SavantPalette.inkSecondary)
+                Text(String(viewModel.selectedSeason))
+                    .font(SavantType.bodyBold)
+                    .foregroundStyle(SavantPalette.ink)
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundStyle(SavantPalette.inkTertiary)
+            }
+        }
+        .menuOrder(.fixed)
     }
 
     private func favoriteTeamSection(favorite: String) -> some View {

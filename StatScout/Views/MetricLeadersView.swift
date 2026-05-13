@@ -88,7 +88,7 @@ struct MetricLeadersView: View {
                     if let best = item.best {
                         NavigationLink(value: best.player) {
                             HStack(spacing: 6) {
-                                PlayerHeadshot(url: best.player.headshotURL, initials: best.player.initials, size: 24)
+                                PlayerHeadshot(team: best.player.team, initials: best.player.initials, size: 24)
                                 VStack(alignment: .leading, spacing: 1) {
                                     Text(best.player.name)
                                         .font(SavantType.smallBold)
@@ -115,7 +115,7 @@ struct MetricLeadersView: View {
                     if let worst = item.worst {
                         NavigationLink(value: worst.player) {
                             HStack(spacing: 6) {
-                                PlayerHeadshot(url: worst.player.headshotURL, initials: worst.player.initials, size: 24)
+                                PlayerHeadshot(team: worst.player.team, initials: worst.player.initials, size: 24)
                                 VStack(alignment: .leading, spacing: 1) {
                                     Text(worst.player.name)
                                         .font(SavantType.smallBold)

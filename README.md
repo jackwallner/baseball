@@ -1,6 +1,6 @@
 # StatScout
 
-StatScout is a native SwiftUI iOS app for fans and media to view mobile-friendly Baseball Savant-style player percentile pages from a nightly refreshed Statcast data feed.
+StatScout is a native SwiftUI iOS app for fans and media to view mobile-friendly player percentile pages from a nightly refreshed advanced-metrics data feed.
 
 ## Stack
 
@@ -8,7 +8,7 @@ StatScout is a native SwiftUI iOS app for fans and media to view mobile-friendly
 - **Project generation:** XcodeGen
 - **Database/API:** Supabase Postgres + generated REST API
 - **Nightly refresh:** GitHub Actions scheduled Python job
-- **Ingestion:** Python + `pybaseball` Baseball Savant percentile rankings
+- **Ingestion:** Python + `pybaseball` percentile rankings
 
 ## Project layout
 
@@ -65,8 +65,8 @@ The workflow runs daily at `14:00 UTC` (10:00 EDT) and can also be run manually 
 
 ## Next production steps
 
-- Add team/position enrichment to the Savant percentile snapshot rows.
-- Add dedicated player search/profile navigation around Savant-style percentile cards.
+- Add team/position enrichment to the percentile snapshot rows.
+- Add dedicated player search/profile navigation around percentile cards.
 - Add cached local persistence in the iOS app.
 - Add push alerts for major percentile movers.
 - Add share cards for media-friendly player insights.

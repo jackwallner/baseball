@@ -142,7 +142,7 @@ struct PlayerComparisonView: View {
 
     private func playerSummaryCard(player: Player, label: String) -> some View {
         VStack(spacing: 8) {
-            PlayerHeadshot(url: player.headshotURL, initials: player.initials, size: 56)
+            PlayerHeadshot(team: player.team, initials: player.initials, size: 56)
             Text(player.name)
                 .font(SavantType.smallBold)
                 .foregroundStyle(SavantPalette.ink)

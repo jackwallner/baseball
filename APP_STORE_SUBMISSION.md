@@ -86,8 +86,10 @@ Six screenshots available in `Screenshots/appstore/`. Upload in this order:
 
 ## 6. Keywords
 
+App Store Connect keyword field has a 100-character limit. The string below is 97 chars and intentionally omits terms already covered by the app name + subtitle ("baseball", "percentiles", "rankings", "metrics") and any third-party trademarks (mlb, statcast, savant). Sabermetric tail terms (`xwOBA`, `wRC`, `barrel`) are factual stat names in the public domain.
+
 ```
-baseball,mlb,stats,analytics,savant,statcast,fantasy,metrics,leaderboard,sabermetrics,rankings,pitcher,hitter,percentile,xwOBA,OAA,sprint speed,wRC+,barrel,hard hit,pitching,fielding,running,comparisons,historical,scout
+stats,analytics,sabermetrics,fantasy,hitter,scouting,leaderboard,batting,pitching,wRC,xwOBA,barrel
 ```
 
 ---
@@ -100,7 +102,7 @@ Select App Privacy answers based on the current App Store Connect / RevenueCat b
 - No account creation or sign-in required
 - No analytics SDKs, no ad networks, no third-party tracking
 - All user preferences stored locally via `@AppStorage` and `UserDefaults`
-- Network requests are limited to: (a) Supabase REST API for player stat snapshots, (b) MLB CDN (`midfield.mlbstatic.com`) for player headshot images, (c) RevenueCat for optional purchase offerings and entitlement verification
+- Network requests are limited to: (a) Supabase REST API for player stat snapshots, (b) RevenueCat for optional purchase offerings and entitlement verification
 - Purchases are processed by Apple; purchase entitlement status is verified through RevenueCat
 - No user-generated content, no chat, no social features
 - The `PrivacyInfo.xcprivacy` manifest declares no collected data and includes required-reason entries for UserDefaults and file timestamp access
@@ -152,7 +154,6 @@ The app pulls data from a Supabase database that is refreshed nightly via an aut
 ### Network Endpoints
 
 - **Supabase REST API** (`https://babzqsbmcunrezsdpyng.supabase.co`) — player snapshot data, read-only via anon key with Row Level Security
-- **MLB CDN** (`https://midfield.mlbstatic.com`) — player headshot images
 - **RevenueCat** (`https://api.revenuecat.com`) — IAP purchase verification and entitlement checks
 
 ### Known Visual Characteristics

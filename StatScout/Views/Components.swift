@@ -3,47 +3,21 @@ import SwiftUI
 // MARK: - Atomic Components
 
 struct PlayerHeadshot: View {
-    let url: URL?
+    let team: String
     let initials: String
     let size: CGFloat
 
     var body: some View {
         ZStack {
-            Circle().fill(SavantPalette.surfaceAlt)
-            if let url {
-                AsyncImage(url: url) { phase in
-                    switch phase {
-                    case .success(let image):
-                        image.resizable().scaledToFill()
-                            .frame(width: size, height: size)
-                    case .failure(_):
-                        initialsView
-                    case .empty:
-                        shimmerView
-                    @unknown default:
-                        shimmerView
-                    }
-                }
-            } else {
-                initialsView
-            }
+            Circle().fill(MLBTeamColor.color(team))
+            Text(initials)
+                .font(.system(size: size * 0.38, weight: .bold))
+                .foregroundStyle(.white)
         }
         .frame(width: size, height: size)
         .clipShape(Circle())
-        .overlay(Circle().stroke(SavantPalette.hairline, lineWidth: 0.5))
+        .overlay(Circle().stroke(Color.white.opacity(0.25), lineWidth: 0.5))
         .accessibilityHidden(true)
-    }
-
-    private var initialsView: some View {
-        Text(initials)
-            .font(.system(size: size * 0.36, weight: .bold))
-            .foregroundStyle(SavantPalette.inkTertiary)
-    }
-
-    private var shimmerView: some View {
-        Circle()
-            .fill(SavantPalette.surfaceAlt)
-            .shimmering()
     }
 }
 
@@ -434,7 +408,7 @@ struct LeaderboardTableRow: View {
                 .monospacedDigit()
 
             HStack(spacing: 10) {
-                PlayerHeadshot(url: player.headshotURL, initials: player.initials, size: 36)
+                PlayerHeadshot(team: player.team, initials: player.initials, size: 36)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(player.name)
                         .font(SavantType.bodyBold)

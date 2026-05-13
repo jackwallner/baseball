@@ -106,11 +106,6 @@ struct Player: Identifiable, Codable, Hashable, Sendable {
         return "\(name) · \(team) \(position)\nOverall: \(overallPercentile.ordinal) percentile\nTop stat: \(headline)\nStatScout"
     }
 
-    var savantURL: URL? {
-        let slug = name.lowercased().replacingOccurrences(of: " ", with: "-")
-        return URL(string: "https://baseballsavant.mlb.com/savant-player/\(slug)-\(playerId)")
-    }
-
     func percentile(for category: MetricCategory) -> Int? {
         let categoryMetrics = metrics.filter { $0.category == category }
         guard !categoryMetrics.isEmpty else { return nil }
@@ -144,6 +139,31 @@ enum MetricCategory: String, Codable, CaseIterable, Hashable, Sendable {
     case pitching = "Pitching"
     case fielding = "Fielding"
     case running = "Running"
+
+    /// The preferred display order of metric labels within this category,
+    /// matching Baseball Savant's convention.
+    var metricPriorityOrder: [String] {
+        switch self {
+        case .hitting:
+            return ["xwOBA", "xBA", "xSLG", "wOBA", "BA", "SLG", "OBP", "OPS", "ISO",
+                    "K%", "BB%", "Whiff%", "Barrel%", "HardHit%", "EV", "LA", "Sprint Speed"]
+        case .pitching:
+            return ["xwOBA", "xERA", "K%", "BB%", "Whiff%", "Barrel%", "Chase%",
+                    "EV", "HardHit%", "GB%", "FB%"]
+        case .fielding:
+            return ["Range (OAA)", "Arm Strength", "Arm Value", "Jump", "Burst"]
+        case .running:
+            return ["Sprint Speed", "Bolts", "Acceleration"]
+        }
+    }
+
+    /// Returns a comparator for sorting metric labels within this category.
+    func sortMetrics(_ a: String, _ b: String) -> Bool {
+        let order = metricPriorityOrder
+        let ia = order.firstIndex(of: a) ?? order.count
+        let ib = order.firstIndex(of: b) ?? order.count
+        return ia < ib
+    }
 }
 
 struct TeamRoute: Hashable {
@@ -194,9 +214,6 @@ extension Player {
 
         // Standard case: first initial + last initial
         return String(first.prefix(1)) + String(last.prefix(1))
-    }
-    var headshotURL: URL? {
-        imageURL ?? URL(string: "https://midfield.mlbstatic.com/v1/people/\(playerId)/spots/240")
     }
 }
 

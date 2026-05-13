@@ -106,7 +106,9 @@ extension Package {
 
 extension CustomerInfo {
     var hasProEntitlement: Bool {
-        !entitlements.active.isEmpty
+        let active = entitlements.active
+        return active[RevenueCatConfig.proEntitlement]?.isActive == true
+            || active[RevenueCatConfig.fallbackEntitlement]?.isActive == true
     }
 }
 

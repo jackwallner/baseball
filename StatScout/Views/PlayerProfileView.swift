@@ -110,26 +110,17 @@ struct PlayerProfileView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                HStack(spacing: 12) {
-                    Button {
-                        if store.isPro {
-                            showingPlayerPicker = true
-                        } else {
-                            paywallTrigger = .playerComparison
-                        }
-                    } label: {
-                        Image(systemName: "person.2.fill")
-                            .foregroundStyle(.white)
+                Button {
+                    if store.isPro {
+                        showingPlayerPicker = true
+                    } else {
+                        paywallTrigger = .playerComparison
                     }
-                    .accessibilityLabel("Compare with another player")
-                    if let url = player.savantURL {
-                        Link(destination: url) {
-                            Image(systemName: "arrow.up.right.square")
-                                .foregroundStyle(.white)
-                        }
-                        .accessibilityLabel("Open source page")
-                    }
+                } label: {
+                    Image(systemName: "person.2.fill")
+                        .foregroundStyle(.white)
                 }
+                .accessibilityLabel("Compare with another player")
             }
         }
         .sheet(isPresented: $showPercentileInfo) {
@@ -586,7 +577,7 @@ private struct PlayerPickerSheet: View {
                     onSelect(player)
                 } label: {
                     HStack(spacing: 12) {
-                        PlayerHeadshot(url: player.headshotURL, initials: player.initials, size: 36)
+                        PlayerHeadshot(team: player.team, initials: player.initials, size: 36)
                         VStack(alignment: .leading, spacing: 2) {
                             Text(player.name)
                                 .font(SavantType.bodyBold)

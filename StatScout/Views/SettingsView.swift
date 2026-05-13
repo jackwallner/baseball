@@ -27,7 +27,7 @@ struct AboutView: View {
         }
         .background(SavantPalette.canvas.ignoresSafeArea())
         .sheet(isPresented: $showingPaywall) {
-            PaywallView()
+            PaywallView(trigger: .upgrade)
         }
     }
 

@@ -6,13 +6,6 @@ struct StatScoutApp: App {
     @StateObject private var store = StoreService.shared
 
     init() {
-        // 64 MB memory + 256 MB disk image cache so headshots stick around between launches.
-        URLCache.shared = URLCache(
-            memoryCapacity: 64 * 1024 * 1024,
-            diskCapacity: 256 * 1024 * 1024,
-            directory: FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first?.appending(path: "image-cache")
-        )
-
         guard let urlString = Self.configValue(for: "SUPABASE_URL"),
               let url = URL(string: urlString),
               let key = Self.configValue(for: "SUPABASE_ANON_KEY") else {
@@ -54,7 +47,6 @@ struct ContentView: View {
     @EnvironmentObject private var store: StoreService
 
     @State private var viewModel: DashboardViewModel
-    @State private var showingPaywall = false
 
     init(api: StatcastAPI) {
         _viewModel = State(initialValue: DashboardViewModel(provider: api, cache: TwoTierPlayerCache()))
@@ -67,15 +59,12 @@ struct ContentView: View {
                 .allowsHitTesting(hasCompletedOnboarding)
 
             if !hasCompletedOnboarding {
-                OnboardingCards(viewModel: viewModel, showingPaywall: $showingPaywall, hasCompletedOnboarding: $hasCompletedOnboarding)
+                OnboardingCards(viewModel: viewModel, hasCompletedOnboarding: $hasCompletedOnboarding)
                     .transition(.opacity)
                     .zIndex(1)
             }
         }
         .task { await viewModel.loadIfNeeded() }
-        .sheet(isPresented: $showingPaywall) {
-            PaywallView()
-        }
     }
 }
 
@@ -89,12 +78,10 @@ struct BulletItem: Identifiable {
 struct OnboardingCards: View {
     @EnvironmentObject private var store: StoreService
     let viewModel: DashboardViewModel
-    @Binding var showingPaywall: Bool
     @Binding var hasCompletedOnboarding: Bool
     @State private var currentPage = 0
 
     private var isLastPage: Bool { currentPage == pages.count - 1 }
-    private var isPricingPage: Bool { currentPage == 2 }
     private var dataReady: Bool { viewModel.isReady }
 
     var body: some View {
@@ -169,32 +156,6 @@ struct OnboardingCards: View {
             }
             .buttonStyle(.plain)
             .disabled(!dataReady)
-        } else if isPricingPage {
-            VStack(spacing: 12) {
-                Button {
-                    showingPaywall = true
-                } label: {
-                    Text(store.proPrice.map { "Unlock Pro — \($0)" } ?? "See Plans")
-                        .font(SavantType.bodyBold)
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 52)
-                        .background(SavantPalette.savantRed)
-                        .clipShape(RoundedRectangle(cornerRadius: 14))
-                }
-                .buttonStyle(.plain)
-
-                Button {
-                    withAnimation { currentPage += 1 }
-                } label: {
-                    Text("Maybe Later")
-                        .font(SavantType.bodyBold)
-                        .foregroundStyle(SavantPalette.inkSecondary)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 44)
-                }
-                .buttonStyle(.plain)
-            }
         } else {
             Button {
                 withAnimation { currentPage += 1 }
@@ -234,26 +195,13 @@ struct OnboardingCards: View {
             ]
         ),
         OnboardingPage(
-            icon: "crown.fill",
-            title: "Go Pro",
-            description: "Current season is free. Pro unlocks the trends that tell the full story — past seasons, year-over-year changes, and head-to-head comparisons.",
-            bullets: [
-                BulletItem(text: "Current season leaderboard", icon: "checkmark.circle.fill", color: .green),
-                BulletItem(text: "Player profiles & percentiles", icon: "checkmark.circle.fill", color: .green),
-                BulletItem(text: "Past seasons on demand", icon: "crown.fill", color: .yellow),
-                BulletItem(text: "Year-over-year comparisons", icon: "crown.fill", color: .yellow),
-                BulletItem(text: "Head-to-head player matchups", icon: "crown.fill", color: .yellow),
-                BulletItem(text: "Full percentile history", icon: "crown.fill", color: .yellow)
-            ]
-        ),
-        OnboardingPage(
             icon: "baseball.fill",
             title: "Play Ball",
-            description: "Data is loading so you can jump right into the leaderboard. Your app, your team, your game.",
+            description: "Data is loading so you can jump right into the leaderboard. In the meantime, here's a look at what's available:",
             bullets: [
-                BulletItem(text: "Ready when the data loads", icon: "checkmark.circle.fill", color: SavantPalette.savantRed),
+                BulletItem(text: "Current season fully unlocked — dive right in", icon: "checkmark.circle.fill", color: SavantPalette.savantRed),
                 BulletItem(text: "No account required to get started", icon: "checkmark.circle.fill", color: SavantPalette.savantRed),
-                BulletItem(text: "Upgrade to Pro anytime from Settings", icon: "checkmark.circle.fill", color: SavantPalette.savantRed)
+                BulletItem(text: "Upgrade to Pro anytime for past seasons & comparisons", icon: "crown.fill", color: .yellow)
             ]
         )
     ]

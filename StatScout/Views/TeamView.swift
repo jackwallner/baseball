@@ -73,16 +73,6 @@ struct TeamView: View {
         .background(SavantPalette.canvas.ignoresSafeArea())
         .navigationTitle(teamFullName(team))
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                if let url = savantTeamURL(for: team) {
-                    Link(destination: url) {
-                        Image(systemName: "safari")
-                            .foregroundStyle(.white)
-                    }
-                }
-            }
-        }
         .sheet(isPresented: $showingPaywall) {
             PaywallView(trigger: .teamView)
         }
@@ -160,11 +150,6 @@ struct TeamView: View {
             Text(description)
         }
         .padding(.vertical, 48)
-    }
-
-    private func savantTeamURL(for abbr: String) -> URL? {
-        let normalized = normalizedTeamAbbreviation(abbr).lowercased()
-        return URL(string: "https://baseballsavant.mlb.com/team/\(normalized)")
     }
 
     @ViewBuilder

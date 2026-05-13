@@ -894,7 +894,7 @@ def build_snapshot_rows(season: int) -> list[dict]:
     """Build snapshot rows with both percentiles and actual values."""
     logger.info("Building snapshot rows for season %s with actual values...", season)
 
-    now = datetime.now(UTC) - timedelta(days=1)
+    now = datetime.now(UTC)
     players: dict[int, dict] = {}
 
     value_store = ActualValueStore(season)

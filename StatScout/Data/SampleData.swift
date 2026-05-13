@@ -10,7 +10,7 @@ struct SampleData {
             team: "NYY",
             position: "RF",
             handedness: "R/R",
-            imageURL: URL(string: "https://midfield.mlbstatic.com/v1/people/592450/spots/240"),
+            imageURL: nil,
             updatedAt: Date(),
             season: 2026,
             metrics: [
@@ -43,7 +43,7 @@ struct SampleData {
             team: "LAD",
             position: "DH",
             handedness: "L/R",
-            imageURL: URL(string: "https://midfield.mlbstatic.com/v1/people/660271/spots/240"),
+            imageURL: nil,
             updatedAt: Date(),
             season: 2026,
             metrics: [
@@ -76,7 +76,7 @@ struct SampleData {
             team: "KC",
             position: "SS",
             handedness: "R/R",
-            imageURL: URL(string: "https://midfield.mlbstatic.com/v1/people/669203/spots/240"),
+            imageURL: nil,
             updatedAt: Date(),
             season: 2026,
             metrics: [
@@ -109,7 +109,7 @@ struct SampleData {
             team: "PIT",
             position: "SP",
             handedness: "R/R",
-            imageURL: URL(string: "https://midfield.mlbstatic.com/v1/people/694973/spots/240"),
+            imageURL: nil,
             updatedAt: Date(),
             season: 2026,
             metrics: [
@@ -143,7 +143,7 @@ struct SampleData {
             team: "NYY",
             position: "LF",
             handedness: "L/L",
-            imageURL: URL(string: "https://midfield.mlbstatic.com/v1/people/665742/spots/240"),
+            imageURL: nil,
             updatedAt: Date(),
             season: 2025,
             metrics: [
@@ -163,7 +163,7 @@ struct SampleData {
             team: "TOR",
             position: "1B",
             handedness: "R/R",
-            imageURL: URL(string: "https://midfield.mlbstatic.com/v1/people/665489/spots/240"),
+            imageURL: nil,
             updatedAt: Date(),
             season: 2025,
             metrics: [

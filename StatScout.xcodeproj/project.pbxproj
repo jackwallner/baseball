@@ -15,7 +15,6 @@
 		194BDDCA1D45B8E71852DF10 /* StandardStatsLeadersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9CBAD749A639F5A5ADCF10B /* StandardStatsLeadersView.swift */; };
 		1C05ED9E954E365E79E177AC /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57A36C805E9D0AB83292B6F7 /* PaywallView.swift */; };
 		203BA78977360FDD34CE3DCE /* SavantTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBA717240777CE85A8A2379E /* SavantTokens.swift */; };
-		2C52E0DE7046B30BAB6CAF26 /* StoreManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE78CAB2EACA19D3117D7C02 /* StoreManager.swift */; };
 		2D96A2A958994588B6F847D5 /* YearAuditUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98410E06CAC66BDEE4137CAF /* YearAuditUITests.swift */; };
 		3A17E9E47DA00F4396C5E4A8 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = B6F6FCA7A34D8F553BA94A8D /* RevenueCat */; };
 		3DA5F5AA0CC4C3141DB727AA /* PlayerCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 346E3D39DDC5F6FDD387016B /* PlayerCache.swift */; };
@@ -43,6 +42,7 @@
 		F6AE33EDC77A2F71DFC9A244 /* YearComparisonFeatureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A722423BB05C1EA767098065 /* YearComparisonFeatureTests.swift */; };
 		F7175DB88FA0286F66E2A8ED /* players-historical.plist in Resources */ = {isa = PBXBuildFile; fileRef = 18DC891CB6C0193D0FAAE5FE /* players-historical.plist */; };
 		F9CFA1F577A94864AB624B41 /* SampleData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BF12CF754F018EFD7BE7729 /* SampleData.swift */; };
+		FC0DF3B89E0E8C6152BC78CF /* YearComparePreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13A6D136EE3F7A2B36956CA4 /* YearComparePreview.swift */; };
 		FE17DDC74A43A910CD4A1CE8 /* SavantModules.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C04FC271035959EFD5300A2 /* SavantModules.swift */; };
 /* End PBXBuildFile section */
 
@@ -66,6 +66,7 @@
 /* Begin PBXFileReference section */
 		00934226FB4C12145112549C /* MetricRankingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetricRankingView.swift; sourceTree = "<group>"; };
 		11CC376E01BC54EAB941E7A7 /* players-historical.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "players-historical.json"; sourceTree = "<group>"; };
+		13A6D136EE3F7A2B36956CA4 /* YearComparePreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YearComparePreview.swift; sourceTree = "<group>"; };
 		147A7B626DB00162FDED79EA /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		15914E954BD86B91C09E5C88 /* StatcastAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatcastAPI.swift; sourceTree = "<group>"; };
 		18DC891CB6C0193D0FAAE5FE /* players-historical.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "players-historical.plist"; sourceTree = "<group>"; };
@@ -103,7 +104,6 @@
 		F817C1759417F135E7CD20C2 /* StoreService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreService.swift; sourceTree = "<group>"; };
 		F9CBAD749A639F5A5ADCF10B /* StandardStatsLeadersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StandardStatsLeadersView.swift; sourceTree = "<group>"; };
 		FCF08005AEA98F7CFF7919C6 /* TeamView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamView.swift; sourceTree = "<group>"; };
-		FE78CAB2EACA19D3117D7C02 /* StoreManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -210,7 +210,6 @@
 			children = (
 				346E3D39DDC5F6FDD387016B /* PlayerCache.swift */,
 				15914E954BD86B91C09E5C88 /* StatcastAPI.swift */,
-				FE78CAB2EACA19D3117D7C02 /* StoreManager.swift */,
 				F817C1759417F135E7CD20C2 /* StoreService.swift */,
 			);
 			path = Services;
@@ -241,6 +240,7 @@
 				F9CBAD749A639F5A5ADCF10B /* StandardStatsLeadersView.swift */,
 				93AB140AC9F51D7E0F0E2C6D /* TeamsView.swift */,
 				FCF08005AEA98F7CFF7919C6 /* TeamView.swift */,
+				13A6D136EE3F7A2B36956CA4 /* YearComparePreview.swift */,
 				7021023A2FAE67C688618334 /* YearComparisonView.swift */,
 			);
 			path = Views;
@@ -418,10 +418,10 @@
 				194BDDCA1D45B8E71852DF10 /* StandardStatsLeadersView.swift in Sources */,
 				97ADF393CE14DE856A50A0B5 /* StatScoutApp.swift in Sources */,
 				C5718F0C8435928CBF995DE5 /* StatcastAPI.swift in Sources */,
-				2C52E0DE7046B30BAB6CAF26 /* StoreManager.swift in Sources */,
 				DBAED006FBC8ACCE2A4D49FD /* StoreService.swift in Sources */,
 				648F3040D95418DB26BE2EE1 /* TeamView.swift in Sources */,
 				03322BA439762FE028116ADC /* TeamsView.swift in Sources */,
+				FC0DF3B89E0E8C6152BC78CF /* YearComparePreview.swift in Sources */,
 				C080C107A1B4ABFAC0DCE3E9 /* YearComparisonView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -458,7 +458,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = StatScout/StatScout.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CURRENT_PROJECT_VERSION = 75;
+				CURRENT_PROJECT_VERSION = 82;
 				DEVELOPMENT_TEAM = YXG4MP6W39;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = StatScout/Info.plist;
@@ -577,7 +577,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = StatScout/StatScout.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 75;
+				CURRENT_PROJECT_VERSION = 82;
 				DEVELOPMENT_TEAM = YXG4MP6W39;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = StatScout/Info.plist;

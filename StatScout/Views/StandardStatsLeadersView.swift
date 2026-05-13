@@ -210,7 +210,7 @@ struct StandardStatsLeadersView: View {
 
                 // Player info
                 HStack(spacing: 10) {
-                    PlayerHeadshot(url: player.headshotURL, initials: player.initials, size: 36)
+                    PlayerHeadshot(team: player.team, initials: player.initials, size: 36)
                     VStack(alignment: .leading, spacing: 2) {
                         Text(player.name)
                             .font(SavantType.bodyBold)
