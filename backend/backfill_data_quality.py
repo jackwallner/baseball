@@ -5,6 +5,8 @@ Fixes data quality issues left by older ingestion bugs:
      dividing pitcher SO/BB by the bogus pitcher-as-batter PA).
   2. Rewrites every display_value string with a correct ordinal suffix
      ("73th" -> "73rd", "1th" -> "1st", etc.).
+  3. Drops metrics that have a percentile but no actual_value (legacy
+     rows from before the "skip metrics without actual values" fix).
 
 Run after the ingest.py fixes are deployed; the next nightly ingest will
 repopulate dropped rates with correct percentiles from BF.
@@ -50,7 +52,7 @@ RATE_LABELS = {"K%", "BB%"}
 
 def clean_metrics(metrics: list) -> tuple[list, dict]:
     """Return (new_metrics, stats) — stats counts edits and drops."""
-    stats = {"dropped_rates": 0, "suffix_fixes": 0}
+    stats = {"dropped_rates": 0, "suffix_fixes": 0, "dropped_empty": 0}
     out = []
     for m in metrics or []:
         # Drop impossible K%/BB% values
@@ -59,6 +61,14 @@ def clean_metrics(metrics: list) -> tuple[list, dict]:
             if v is not None and (v < 0 or v > 100):
                 stats["dropped_rates"] += 1
                 continue
+
+        # Drop legacy percentile-only rows (no actual value).
+        # The current ingest skips these, but rows written before that fix
+        # still pollute the DB.
+        av = (m.get("actual_value") or "").strip()
+        if m.get("percentile") is not None and not av:
+            stats["dropped_empty"] += 1
+            continue
 
         dv = m.get("display_value") or ""
         if dv:
@@ -97,6 +107,7 @@ def main():
     rows_changed = 0
     total_drops = 0
     total_suffix = 0
+    total_empty = 0
 
     while True:
         q = sb.table("player_snapshots").select("id,season,metrics")
@@ -108,10 +119,11 @@ def main():
         for row in chunk:
             total_rows += 1
             new_metrics, stats = clean_metrics(row.get("metrics") or [])
-            if stats["dropped_rates"] or stats["suffix_fixes"]:
+            if stats["dropped_rates"] or stats["suffix_fixes"] or stats["dropped_empty"]:
                 rows_changed += 1
                 total_drops += stats["dropped_rates"]
                 total_suffix += stats["suffix_fixes"]
+                total_empty += stats["dropped_empty"]
                 if not args.dry_run:
                     sb.table("player_snapshots").update({"metrics": new_metrics}).eq(
                         "id", row["id"]
@@ -127,8 +139,8 @@ def main():
             logger.info("Processed %d rows...", total_rows)
 
     logger.info(
-        "Done. rows=%d changed=%d dropped_rates=%d suffix_fixes=%d dry_run=%s",
-        total_rows, rows_changed, total_drops, total_suffix, args.dry_run,
+        "Done. rows=%d changed=%d dropped_rates=%d suffix_fixes=%d dropped_empty=%d dry_run=%s",
+        total_rows, rows_changed, total_drops, total_suffix, total_empty, args.dry_run,
     )
 
 
