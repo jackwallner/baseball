@@ -107,8 +107,21 @@ extension Package {
 extension CustomerInfo {
     var hasProEntitlement: Bool {
         let active = entitlements.active
-        return active[RevenueCatConfig.proEntitlement]?.isActive == true
-            || active[RevenueCatConfig.fallbackEntitlement]?.isActive == true
+        if active[RevenueCatConfig.proEntitlement]?.isActive == true
+            || active[RevenueCatConfig.fallbackEntitlement]?.isActive == true {
+            return true
+        }
+        // Belt-and-suspenders: if the entitlement mapping on the dashboard is
+        // missing or mis-named, fall back to product ownership. Lifetime is a
+        // non-consumable; recurring products show up under activeSubscriptions.
+        if nonSubscriptions.contains(where: { $0.productIdentifier == StatScoutProduct.lifetime }) {
+            return true
+        }
+        let recurring: Set<String> = [StatScoutProduct.yearly, StatScoutProduct.monthly]
+        if !activeSubscriptions.intersection(recurring).isEmpty {
+            return true
+        }
+        return false
     }
 }
 

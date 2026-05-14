@@ -58,6 +58,7 @@ enum PaywallTrigger: Identifiable {
 
 struct PaywallView: View {
     @EnvironmentObject private var store: StoreService
+    @Environment(\.dismiss) private var dismiss
     let trigger: PaywallTrigger
 
     init(trigger: PaywallTrigger = .upgrade) {
@@ -75,11 +76,25 @@ struct PaywallView: View {
                     RevenueCatUI.PaywallView()
                 }
             }
+            .onPurchaseCompleted { customerInfo in
+                store.apply(customerInfo: customerInfo)
+                Task {
+                    await store.updateCustomerProductStatus(fetchPolicy: .fetchCurrent)
+                    if store.isPro { dismiss() }
+                }
+            }
+            .onRestoreCompleted { customerInfo in
+                store.apply(customerInfo: customerInfo)
+                if customerInfo.hasProEntitlement { dismiss() }
+            }
         }
         .task {
             if store.currentOffering == nil {
                 await store.fetchProducts()
             }
+        }
+        .onChange(of: store.isPro) { _, isPro in
+            if isPro { dismiss() }
         }
     }
 
