@@ -51,7 +51,7 @@ def test_build_metrics_with_values_uses_actual_value_when_available():
     assert len(ev) == 1
     assert ev[0]["value"] == "94.5 mph"
     assert ev[0]["actual_value"] == "94.5 mph"
-    assert ev[0]["display_value"] == "94.5 mph · 92th"
+    assert ev[0]["display_value"] == "94.5 mph · 92nd"
 
 
 def test_merge_player_row_maps_team(sample_batter_row):
@@ -226,7 +226,63 @@ def test_add_calculated_rates_assigns_true_percentiles():
     for m in list(by_pid_k.values()) + list(by_pid_bb.values()):
         assert m["percentile"] > 0
         assert "display_value" in m
-        assert "th" in m["display_value"]
+        assert any(suf in m["display_value"] for suf in ("st", "nd", "rd", "th"))
+
+
+def test_ordinal_suffix():
+    # 11-13 always 'th'
+    for n in (11, 12, 13, 111, 112, 113):
+        assert ingest.ordinal_suffix(n) == "th"
+    assert ingest.ordinal_suffix(1) == "st"
+    assert ingest.ordinal_suffix(21) == "st"
+    assert ingest.ordinal_suffix(91) == "st"
+    assert ingest.ordinal_suffix(2) == "nd"
+    assert ingest.ordinal_suffix(22) == "nd"
+    assert ingest.ordinal_suffix(92) == "nd"
+    assert ingest.ordinal_suffix(3) == "rd"
+    assert ingest.ordinal_suffix(23) == "rd"
+    assert ingest.ordinal_suffix(73) == "rd"
+    for n in (4, 5, 6, 7, 8, 9, 10, 20, 100):
+        assert ingest.ordinal_suffix(n) == "th"
+
+
+def test_add_calculated_rates_uses_bf_for_pitchers():
+    # Regression: pitching_stats_bref sometimes returns a tiny pitcher-as-hitter
+    # PA (e.g. 2) alongside the real BF (e.g. 527). The old code divided by PA
+    # and produced rates like K%=7100%. Must use BF for pitchers.
+    player = {
+        "player_type": "pitcher",
+        "standard_stats": [
+            {"label": "PA", "value": "2"},      # bogus pitcher-as-batter PA
+            {"label": "BF", "value": "527"},    # correct denominator
+            {"label": "SO", "value": "142"},
+            {"label": "BB", "value": "50"},
+        ],
+        "metrics": [],
+    }
+    ingest._add_calculated_rates({1: player})
+    k = next(m for m in player["metrics"] if m["label"] == "K%")
+    bb = next(m for m in player["metrics"] if m["label"] == "BB%")
+    # 142/527 = 26.9%, 50/527 = 9.5% — both well under 100%
+    assert k["value"] == "26.9%"
+    assert bb["value"] == "9.5%"
+
+
+def test_add_calculated_rates_skips_impossible_rates():
+    # If upstream data is corrupt (SO > BF), don't emit a >100% rate.
+    player = {
+        "player_type": "pitcher",
+        "standard_stats": [
+            {"label": "BF", "value": "5"},
+            {"label": "SO", "value": "13"},
+            {"label": "BB", "value": "10"},
+        ],
+        "metrics": [],
+    }
+    ingest._add_calculated_rates({1: player})
+    labels = {m["label"] for m in player["metrics"]}
+    assert "K%" not in labels
+    assert "BB%" not in labels
 
 
 def test_add_calculated_rates_preserves_native_percentile():

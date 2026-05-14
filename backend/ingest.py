@@ -141,13 +141,14 @@ def normalize_team_abbr(value: Any) -> str:
         "HOUSTON ASTROS": "HOU",
         "KANSAS CITY ROYALS": "KC", "KCR": "KC",
         "LOS ANGELES ANGELS": "LAA", "ANAHEIM ANGELS": "LAA",
+        "ATHLETICS": "OAK", "OAKLAND ATHLETICS": "OAK", "ATH": "OAK",
+        "SACRAMENTO ATHLETICS": "OAK",
         "LOS ANGELES DODGERS": "LAD",
         "MIAMI MARLINS": "MIA",
         "MILWAUKEE BREWERS": "MIL",
         "MINNESOTA TWINS": "MIN",
         "NEW YORK METS": "NYM",
         "NEW YORK YANKEES": "NYY",
-        "OAKLAND ATHLETICS": "OAK",
         "PHILADELPHIA PHILLIES": "PHI",
         "PITTSBURGH PIRATES": "PIT",
         "SAN DIEGO PADRES": "SD", "SDP": "SD",
@@ -173,6 +174,16 @@ def percentile_value(value: Any) -> Optional[int]:
         return max(0, min(100, int(round(float(value)))))
     except (ValueError, TypeError):
         return None
+
+
+def ordinal_suffix(n: int) -> str:
+    if 10 <= (n % 100) <= 20:
+        return "th"
+    return {1: "st", 2: "nd", 3: "rd"}.get(n % 10, "th")
+
+
+def format_percentile(actual_value: str, percentile: int) -> str:
+    return f"{actual_value} · {percentile}{ordinal_suffix(percentile)}"
 
 
 def safe_player_id(row: pd.Series) -> Optional[int]:
@@ -213,9 +224,10 @@ class ActualValueStore:
 
         # Batter expected stats (xwOBA, xBA, xSLG)
         try:
-            # Use minimal threshold - if Baseball Savant provides a percentile,
-            # we should provide the corresponding actual value
-            df = statcast_batter_expected_stats(self.season, minPA=1)
+            # Use Savant's qualified threshold so raw values stay in lockstep with
+            # percentiles. Sub-qualifier players get NaN here, the metric is dropped
+            # downstream, and we avoid showing "117 mph at 1st percentile" rows.
+            df = statcast_batter_expected_stats(self.season, minPA="q")
             df["player_id"] = pd.to_numeric(df["player_id"], errors="coerce")
             self._data["batter_expected"] = {}
             for _, row in df.iterrows():
@@ -233,9 +245,7 @@ class ActualValueStore:
 
         # Batter exit velocity
         try:
-            # Use minimal threshold - if Baseball Savant provides a percentile,
-            # we should provide the corresponding actual value
-            df = statcast_batter_exitvelo_barrels(self.season, minBBE=1)
+            df = statcast_batter_exitvelo_barrels(self.season, minBBE="q")
             df["player_id"] = pd.to_numeric(df["player_id"], errors="coerce")
             self._data["batter_exitvelo"] = {}
             for _, row in df.iterrows():
@@ -255,9 +265,8 @@ class ActualValueStore:
 
         # Sprint speed
         try:
-            # Use minimal threshold - if Baseball Savant provides a percentile,
-            # we should provide the corresponding actual value
-            df = statcast_sprint_speed(self.season, min_opp=1)
+            # Default min_opp=10 matches Savant's sprint-speed leaderboard qualifier.
+            df = statcast_sprint_speed(self.season)
             df["player_id"] = pd.to_numeric(df["player_id"], errors="coerce")
             self._data["sprint_speed"] = {}
             for _, row in df.iterrows():
@@ -274,9 +283,7 @@ class ActualValueStore:
 
         # Outs above average (fielding)
         try:
-            # Use minimal threshold - if Baseball Savant provides a percentile,
-            # we should provide the corresponding actual value
-            df = statcast_outs_above_average(self.season, pos="all", min_att=1)
+            df = statcast_outs_above_average(self.season, pos="all", min_att="q")
             df["player_id"] = pd.to_numeric(df["player_id"], errors="coerce")
             self._data["oaa"] = {}
             for _, row in df.iterrows():
@@ -293,9 +300,7 @@ class ActualValueStore:
 
         # Pitcher expected stats
         try:
-            # Use minimal threshold - if Baseball Savant provides a percentile,
-            # we should provide the corresponding actual value
-            df = statcast_pitcher_expected_stats(self.season, minPA=1)
+            df = statcast_pitcher_expected_stats(self.season, minPA="q")
             df["player_id"] = pd.to_numeric(df["player_id"], errors="coerce")
             self._data["pitcher_expected"] = {}
             for _, row in df.iterrows():
@@ -314,9 +319,7 @@ class ActualValueStore:
 
         # Pitcher exit velocity against
         try:
-            # Use minimal threshold - if Baseball Savant provides a percentile,
-            # we should provide the corresponding actual value
-            df = statcast_pitcher_exitvelo_barrels(self.season, minBBE=1)
+            df = statcast_pitcher_exitvelo_barrels(self.season, minBBE="q")
             df["player_id"] = pd.to_numeric(df["player_id"], errors="coerce")
             self._data["pitcher_exitvelo"] = {}
             for _, row in df.iterrows():
@@ -402,15 +405,16 @@ class ActualValueStore:
         unit = ""
 
         try:
+            # NOTE: Savant-sourced metrics (xwOBA, xBA, xSLG, exit velo, barrel%,
+            # hard-hit%, max EV, sweet-spot%) intentionally have no aggregator
+            # fallback. The aggregator computes from raw play-by-play with no
+            # qualifier, so falling back would re-introduce sub-qualifier players
+            # whose Savant percentile is artificially low — the very mismatch
+            # the MetricLeaders best/worst column was surfacing.
             if metric_key == "xwoba":
                 src = self._data["batter_expected"] if player_type == "batter" else self._data["pitcher_expected"]
                 if player_id in src:
                     v = src[player_id].get("est_woba")
-                    if pd.notna(v):
-                        value = f"{v:.3f}"
-                # Fallback to aggregated data
-                if not value and player_id in self._data.get("batter_agg", {}):
-                    v = self._data["batter_agg"][player_id].get("xwoba")
                     if pd.notna(v):
                         value = f"{v:.3f}"
 
@@ -420,11 +424,6 @@ class ActualValueStore:
                     v = src[player_id].get("est_ba")
                     if pd.notna(v):
                         value = f"{v:.3f}"
-                # Fallback to aggregated data
-                if not value and player_id in self._data.get("batter_agg", {}):
-                    v = self._data["batter_agg"][player_id].get("xba")
-                    if pd.notna(v):
-                        value = f"{v:.3f}"
 
             elif metric_key == "xslg":
                 src = self._data["batter_expected"] if player_type == "batter" else self._data["pitcher_expected"]
@@ -432,22 +431,11 @@ class ActualValueStore:
                     v = src[player_id].get("est_slg")
                     if pd.notna(v):
                         value = f"{v:.3f}"
-                # Fallback to aggregated data
-                if not value and player_id in self._data.get("batter_agg", {}):
-                    v = self._data["batter_agg"][player_id].get("xslg")
-                    if pd.notna(v):
-                        value = f"{v:.3f}"
 
             elif metric_key == "exit_velocity":
                 src = self._data["batter_exitvelo"] if player_type == "batter" else self._data["pitcher_exitvelo"]
                 if player_id in src:
                     v = src[player_id].get("avg_hit_speed")
-                    if pd.notna(v):
-                        value = f"{v:.1f}"
-                        unit = " mph"
-                # Fallback to aggregated data
-                if not value and player_id in self._data.get("batter_agg", {}):
-                    v = self._data["batter_agg"][player_id].get("exit_velocity")
                     if pd.notna(v):
                         value = f"{v:.1f}"
                         unit = " mph"
@@ -459,23 +447,11 @@ class ActualValueStore:
                     if pd.notna(v):
                         value = f"{v:.1f}"
                         unit = "%"
-                # Fallback to aggregated data
-                if not value and player_id in self._data.get("batter_agg", {}):
-                    v = self._data["batter_agg"][player_id].get("brl_percent")
-                    if pd.notna(v):
-                        value = f"{v:.1f}"
-                        unit = "%"
 
             elif metric_key == "hard_hit_percent":
                 src = self._data["batter_exitvelo"] if player_type == "batter" else self._data["pitcher_exitvelo"]
                 if player_id in src:
                     v = src[player_id].get("ev95percent")
-                    if pd.notna(v):
-                        value = f"{v:.1f}"
-                        unit = "%"
-                # Fallback to aggregated data
-                if not value and player_id in self._data.get("batter_agg", {}):
-                    v = self._data["batter_agg"][player_id].get("hard_hit_percent")
                     if pd.notna(v):
                         value = f"{v:.1f}"
                         unit = "%"
@@ -487,22 +463,10 @@ class ActualValueStore:
                     if pd.notna(v):
                         value = f"{v:.1f}"
                         unit = " mph"
-                # Fallback to aggregated data
-                if not value and player_id in self._data.get("batter_agg", {}):
-                    v = self._data["batter_agg"][player_id].get("max_ev")
-                    if pd.notna(v):
-                        value = f"{v:.1f}"
-                        unit = " mph"
 
             elif metric_key == "launch_angle_sweet_spot":
                 if player_id in self._data["batter_exitvelo"]:
                     v = self._data["batter_exitvelo"][player_id].get("anglesweetspotpercent")
-                    if pd.notna(v):
-                        value = f"{v:.1f}"
-                        unit = "%"
-                # Fallback to aggregated data
-                if not value and player_id in self._data.get("batter_agg", {}):
-                    v = self._data["batter_agg"][player_id].get("launch_angle_sweet_spot")
                     if pd.notna(v):
                         value = f"{v:.1f}"
                         unit = "%"
@@ -632,7 +596,7 @@ def build_metrics_with_values(
             "percentile": percentile,
             "category": category,
             "actual_value": actual_value,
-            "display_value": f"{actual_value} · {percentile}th",
+            "display_value": format_percentile(actual_value, percentile),
         }
 
         metrics.append(metric)
@@ -680,6 +644,69 @@ def build_roster_lookup(season: int) -> dict[int, dict[str, str]]:
     return lookup
 
 
+def resolve_tbd_teams(players: dict[int, dict]) -> None:
+    """Hit the MLB Stats API for any player still marked TBD.
+
+    Players on AAA rosters (or freshly traded) won't appear in the primary
+    teams/roster lookup. The /people endpoint exposes either the MLB team
+    directly or, for minor-leaguers, the parent organization via
+    `parentOrgId` on the affiliate team.
+    """
+    pending = [pid for pid, p in players.items() if p.get("team") == "TBD"]
+    if not pending:
+        return
+    logger.info("Resolving %d TBD-team players via /people endpoint", len(pending))
+
+    # The MLB Stats API accepts a comma-separated personIds list; batch in 50s.
+    resolved = 0
+    for i in range(0, len(pending), 50):
+        batch = pending[i:i + 50]
+        try:
+            resp = requests.get(
+                "https://statsapi.mlb.com/api/v1/people",
+                params={
+                    "personIds": ",".join(str(p) for p in batch),
+                    "hydrate": "currentTeam",
+                },
+                timeout=30,
+            )
+            resp.raise_for_status()
+            data = resp.json()
+        except Exception:
+            logger.exception("TBD resolver: /people batch failed")
+            continue
+
+        for person in data.get("people", []):
+            try:
+                pid = int(person["id"])
+            except (KeyError, ValueError, TypeError):
+                continue
+            ct = person.get("currentTeam") or {}
+            # Direct MLB team
+            abbr = normalize_team_abbr(ct.get("abbreviation") or ct.get("teamCode") or ct.get("fileCode") or ct.get("name") or "")
+            if abbr == "TBD":
+                # Try parent organization (AAA/AA affiliates)
+                parent_id = ct.get("parentOrgId")
+                parent_name = ct.get("parentOrgName")
+                if parent_name:
+                    abbr = normalize_team_abbr(parent_name)
+                elif parent_id:
+                    try:
+                        pr = requests.get(
+                            f"https://statsapi.mlb.com/api/v1/teams/{parent_id}",
+                            timeout=10,
+                        )
+                        pr.raise_for_status()
+                        pteam = (pr.json().get("teams") or [{}])[0]
+                        abbr = normalize_team_abbr(pteam.get("abbreviation") or pteam.get("name") or "")
+                    except Exception:
+                        pass
+            if abbr != "TBD" and pid in players:
+                players[pid]["team"] = abbr
+                resolved += 1
+    logger.info("TBD resolver: filled %d/%d", resolved, len(pending))
+
+
 def merge_player_row(
     players: dict[int, dict],
     row: pd.Series,
@@ -718,7 +745,6 @@ def merge_player_row(
             "source": "baseball_savant_enhanced",
             "metrics": [],
             "standard_stats": [],
-            "games": [],
             "updated_at": now_str,
         }
     else:
@@ -787,23 +813,39 @@ def _add_calculated_rates(players: dict[int, dict]) -> None:
             except (ValueError, TypeError):
                 pass
 
-        if pa is None and bf is not None:
-            pa = bf
-
-        if pa is None or pa <= 0:
-            continue
-
         player_type = player.get("player_type", "batter")
         is_pitcher = player_type == "pitcher" or (player_type == "two_way" and bf is not None)
 
+        # For pitchers, batters-faced is the only correct denominator. The
+        # batter-style PA returned by pitching_stats_bref reflects the pitcher's
+        # own at-bats and is meaningless here (often 1-2 even for full seasons).
+        if is_pitcher:
+            denom = bf
+        else:
+            denom = pa if pa is not None else bf
+
+        if denom is None or denom <= 0:
+            continue
+
+        def _rate(numer):
+            if numer is None:
+                return None
+            rate = (numer / denom) * 100
+            # Counting stats can't exceed batters faced / plate appearances.
+            # If they do, the upstream row is corrupt — skip rather than emit
+            # impossible values.
+            if rate < 0 or rate > 100:
+                return None
+            return rate
+
         aggregates.append({
             "pid": pid,
-            "pa": pa,
+            "denom": denom,
             "is_pitcher": is_pitcher,
             "prefix": "pitcher" if is_pitcher else "batter",
             "category": "Pitching" if is_pitcher else "Hitting",
-            "k_rate": (so / pa) * 100 if so is not None else None,
-            "bb_rate": (bb / pa) * 100 if bb is not None else None,
+            "k_rate": _rate(so),
+            "bb_rate": _rate(bb),
         })
 
     if not aggregates:
@@ -850,7 +892,7 @@ def _add_calculated_rates(players: dict[int, dict]) -> None:
                 pct = metric.get("percentile") or calc_k_pct
                 if pct:
                     metric["percentile"] = pct
-                    metric["display_value"] = f"{k_value} · {pct}th"
+                    metric["display_value"] = format_percentile(k_value, pct)
             else:
                 metric = {
                     "id": f"{prefix}-{pid}-k_percent",
@@ -861,7 +903,7 @@ def _add_calculated_rates(players: dict[int, dict]) -> None:
                     "category": category,
                 }
                 if calc_k_pct:
-                    metric["display_value"] = f"{k_value} · {calc_k_pct}th"
+                    metric["display_value"] = format_percentile(k_value, calc_k_pct)
                 player["metrics"].append(metric)
 
         if r["bb_rate"] is not None:
@@ -875,7 +917,7 @@ def _add_calculated_rates(players: dict[int, dict]) -> None:
                 pct = metric.get("percentile") or calc_bb_pct
                 if pct:
                     metric["percentile"] = pct
-                    metric["display_value"] = f"{bb_value} · {pct}th"
+                    metric["display_value"] = format_percentile(bb_value, pct)
             else:
                 metric = {
                     "id": f"{prefix}-{pid}-bb_percent",
@@ -886,7 +928,7 @@ def _add_calculated_rates(players: dict[int, dict]) -> None:
                     "category": category,
                 }
                 if calc_bb_pct:
-                    metric["display_value"] = f"{bb_value} · {calc_bb_pct}th"
+                    metric["display_value"] = format_percentile(bb_value, calc_bb_pct)
                 player["metrics"].append(metric)
 
 
@@ -934,6 +976,8 @@ def build_snapshot_rows(season: int) -> list[dict]:
         sum(1 for p in players.values() if p.get("player_type") == "two_way"),
         skipped,
     )
+
+    resolve_tbd_teams(players)
 
     all_player_ids = list(players.keys())
 

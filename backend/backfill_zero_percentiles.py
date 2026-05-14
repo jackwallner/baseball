@@ -150,7 +150,11 @@ def backfill_season(client, season: int, dry_run: bool = False) -> dict:
 
             m["percentile"] = new_pct
             value_str = m.get("value") or m.get("actual_value") or f"{rate:.1f}%"
-            m["display_value"] = f"{value_str} · {new_pct}th"
+            if 10 <= new_pct % 100 <= 20:
+                suffix = "th"
+            else:
+                suffix = {1: "st", 2: "nd", 3: "rd"}.get(new_pct % 10, "th")
+            m["display_value"] = f"{value_str} · {new_pct}{suffix}"
             changed = True
             updates_planned += 1
 
