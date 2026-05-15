@@ -181,7 +181,7 @@ def test_add_calculated_rates_from_standard_stats():
         "metrics": [],
     }
     players = {1: player}
-    ingest._add_calculated_rates(players)
+    ingest._add_calculated_rates(players, set(players))
     labels = {m["label"] for m in player["metrics"]}
     assert "K%" in labels
     assert "BB%" in labels
@@ -212,7 +212,7 @@ def test_add_calculated_rates_assigns_true_percentiles():
         2: _make_batter(2, 500, 100, 50),
         3: _make_batter(3, 500, 150, 75),
     }
-    ingest._add_calculated_rates(players)
+    ingest._add_calculated_rates(players, set(players))
 
     by_pid_k = {pid: next(m for m in p["metrics"] if m["label"] == "K%") for pid, p in players.items()}
     by_pid_bb = {pid: next(m for m in p["metrics"] if m["label"] == "BB%") for pid, p in players.items()}
@@ -260,7 +260,7 @@ def test_add_calculated_rates_uses_bf_for_pitchers():
         ],
         "metrics": [],
     }
-    ingest._add_calculated_rates({1: player})
+    ingest._add_calculated_rates({1: player}, {1})
     k = next(m for m in player["metrics"] if m["label"] == "K%")
     bb = next(m for m in player["metrics"] if m["label"] == "BB%")
     # 142/527 = 26.9%, 50/527 = 9.5% — both well under 100%
@@ -279,10 +279,21 @@ def test_add_calculated_rates_skips_impossible_rates():
         ],
         "metrics": [],
     }
-    ingest._add_calculated_rates({1: player})
+    ingest._add_calculated_rates({1: player}, {1})
     labels = {m["label"] for m in player["metrics"]}
     assert "K%" not in labels
     assert "BB%" not in labels
+
+
+def test_add_calculated_rates_skips_unqualified_players():
+    # Sub-qualifier player (not in qualified_pids): Savant shows no K%/BB%
+    # bar for them, so we must not fabricate one from a tiny sample.
+    sub = _make_batter(99, pa=18, so=0, bb=0)   # 0 K in 18 PA -> would be 99th
+    qualified = _make_batter(1, pa=500, so=100, bb=50)
+    players = {99: sub, 1: qualified}
+    ingest._add_calculated_rates(players, {1})
+    assert sub["metrics"] == []
+    assert {m["label"] for m in qualified["metrics"]} == {"K%", "BB%"}
 
 
 def test_add_calculated_rates_preserves_native_percentile():
@@ -298,6 +309,6 @@ def test_add_calculated_rates_preserves_native_percentile():
             {"id": "batter-1-k_percent", "label": "K%", "value": "25.0%", "percentile": 42, "category": "Hitting"},
         ],
     }
-    ingest._add_calculated_rates({1: player})
+    ingest._add_calculated_rates({1: player}, {1})
     k = next(m for m in player["metrics"] if m["label"] == "K%")
     assert k["percentile"] == 42

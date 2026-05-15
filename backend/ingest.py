@@ -797,7 +797,7 @@ def _rank_percentiles(values: dict[int, float], lower_better: bool) -> dict[int,
     return {int(pid): max(1, min(100, int(round(pct * 100)))) for pid, pct in ranks.items()}
 
 
-def _add_calculated_rates(players: dict[int, dict]) -> None:
+def _add_calculated_rates(players: dict[int, dict], qualified_pids: set[int]) -> None:
     """Calculate K% and BB% from standard stats with true league-relative percentiles.
 
     When upstream Baseball Savant percentile data is missing (common for
@@ -806,10 +806,18 @@ def _add_calculated_rates(players: dict[int, dict]) -> None:
     rank within the appropriate population (batters vs. pitchers). K% is
     inversely ranked for batters (lower K% = higher percentile) and BB% is
     inversely ranked for pitchers (lower BB% = higher percentile).
+
+    Only runs for players Savant itself ranks (``qualified_pids``: non-null
+    xwoba in the percentile-ranks export, i.e. they clear Savant's 2.1 PA /
+    team-game batter and 1.25 PA / team-game pitcher qualifiers). Sub-qualifier
+    players get no K%/BB% bar at all — matching what baseballsavant.mlb.com
+    shows on the player page — instead of a fabricated small-sample percentile.
     """
     aggregates: list[dict[str, Any]] = []
 
     for pid, player in players.items():
+        if pid not in qualified_pids:
+            continue
         pa = None
         so = None
         bb = None
@@ -967,6 +975,18 @@ def build_snapshot_rows(season: int) -> list[dict]:
     logger.info("Batter percentile rows: %d", len(batter_rows))
     logger.info("Pitcher percentile rows: %d", len(pitcher_rows))
 
+    # Savant only computes a percentile panel for players who clear the rate
+    # qualifier (2.1 PA/team-game batters, 1.25 PA/team-game pitchers); those
+    # rows carry a non-null xwoba. Sub-qualifiers come back all-NaN. Use this
+    # exact signal to gate the K%/BB% fallback so we never invent a percentile
+    # Savant itself withholds.
+    qualified_pids: set[int] = set()
+    for df in (batter_rows, pitcher_rows):
+        if "xwoba" in df.columns and "player_id" in df.columns:
+            q = df.loc[df["xwoba"].notna(), "player_id"]
+            qualified_pids.update(int(p) for p in q if pd.notna(p))
+    logger.info("Savant-qualified players (percentile panel): %d", len(qualified_pids))
+
     batter_metrics = BATTER_METRICS + RUNNING_METRICS + FIELDING_METRICS
     skipped = 0
     for _, row in batter_rows.iterrows():
@@ -1040,7 +1060,7 @@ def build_snapshot_rows(season: int) -> list[dict]:
 
     logger.info("Attached standard stats to %d players", with_std)
 
-    _add_calculated_rates(players)
+    _add_calculated_rates(players, qualified_pids)
 
     return list(players.values())
 
