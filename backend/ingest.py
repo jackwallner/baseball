@@ -645,20 +645,25 @@ def build_roster_lookup(season: int) -> dict[int, dict[str, str]]:
 
 
 def resolve_tbd_teams(players: dict[int, dict]) -> None:
-    """Hit the MLB Stats API for any player still marked TBD.
+    """Hit the MLB Stats API for any player still marked TBD or missing position.
 
     Players on AAA rosters (or freshly traded) won't appear in the primary
     teams/roster lookup. The /people endpoint exposes either the MLB team
     directly or, for minor-leaguers, the parent organization via
-    `parentOrgId` on the affiliate team.
+    `parentOrgId` on the affiliate team, plus `primaryPosition.abbreviation`
+    for the player's position.
     """
-    pending = [pid for pid, p in players.items() if p.get("team") == "TBD"]
+    pending = [
+        pid for pid, p in players.items()
+        if p.get("team") == "TBD" or not p.get("position")
+    ]
     if not pending:
         return
-    logger.info("Resolving %d TBD-team players via /people endpoint", len(pending))
+    logger.info("Resolving %d players (TBD team or missing position) via /people endpoint", len(pending))
 
     # The MLB Stats API accepts a comma-separated personIds list; batch in 50s.
-    resolved = 0
+    team_resolved = 0
+    pos_resolved = 0
     for i in range(0, len(pending), 50):
         batch = pending[i:i + 50]
         try:
@@ -681,6 +686,8 @@ def resolve_tbd_teams(players: dict[int, dict]) -> None:
                 pid = int(person["id"])
             except (KeyError, ValueError, TypeError):
                 continue
+            if pid not in players:
+                continue
             ct = person.get("currentTeam") or {}
             # Direct MLB team
             abbr = normalize_team_abbr(ct.get("abbreviation") or ct.get("teamCode") or ct.get("fileCode") or ct.get("name") or "")
@@ -701,10 +708,19 @@ def resolve_tbd_teams(players: dict[int, dict]) -> None:
                         abbr = normalize_team_abbr(pteam.get("abbreviation") or pteam.get("name") or "")
                     except Exception:
                         pass
-            if abbr != "TBD" and pid in players:
+            if abbr != "TBD" and players[pid].get("team") == "TBD":
                 players[pid]["team"] = abbr
-                resolved += 1
-    logger.info("TBD resolver: filled %d/%d", resolved, len(pending))
+                team_resolved += 1
+            if not players[pid].get("position"):
+                pos_abbr = (person.get("primaryPosition") or {}).get("abbreviation") or ""
+                if pos_abbr == "P":
+                    pos = "Pitcher"
+                else:
+                    pos = pos_abbr
+                if pos:
+                    players[pid]["position"] = pos
+                    pos_resolved += 1
+    logger.info("TBD resolver: filled %d teams, %d positions (%d candidates)", team_resolved, pos_resolved, len(pending))
 
 
 def merge_player_row(
