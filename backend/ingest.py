@@ -1062,7 +1062,13 @@ def build_snapshot_rows(season: int) -> list[dict]:
 
     _add_calculated_rates(players, qualified_pids)
 
-    return list(players.values())
+    # A player with no percentile metrics has no Savant percentile panel and
+    # nothing to show on the app — drop them rather than list an empty page.
+    snapshots = [p for p in players.values() if p.get("metrics")]
+    dropped = len(players) - len(snapshots)
+    if dropped:
+        logger.info("Dropped %d players with no percentile metrics", dropped)
+    return snapshots
 
 
 def _fetch_mlb_standard_stats(player_ids: list[int], season: int) -> dict[int, dict[str, Any]]:
@@ -1347,6 +1353,27 @@ def main() -> None:
                     raise
 
         logger.info("Successfully upserted %d player snapshots with actual values for %s.", len(rows), season)
+
+        # Prune rows that are no longer in the qualified set: players who fell
+        # below Savant's qualifier or off the leaderboard entirely. Without
+        # this, an upsert-only refresh leaves their old (now stale) row behind
+        # forever. Guarded by a sanity floor so a thin/botched run can't wipe
+        # the table.
+        if len(rows) >= 500:
+            kept = {r["id"] for r in rows}
+            existing = (
+                client.table("player_snapshots")
+                .select("id")
+                .eq("season", season)
+                .execute()
+                .data
+            )
+            orphans = [r["id"] for r in existing if r["id"] not in kept]
+            for batch in chunks(orphans, 100):
+                client.table("player_snapshots").delete().in_("id", batch).eq("season", season).execute()
+            logger.info("Pruned %d stale/unqualified rows for %s.", len(orphans), season)
+        else:
+            logger.warning("Only %d rows built — skipping prune (sanity floor).", len(rows))
     except Exception:
         logger.exception("Failed to process season %s", season)
         sys.exit(1)
