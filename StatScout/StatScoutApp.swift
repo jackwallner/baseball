@@ -67,6 +67,9 @@ struct ContentView: View {
         }
         .task { await viewModel.loadIfNeeded() }
         .onAppear { viewModel.applyProState(store.isPro) }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
+            Task { await viewModel.load() }
+        }
         .onChange(of: store.isPro) { _, isPro in
             viewModel.applyProState(isPro)
         }
