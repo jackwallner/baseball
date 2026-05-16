@@ -39,7 +39,9 @@ struct StatcastAPI: StatcastProviding {
                 .appending(queryItems: [
                     URLQueryItem(name: "select", value: "*"),
                     URLQueryItem(name: "season", value: seasonFilter),
-                    URLQueryItem(name: "order", value: "updated_at.desc"),
+                    // Stable key so offset paging can't skip/duplicate rows when
+                    // updated_at changes mid-fetch.
+                    URLQueryItem(name: "order", value: "id.asc"),
                     URLQueryItem(name: "limit", value: String(pageSize)),
                     URLQueryItem(name: "offset", value: String(offset))
                 ])
@@ -55,12 +57,30 @@ struct StatcastAPI: StatcastProviding {
                 throw URLError(.badServerResponse)
             }
 
-            let page = try JSONDecoder.statScout.decode([Player].self, from: data)
+            let rows = try JSONDecoder.statScout.decode([Lenient<Player>].self, from: data)
+            let page = rows.compactMap(\.value)
+            // A non-empty page that decodes to zero players means the schema
+            // changed under us — surface it instead of silently going blank.
+            if !rows.isEmpty && page.isEmpty {
+                throw DecodingError.dataCorrupted(
+                    .init(codingPath: [], debugDescription: "All player rows failed to decode")
+                )
+            }
             all.append(contentsOf: page)
-            if page.count < pageSize { break }
+            if rows.count < pageSize { break }
             offset += pageSize
         }
         return all
+    }
+}
+
+/// Decodes an element if possible, otherwise yields nil instead of throwing —
+/// so one malformed row can't fail the entire page.
+private struct Lenient<T: Decodable>: Decodable {
+    let value: T?
+
+    init(from decoder: Decoder) throws {
+        value = try? T(from: decoder)
     }
 }
 

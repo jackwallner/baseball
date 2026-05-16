@@ -14,7 +14,6 @@ struct RootTabView: View {
     @State private var viewModel: DashboardViewModel
     @State private var selection = 0
     @State private var showingAbout = false
-    @State private var showingPaywall = false
 
     init(viewModel: DashboardViewModel) {
         _viewModel = State(initialValue: viewModel)
@@ -39,9 +38,6 @@ struct RootTabView: View {
                 .tag(3)
         }
         .tint(SavantPalette.savantRed)
-        .sheet(isPresented: $showingPaywall) {
-            PaywallView(trigger: .upgrade)
-        }
         .sheet(isPresented: $showingAbout) {
             NavigationStack {
                 AboutView(lastUpdated: viewModel.lastUpdated)
@@ -115,7 +111,7 @@ private struct SavantNavBar: ViewModifier {
 
 private struct ProToolbarButton: ViewModifier {
     @EnvironmentObject private var store: StoreService
-    @State private var showingPaywall = false
+    @State private var paywallTrigger: PaywallTrigger?
 
     func body(content: Content) -> some View {
         content
@@ -123,7 +119,7 @@ private struct ProToolbarButton: ViewModifier {
                 if !store.isPro {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button {
-                            showingPaywall = true
+                            paywallTrigger = store.defaultUpgradeTrigger
                         } label: {
                             HStack(spacing: 3) {
                                 Image(systemName: "crown.fill")
@@ -137,8 +133,8 @@ private struct ProToolbarButton: ViewModifier {
                     }
                 }
             }
-            .sheet(isPresented: $showingPaywall) {
-                PaywallView(trigger: .upgrade)
+            .sheet(item: $paywallTrigger) { trigger in
+                PaywallView(trigger: trigger)
             }
     }
 }

@@ -65,6 +65,27 @@ final class DashboardViewModel {
             userSortMetricByCategory.removeValue(forKey: category)
         }
     }
+    // Mirrors StoreService.isPro. Set by the view layer so season gating and
+    // selectedSeason clamping stay consistent without the VM depending on the store.
+    var isPro: Bool = false
+
+    func isSeasonLocked(_ season: Int) -> Bool {
+        !isPro && season != StatScoutSeason.free
+    }
+
+    /// Push Pro state in from the view and re-clamp the selected season so a free
+    /// user can never land on (and silently render) a locked past season.
+    func applyProState(_ pro: Bool) {
+        isPro = pro
+        clampSelectedSeason()
+    }
+
+    private func clampSelectedSeason() {
+        guard isSeasonLocked(selectedSeason) else { return }
+        let target = availableSeasons.first(where: { !isSeasonLocked($0) }) ?? StatScoutSeason.free
+        if selectedSeason != target { selectedSeason = target }
+    }
+
     // Start true so the very first frame shows a spinner, not a "No data for 2026" empty state
     // before saved players or the network feed resolves.
     var isLoading = true
@@ -181,19 +202,30 @@ final class DashboardViewModel {
     var minInningsPitched: Double { qualifierLevel.minIP }
 
     func isQualified(_ player: Player, for category: MetricCategory?) -> Bool {
-        guard qualifierLevel != .all else { return true }
-        let stats = player.standardStats ?? []
-        switch category {
-        case .pitching:
-            return ipValue(in: stats) >= minInningsPitched
-        case .hitting, .running, .none:
-            if player.playerType == "pitcher" {
-                return ipValue(in: stats) >= minInningsPitched
+        switch qualifierLevel {
+        case .all:
+            return true
+        case .qualified:
+            // Savant only assigns percentiles to players who meet its qualification thresholds,
+            // so "has a percentile in this category" is the authoritative signal.
+            if let category {
+                return player.metrics.contains { $0.category == category }
             }
-            return paValue(in: stats) >= minPlateAppearances
-        case .fielding:
-            return paValue(in: stats) >= minPlateAppearances
-                || ipValue(in: stats) >= minInningsPitched
+            return !player.metrics.isEmpty
+        case .any:
+            let stats = player.standardStats ?? []
+            switch category {
+            case .pitching:
+                return ipValue(in: stats) >= minInningsPitched
+            case .hitting, .running, .none:
+                if player.playerType == "pitcher" {
+                    return ipValue(in: stats) >= minInningsPitched
+                }
+                return paValue(in: stats) >= minPlateAppearances
+            case .fielding:
+                return paValue(in: stats) >= minPlateAppearances
+                    || ipValue(in: stats) >= minInningsPitched
+            }
         }
     }
 
@@ -357,8 +389,21 @@ final class DashboardViewModel {
             let allPlayers = current.isEmpty ? fallbackPlayers : mergePlayers(replacing: current)
 
             guard !allPlayers.isEmpty else {
-                errorMessage = "No players found."
-                lastFetchFailed = true
+                // No current data (offseason / cold cache / offline). Fall back to
+                // bundled historical so the app is usable instead of trapped on an
+                // empty state; season gating still applies via isSeasonLocked.
+                let historicalFallback: [Player] = await Task.detached { [cache] in
+                    if let cache = cache as? TwoTierPlayerCache {
+                        return cache.loadHistoricalPlayers()
+                    }
+                    return (try? cache?.loadPlayers()) ?? []
+                }.value
+                if !historicalFallback.isEmpty {
+                    ingestPlayers(historicalFallback)
+                } else {
+                    errorMessage = "No players found."
+                    lastFetchFailed = true
+                }
                 isLoading = false
                 loadingProgress = 1
                 return
@@ -432,8 +477,11 @@ final class DashboardViewModel {
 
         let seasonsWithData = Set(histories.values.flatMap { $0 }.compactMap(\.season))
         if !seasonsWithData.contains(selectedSeason),
-           let mostRecent = seasonsWithData.sorted(by: >).first {
-            selectedSeason = mostRecent
+           let mostRecentUnlocked = seasonsWithData.sorted(by: >).first(where: { !isSeasonLocked($0) }) {
+            // Only auto-jump to a season the user can actually view; a free user
+            // with no current-season data stays on the free season (honest empty
+            // state) rather than silently rendering locked past-season data.
+            selectedSeason = mostRecentUnlocked
         }
 
         recomputeTeamCache()

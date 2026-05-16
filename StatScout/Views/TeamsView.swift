@@ -166,7 +166,7 @@ struct TeamsView: View {
                 Button {
                     if store.isPro {
                         Task { await viewModel.loadHistoricalIfNeeded() }
-                    } else {
+                    } else if PaywallGate.shared.shouldPresent(.teamView) {
                         showingPaywall = true
                     }
                 } label: {
@@ -175,10 +175,10 @@ struct TeamsView: View {
                 }
             }
             ForEach(viewModel.availableSeasons, id: \.self) { season in
-                let isLocked = season != 2026 && !store.isPro
+                let isLocked = viewModel.isSeasonLocked(season)
                 Button {
                     if isLocked {
-                        showingPaywall = true
+                        if PaywallGate.shared.shouldPresent(.teamView) { showingPaywall = true }
                     } else {
                         viewModel.selectedSeason = season
                     }

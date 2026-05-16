@@ -15,6 +15,36 @@ enum RevenueCatConfig {
     static let fallbackEntitlement = "pro"
 }
 
+enum StatScoutSeason {
+    /// The only season available without Pro. Everything older is gated.
+    static let free = 2026
+}
+
+enum StatScoutLegal {
+    /// Apple's standard EULA — required on the paywall unless a custom one is hosted.
+    static let termsURL = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!
+    static let privacyURL = URL(string: "https://jackwallner.github.io/baseball/privacy-policy.html")!
+}
+
+/// Session-scoped cap so the same contextual paywall can't be re-presented
+/// endlessly as a user pokes at locked features. Resets on app relaunch.
+@MainActor
+final class PaywallGate: ObservableObject {
+    static let shared = PaywallGate()
+    private var presentedCount: [PaywallTrigger: Int] = [:]
+    private let maxPerTrigger = 2
+
+    /// Returns true if the paywall for this trigger may still be shown.
+    /// User-explicit entry points (Settings, toolbar) should bypass this.
+    func shouldPresent(_ trigger: PaywallTrigger) -> Bool {
+        presentedCount[trigger, default: 0] < maxPerTrigger
+    }
+
+    func markPresented(_ trigger: PaywallTrigger) {
+        presentedCount[trigger, default: 0] += 1
+    }
+}
+
 enum PurchaseState {
     case purchased
     case cancelled
@@ -158,6 +188,21 @@ final class StoreService: NSObject, ObservableObject {
 
     var proPrice: String? {
         products.first(where: { $0.productKind == .lifetime })?.storeProduct.localizedPriceString
+    }
+
+    /// True when the user once held a Pro entitlement that has since expired and
+    /// isn't currently active. Used to show a tailored win-back paywall.
+    var isLapsed: Bool {
+        guard !isPro, let info = customerInfo else { return false }
+        return info.entitlements.all.values.contains { entitlement in
+            !entitlement.isActive
+                && (entitlement.expirationDate.map { $0 < Date() } ?? false)
+        }
+    }
+
+    /// The generic "upgrade" ask, swapped to a win-back variant for lapsed users.
+    var defaultUpgradeTrigger: PaywallTrigger {
+        isLapsed ? .winback : .upgrade
     }
 
     private let logger = Logger(subsystem: "com.jackwallner.baseball", category: "Store")

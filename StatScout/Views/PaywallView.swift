@@ -1,7 +1,7 @@
 import SwiftUI
 import RevenueCatUI
 
-enum PaywallTrigger: Identifiable {
+enum PaywallTrigger: Identifiable, Hashable {
     var id: Self { self }
 
     case pastSeason
@@ -11,6 +11,7 @@ enum PaywallTrigger: Identifiable {
     case upgrade
     case pastSeasonsLoad
     case teamView
+    case winback
 
     var icon: String {
         switch self {
@@ -21,6 +22,7 @@ enum PaywallTrigger: Identifiable {
         case .upgrade:           return "crown.fill"
         case .pastSeasonsLoad:   return "clock.arrow.circlepath"
         case .teamView:          return "shield.lefthalf.filled"
+        case .winback:           return "arrow.counterclockwise.circle.fill"
         }
     }
 
@@ -33,6 +35,7 @@ enum PaywallTrigger: Identifiable {
         case .upgrade:           return "StatScout Pro"
         case .pastSeasonsLoad:   return "Load Past Seasons"
         case .teamView:          return "Team Insights"
+        case .winback:           return "Welcome Back"
         }
     }
 
@@ -52,6 +55,8 @@ enum PaywallTrigger: Identifiable {
             return "Load historical data to explore past seasons, year-over-year trends, and more."
         case .teamView:
             return "Get full team rosters, player breakdowns, and side-by-side comparisons for every squad."
+        case .winback:
+            return "Your Pro access has lapsed. Renew to get historical seasons, year-over-year trends, and head-to-head matchups back."
         }
     }
 }
@@ -59,6 +64,7 @@ enum PaywallTrigger: Identifiable {
 struct PaywallView: View {
     @EnvironmentObject private var store: StoreService
     @Environment(\.dismiss) private var dismiss
+    @State private var hasDismissed = false
     let trigger: PaywallTrigger
 
     init(trigger: PaywallTrigger = .upgrade) {
@@ -77,25 +83,49 @@ struct PaywallView: View {
                 }
             }
             .onPurchaseCompleted { customerInfo in
+                // Just refresh status; the single onChange(of: isPro) path below
+                // owns dismissal so we don't race multiple dismiss() calls.
                 store.apply(customerInfo: customerInfo)
-                Task {
-                    await store.updateCustomerProductStatus(fetchPolicy: .fetchCurrent)
-                    if store.isPro { dismiss() }
-                }
+                Task { await store.updateCustomerProductStatus(fetchPolicy: .fetchCurrent) }
             }
             .onRestoreCompleted { customerInfo in
                 store.apply(customerInfo: customerInfo)
-                if customerInfo.hasProEntitlement { dismiss() }
+                if customerInfo.hasProEntitlement { dismissOnce() }
             }
+
+            paywallFooter
         }
         .task {
             if store.currentOffering == nil {
                 await store.fetchProducts()
             }
         }
+        .onAppear { PaywallGate.shared.markPresented(trigger) }
         .onChange(of: store.isPro) { _, isPro in
-            if isPro { dismiss() }
+            if isPro { dismissOnce() }
         }
+    }
+
+    private func dismissOnce() {
+        guard !hasDismissed else { return }
+        hasDismissed = true
+        dismiss()
+    }
+
+    private var paywallFooter: some View {
+        HStack(spacing: 16) {
+            Button("Restore") {
+                Task { await store.restorePurchases() }
+            }
+            Link("Terms", destination: StatScoutLegal.termsURL)
+            Link("Privacy", destination: StatScoutLegal.privacyURL)
+        }
+        .font(SavantType.micro)
+        .tracking(0.3)
+        .foregroundStyle(SavantPalette.inkTertiary)
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 10)
+        .background(SavantPalette.surfaceAlt)
     }
 
     private var triggerHeader: some View {
@@ -129,10 +159,10 @@ struct PaywallView: View {
     }
 
     private var trialLabel: String? {
-        let yearlyTrial = store.products
-            .first(where: { $0.productKind == .yearly })?
-            .introOfferLabel
-        guard let yearlyTrial else { return nil }
-        return "Yearly plan includes a \(yearlyTrial) — cancel anytime before it ends."
+        guard let yearly = store.products.first(where: { $0.productKind == .yearly }),
+              let trial = yearly.introOfferLabel else {
+            return nil
+        }
+        return "Yearly: \(trial), then \(yearly.priceLabel). Auto-renews until cancelled in Settings. Cancel ≥24h before the trial ends to avoid charges."
     }
 }

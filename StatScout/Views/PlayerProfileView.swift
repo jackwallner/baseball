@@ -224,7 +224,7 @@ struct PlayerProfileView: View {
 
     private var proUpsellCard: some View {
         Button {
-            paywallTrigger = .upgrade
+            paywallTrigger = store.defaultUpgradeTrigger
         } label: {
             HStack(spacing: 12) {
                 Image(systemName: "crown.fill")
@@ -364,10 +364,12 @@ struct PlayerProfileView: View {
             if seasons.count > 1 {
                 Menu {
                     ForEach(seasons, id: \.self) { season in
-                        let isLocked = season != 2026 && !store.isPro
+                        let isLocked = season != StatScoutSeason.free && !store.isPro
                         Button {
                             if isLocked {
-                                paywallTrigger = .pastSeason
+                                if PaywallGate.shared.shouldPresent(.pastSeason) {
+                                    paywallTrigger = .pastSeason
+                                }
                             } else {
                                 selectedPercentileSeason = season
                             }

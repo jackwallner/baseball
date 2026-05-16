@@ -48,7 +48,7 @@ struct DashboardView: View {
     private var aboutFooter: some View {
         VStack(spacing: 8) {
             if !store.isPro {
-                Button(action: { paywallTrigger = .upgrade }) {
+                Button(action: { paywallTrigger = store.defaultUpgradeTrigger }) {
                     HStack(spacing: 6) {
                         Image(systemName: "crown.fill")
                             .font(.system(size: 10))
@@ -78,7 +78,7 @@ struct DashboardView: View {
 
     private var proUpsellBanner: some View {
         Button {
-            paywallTrigger = .upgrade
+            paywallTrigger = store.defaultUpgradeTrigger
         } label: {
             HStack(spacing: 10) {
                 Image(systemName: "crown.fill")
@@ -156,7 +156,7 @@ struct DashboardView: View {
                 Button {
                     if store.isPro {
                         Task { await viewModel.loadHistoricalIfNeeded() }
-                    } else {
+                    } else if PaywallGate.shared.shouldPresent(.pastSeasonsLoad) {
                         paywallTrigger = .pastSeasonsLoad
                     }
                 } label: {
@@ -164,10 +164,10 @@ struct DashboardView: View {
                 }
             }
             ForEach(viewModel.availableSeasons, id: \.self) { season in
-                let isLocked = season != 2026 && !store.isPro
+                let isLocked = viewModel.isSeasonLocked(season)
                 Button {
                     if isLocked {
-                        paywallTrigger = .pastSeason
+                        if PaywallGate.shared.shouldPresent(.pastSeason) { paywallTrigger = .pastSeason }
                     } else {
                         viewModel.selectedSeason = season
                     }

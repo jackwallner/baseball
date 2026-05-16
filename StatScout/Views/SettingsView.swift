@@ -3,7 +3,7 @@ import SwiftUI
 struct AboutView: View {
     @EnvironmentObject private var store: StoreService
     let lastUpdated: Date?
-    @State private var showingPaywall = false
+    @State private var paywallTrigger: PaywallTrigger?
 
     private var version: String {
         let short = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
@@ -26,8 +26,8 @@ struct AboutView: View {
             .padding(.bottom, 12)
         }
         .background(SavantPalette.canvas.ignoresSafeArea())
-        .sheet(isPresented: $showingPaywall) {
-            PaywallView(trigger: .upgrade)
+        .sheet(item: $paywallTrigger) { trigger in
+            PaywallView(trigger: trigger)
         }
     }
 
@@ -76,8 +76,8 @@ struct AboutView: View {
                     }
                     Spacer()
                     if !store.isPro {
-                        Button("Upgrade") {
-                            showingPaywall = true
+                        Button(store.isLapsed ? "Renew" : "Upgrade") {
+                            paywallTrigger = store.defaultUpgradeTrigger
                         }
                         .buttonStyle(.borderedProminent)
                         .tint(SavantPalette.savantRed)

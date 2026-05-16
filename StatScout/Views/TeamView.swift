@@ -157,10 +157,10 @@ struct TeamView: View {
         HStack {
             Menu {
                 ForEach(viewModel.availableSeasons, id: \.self) { season in
-                    let isLocked = season != 2026 && !store.isPro
+                    let isLocked = viewModel.isSeasonLocked(season)
                     Button {
                         if isLocked {
-                            showingPaywall = true
+                            if PaywallGate.shared.shouldPresent(.teamView) { showingPaywall = true }
                         } else {
                             viewModel.selectedSeason = season
                         }

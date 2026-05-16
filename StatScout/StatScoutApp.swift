@@ -1,4 +1,5 @@
 import SwiftUI
+import RevenueCat
 
 @main
 struct StatScoutApp: App {
@@ -65,6 +66,10 @@ struct ContentView: View {
             }
         }
         .task { await viewModel.loadIfNeeded() }
+        .onAppear { viewModel.applyProState(store.isPro) }
+        .onChange(of: store.isPro) { _, isPro in
+            viewModel.applyProState(isPro)
+        }
     }
 }
 
@@ -80,9 +85,29 @@ struct OnboardingCards: View {
     let viewModel: DashboardViewModel
     @Binding var hasCompletedOnboarding: Bool
     @State private var currentPage = 0
+    @State private var paywallTrigger: PaywallTrigger?
 
     private var isLastPage: Bool { currentPage == pages.count - 1 }
     private var dataReady: Bool { viewModel.isReady }
+
+    private var yearlyPackage: Package? {
+        store.products.first(where: { $0.productKind == .yearly })
+    }
+
+    private var hasYearlyTrial: Bool {
+        yearlyPackage?.introOfferLabel != nil
+    }
+
+    private var proCTALabel: String {
+        hasYearlyTrial ? "Start Free Trial" : "Upgrade to Pro"
+    }
+
+    private var trialDisclosure: String? {
+        guard let yearly = yearlyPackage, let trial = yearly.introOfferLabel else {
+            return nil
+        }
+        return "\(trial), then \(yearly.priceLabel). Auto-renews until cancelled in Settings › Apple ID › Subscriptions. Cancel at least 24 hours before the trial ends to avoid being charged."
+    }
 
     var body: some View {
         ZStack {
@@ -123,39 +148,92 @@ struct OnboardingCards: View {
                     .padding(.bottom, 32)
             }
         }
+        .task {
+            if store.currentOffering == nil {
+                await store.fetchProducts()
+            }
+        }
+        .sheet(item: $paywallTrigger) { trigger in
+            PaywallView(trigger: trigger)
+        }
+        .onChange(of: store.isPro) { _, isPro in
+            if isPro {
+                paywallTrigger = nil
+                withAnimation { hasCompletedOnboarding = true }
+            }
+        }
     }
 
     @ViewBuilder
     private var bottomButtons: some View {
         if isLastPage {
-            Button {
-                withAnimation { hasCompletedOnboarding = true }
-            } label: {
-                HStack(spacing: 10) {
-                    if !dataReady {
-                        VStack(spacing: 6) {
-                            ProgressView(value: min(max(viewModel.loadingProgress, 0), 1), total: 1)
-                                .progressViewStyle(.linear)
-                                .tint(.white)
-                            Text(viewModel.loadingMessage)
-                                .font(SavantType.micro)
-                                .tracking(0.4)
-                        }
-                    } else {
-                        Image(systemName: "baseball.fill")
-                            .font(.system(size: 14, weight: .semibold))
-                        Text("Play Ball")
-                    }
+            VStack(spacing: 10) {
+                // Primary action is always entering the app — never blocked on
+                // data load or a purchase, so a user can't get trapped here.
+                Button {
+                    withAnimation { hasCompletedOnboarding = true }
+                } label: {
+                    Text("Get Started")
+                        .font(SavantType.bodyBold)
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 52)
+                        .background(SavantPalette.savantRed)
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
                 }
-                .font(SavantType.bodyBold)
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .frame(height: 52)
-                .background(dataReady ? SavantPalette.savantRed : SavantPalette.savantRed.opacity(0.55))
-                .clipShape(RoundedRectangle(cornerRadius: 14))
+                .buttonStyle(.plain)
+
+                if !dataReady {
+                    HStack(spacing: 8) {
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                            .tint(SavantPalette.inkSecondary)
+                            .scaleEffect(0.7)
+                        Text(viewModel.loadingMessage)
+                            .font(SavantType.micro)
+                            .tracking(0.4)
+                    }
+                    .foregroundStyle(SavantPalette.inkSecondary)
+                    .frame(height: 20)
+                }
+
+                // Pro is offered, not forced — the real ask happens later at a
+                // contextual lock once the user has felt the app's value.
+                Button {
+                    paywallTrigger = .onboarding
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "crown.fill")
+                            .font(.system(size: 12, weight: .semibold))
+                        Text(proCTALabel)
+                            .font(SavantType.smallBold)
+                    }
+                    .foregroundStyle(SavantPalette.savantRed)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 32)
+                }
+                .buttonStyle(.plain)
+
+                if let trialDisclosure {
+                    Text(trialDisclosure)
+                        .font(SavantType.micro)
+                        .foregroundStyle(SavantPalette.inkSecondary)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.horizontal, 4)
+                }
+
+                Button {
+                    Task { await store.restorePurchases() }
+                } label: {
+                    Text("Restore Purchases")
+                        .font(SavantType.micro)
+                        .tracking(0.4)
+                        .foregroundStyle(SavantPalette.inkTertiary)
+                        .frame(height: 24)
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
-            .disabled(!dataReady)
         } else {
             Button {
                 withAnimation { currentPage += 1 }
@@ -195,13 +273,14 @@ struct OnboardingCards: View {
             ]
         ),
         OnboardingPage(
-            icon: "baseball.fill",
-            title: "Play Ball",
-            description: "Data is loading so you can jump right into the leaderboard. In the meantime, here's a look at what's available:",
+            icon: "crown.fill",
+            title: "Unlock\nPro",
+            description: "Current season is free forever. Pro unlocks the rest of the game — every season, every comparison, every team breakdown.",
             bullets: [
-                BulletItem(text: "Current season fully unlocked — dive right in", icon: "checkmark.circle.fill", color: SavantPalette.savantRed),
-                BulletItem(text: "No account required to get started", icon: "checkmark.circle.fill", color: SavantPalette.savantRed),
-                BulletItem(text: "Upgrade to Pro anytime for past seasons & comparisons", icon: "crown.fill", color: .yellow)
+                BulletItem(text: "Every past season unlocked", icon: "calendar.badge.clock", color: SavantPalette.savantRed),
+                BulletItem(text: "Year-over-year comparisons", icon: "arrow.left.arrow.right.circle.fill", color: SavantPalette.savantRed),
+                BulletItem(text: "Head-to-head player matchups", icon: "person.2.fill", color: SavantPalette.savantRed),
+                BulletItem(text: "Full team rosters & insights", icon: "shield.lefthalf.filled", color: SavantPalette.savantRed)
             ]
         )
     ]
