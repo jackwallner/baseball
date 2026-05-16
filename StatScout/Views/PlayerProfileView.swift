@@ -106,6 +106,15 @@ struct PlayerProfileView: View {
         }
         .scrollBounceBehavior(.basedOnSize)
         .background(SavantPalette.canvas.ignoresSafeArea())
+        .onAppear {
+            // Deferred activation: the only full-screen Pro pitch. Shows once
+            // per session when the user opens their first player, after they've
+            // already felt the app's value. Contextual gates (compare, past
+            // season) still show their own triggers on specific actions.
+            if !store.isPro, PaywallGate.shared.shouldPresent(.activation) {
+                paywallTrigger = .activation
+            }
+        }
         .navigationTitle(player.name)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {

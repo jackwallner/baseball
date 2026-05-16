@@ -11,7 +11,20 @@ struct StandardStatsLeadersView: View {
     @State private var selectedCategory: StandardStatCategory = .hitting
     @State private var selectedStat: String = "AVG"
     @State private var sortDescending = true
-    
+
+    /// Stats where lower is the better outcome — sort defaults to ascending so the
+    /// leader (lowest ERA, fewest losses, etc.) sits at the top.
+    private static let lowerIsBetter: Set<String> = ["ERA", "WHIP", "BB/9", "L"]
+
+    // SO is contextual: pitcher strikeouts (good) vs batter strikeouts (bad).
+    // The pitching tab keeps SO as "more is better"; the hitting tab flips it.
+    private func defaultDescending(for stat: String) -> Bool {
+        if stat == "SO" {
+            return selectedCategory == .pitching
+        }
+        return !Self.lowerIsBetter.contains(stat)
+    }
+
     // Available stats per category
     var availableStats: [String] {
         switch selectedCategory {
@@ -32,9 +45,22 @@ struct StandardStatsLeadersView: View {
     }
 
     private func matchesPlayerType(player: Player) -> Bool {
+        // Pitchers carry batter-shaped standardStats (HR allowed, etc.) and a few
+        // position players have appeared in mop-up pitching, so a permissive `!=`
+        // filter leaks both directions. Whitelist by role, AND require a Savant
+        // percentile in the matching category — that's Savant's qualification
+        // signal. Without it the AVG board fills with 1-metric, sub-sample
+        // players (e.g. .366 on 42 AB whose only metric is Sprint Speed) ranked
+        // above real regulars. `qualifiedSeasonPlayers` can't catch this: ingest
+        // already prunes metric-less rows, so that gate passes everyone.
+        let type = player.playerType?.lowercased()
         switch selectedCategory {
-        case .hitting: return player.playerType != "pitcher"
-        case .pitching: return player.playerType != "batter"
+        case .hitting:
+            return type != "pitcher"
+                && player.metrics.contains { $0.category == .hitting }
+        case .pitching:
+            return (type == "pitcher" || type == "two_way")
+                && player.metrics.contains { $0.category == .pitching }
         }
     }
     
@@ -91,7 +117,9 @@ struct StandardStatsLeadersView: View {
             ForEach(StandardStatCategory.allCases, id: \.self) { category in
                 Button(action: {
                     selectedCategory = category
-                    selectedStat = availableStats.first ?? "AVG"
+                    let stat = availableStats.first ?? "AVG"
+                    selectedStat = stat
+                    sortDescending = defaultDescending(for: stat)
                     let generator = UIImpactFeedbackGenerator(style: .light)
                     generator.impactOccurred()
                 }) {
@@ -114,6 +142,7 @@ struct StandardStatsLeadersView: View {
                 ForEach(availableStats, id: \.self) { stat in
                     Button(action: {
                         selectedStat = stat
+                        sortDescending = defaultDescending(for: stat)
                         let generator = UIImpactFeedbackGenerator(style: .light)
                         generator.impactOccurred()
                     }) {

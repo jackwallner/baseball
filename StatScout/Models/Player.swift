@@ -174,10 +174,18 @@ struct TeamRoute: Hashable {
 extension Player {
     func matchesPlayerType(for category: MetricCategory?) -> Bool {
         guard let category else { return true }
+        let type = playerType?.lowercased()
         switch category {
-        case .hitting: return playerType != "pitcher"
-        case .pitching: return playerType != "batter"
-        case .fielding, .running: return true
+        case .hitting:
+            // Pitchers carry batter-shaped fields in their feed (HR allowed, etc.) —
+            // a strict whitelist keeps them off the hitting board even when those
+            // fields are present. nil falls through to "include" so we don't drop
+            // legitimate batters who lost their role label upstream.
+            return type != "pitcher"
+        case .pitching:
+            return type == "pitcher" || type == "two_way"
+        case .fielding, .running:
+            return true
         }
     }
 

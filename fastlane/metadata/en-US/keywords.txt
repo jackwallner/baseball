@@ -1,0 +1,1 @@
+sabermetrics,fantasy,scouting,xwOBA,xSLG,xBA,wRC,launch angle,exit velo,whiff,leaders,barrel,sprint

@@ -200,32 +200,11 @@ struct OnboardingCards: View {
                     .frame(height: 20)
                 }
 
-                // Pro is offered, not forced — the real ask happens later at a
-                // contextual lock once the user has felt the app's value.
-                Button {
-                    paywallTrigger = .onboarding
-                } label: {
-                    HStack(spacing: 6) {
-                        Image(systemName: "crown.fill")
-                            .font(.system(size: 12, weight: .semibold))
-                        Text(proCTALabel)
-                            .font(SavantType.smallBold)
-                    }
-                    .foregroundStyle(SavantPalette.savantRed)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 32)
-                }
-                .buttonStyle(.plain)
-
-                if let trialDisclosure {
-                    Text(trialDisclosure)
-                        .font(SavantType.micro)
-                        .foregroundStyle(SavantPalette.inkSecondary)
-                        .multilineTextAlignment(.center)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .padding(.horizontal, 4)
-                }
-
+                // No Pro pitch here — the ask is deliberately deferred to a
+                // one-time full-screen paywall on the user's first meaningful
+                // action (opening a player), after they've felt the value.
+                // Restore stays so a reinstalling subscriber isn't funneled
+                // through a paywall just to get their purchase back.
                 Button {
                     Task { await store.restorePurchases() }
                 } label: {
@@ -273,17 +252,6 @@ struct OnboardingCards: View {
                 BulletItem(text: "Teams — see who's hot, who's not", icon: "checkmark.circle.fill", color: SavantPalette.savantRed),
                 BulletItem(text: "Metrics — best & worst at each stat", icon: "checkmark.circle.fill", color: SavantPalette.savantRed),
                 BulletItem(text: "Stats — traditional numbers for the curious", icon: "checkmark.circle.fill", color: SavantPalette.savantRed)
-            ]
-        ),
-        OnboardingPage(
-            icon: "crown.fill",
-            title: "Unlock\nPro",
-            description: "Current season is free forever. Pro unlocks the rest of the game — every season, every comparison, every team breakdown.",
-            bullets: [
-                BulletItem(text: "Every past season unlocked", icon: "calendar.badge.clock", color: SavantPalette.savantRed),
-                BulletItem(text: "Year-over-year comparisons", icon: "arrow.left.arrow.right.circle.fill", color: SavantPalette.savantRed),
-                BulletItem(text: "Head-to-head player matchups", icon: "person.2.fill", color: SavantPalette.savantRed),
-                BulletItem(text: "Full team rosters & insights", icon: "shield.lefthalf.filled", color: SavantPalette.savantRed)
             ]
         )
     ]

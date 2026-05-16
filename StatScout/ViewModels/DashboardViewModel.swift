@@ -242,14 +242,38 @@ final class DashboardViewModel {
     private static let paLabels: Set<String> = ["PA", "AB"]
     private static let ipLabels: Set<String> = ["IP"]
 
-    // Baseball Savant-style sorting: use consistent key metric for ALL players
+    // Baseball Savant-style sorting: rank by the consistent key metric. Players
+    // who lack that exact metric (e.g. ~90 relievers have no xwOBA-against) are
+    // partitioned to the end instead of being scored by a category-average
+    // fallback — that fallback mixes two different scales and interleaves rows
+    // with blank value cells mid-board (Ryan Helsley landing at #7 with no
+    // xwOBA shown). The tail stays visible (Savant lists them too) but never
+    // jumps above genuinely-ranked players, regardless of sort direction.
     var leaderboard: [Player] {
         let sortLabel = currentSortMetric
-        return filteredPlayers.sorted { p1, p2 in
-            let p1Score = playerSortScore(player: p1, metricLabel: sortLabel)
-            let p2Score = playerSortScore(player: p2, metricLabel: sortLabel)
-            return sortDescending ? p1Score > p2Score : p1Score < p2Score
+        guard let category = selectedCategory, let label = sortLabel else {
+            return filteredPlayers.sorted { p1, p2 in
+                let p1Score = playerSortScore(player: p1, metricLabel: sortLabel)
+                let p2Score = playerSortScore(player: p2, metricLabel: sortLabel)
+                return sortDescending ? p1Score > p2Score : p1Score < p2Score
+            }
         }
+
+        func sortMetric(_ p: Player) -> Int? {
+            p.metrics.first { $0.label == label && $0.category == category }?.percentile
+        }
+
+        let ranked = filteredPlayers.filter { sortMetric($0) != nil }
+            .sorted { p1, p2 in
+                let s1 = sortMetric(p1) ?? 0
+                let s2 = sortMetric(p2) ?? 0
+                return sortDescending ? s1 > s2 : s1 < s2
+            }
+        let tail = filteredPlayers.filter { sortMetric($0) == nil }
+            .sorted { (p1, p2) in
+                (p1.percentile(for: category) ?? 0) > (p2.percentile(for: category) ?? 0)
+            }
+        return ranked + tail
     }
 
     // Determine which metric label to use for consistent sorting across all players

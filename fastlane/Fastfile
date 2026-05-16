@@ -1,0 +1,75 @@
+opt_out_usage
+
+default_platform(:ios)
+
+platform :ios do
+  desc "Download current metadata + screenshots from App Store Connect into /tmp/asc-live"
+  lane :download_state do
+    api_key = app_store_connect_api_key(
+      key_id: ENV["ASC_API_KEY_ID"],
+      issuer_id: ENV["ASC_ISSUER_ID"],
+      key_filepath: ENV["ASC_KEY_PATH"]
+    )
+
+    sh("rm -rf /tmp/asc-live && mkdir -p /tmp/asc-live")
+
+    deliver(
+      api_key: api_key,
+      run_precheck_before_submit: false,
+      metadata_path: "/tmp/asc-live/metadata",
+      screenshots_path: "/tmp/asc-live/screenshots",
+      skip_binary_upload: true,
+      skip_screenshots: false,
+      skip_metadata: false,
+      force: true
+    )
+  end
+
+  desc "Upload screenshots and metadata to App Store Connect"
+  lane :upload_metadata do
+    api_key = app_store_connect_api_key(
+      key_id: ENV["ASC_API_KEY_ID"],
+      issuer_id: ENV["ASC_ISSUER_ID"],
+      key_filepath: ENV["ASC_KEY_PATH"]
+    )
+
+    deliver(
+      api_key: api_key,
+      force: true,
+      precheck_include_in_app_purchases: false,
+      skip_binary_upload: true,
+      skip_screenshots: false,
+      overwrite_screenshots: true,
+      submit_for_review: false,
+      automatic_release: false,
+      run_precheck_before_submit: false,
+      app_review_information: {
+        first_name: "Jack",
+        last_name: "Wallner",
+        email: "jackwallner@gmail.com",
+        demo_user: "N/A — no login, no account system",
+        demo_password: "",
+        notes: <<~NOTES
+          StatScout is a read-only baseball statistics viewer with no user accounts or sign-in.
+
+          Core flow:
+          1. Launch app — new users see onboarding; returning users land on leaderboard
+          2. Scroll leaderboard of ~800+ players with percentile rankings
+          3. Tap player for profile with visual metric bars, standard stats, and year compare
+          4. Filter by Hitting, Pitching, Fielding, Running categories
+          5. Browse Teams tab for team rosters
+          6. Metrics tab shows best/worst performers per category
+
+          Pro features (IAP via RevenueCat):
+          - Historical seasons, player comparisons, year-over-year tracking
+          - Test with Sandbox account via RevenueCat
+
+          Known: Light mode only. No shadows. No accounts. No social features.
+        NOTES
+      },
+      submission_information: {
+        add_id_info_uses_idfa: false
+      }
+    )
+  end
+end

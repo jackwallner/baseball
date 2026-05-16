@@ -48,9 +48,24 @@ struct TeamView: View {
         let byCategory = selectedCategory == nil
             ? byType
             : byType.filter { p in p.metrics.contains { $0.category == selectedCategory } }
-        return byCategory.sorted {
+        // Mirror the Dashboard: rank players who have the sort metric, then
+        // append those who don't (sorted by category percentile) so blank-value
+        // rows never interleave above genuinely-ranked players.
+        guard let m = sortMetric else {
+            return byCategory.sorted {
+                sortDescending ? score($0) > score($1) : score($0) < score($1)
+            }
+        }
+        func hasSortMetric(_ p: Player) -> Bool {
+            p.metrics.contains { $0.label == m.label && $0.category == m.category }
+        }
+        let ranked = byCategory.filter(hasSortMetric).sorted {
             sortDescending ? score($0) > score($1) : score($0) < score($1)
         }
+        let tail = byCategory.filter { !hasSortMetric($0) }.sorted {
+            score($0) > score($1)
+        }
+        return ranked + tail
     }
 
     var body: some View {
@@ -118,7 +133,8 @@ struct TeamView: View {
                             : "Try a different search term."
                     )
                 } else {
-                    LeaderboardTableHeader(sortDescending: sortDescending, sortLabel: sortLabel)
+                    // Percentile-ranked, not raw-value sorted — see DashboardView.
+                    LeaderboardTableHeader(sortDescending: sortDescending, sortLabel: "PCTL")
                     ForEach(Array(filteredPlayers.enumerated()), id: \.element.id) { index, player in
                         NavigationLink(value: player) {
                             LeaderboardTableRow(

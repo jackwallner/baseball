@@ -8,6 +8,7 @@ enum PaywallTrigger: Identifiable, Hashable {
     case yearCompare
     case playerComparison
     case onboarding
+    case activation
     case upgrade
     case pastSeasonsLoad
     case teamView
@@ -19,6 +20,7 @@ enum PaywallTrigger: Identifiable, Hashable {
         case .yearCompare:       return "arrow.left.arrow.right.circle.fill"
         case .playerComparison:  return "person.2.fill"
         case .onboarding:        return "crown.fill"
+        case .activation:        return "crown.fill"
         case .upgrade:           return "crown.fill"
         case .pastSeasonsLoad:   return "clock.arrow.circlepath"
         case .teamView:          return "shield.lefthalf.filled"
@@ -32,6 +34,7 @@ enum PaywallTrigger: Identifiable, Hashable {
         case .yearCompare:       return "Year-over-Year Comparison"
         case .playerComparison:  return "Player Comparison"
         case .onboarding:        return "Go Pro"
+        case .activation:        return "Unlock the Full Game"
         case .upgrade:           return "StatScout Pro"
         case .pastSeasonsLoad:   return "Load Past Seasons"
         case .teamView:          return "Team Insights"
@@ -49,6 +52,8 @@ enum PaywallTrigger: Identifiable, Hashable {
             return "Compare any two players side by side across every metric. Find who leads in xwOBA, Barrel%, Sprint Speed, and more."
         case .onboarding:
             return "Current season is free. Pro unlocks historical seasons, year-over-year comparisons, and head-to-head player matchups."
+        case .activation:
+            return "You're all set with the current season. Pro adds every past season, year-over-year trends, and head-to-head player matchups — the full scouting picture."
         case .upgrade:
             return "Unlock historical seasons and year-over-year comparisons."
         case .pastSeasonsLoad:

@@ -54,7 +54,10 @@ struct MetricRankingView: View {
                     }
                     .padding(.vertical, 24)
                 } else {
-                    LeaderboardTableHeader(sortDescending: sortDescending, sortLabel: metricLabel)
+                    // Board is ranked by percentile (Savant-style), so the column
+                    // header reflects that — labeling it "XWOBA" made the raw
+                    // values look mis-sorted. The raw value still shows per row.
+                    LeaderboardTableHeader(sortDescending: sortDescending, sortLabel: "PCTL")
                     ForEach(Array(rankedPlayers.enumerated()), id: \.element.id) { index, player in
                         NavigationLink(value: player) {
                             LeaderboardTableRow(
