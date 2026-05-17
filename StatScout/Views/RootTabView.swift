@@ -14,6 +14,9 @@ struct RootTabView: View {
     @State private var viewModel: DashboardViewModel
     @State private var selection = 0
     @State private var showingAbout = false
+    // Owned here so TeamsView can auto-push the favorite team and the user can
+    // still pop back to the list.
+    @State private var teamsPath = NavigationPath()
 
     init(viewModel: DashboardViewModel) {
         _viewModel = State(initialValue: viewModel)
@@ -21,8 +24,8 @@ struct RootTabView: View {
 
     var body: some View {
         TabView(selection: $selection) {
-            leadersTab
-                .tabItem { Label("Leaders", systemImage: "list.number") }
+            statsTab
+                .tabItem { Label("Stats", systemImage: "chart.bar.fill") }
                 .tag(0)
 
             teamsTab
@@ -32,14 +35,6 @@ struct RootTabView: View {
             compareTab
                 .tabItem { Label("Compare", systemImage: "arrow.left.arrow.right") }
                 .tag(2)
-
-            metricsTab
-                .tabItem { Label("StatScout", systemImage: "chart.bar.fill") }
-                .tag(3)
-
-            standardStatsTab
-                .tabItem { Label("Box Score", systemImage: "tablecells.fill") }
-                .tag(4)
         }
         .tint(SavantPalette.savantRed)
         .sheet(isPresented: $showingAbout) {
@@ -59,10 +54,10 @@ struct RootTabView: View {
         }
     }
 
-    private var leadersTab: some View {
+    private var statsTab: some View {
         NavigationStack {
-            DashboardView(viewModel: viewModel)
-                .navigationTitle("Leaders")
+            StatsView(viewModel: viewModel)
+                .navigationTitle("Stats")
                 .navigationBarTitleDisplayMode(.inline)
                 .modifier(SavantNavBar())
                 .modifier(ProToolbarButton())
@@ -71,8 +66,8 @@ struct RootTabView: View {
     }
 
     private var teamsTab: some View {
-        NavigationStack {
-            TeamsView(viewModel: viewModel)
+        NavigationStack(path: $teamsPath) {
+            TeamsView(viewModel: viewModel, path: $teamsPath)
                 .navigationTitle("Teams")
                 .navigationBarTitleDisplayMode(.inline)
                 .modifier(SavantNavBar())
@@ -94,27 +89,6 @@ struct RootTabView: View {
         }
     }
 
-    private var metricsTab: some View {
-        NavigationStack {
-            MetricLeadersView(metrics: selection == 3 ? viewModel.allMetrics : [])
-                .navigationTitle("StatScout Leaders")
-                .navigationBarTitleDisplayMode(.inline)
-                .modifier(SavantNavBar())
-                .modifier(ProToolbarButton())
-                .modifier(StandardDestinations(viewModel: viewModel))
-        }
-    }
-
-    private var standardStatsTab: some View {
-        NavigationStack {
-            StandardStatsLeadersView(players: selection == 4 ? viewModel.qualifiedSeasonPlayers : [])
-                .navigationTitle("Box Score Stats")
-                .navigationBarTitleDisplayMode(.inline)
-                .modifier(SavantNavBar())
-                .modifier(ProToolbarButton())
-                .modifier(StandardDestinations(viewModel: viewModel))
-        }
-    }
 }
 
 private struct SavantNavBar: ViewModifier {

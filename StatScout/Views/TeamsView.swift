@@ -34,9 +34,13 @@ final class TeamsViewModel {
 struct TeamsView: View {
     @EnvironmentObject private var store: StoreService
     let viewModel: DashboardViewModel
+    @Binding var path: NavigationPath
     @State private var teamsViewModel = TeamsViewModel()
     @State private var searchText = ""
     @State private var showingPaywall = false
+    // Auto-enter the favorite team once per launch; popping back must not
+    // re-push it, or the user can never reach the list.
+    @State private var didAutoEnterFavorite = false
 
     private static let allTeams: [String] = [
         "ARI", "ATL", "BAL", "BOS", "CHC", "CWS", "CIN", "CLE", "COL", "DET",
@@ -49,27 +53,10 @@ struct TeamsView: View {
             teamFullName($0).localizedCaseInsensitiveContains(searchText) ||
             $0.localizedCaseInsensitiveContains(searchText)
         }
-
-        // Sort: favorite first, then by team score descending
-        guard let favorite = teamsViewModel.favoriteTeam else {
-            return teams.sorted { viewModel.teamScore($0) > viewModel.teamScore($1) }
-        }
-
-        return teams.sorted {
-            let isFav0 = $0 == favorite
-            let isFav1 = $1 == favorite
-            if isFav0 != isFav1 {
-                return isFav1 ? false : true
-            }
-            return viewModel.teamScore($0) > viewModel.teamScore($1)
-        }
-    }
-
-    private var nonFavoriteTeams: [String] {
-        guard let favorite = teamsViewModel.favoriteTeam else {
-            return filteredTeams
-        }
-        return filteredTeams.filter { $0 != favorite }
+        // Plain alphabetical by full team name — the old score-based / favorite-
+        // first ordering was confusing and the score itself was a mislabeled
+        // percentile. Favorites now auto-open instead of being pinned here.
+        return teams.sorted { teamFullName($0).localizedCompare(teamFullName($1)) == .orderedAscending }
     }
 
     private var isInitiallyLoading: Bool {
@@ -86,12 +73,6 @@ struct TeamsView: View {
                 if isInitiallyLoading {
                     teamsLoadingState
                 } else {
-                    if let favorite = teamsViewModel.favoriteTeam,
-                       filteredTeams.contains(favorite),
-                       searchText.isEmpty {
-                        favoriteTeamSection(favorite: favorite)
-                    }
-
                     allTeamsSection
                 }
             }
@@ -103,9 +84,21 @@ struct TeamsView: View {
         .refreshable {
             await viewModel.load()
         }
+        .onAppear(perform: autoEnterFavoriteIfNeeded)
         .sheet(isPresented: $showingPaywall) {
             PaywallView(trigger: .teamView)
         }
+    }
+
+    /// On first Teams visit, drop the user straight into their favorite team
+    /// (the back button returns to the alphabetical list). Guarded so popping
+    /// back or revisiting the tab doesn't trap them by re-pushing.
+    private func autoEnterFavoriteIfNeeded() {
+        guard !didAutoEnterFavorite,
+              let favorite = teamsViewModel.favoriteTeam,
+              path.isEmpty else { return }
+        didAutoEnterFavorite = true
+        path.append(TeamDestination(abbr: favorite))
     }
 
     private var teamsLoadingState: some View {
@@ -213,50 +206,10 @@ struct TeamsView: View {
         .menuOrder(.fixed)
     }
 
-    private func favoriteTeamSection(favorite: String) -> some View {
-        VStack(spacing: 0) {
-            SavantSectionBar(
-                title: "FAVORITE TEAM",
-                trailing: AnyView(
-                    Button(action: {
-                        teamsViewModel.removeFavorite()
-                        let generator = UIImpactFeedbackGenerator(style: .light)
-                        generator.impactOccurred()
-                    }) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "star.slash")
-                                .font(.caption)
-                            Text("Remove")
-                                .font(SavantType.micro)
-                        }
-                        .foregroundStyle(SavantPalette.inkSecondary)
-                    }
-                )
-            )
-
-            NavigationLink(value: TeamDestination(abbr: favorite)) {
-                TeamRow(
-                    abbr: favorite,
-                    isFavorite: true,
-                    showFavoriteButton: false,
-                    teamScore: viewModel.teamScore(favorite)
-                )
-            }
-            .buttonStyle(.plain)
-        }
-        .background(SavantPalette.surface)
-        .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
-        .overlay(
-            RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
-                .stroke(SavantPalette.hairline, lineWidth: 0.5)
-        )
-        .padding(.horizontal, 12)
-    }
-
     private var allTeamsSection: some View {
         VStack(spacing: 0) {
             SavantSectionBar(
-                title: teamsViewModel.favoriteTeam != nil ? "ALL TEAMS" : "TEAMS",
+                title: "TEAMS",
                 trailing: searchText.isEmpty ? nil : AnyView(
                     Button(action: { searchText = "" }) {
                         Text("Clear")
@@ -281,39 +234,36 @@ struct TeamsView: View {
                 }
                 .padding(.vertical, 48)
             } else {
-                // List teams
-                let teamsToShow = teamsViewModel.favoriteTeam != nil && searchText.isEmpty
-                    ? nonFavoriteTeams
-                    : filteredTeams
-
-                ForEach(Array(teamsToShow.enumerated()), id: \.element) { index, abbr in
+                ForEach(Array(filteredTeams.enumerated()), id: \.element) { index, abbr in
                     HStack(spacing: 0) {
                         NavigationLink(value: TeamDestination(abbr: abbr)) {
                             TeamRowContent(
                                 abbr: abbr,
-                                isFavorite: teamsViewModel.isFavorite(abbr),
-                                teamScore: viewModel.teamScore(abbr)
+                                isFavorite: teamsViewModel.isFavorite(abbr)
                             )
                         }
                         .buttonStyle(.plain)
 
-                        if teamsViewModel.favoriteTeam != abbr {
-                            Button {
+                        Button {
+                            let isFav = teamsViewModel.isFavorite(abbr)
+                            if isFav {
+                                teamsViewModel.removeFavorite()
+                            } else {
                                 teamsViewModel.setFavorite(abbr)
-                                UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                            } label: {
-                                Image(systemName: "star")
-                                    .font(.system(size: 18, weight: .medium))
-                                    .foregroundStyle(SavantPalette.inkTertiary)
-                                    .frame(width: 44, height: 44)
-                                    .contentShape(Rectangle())
                             }
-                            .buttonStyle(.borderless)
+                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                        } label: {
+                            Image(systemName: teamsViewModel.isFavorite(abbr) ? "star.fill" : "star")
+                                .font(.system(size: 18, weight: .medium))
+                                .foregroundStyle(teamsViewModel.isFavorite(abbr) ? Color.yellow : SavantPalette.inkTertiary)
+                                .frame(width: 44, height: 44)
+                                .contentShape(Rectangle())
                         }
+                        .buttonStyle(.borderless)
                     }
                     .padding(.trailing, 12)
 
-                    if index < teamsToShow.count - 1 {
+                    if index < filteredTeams.count - 1 {
                         Divider()
                             .padding(.leading, 68)
                     }
@@ -333,36 +283,9 @@ struct TeamsView: View {
 
 // MARK: - Team Row
 
-struct TeamRow: View {
-    let abbr: String
-    let isFavorite: Bool
-    let showFavoriteButton: Bool
-    let teamScore: Double?
-    var onFavoriteTap: (() -> Void)? = nil
-
-    var body: some View {
-        HStack(spacing: 0) {
-            TeamRowContent(abbr: abbr, isFavorite: isFavorite, teamScore: teamScore)
-
-            if showFavoriteButton {
-                Button(action: { onFavoriteTap?() }) {
-                    Image(systemName: "star")
-                        .font(.system(size: 18, weight: .medium))
-                        .foregroundStyle(SavantPalette.inkTertiary)
-                        .frame(width: 44, height: 44)
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(.borderless)
-            }
-        }
-        .padding(.trailing, 12)
-    }
-}
-
 struct TeamRowContent: View {
     let abbr: String
     let isFavorite: Bool
-    let teamScore: Double?
 
     var body: some View {
         HStack(spacing: 0) {
@@ -387,21 +310,6 @@ struct TeamRowContent: View {
                     .foregroundStyle(SavantPalette.inkTertiary)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-
-            if let score = teamScore {
-                // This is the team's average xwOBA *percentile* (0–100), not an
-                // xwOBA value (~.320). Labeling it "xwOBA" read as nonsense
-                // ("55 xwOBA"); call it what it is.
-                HStack(spacing: 3) {
-                    Text(String(format: "%.0f", score))
-                        .font(SavantType.statSmall)
-                        .foregroundStyle(SavantPalette.inkSecondary)
-                    Text("xwOBA %ile")
-                        .font(SavantType.micro)
-                        .foregroundStyle(SavantPalette.inkTertiary)
-                }
-                .padding(.trailing, 8)
-            }
 
             Image(systemName: "chevron.right")
                 .font(.system(size: 12, weight: .semibold))
@@ -468,7 +376,7 @@ struct TeamTile: View {
 #if DEBUG
 #Preview {
     NavigationStack {
-        TeamsView(viewModel: DashboardViewModel())
+        TeamsView(viewModel: DashboardViewModel(), path: .constant(NavigationPath()))
             .environmentObject(StoreService.shared)
     }
 }
