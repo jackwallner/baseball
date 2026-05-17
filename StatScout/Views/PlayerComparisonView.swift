@@ -73,7 +73,7 @@ struct PlayerComparisonView: View {
                     Button {
                         showingPaywall = true
                     } label: {
-                        Text(store.proPrice.map { "Unlock Pro — \($0)" } ?? "Unlock Pro")
+                        Text(store.paywallBlurCTA)
                             .font(SavantType.bodyBold)
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)
@@ -82,6 +82,14 @@ struct PlayerComparisonView: View {
                             .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
                     .buttonStyle(.plain)
+
+                    if let subtext = store.paywallBlurSubtext {
+                        Text(subtext)
+                            .font(SavantType.micro)
+                            .tracking(0.3)
+                            .foregroundStyle(SavantPalette.inkTertiary)
+                            .multilineTextAlignment(.center)
+                    }
                 }
                 .padding(.horizontal, 24)
                 .padding(.vertical, 20)

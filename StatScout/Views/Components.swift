@@ -237,28 +237,37 @@ struct QualifierPicker: View {
     @Binding var selection: DashboardViewModel.QualifierLevel
 
     var body: some View {
-        HStack(spacing: 0) {
-            ForEach(DashboardViewModel.QualifierLevel.allCases) { level in
-                Button {
-                    selection = level
-                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                } label: {
-                    Text(level.rawValue)
-                        .font(SavantType.micro)
-                        .tracking(0.4)
-                        .foregroundStyle(selection == level ? .white : SavantPalette.inkSecondary)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 28)
-                        .background(selection == level ? SavantPalette.savantRed : Color.clear)
-                        .clipShape(Capsule())
+        VStack(spacing: 4) {
+            HStack(spacing: 0) {
+                ForEach(DashboardViewModel.QualifierLevel.allCases) { level in
+                    Button {
+                        selection = level
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    } label: {
+                        Text(level.rawValue)
+                            .font(SavantType.micro)
+                            .tracking(0.4)
+                            .foregroundStyle(selection == level ? .white : SavantPalette.inkSecondary)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 28)
+                            .background(selection == level ? SavantPalette.savantRed : Color.clear)
+                            .clipShape(Capsule())
+                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
+            .padding(2)
+            .background(SavantPalette.surface)
+            .clipShape(Capsule())
+            .overlay(Capsule().stroke(SavantPalette.hairline, lineWidth: 0.5))
+
+            // Threshold caption — keeps "All" and "Min Sample" from reading as
+            // synonyms by spelling out what the active level actually filters.
+            Text(selection.description)
+                .font(SavantType.micro)
+                .tracking(0.3)
+                .foregroundStyle(SavantPalette.inkTertiary)
         }
-        .padding(2)
-        .background(SavantPalette.surface)
-        .clipShape(Capsule())
-        .overlay(Capsule().stroke(SavantPalette.hairline, lineWidth: 0.5))
     }
 }
 

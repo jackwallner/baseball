@@ -9,12 +9,13 @@ struct MetricRankingView: View {
 
     private var rankedPlayers: [Player] {
         players.filter { player in
-            player.metrics.contains { $0.label == metricLabel && $0.category == metricCategory }
+            guard let m = player.metrics.first(where: { $0.label == metricLabel && $0.category == metricCategory }) else { return false }
+            return DashboardViewModel.rawNumeric(m.value) != nil
         }
         .sorted {
-            let p1 = metricPercentile(for: $0)
-            let p2 = metricPercentile(for: $1)
-            return sortDescending ? p1 > p2 : p1 < p2
+            let v1 = rawValue(for: $0) ?? 0
+            let v2 = rawValue(for: $1) ?? 0
+            return sortDescending ? v1 > v2 : v1 < v2
         }
     }
 
@@ -36,7 +37,7 @@ struct MetricRankingView: View {
                                 generator.impactOccurred()
                             }) {
                                 HStack(spacing: 4) {
-                                    Text("Percentile")
+                                    Text(metricLabel)
                                     Image(systemName: sortDescending ? "arrow.down" : "arrow.up")
                                 }
                                 .font(SavantType.micro)
@@ -54,10 +55,9 @@ struct MetricRankingView: View {
                     }
                     .padding(.vertical, 24)
                 } else {
-                    // Board is ranked by percentile (Savant-style), so the column
-                    // header reflects that — labeling it "XWOBA" made the raw
-                    // values look mis-sorted. The raw value still shows per row.
-                    LeaderboardTableHeader(sortDescending: sortDescending, sortLabel: "PCTL")
+                    // Sorted by raw stat value — header carries the metric label
+                    // (e.g. "xwOBA") so the column matches what's in each row.
+                    LeaderboardTableHeader(sortDescending: sortDescending, sortLabel: metricLabel)
                     ForEach(Array(rankedPlayers.enumerated()), id: \.element.id) { index, player in
                         NavigationLink(value: player) {
                             LeaderboardTableRow(
@@ -88,6 +88,11 @@ struct MetricRankingView: View {
 
     private func metricPercentile(for player: Player) -> Int {
         player.metrics.first { $0.label == metricLabel && $0.category == metricCategory }?.percentile ?? 0
+    }
+
+    private func rawValue(for player: Player) -> Double? {
+        guard let m = player.metrics.first(where: { $0.label == metricLabel && $0.category == metricCategory }) else { return nil }
+        return DashboardViewModel.rawNumeric(m.value)
     }
 }
 

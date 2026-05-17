@@ -174,7 +174,7 @@ final class DashboardViewModel {
 
     enum QualifierLevel: String, CaseIterable, Identifiable {
         case all = "All"
-        case any = "Any PA/IP"
+        case any = "Min Sample"
         case qualified = "Qualified"
 
         var id: String { rawValue }
@@ -192,6 +192,16 @@ final class DashboardViewModel {
             case .all: return 0
             case .any: return 5
             case .qualified: return 20
+            }
+        }
+
+        /// Short caption explaining the active threshold. Shown next to the picker
+        /// so "All" and "Min Sample" don't look like synonyms.
+        var description: String {
+            switch self {
+            case .all: return "No minimum"
+            case .any: return "10+ PA / 5+ IP"
+            case .qualified: return "Savant qualifier"
             }
         }
     }
@@ -242,38 +252,48 @@ final class DashboardViewModel {
     private static let paLabels: Set<String> = ["PA", "AB"]
     private static let ipLabels: Set<String> = ["IP"]
 
-    // Baseball Savant-style sorting: rank by the consistent key metric. Players
-    // who lack that exact metric (e.g. ~90 relievers have no xwOBA-against) are
-    // partitioned to the end instead of being scored by a category-average
-    // fallback — that fallback mixes two different scales and interleaves rows
-    // with blank value cells mid-board (Ryan Helsley landing at #7 with no
-    // xwOBA shown). The tail stays visible (Savant lists them too) but never
-    // jumps above genuinely-ranked players, regardless of sort direction.
+    // Sort by the raw stat value, not the percentile — percentile-sorting
+    // produced ties (two players at 95) and made the "PCTL" header look
+    // disconnected from the xwOBA values shown per row. Players missing the
+    // exact metric are partitioned to the end so blank-value rows never
+    // interleave above genuinely-ranked players.
     var leaderboard: [Player] {
         let sortLabel = currentSortMetric
         guard let category = selectedCategory, let label = sortLabel else {
             return filteredPlayers.sorted { p1, p2 in
-                let p1Score = playerSortScore(player: p1, metricLabel: sortLabel)
-                let p2Score = playerSortScore(player: p2, metricLabel: sortLabel)
-                return sortDescending ? p1Score > p2Score : p1Score < p2Score
+                let v1 = Self.rawNumeric(p1.metrics.first(where: { $0.label == "xwOBA" })?.value ?? "") ?? -.infinity
+                let v2 = Self.rawNumeric(p2.metrics.first(where: { $0.label == "xwOBA" })?.value ?? "") ?? -.infinity
+                return sortDescending ? v1 > v2 : v1 < v2
             }
         }
 
-        func sortMetric(_ p: Player) -> Int? {
-            p.metrics.first { $0.label == label && $0.category == category }?.percentile
+        func rawValue(_ p: Player) -> Double? {
+            guard let m = p.metrics.first(where: { $0.label == label && $0.category == category }) else { return nil }
+            return Self.rawNumeric(m.value)
         }
 
-        let ranked = filteredPlayers.filter { sortMetric($0) != nil }
+        let ranked = filteredPlayers.filter { rawValue($0) != nil }
             .sorted { p1, p2 in
-                let s1 = sortMetric(p1) ?? 0
-                let s2 = sortMetric(p2) ?? 0
-                return sortDescending ? s1 > s2 : s1 < s2
+                let v1 = rawValue(p1) ?? 0
+                let v2 = rawValue(p2) ?? 0
+                return sortDescending ? v1 > v2 : v1 < v2
             }
-        let tail = filteredPlayers.filter { sortMetric($0) == nil }
+        let tail = filteredPlayers.filter { rawValue($0) == nil }
             .sorted { (p1, p2) in
                 (p1.percentile(for: category) ?? 0) > (p2.percentile(for: category) ?? 0)
             }
         return ranked + tail
+    }
+
+    /// Parse a leading numeric value from a metric's display string.
+    /// Handles ".345", "8.2%", "98.5 mph", "28.5 ft/s", "25.3°", "-1.2".
+    static func rawNumeric(_ value: String) -> Double? {
+        var s = value.trimmingCharacters(in: .whitespaces)
+        if s.hasPrefix(".") { s = "0" + s }
+        if s.hasPrefix("-.") { s = "-0" + s.dropFirst() }
+        let scanner = Scanner(string: s)
+        scanner.charactersToBeSkipped = nil
+        return scanner.scanDouble()
     }
 
     // Determine which metric label to use for consistent sorting across all players

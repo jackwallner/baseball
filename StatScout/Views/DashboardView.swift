@@ -247,10 +247,10 @@ struct DashboardView: View {
                 }
             }
         } label: {
-            // Ranked by percentile (Savant-style), not raw value — label the
-            // column "PCTL" so the raw values shown per row don't look
-            // mis-sorted. The active metric is in the "Sort by" menu above.
-            LeaderboardTableHeader(sortDescending: viewModel.sortDescending, sortLabel: "PCTL")
+            // Ranked by raw value — header carries the active metric name so
+            // the column matches the values shown per row. The "Sort by" menu
+            // above still picks which metric drives the rank.
+            LeaderboardTableHeader(sortDescending: viewModel.sortDescending, sortLabel: viewModel.currentSortMetric ?? viewModel.sortLabel)
         }
         .menuOrder(.fixed)
     }

@@ -30,13 +30,15 @@ struct TeamView: View {
         return sortMetric?.label ?? "Top Category"
     }
 
-    private func score(_ player: Player) -> Int {
-        if let m = sortMetric, let metric = player.metrics.first(where: { $0.label == m.label && $0.category == m.category }) {
-            return metric.percentile
-        }
-        if let category = selectedCategory {
-            if let p = player.percentile(for: category) { return p }
-        }
+    private func rawValue(_ player: Player) -> Double? {
+        guard let m = sortMetric,
+              let metric = player.metrics.first(where: { $0.label == m.label && $0.category == m.category })
+        else { return nil }
+        return DashboardViewModel.rawNumeric(metric.value)
+    }
+
+    private func fallbackPercentile(_ player: Player) -> Int {
+        if let category = selectedCategory, let p = player.percentile(for: category) { return p }
         return player.metrics.first(where: { $0.label == "xwOBA" })?.percentile ?? 0
     }
 
@@ -48,22 +50,21 @@ struct TeamView: View {
         let byCategory = selectedCategory == nil
             ? byType
             : byType.filter { p in p.metrics.contains { $0.category == selectedCategory } }
-        // Mirror the Dashboard: rank players who have the sort metric, then
-        // append those who don't (sorted by category percentile) so blank-value
-        // rows never interleave above genuinely-ranked players.
-        guard let m = sortMetric else {
+        // Mirror the Dashboard: sort by raw stat value when available; players
+        // missing the sort metric fall to the bottom (ordered by category
+        // percentile) so blank-value rows never interleave above ranked rows.
+        guard sortMetric != nil else {
             return byCategory.sorted {
-                sortDescending ? score($0) > score($1) : score($0) < score($1)
+                sortDescending ? fallbackPercentile($0) > fallbackPercentile($1) : fallbackPercentile($0) < fallbackPercentile($1)
             }
         }
-        func hasSortMetric(_ p: Player) -> Bool {
-            p.metrics.contains { $0.label == m.label && $0.category == m.category }
+        let ranked = byCategory.filter { rawValue($0) != nil }.sorted {
+            let v1 = rawValue($0) ?? 0
+            let v2 = rawValue($1) ?? 0
+            return sortDescending ? v1 > v2 : v1 < v2
         }
-        let ranked = byCategory.filter(hasSortMetric).sorted {
-            sortDescending ? score($0) > score($1) : score($0) < score($1)
-        }
-        let tail = byCategory.filter { !hasSortMetric($0) }.sorted {
-            score($0) > score($1)
+        let tail = byCategory.filter { rawValue($0) == nil }.sorted {
+            fallbackPercentile($0) > fallbackPercentile($1)
         }
         return ranked + tail
     }
@@ -133,8 +134,9 @@ struct TeamView: View {
                             : "Try a different search term."
                     )
                 } else {
-                    // Percentile-ranked, not raw-value sorted — see DashboardView.
-                    LeaderboardTableHeader(sortDescending: sortDescending, sortLabel: "PCTL")
+                    // Sorted by raw stat value — header carries the metric name
+                    // so the column matches the values shown per row.
+                    LeaderboardTableHeader(sortDescending: sortDescending, sortLabel: sortLabel)
                     ForEach(Array(filteredPlayers.enumerated()), id: \.element.id) { index, player in
                         NavigationLink(value: player) {
                             LeaderboardTableRow(

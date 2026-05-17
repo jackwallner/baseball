@@ -190,6 +190,30 @@ final class StoreService: NSObject, ObservableObject {
         products.first(where: { $0.productKind == .lifetime })?.storeProduct.localizedPriceString
     }
 
+    /// CTA label for the blurred contextual paywalls (Year Compare, Player
+    /// Compare). Leads with the yearly free-trial offer when available so the
+    /// upsell emphasizes the low-friction option instead of the lifetime price.
+    var paywallBlurCTA: String {
+        if let yearly = products.first(where: { $0.productKind == .yearly }) {
+            if let trial = yearly.introOfferLabel {
+                return "Start \(trial)"
+            }
+            return "Try Pro — \(yearly.priceLabel)"
+        }
+        if let price = proPrice {
+            return "Unlock Pro — \(price)"
+        }
+        return "Unlock Pro"
+    }
+
+    /// One-line secondary caption shown under the CTA when a trial is offered,
+    /// so the price after the trial isn't hidden.
+    var paywallBlurSubtext: String? {
+        guard let yearly = products.first(where: { $0.productKind == .yearly }),
+              yearly.introOfferLabel != nil else { return nil }
+        return "Then \(yearly.priceLabel). Cancel anytime."
+    }
+
     /// True when the user once held a Pro entitlement that has since expired and
     /// isn't currently active. Used to show a tailored win-back paywall.
     var isLapsed: Bool {
