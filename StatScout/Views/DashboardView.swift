@@ -11,6 +11,9 @@ struct DashboardView: View {
             ScrollView {
                 LazyVStack(spacing: 0, pinnedViews: []) {
                     unifiedControlBar
+                    if !viewModel.leaderboard.isEmpty {
+                        sortControlsRow
+                    }
                     leaderboardSection
                     if !viewModel.players.isEmpty {
                         aboutFooter
@@ -216,11 +219,16 @@ struct DashboardView: View {
         .clipShape(Capsule())
     }
 
-    private var sortHeaderMenu: some View {
-        Menu {
+    // Explicit, always-visible sort controls. The old design buried both the
+    // metric picker and the direction toggle inside a single Menu wrapping the
+    // whole table header — undiscoverable, and the menu was unreliable inside
+    // the ScrollView (the "no descending option" report). Now: a "Sort by"
+    // chip for the metric, and a direct tap-to-toggle on the header itself.
+    private var sortControlsRow: some View {
+        HStack(spacing: 8) {
             let metrics = viewModel.availableSortMetrics
             if !metrics.isEmpty {
-                Section("Sort by") {
+                Menu {
                     ForEach(metrics, id: \.self) { metric in
                         Button {
                             viewModel.setUserSortMetric(metric)
@@ -233,26 +241,62 @@ struct DashboardView: View {
                             }
                         }
                     }
-                }
-            }
-            Section {
-                Button {
-                    viewModel.toggleSortDirection()
-                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
                 } label: {
-                    Label(
-                        viewModel.sortDescending ? "Highest first" : "Lowest first",
-                        systemImage: viewModel.sortDescending ? "arrow.down" : "arrow.up"
-                    )
+                    HStack(spacing: 4) {
+                        Text("Sort by")
+                            .font(SavantType.micro)
+                            .tracking(0.4)
+                            .foregroundStyle(SavantPalette.inkSecondary)
+                        Text(viewModel.currentSortMetric ?? viewModel.sortLabel)
+                            .font(SavantType.smallBold)
+                            .foregroundStyle(SavantPalette.ink)
+                        Image(systemName: "chevron.down")
+                            .font(.system(size: 9, weight: .bold))
+                            .foregroundStyle(SavantPalette.inkTertiary)
+                    }
+                    .padding(.horizontal, 12)
+                    .frame(height: 30)
+                    .background(SavantPalette.surface)
+                    .clipShape(Capsule())
+                    .overlay(Capsule().stroke(SavantPalette.hairline, lineWidth: 0.5))
                 }
+                .menuOrder(.fixed)
             }
+
+            Spacer()
+
+            Button {
+                viewModel.toggleSortDirection()
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            } label: {
+                HStack(spacing: 4) {
+                    Image(systemName: viewModel.sortDescending ? "arrow.down" : "arrow.up")
+                        .font(.system(size: 10, weight: .bold))
+                    Text(viewModel.sortDescending ? "Highest first" : "Lowest first")
+                        .font(SavantType.micro)
+                        .tracking(0.4)
+                }
+                .foregroundStyle(.white)
+                .padding(.horizontal, 12)
+                .frame(height: 30)
+                .background(SavantPalette.savantRed)
+                .clipShape(Capsule())
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, 12)
+        .padding(.bottom, 8)
+    }
+
+    private var sortHeader: some View {
+        // Direct tap-to-toggle (matches Box Score, which works reliably).
+        Button {
+            viewModel.toggleSortDirection()
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
         } label: {
-            // Ranked by raw value — header carries the active metric name so
-            // the column matches the values shown per row. The "Sort by" menu
-            // above still picks which metric drives the rank.
             LeaderboardTableHeader(sortDescending: viewModel.sortDescending, sortLabel: viewModel.currentSortMetric ?? viewModel.sortLabel)
         }
-        .menuOrder(.fixed)
+        .buttonStyle(.plain)
     }
 
     private var leaderboardSection: some View {
@@ -291,7 +335,7 @@ struct DashboardView: View {
                 .padding(.vertical, 24)
                 .frame(minHeight: 200)
             } else {
-                sortHeaderMenu
+                sortHeader
                 let sortMetric = viewModel.currentSortMetricForDisplay
                 LazyVStack(spacing: 0) {
                     ForEach(Array(viewModel.leaderboard.enumerated()), id: \.element.id) { index, player in

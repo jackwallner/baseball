@@ -447,24 +447,29 @@ final class DashboardViewModel {
                 metricMap[compositeKey]?.values.append((player: player, percentile: metric.percentile, actualValue: metric.value))
             }
         }
-        return metricMap.map { (key, data) in
+        return metricMap.compactMap { (key, data) -> MetricLeaderEntry? in
             let label = key.split(separator: "|").first.map(String.init) ?? key
-            // Rank Best/Lowest by raw value with direction awareness so
-            // "Lowest" actually means "worst" for the metric — pitcher xwOBA
-            // best = lowest raw value, hitter xwOBA best = highest.
-            let lowerBetter = Self.lowerIsBetter(label: label, category: data.category)
-            let ascending = data.values.sorted { lhs, rhs in
-                let a = Self.rawNumeric(lhs.actualValue) ?? 0
-                let b = Self.rawNumeric(rhs.actualValue) ?? 0
-                return a < b
-            }
-            let best = lowerBetter ? ascending.first : ascending.last
-            let worst = lowerBetter ? ascending.last : ascending.first
+            // Rank Best/Worst by Savant percentile, NOT by parsing the value
+            // string. Roughly half of xISO / xOBP / Hard-Hit% (and 100% of
+            // Arm Strength / Squared-Up%) ship a valid percentile but a blank
+            // value; rawNumeric("") collapsed them all to 0, every player tied,
+            // and the sort returned the same player (e.g. Ohtani) for both
+            // ends with empty cells. Percentile is Savant's normalized
+            // goodness — already direction-correct (it inverts for pitchers),
+            // so highest = best, lowest = worst with no per-metric polarity
+            // table needed.
+            let byPercentile = data.values.sorted { $0.percentile < $1.percentile }
+            guard let best = byPercentile.last else { return nil }
+            let worst = byPercentile.first
+            // Single qualifier (or every qualifier tied): the same player can't
+            // be both Best and Worst — drop the duplicate so the row reads
+            // "Best: X / Only qualifier" instead of "X is also the worst".
+            let dedupedWorst = (worst?.player.id == best.player.id) ? nil : worst
             return (
                 label: label,
                 category: data.category,
                 best: best,
-                worst: worst
+                worst: dedupedWorst
             )
         }.sorted { $0.label < $1.label }
     }

@@ -41,6 +41,14 @@ struct MetricLeadersView: View {
         .navigationBarTitleDisplayMode(.inline)
     }
 
+    /// Many metrics (xISO, xOBP, Hard-Hit%, Arm Strength, Squared-Up%) ship a
+    /// valid Savant percentile but a blank value string. Rather than render an
+    /// empty cell, fall back to the percentile so the row still carries signal.
+    private func displayValue(_ raw: String, percentile: Int) -> String {
+        let trimmed = raw.trimmingCharacters(in: .whitespaces)
+        return trimmed.isEmpty ? "\(percentile.ordinal) pct" : trimmed
+    }
+
     private func categoryCard(_ group: (MetricCategory, [MetricLeaderEntry])) -> some View {
         VStack(spacing: 0) {
             SavantSectionBar(title: group.0.rawValue.uppercased())
@@ -56,7 +64,7 @@ struct MetricLeadersView: View {
                     .tracking(0.5)
                     .foregroundStyle(SavantPalette.inkTertiary)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                Text("LOWEST")
+                Text("WORST")
                     .font(SavantType.micro)
                     .tracking(0.5)
                     .foregroundStyle(SavantPalette.inkTertiary)
@@ -95,7 +103,7 @@ struct MetricLeadersView: View {
                                         .foregroundStyle(SavantPalette.ink)
                                         .lineLimit(1)
                                         .minimumScaleFactor(0.7)
-                                    Text(best.actualValue)
+                                    Text(displayValue(best.actualValue, percentile: best.percentile))
                                         .font(SavantType.statSmall)
                                         .foregroundStyle(SavantPalette.inkSecondary)
                                         .lineLimit(1)
@@ -122,7 +130,7 @@ struct MetricLeadersView: View {
                                         .foregroundStyle(SavantPalette.ink)
                                         .lineLimit(1)
                                         .minimumScaleFactor(0.7)
-                                    Text(worst.actualValue)
+                                    Text(displayValue(worst.actualValue, percentile: worst.percentile))
                                         .font(SavantType.statSmall)
                                         .foregroundStyle(SavantPalette.inkSecondary)
                                         .lineLimit(1)
@@ -132,7 +140,7 @@ struct MetricLeadersView: View {
                         }
                         .buttonStyle(.plain)
                     } else {
-                        Text("No qualified players")
+                        Text("Only qualifier")
                             .font(SavantType.micro)
                             .foregroundStyle(SavantPalette.inkTertiary)
                             .frame(maxWidth: .infinity, alignment: .leading)
