@@ -10,7 +10,16 @@ final class DashboardViewModel {
     var players: [Player] = []
     var playerHistories: [Int: [Player]] = [:]
     var searchText = ""
-    var selectedCategory: MetricCategory? = .hitting
+    var selectedCategory: MetricCategory? = .hitting {
+        didSet {
+            if oldValue != selectedCategory { applyDefaultSortDirection() }
+        }
+    }
+    // Tracks whether the user has manually flipped direction since the last
+    // metric/category change. When nil, sortDescending follows the metric's
+    // default ("best first"); once toggled it pins until the user switches
+    // metric or category again.
+    private var userToggledDirection = false
     var sortDescending = true
     // Defaults to current year, but `load()` will reset to the most recent season
     // that actually has data once the cache/network resolves so first paint isn't an empty state.
@@ -64,6 +73,23 @@ final class DashboardViewModel {
         } else {
             userSortMetricByCategory.removeValue(forKey: category)
         }
+        applyDefaultSortDirection()
+    }
+
+    /// Call when the user explicitly flips direction (header tap / menu item)
+    /// so the auto-default doesn't stomp their preference until they change
+    /// the active metric or category.
+    func toggleSortDirection() {
+        sortDescending.toggle()
+        userToggledDirection = true
+    }
+
+    /// Reset direction to "best first" for the active metric. Triggered by
+    /// category changes and by picking a new sort metric — but only when the
+    /// user hasn't manually pinned a direction in this session.
+    private func applyDefaultSortDirection() {
+        userToggledDirection = false
+        sortDescending = Self.defaultSortDescending(label: currentSortMetric, category: selectedCategory)
     }
     // Mirrors StoreService.isPro. Set by the view layer so season gating and
     // selectedSeason clamping stay consistent without the VM depending on the store.
@@ -296,6 +322,30 @@ final class DashboardViewModel {
         return scanner.scanDouble()
     }
 
+    /// Metrics where a lower raw value is the better outcome. Drives the
+    /// default sort direction (so pitcher xwOBA lists best pitchers first
+    /// instead of worst) and Best/Lowest selection on MetricLeadersView.
+    /// Hitter xwOBA / Barrel% high = good; pitcher xwOBA / Barrel% low = good.
+    static func lowerIsBetter(label: String, category: MetricCategory) -> Bool {
+        switch category {
+        case .pitching:
+            return ["xwOBA", "xBA", "xSLG", "xERA", "ERA", "WHIP", "BB%",
+                    "Barrel%", "HardHit%", "EV", "LA", "GB%", "FB%"].contains(label)
+        case .hitting:
+            return ["K%"].contains(label)
+        case .fielding, .running:
+            return false
+        }
+    }
+
+    /// Default sort direction for a metric — descending (highest first) unless
+    /// the metric reads better when lower. Used to keep "best player first" as
+    /// the initial ordering even after switching to raw-value sorting.
+    static func defaultSortDescending(label: String?, category: MetricCategory?) -> Bool {
+        guard let label, let category else { return true }
+        return !lowerIsBetter(label: label, category: category)
+    }
+
     // Determine which metric label to use for consistent sorting across all players
     private func determineSortMetricLabel() -> String? {
         guard let category = selectedCategory else { return nil }
@@ -351,12 +401,19 @@ final class DashboardViewModel {
     }
 
     func players(forTeam team: String) -> [Player] {
+        // Sort by raw xwOBA value to match the leaderboard convention.
+        // Pitchers (where lower xwOBA is better) sort to the bottom, then by
+        // ascending xwOBA — gives a sane "best hitters first, best pitchers
+        // last" team roster ordering.
         let normalized = normalizedTeamAbbreviation(team)
         return seasonPlayers.filter { normalizedTeamAbbreviation($0.team) == normalized }
             .sorted { p0, p1 in
-                let s0 = p0.metrics.first(where: { $0.label == "xwOBA" })?.percentile ?? 0
-                let s1 = p1.metrics.first(where: { $0.label == "xwOBA" })?.percentile ?? 0
-                return s0 > s1
+                let isPitcher0 = p0.playerType?.lowercased() == "pitcher"
+                let isPitcher1 = p1.playerType?.lowercased() == "pitcher"
+                if isPitcher0 != isPitcher1 { return !isPitcher0 }
+                let v0 = Self.rawNumeric(p0.metrics.first(where: { $0.label == "xwOBA" })?.value ?? "") ?? -.infinity
+                let v1 = Self.rawNumeric(p1.metrics.first(where: { $0.label == "xwOBA" })?.value ?? "") ?? -.infinity
+                return isPitcher0 ? v0 < v1 : v0 > v1
             }
     }
 
@@ -387,13 +444,23 @@ final class DashboardViewModel {
             }
         }
         return metricMap.map { (key, data) in
-            let sorted = data.values.sorted { $0.percentile > $1.percentile }
             let label = key.split(separator: "|").first.map(String.init) ?? key
+            // Rank Best/Lowest by raw value with direction awareness so
+            // "Lowest" actually means "worst" for the metric — pitcher xwOBA
+            // best = lowest raw value, hitter xwOBA best = highest.
+            let lowerBetter = Self.lowerIsBetter(label: label, category: data.category)
+            let ascending = data.values.sorted { lhs, rhs in
+                let a = Self.rawNumeric(lhs.actualValue) ?? 0
+                let b = Self.rawNumeric(rhs.actualValue) ?? 0
+                return a < b
+            }
+            let best = lowerBetter ? ascending.first : ascending.last
+            let worst = lowerBetter ? ascending.last : ascending.first
             return (
                 label: label,
                 category: data.category,
-                best: sorted.first,
-                worst: sorted.last
+                best: best,
+                worst: worst
             )
         }.sorted { $0.label < $1.label }
     }

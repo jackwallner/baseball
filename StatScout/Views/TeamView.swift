@@ -9,6 +9,7 @@ struct TeamView: View {
     @State private var searchText = ""
     @State private var selectedCategory: MetricCategory? = nil
     @State private var sortDescending = true
+    @State private var lastDefaultedSortKey: String? = nil
     @State private var showingPaywall = false
 
     private var displaySeason: Int {
@@ -89,9 +90,24 @@ struct TeamView: View {
         .background(SavantPalette.canvas.ignoresSafeArea())
         .navigationTitle(teamFullName(team))
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear { applyDefaultDirectionIfMetricChanged() }
+        .onChange(of: selectedCategory) { _, _ in applyDefaultDirectionIfMetricChanged() }
         .sheet(isPresented: $showingPaywall) {
             PaywallView(trigger: .teamView)
         }
+    }
+
+    /// Reset sort direction to "best first" whenever the active sort metric
+    /// changes (driven by category switches). Tracks the key so a category
+    /// change to one with the same priority metric doesn't stomp a manual flip.
+    private func applyDefaultDirectionIfMetricChanged() {
+        let key = sortMetric.map { "\($0.category.rawValue)|\($0.label)" } ?? "—"
+        guard key != lastDefaultedSortKey else { return }
+        lastDefaultedSortKey = key
+        sortDescending = DashboardViewModel.defaultSortDescending(
+            label: sortMetric?.label,
+            category: sortMetric?.category
+        )
     }
 
     private var rosterSection: some View {

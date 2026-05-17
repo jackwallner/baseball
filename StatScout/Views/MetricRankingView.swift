@@ -5,7 +5,18 @@ struct MetricRankingView: View {
     let metricCategory: MetricCategory
     let players: [Player]
     let season: Int?
-    @State private var sortDescending = true
+    @State private var sortDescending: Bool
+
+    init(metricLabel: String, metricCategory: MetricCategory, players: [Player], season: Int?) {
+        self.metricLabel = metricLabel
+        self.metricCategory = metricCategory
+        self.players = players
+        self.season = season
+        // Default to "best first" for the active metric (descending for
+        // higher-is-better, ascending for pitcher xwOBA / ERA / WHIP / etc.).
+        // User can still flip via the header chevron.
+        _sortDescending = State(initialValue: DashboardViewModel.defaultSortDescending(label: metricLabel, category: metricCategory))
+    }
 
     private var rankedPlayers: [Player] {
         players.filter { player in

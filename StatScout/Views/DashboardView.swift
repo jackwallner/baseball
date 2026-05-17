@@ -237,7 +237,7 @@ struct DashboardView: View {
             }
             Section {
                 Button {
-                    viewModel.sortDescending.toggle()
+                    viewModel.toggleSortDirection()
                     UIImpactFeedbackGenerator(style: .light).impactOccurred()
                 } label: {
                     Label(
