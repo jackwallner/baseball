@@ -395,9 +395,13 @@ final class DashboardViewModel {
         }
     }
 
-    // Expose the current sort metric for row display
+    // Expose the current sort metric for row display. When no category is
+    // active the leaderboard sorts by raw xwOBA; surface that label (with
+    // nil category) so LeaderboardTableRow matches by label alone and shows
+    // each player's xwOBA value instead of a percentile fallback.
     var currentSortMetricForDisplay: (label: String?, category: MetricCategory?) {
-        (currentSortMetric, selectedCategory)
+        if let label = currentSortMetric { return (label, selectedCategory) }
+        return ("xwOBA", nil)
     }
 
     func players(forTeam team: String) -> [Player] {

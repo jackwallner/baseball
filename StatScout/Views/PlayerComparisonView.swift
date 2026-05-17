@@ -231,26 +231,26 @@ struct PlayerComparisonView: View {
             if let m = metric {
                 let isWinner = (other.map { m.percentile > $0.percentile }) ?? false
                 let pctColor = SavantPalette.color(forPercentile: m.percentile)
-                VStack(spacing: 4) {
+                // Raw value only — the colored bar conveys percentile. Tinting
+                // the value text by percentile keeps the "who's better" cue
+                // without doubling up the number.
+                VStack(spacing: 6) {
                     HStack(spacing: 4) {
                         if isWinner {
                             Image(systemName: "trophy.fill")
                                 .font(.system(size: 10, weight: .bold))
                                 .foregroundStyle(Color.yellow)
                         }
-                        Text(m.value)
-                            .font(SavantType.statSmall)
-                            .foregroundStyle(SavantPalette.ink)
+                        Text(m.value.isEmpty ? "—" : m.value)
+                            .font(SavantType.statMed)
+                            .foregroundStyle(pctColor)
                             .lineLimit(1)
+                            .minimumScaleFactor(0.7)
                     }
-                    Text("\(m.percentile)%")
-                        .font(SavantType.micro)
-                        .tracking(0.3)
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(pctColor)
-                        .clipShape(Capsule())
+                    RoundedRectangle(cornerRadius: 2)
+                        .fill(pctColor)
+                        .frame(width: max(8, CGFloat(m.percentile) * 0.6), height: 4)
+                        .frame(maxWidth: 60, alignment: .leading)
                 }
                 .frame(maxWidth: .infinity)
             } else {

@@ -393,19 +393,28 @@ struct LeaderboardTableRow: View {
     var metricCategory: MetricCategory? = nil
 
     private var displayMetric: Metric? {
-        guard let label = metricLabel, let category = metricCategory else { return nil }
-        return player.metrics.first { $0.label == label && $0.category == category }
+        guard let label = metricLabel else { return nil }
+        // When no category is active (the all-categories leaderboard) fall back
+        // to matching on label alone so we still surface the player's xwOBA
+        // entry regardless of whether it lives under hitting or pitching.
+        if let category = metricCategory {
+            return player.metrics.first { $0.label == label && $0.category == category }
+        }
+        return player.metrics.first { $0.label == label }
     }
 
     private var displayPercentile: Int {
         displayMetric?.percentile ?? player.overallPercentile
     }
 
+    // Raw stat value only — never the percentile. The colored bar to the left
+    // already conveys percentile visually; numeric percentile in this column
+    // duplicates that signal and reads as "the stat value" at a glance.
     private var displayValueText: String {
         if let metric = displayMetric, !metric.value.isEmpty {
             return metric.value
         }
-        return "\(displayPercentile)"
+        return "—"
     }
 
     var body: some View {
