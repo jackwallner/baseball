@@ -389,11 +389,14 @@ struct TeamRowContent: View {
             .frame(maxWidth: .infinity, alignment: .leading)
 
             if let score = teamScore {
+                // This is the team's average xwOBA *percentile* (0–100), not an
+                // xwOBA value (~.320). Labeling it "xwOBA" read as nonsense
+                // ("55 xwOBA"); call it what it is.
                 HStack(spacing: 3) {
                     Text(String(format: "%.0f", score))
                         .font(SavantType.statSmall)
                         .foregroundStyle(SavantPalette.inkSecondary)
-                    Text("xwOBA")
+                    Text("xwOBA %ile")
                         .font(SavantType.micro)
                         .foregroundStyle(SavantPalette.inkTertiary)
                 }

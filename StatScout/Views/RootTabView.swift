@@ -29,13 +29,17 @@ struct RootTabView: View {
                 .tabItem { Label("Teams", systemImage: "shield.lefthalf.filled") }
                 .tag(1)
 
+            compareTab
+                .tabItem { Label("Compare", systemImage: "arrow.left.arrow.right") }
+                .tag(2)
+
             metricsTab
                 .tabItem { Label("StatScout", systemImage: "chart.bar.fill") }
-                .tag(2)
+                .tag(3)
 
             standardStatsTab
                 .tabItem { Label("Box Score", systemImage: "tablecells.fill") }
-                .tag(3)
+                .tag(4)
         }
         .tint(SavantPalette.savantRed)
         .sheet(isPresented: $showingAbout) {
@@ -77,9 +81,22 @@ struct RootTabView: View {
         }
     }
 
+    private var compareTab: some View {
+        NavigationStack {
+            // CompareView declares its own ComparisonRoute / YearCompareRoute
+            // destinations, so StandardDestinations is intentionally omitted
+            // here to avoid a duplicate navigationDestination for the same type.
+            CompareView(viewModel: viewModel)
+                .navigationTitle("Compare")
+                .navigationBarTitleDisplayMode(.inline)
+                .modifier(SavantNavBar())
+                .modifier(ProToolbarButton())
+        }
+    }
+
     private var metricsTab: some View {
         NavigationStack {
-            MetricLeadersView(metrics: selection == 2 ? viewModel.allMetrics : [])
+            MetricLeadersView(metrics: selection == 3 ? viewModel.allMetrics : [])
                 .navigationTitle("StatScout Leaders")
                 .navigationBarTitleDisplayMode(.inline)
                 .modifier(SavantNavBar())
@@ -90,7 +107,7 @@ struct RootTabView: View {
 
     private var standardStatsTab: some View {
         NavigationStack {
-            StandardStatsLeadersView(players: selection == 3 ? viewModel.qualifiedSeasonPlayers : [])
+            StandardStatsLeadersView(players: selection == 4 ? viewModel.qualifiedSeasonPlayers : [])
                 .navigationTitle("Box Score Stats")
                 .navigationBarTitleDisplayMode(.inline)
                 .modifier(SavantNavBar())

@@ -31,6 +31,16 @@ struct TeamView: View {
         return sortMetric?.label ?? "Top Category"
     }
 
+    /// Metric label/category used to render each row's value column. In the
+    /// "All" view there's no active category, so match xwOBA by label alone
+    /// (LeaderboardTableRow falls back to label-only matching when category is
+    /// nil) instead of passing nil/nil which renders every row as "—".
+    private var rowDisplayMetric: (label: String?, category: MetricCategory?) {
+        if let m = sortMetric { return (m.label, m.category) }
+        if selectedCategory == nil { return ("xwOBA", nil) }
+        return (nil, nil)
+    }
+
     private func rawValue(_ player: Player) -> Double? {
         guard let m = sortMetric,
               let metric = player.metrics.first(where: { $0.label == m.label && $0.category == m.category })
@@ -81,7 +91,11 @@ struct TeamView: View {
                         .padding(.top, 10)
                 }
 
-                CategoryFilter(selectedCategory: $selectedCategory)
+                // Show an explicit "All" tab. Without it the filter highlighted
+                // "Hitting" while selectedCategory was still nil, so pitchers
+                // (Ferrer) showed on the "hitting" view and every value column
+                // rendered "—" (nil sort metric). All = full roster by design.
+                CategoryFilter(selectedCategory: $selectedCategory, showAllOption: true)
 
                 rosterSection
             }
@@ -158,8 +172,8 @@ struct TeamView: View {
                             LeaderboardTableRow(
                                 rank: index + 1,
                                 player: player,
-                                metricLabel: sortMetric?.label,
-                                metricCategory: sortMetric?.category
+                                metricLabel: rowDisplayMetric.label,
+                                metricCategory: rowDisplayMetric.category
                             )
                         }
                         .buttonStyle(.plain)
