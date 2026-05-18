@@ -16,6 +16,7 @@ struct PlayerProfileView: View {
     @State private var paywallTrigger: PaywallTrigger?
     @State private var showingPlayerPicker = false
     @State private var comparisonRoute: ComparisonRoute?
+    @State private var showTrialPitch = false
 
     enum PlayerStatTab: String, CaseIterable {
         case statcast = "Percentiles"
@@ -106,11 +107,12 @@ struct PlayerProfileView: View {
         }
         .scrollBounceBehavior(.basedOnSize)
         .background(SavantPalette.canvas.ignoresSafeArea())
-        // No auto-paywall on player open — tapping a player should always go
-        // straight to the profile. The in-content `proUpsellCard` (below the
-        // percentile rankings) and the toolbar Pro chip handle promotion.
-        // Contextual gates (compare, year-compare, past season) still fire on
-        // the specific actions that require Pro.
+        // First-tap activation: profile renders immediately (no full-screen
+        // paywall blocking it), and a native half-sheet TrialPitchSheet
+        // floats on top with a "Maybe later" dismiss. PaywallGate caps this
+        // at 2 per session so repeat taps don't re-prompt. The old full-page
+        // .activation PaywallView was removed for being too intrusive — this
+        // is the Vitals-style soft pitch that replaced it.
         .navigationTitle(player.name)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -139,8 +141,18 @@ struct PlayerProfileView: View {
                 comparisonRoute = ComparisonRoute(playerA: player, playerB: selected)
             }
         }
+        .sheet(isPresented: $showTrialPitch) {
+            TrialPitchSheet(trigger: .playerScouting)
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+        }
         .navigationDestination(item: $comparisonRoute) { route in
             PlayerComparisonView(playerA: route.playerA, playerB: route.playerB)
+        }
+        .onAppear {
+            if !store.isPro, PaywallGate.shared.shouldPresent(.playerScouting) {
+                showTrialPitch = true
+            }
         }
     }
 

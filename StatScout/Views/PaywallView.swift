@@ -13,6 +13,12 @@ enum PaywallTrigger: Identifiable, Hashable {
     case pastSeasonsLoad
     case teamView
     case winback
+    /// Soft, half-sheet trial pitch shown on a free user's first player open.
+    /// Distinct from the old `.activation` full-PaywallView popup (removed for
+    /// being too intrusive) — this routes through TrialPitchSheet, which is
+    /// native/intentional, dismissible with "Maybe later", and gated by
+    /// PaywallGate so it caps at 2 per session.
+    case playerScouting
 
     var icon: String {
         switch self {
@@ -25,6 +31,7 @@ enum PaywallTrigger: Identifiable, Hashable {
         case .pastSeasonsLoad:   return "clock.arrow.circlepath"
         case .teamView:          return "shield.lefthalf.filled"
         case .winback:           return "arrow.counterclockwise.circle.fill"
+        case .playerScouting:    return "binoculars.fill"
         }
     }
 
@@ -39,6 +46,7 @@ enum PaywallTrigger: Identifiable, Hashable {
         case .pastSeasonsLoad:   return "Load Past Seasons"
         case .teamView:          return "Team Insights"
         case .winback:           return "Welcome Back"
+        case .playerScouting:    return "Full Player Scouting"
         }
     }
 
@@ -62,6 +70,8 @@ enum PaywallTrigger: Identifiable, Hashable {
             return "Get full team rosters, player breakdowns, and side-by-side comparisons for every squad."
         case .winback:
             return "Your Pro access has lapsed. Renew to get historical seasons, year-over-year trends, and head-to-head matchups back."
+        case .playerScouting:
+            return "Unlock every past season, year-over-year trends, and head-to-head comparisons for every player — the full scouting picture."
         }
     }
 }

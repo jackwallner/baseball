@@ -46,6 +46,11 @@ struct TrialPitchSheet: View {
             footer
         }
         .background(SavantPalette.canvas.ignoresSafeArea())
+        // Tick the session cap on the *pitch* sheet too, not just the full
+        // PaywallView. Otherwise PaywallGate.shouldPresent(.playerScouting)
+        // stays true forever for sheets that never reach PaywallView, and the
+        // half-sheet would auto-present on every player open.
+        .onAppear { PaywallGate.shared.markPresented(trigger) }
         .task {
             if store.currentOffering == nil { await store.fetchProducts() }
         }
