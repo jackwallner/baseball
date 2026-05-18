@@ -106,15 +106,11 @@ struct PlayerProfileView: View {
         }
         .scrollBounceBehavior(.basedOnSize)
         .background(SavantPalette.canvas.ignoresSafeArea())
-        .onAppear {
-            // Deferred activation: the only full-screen Pro pitch. Shows once
-            // per session when the user opens their first player, after they've
-            // already felt the app's value. Contextual gates (compare, past
-            // season) still show their own triggers on specific actions.
-            if !store.isPro, PaywallGate.shared.shouldPresent(.activation) {
-                paywallTrigger = .activation
-            }
-        }
+        // No auto-paywall on player open — tapping a player should always go
+        // straight to the profile. The in-content `proUpsellCard` (below the
+        // percentile rankings) and the toolbar Pro chip handle promotion.
+        // Contextual gates (compare, year-compare, past season) still fire on
+        // the specific actions that require Pro.
         .navigationTitle(player.name)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -232,39 +228,74 @@ struct PlayerProfileView: View {
     }
 
     private var proUpsellCard: some View {
-        Button {
-            paywallTrigger = store.defaultUpgradeTrigger
-        } label: {
-            HStack(spacing: 12) {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 8) {
                 Image(systemName: "crown.fill")
-                    .font(.system(size: 16))
+                    .font(.system(size: 14))
                     .foregroundStyle(Color.yellow)
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Track year-over-year trends")
-                        .font(SavantType.smallBold)
-                        .foregroundStyle(SavantPalette.ink)
-                    Text("See how \(player.name)'s metrics evolved across seasons with Pro.")
-                        .font(SavantType.small)
-                        .foregroundStyle(SavantPalette.inkSecondary)
-                        .lineLimit(2)
-                }
-
-                Spacer(minLength: 8)
-
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(SavantPalette.inkTertiary)
+                Text("StatScout Pro")
+                    .font(SavantType.smallBold)
+                    .tracking(0.4)
+                    .foregroundStyle(SavantPalette.ink)
             }
-            .padding(12)
-            .background(SavantPalette.surface)
-            .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
-            .overlay(
-                RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
-                    .stroke(SavantPalette.hairline, lineWidth: 0.5)
-            )
+
+            Text("Get the full scouting picture on \(player.name).")
+                .font(SavantType.body)
+                .foregroundStyle(SavantPalette.ink)
+                .fixedSize(horizontal: false, vertical: true)
+
+            VStack(alignment: .leading, spacing: 6) {
+                proPerk("chart.line.uptrend.xyaxis", "Year-over-year trends across every metric")
+                proPerk("person.2.fill", "Head-to-head comparisons vs any player")
+                proPerk("calendar.badge.clock", "Every past season, not just this one")
+                proPerk("arrow.down.circle.fill", "Saved offline — works on the road")
+            }
+
+            Button {
+                paywallTrigger = store.defaultUpgradeTrigger
+            } label: {
+                HStack(spacing: 6) {
+                    Text(store.paywallBlurCTA)
+                        .font(SavantType.bodyBold)
+                    Image(systemName: "arrow.right")
+                        .font(.system(size: 12, weight: .bold))
+                }
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity)
+                .frame(height: 46)
+                .background(SavantPalette.savantRed)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+            }
+            .buttonStyle(.plain)
+
+            if let subtext = store.paywallBlurSubtext {
+                Text(subtext)
+                    .font(SavantType.micro)
+                    .tracking(0.3)
+                    .foregroundStyle(SavantPalette.inkTertiary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+            }
         }
-        .buttonStyle(.plain)
+        .padding(16)
+        .background(SavantPalette.surface)
+        .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
+        .overlay(
+            RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
+                .stroke(SavantPalette.hairline, lineWidth: 0.5)
+        )
+    }
+
+    private func proPerk(_ icon: String, _ text: String) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(SavantPalette.savantRed)
+                .frame(width: 16)
+            Text(text)
+                .font(SavantType.small)
+                .foregroundStyle(SavantPalette.inkSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
     }
 
     private var standardContent: some View {

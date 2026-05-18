@@ -38,13 +38,25 @@ EXPECTED_TEAMS = {
     "TEX", "TOR", "WSH",
 }
 
-# Core metrics that should exist for each player type
-BATTER_CORE_METRICS = {"xwOBA", "xSLG", "xBA", "K%", "BB%"}
-PITCHER_CORE_METRICS = {"xwOBA", "xERA", "K%", "BB%", "Whiff%", "Chase%"}
-RUNNING_CORE_METRICS = {"Sprint Speed"}
-FIELDING_CORE_METRICS = {"Range (OAA)"}
+# Core metrics that should exist for each player type. Kept intentionally
+# minimal — the audit's job is to catch "data is broken" cases (no xStats for
+# a regular hitter, no Whiff% for a pitcher), not enumerate every nice-to-have.
+# OAA/Range is excluded because positions without OAA (catcher, DH, 1B in some
+# years) flooded the false-positive count.
+BATTER_CORE_METRICS = {"xwOBA", "xSLG", "xBA"}
+PITCHER_CORE_METRICS = {"xwOBA", "Whiff%", "Chase%"}
+RUNNING_CORE_METRICS: set[str] = set()  # Sprint Speed is opt-in, not core
+FIELDING_CORE_METRICS: set[str] = set()  # OAA varies by position; not core
 
-STANDARD_STATS_EXPECTED = {"PA", "AB", "H", "HR", "BB", "SO", "AVG", "OBP", "SLG", "OPS"}
+# Positions without OAA / sprint-speed data — excluded from those checks if we
+# ever re-add them.
+NON_OAA_POSITIONS = {"C", "DH", "P", "TWP"}
+
+# Standard stats: hitting columns only apply to position players. Pitchers
+# carry IP/ERA/WHIP/K/BB on the pitcher side, which the app surfaces in the
+# Standard tab. The audit shouldn't flag a pitcher for missing AVG/SLG.
+BATTER_STANDARD_STATS = {"PA", "AB", "H", "HR", "BB", "SO", "AVG", "OBP", "SLG", "OPS"}
+PITCHER_STANDARD_STATS = {"IP", "ERA", "WHIP", "SO", "BB"}
 
 
 def fetch_all_seasons(client) -> list[int]:
@@ -178,7 +190,8 @@ def audit_season(client, season: int) -> dict[str, Any]:
                 "missing": sorted(missing),
             })
 
-        # Check standard stats
+        # Standard stats. Pitchers don't have hitting columns and vice versa;
+        # only flag a player when the stats expected for *their* type are gone.
         std_stats = p.get("standard_stats") or []
         if isinstance(std_stats, str):
             try:
@@ -186,12 +199,19 @@ def audit_season(client, season: int) -> dict[str, Any]:
             except Exception:
                 std_stats = []
         std_labels = {s.get("label") for s in std_stats}
-        missing_std = STANDARD_STATS_EXPECTED - std_labels
+        if ptype == "pitcher":
+            expected_std = PITCHER_STANDARD_STATS
+        elif ptype == "two_way":
+            expected_std = BATTER_STANDARD_STATS | PITCHER_STANDARD_STATS
+        else:
+            expected_std = BATTER_STANDARD_STATS
+        missing_std = expected_std - std_labels
         if missing_std:
             missing_standard_stats.append({
                 "id": pid,
                 "name": name,
                 "team": team,
+                "type": ptype,
                 "missing": sorted(missing_std),
             })
 

@@ -208,28 +208,41 @@ struct CompareView: View {
     }
 
     private var lockedOverlay: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: 12) {
             Image(systemName: "crown.fill")
                 .font(.system(size: 22))
                 .foregroundStyle(Color.yellow)
             Text("Find the Edge")
                 .font(SavantType.cardTitle)
                 .foregroundStyle(SavantPalette.ink)
-            Text("Pro unlocks head-to-head player comparisons and year-over-year trends across every metric.")
+            Text("Compare is a Pro feature.")
                 .font(SavantType.small)
                 .foregroundStyle(SavantPalette.inkSecondary)
                 .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
+
+            VStack(alignment: .leading, spacing: 6) {
+                perkRow("person.2.fill", "Head-to-head comparisons across every metric")
+                perkRow("chart.line.uptrend.xyaxis", "Year-over-year trends for any player")
+                perkRow("calendar.badge.clock", "Every past season unlocked")
+                perkRow("arrow.down.circle.fill", "Available offline, even at the park")
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.vertical, 4)
+
             Button {
                 showingTrial = true
             } label: {
-                Text(store.paywallBlurCTA)
-                    .font(SavantType.bodyBold)
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 48)
-                    .background(SavantPalette.savantRed)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                HStack(spacing: 6) {
+                    Text(store.paywallBlurCTA)
+                        .font(SavantType.bodyBold)
+                    Image(systemName: "arrow.right")
+                        .font(.system(size: 12, weight: .bold))
+                }
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity)
+                .frame(height: 48)
+                .background(SavantPalette.savantRed)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
             }
             .buttonStyle(.plain)
             if let subtext = store.paywallBlurSubtext {
@@ -240,7 +253,7 @@ struct CompareView: View {
                     .multilineTextAlignment(.center)
             }
         }
-        .padding(24)
+        .padding(20)
         .background(
             RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
                 .fill(SavantPalette.surface)
@@ -251,6 +264,19 @@ struct CompareView: View {
                 .stroke(SavantPalette.hairline, lineWidth: 0.5)
         )
         .padding(.horizontal, 28)
+    }
+
+    private func perkRow(_ icon: String, _ text: String) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(SavantPalette.savantRed)
+                .frame(width: 16)
+            Text(text)
+                .font(SavantType.small)
+                .foregroundStyle(SavantPalette.inkSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
     }
 }
 

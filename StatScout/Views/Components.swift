@@ -271,6 +271,49 @@ struct QualifierPicker: View {
     }
 }
 
+/// Compact menu variant of `QualifierPicker`. The segmented picker takes a
+/// whole row (plus a caption); this collapses into a chip that fits beside the
+/// category tabs. Use when vertical space matters more than at-a-glance state.
+struct QualifierMenu: View {
+    @Binding var selection: DashboardViewModel.QualifierLevel
+
+    var body: some View {
+        Menu {
+            ForEach(DashboardViewModel.QualifierLevel.allCases) { level in
+                Button {
+                    selection = level
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                } label: {
+                    if level == selection {
+                        Label("\(level.rawValue) · \(level.description)", systemImage: "checkmark")
+                    } else {
+                        Text("\(level.rawValue) · \(level.description)")
+                    }
+                }
+            }
+        } label: {
+            HStack(spacing: 4) {
+                Image(systemName: "line.3.horizontal.decrease.circle")
+                    .font(.system(size: 11, weight: .semibold))
+                Text(selection.rawValue)
+                    .font(SavantType.micro)
+                    .tracking(0.4)
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 9, weight: .bold))
+            }
+            .foregroundStyle(SavantPalette.inkSecondary)
+            .padding(.horizontal, 10)
+            .frame(height: 30)
+            .background(SavantPalette.surface)
+            .clipShape(Capsule())
+            .overlay(Capsule().stroke(SavantPalette.hairline, lineWidth: 0.5))
+        }
+        .menuOrder(.fixed)
+        .accessibilityLabel("Qualifier")
+        .accessibilityValue("\(selection.rawValue), \(selection.description)")
+    }
+}
+
 // MARK: - Section Header (legacy, minimal use)
 
 struct SectionHeader: View {

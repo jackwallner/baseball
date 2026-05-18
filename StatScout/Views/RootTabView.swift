@@ -104,6 +104,15 @@ private struct ProToolbarButton: ViewModifier {
     @EnvironmentObject private var store: StoreService
     @State private var paywallTrigger: PaywallTrigger?
 
+    /// Yellow crown + short action verb on a filled pill. The old version was
+    /// a bare yellow "Pro" label that read as a status badge rather than a
+    /// button — tap-through rates were correspondingly weak. The verb makes
+    /// the CTA unambiguous, and the trial-aware label appears when an intro
+    /// offer is available.
+    private var ctaLabel: String {
+        store.products.contains(where: { $0.introOfferLabel != nil }) ? "Try Pro" : "Get Pro"
+    }
+
     func body(content: Content) -> some View {
         content
             .toolbar {
@@ -112,15 +121,21 @@ private struct ProToolbarButton: ViewModifier {
                         Button {
                             paywallTrigger = store.defaultUpgradeTrigger
                         } label: {
-                            HStack(spacing: 3) {
+                            HStack(spacing: 4) {
                                 Image(systemName: "crown.fill")
-                                    .font(.system(size: 11))
-                                Text("Pro")
+                                    .font(.system(size: 10, weight: .bold))
+                                Text(ctaLabel)
                                     .font(SavantType.micro)
-                                    .tracking(0.3)
+                                    .tracking(0.4)
+                                    .fontWeight(.bold)
                             }
-                            .foregroundStyle(Color.yellow)
+                            .foregroundStyle(SavantPalette.savantNavy)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 5)
+                            .background(Color.yellow)
+                            .clipShape(Capsule())
                         }
+                        .accessibilityLabel("\(ctaLabel) — unlock all features")
                     }
                 }
             }

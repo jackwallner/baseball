@@ -79,56 +79,16 @@ struct DashboardView: View {
         .padding(.vertical, 8)
     }
 
-    private var proUpsellBanner: some View {
-        Button {
-            paywallTrigger = store.defaultUpgradeTrigger
-        } label: {
-            HStack(spacing: 10) {
-                Image(systemName: "crown.fill")
-                    .font(.system(size: 14))
-                    .foregroundStyle(Color.yellow)
-
-                Text("Unlock past seasons, comparisons & trends")
-                    .font(SavantType.small)
-                    .foregroundStyle(SavantPalette.ink)
-
-                Spacer(minLength: 4)
-
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 10, weight: .semibold))
-                    .foregroundStyle(SavantPalette.inkTertiary)
-            }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 10)
-            .background(SavantPalette.surface)
-            .clipShape(RoundedRectangle(cornerRadius: 10))
-            .overlay(
-                RoundedRectangle(cornerRadius: 10)
-                    .stroke(SavantPalette.hairline, lineWidth: 0.5)
-            )
-        }
-        .buttonStyle(.plain)
-        .padding(.horizontal, 12)
-    }
-
+    // Compact header. Previously stacked 5 rows (freshness, upsell banner,
+    // season+search, category filter, qualifier toggle). The freshness text is
+    // shown only while data is actually loading (the rest of the time it's
+    // just noise); the upsell banner is gone (toolbar Pro chip + in-content
+    // cards already promote Pro); and the qualifier picker sits inline at the
+    // tail of the category row, recovering a full row of vertical space.
     private var unifiedControlBar: some View {
         VStack(spacing: 8) {
-            ZStack(alignment: .top) {
-                Color.clear.frame(height: 22)
-                if (viewModel.isLoading || viewModel.isHistoricalLoading) && !viewModel.players.isEmpty {
-                    loadingStatusBar
-                } else if let text = viewModel.freshnessText {
-                    Text(text)
-                        .font(SavantType.micro)
-                        .tracking(0.4)
-                        .foregroundStyle(SavantPalette.inkTertiary)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .padding(.horizontal, 12)
-                }
-            }
-
-            if !store.isPro && !viewModel.players.isEmpty {
-                proUpsellBanner
+            if (viewModel.isLoading || viewModel.isHistoricalLoading) && !viewModel.players.isEmpty {
+                loadingStatusBar
             }
 
             HStack(spacing: 10) {
@@ -139,16 +99,14 @@ struct DashboardView: View {
             }
             .padding(.horizontal, 12)
 
-            CategoryFilter(selectedCategory: $viewModel.selectedCategory)
-
-            qualifierToggle
+            HStack(spacing: 8) {
+                CategoryFilter(selectedCategory: $viewModel.selectedCategory)
+                    .layoutPriority(1)
+                QualifierMenu(selection: $viewModel.qualifierLevel)
+            }
+            .padding(.horizontal, 12)
         }
         .padding(.top, 8)
-    }
-
-    private var qualifierToggle: some View {
-        QualifierPicker(selection: $viewModel.qualifierLevel)
-            .padding(.horizontal, 12)
     }
 
     private var seasonMenu: some View {

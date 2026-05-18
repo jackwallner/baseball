@@ -7,7 +7,10 @@ struct TeamView: View {
     var season: Int? = nil
     var viewModel: DashboardViewModel? = nil
     @State private var searchText = ""
-    @State private var selectedCategory: MetricCategory? = nil
+    // Default to Hitting so the roster always shows a meaningful sort metric.
+    // The old "All" tab is gone — without an active category every value
+    // column rendered "—" and the filter highlight got out of sync.
+    @State private var selectedCategory: MetricCategory? = .hitting
     @State private var sortDescending = true
     @State private var lastDefaultedSortKey: String? = nil
     @State private var showingPaywall = false
@@ -91,11 +94,10 @@ struct TeamView: View {
                         .padding(.top, 10)
                 }
 
-                // Show an explicit "All" tab. Without it the filter highlighted
-                // "Hitting" while selectedCategory was still nil, so pitchers
-                // (Ferrer) showed on the "hitting" view and every value column
-                // rendered "—" (nil sort metric). All = full roster by design.
-                CategoryFilter(selectedCategory: $selectedCategory, showAllOption: true)
+                // Hitting / Pitching / Fielding / Running only — the "All" tab
+                // was confusing (no sort metric → every value rendered "—") and
+                // duplicated what the league-wide Stats tab already does.
+                CategoryFilter(selectedCategory: $selectedCategory)
 
                 rosterSection
             }
