@@ -156,6 +156,13 @@ final class DashboardViewModel {
         return "Updated \(formatter.string(from: lastUpdated))"
     }
 
+    /// Fetch per-game logs for a single player. Powers the Recent Form card —
+    /// the VM is just a passthrough so the card can stay UI-only and we don't
+    /// have to thread the provider through every PlayerProfileView caller.
+    func fetchGameLogs(playerId: Int, season: Int) async throws -> [PlayerGameLog] {
+        try await provider.fetchGameLogs(playerId: playerId, season: season)
+    }
+
     init(provider: StatcastProviding, cache: PlayerCaching? = nil) {
         self.provider = provider
         self.cache = cache

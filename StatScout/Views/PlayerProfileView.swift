@@ -10,6 +10,7 @@ struct PlayerProfileView: View {
     var historicalLoadingMessage = "Loading past seasons…"
     var historicalLoadingProgress = 0.12
     var loadHistorical: (() async -> Void)?
+    var fetchGameLogs: ((Int, Int) async throws -> [PlayerGameLog])?
     @State private var showPercentileInfo = false
     @State private var selectedTab: PlayerStatTab = .statcast
     @State private var selectedPercentileSeason: Int? = nil
@@ -230,6 +231,13 @@ struct PlayerProfileView: View {
     private var statcastContent: some View {
         VStack(spacing: 12) {
             percentileRankingsCard
+
+            RecentFormCard(
+                player: player,
+                season: activeSeason ?? player.season ?? Calendar.current.component(.year, from: .now),
+                fetchGameLogs: fetchGameLogs,
+                onUpgradeTap: { paywallTrigger = .playerScouting }
+            )
 
             if !store.isPro {
                 proUpsellCard

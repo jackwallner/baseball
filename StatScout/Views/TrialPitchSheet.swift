@@ -18,17 +18,50 @@ struct TrialPitchSheet: View {
         let detail: String
     }
 
-    private let benefits: [Benefit] = [
-        Benefit(icon: "person.2.fill",
-                title: "Head-to-head comparisons",
-                detail: "Stack any two players across every Statcast metric."),
-        Benefit(icon: "arrow.left.arrow.right.circle.fill",
-                title: "Year-over-year trends",
-                detail: "See what improved, what slipped, and where they're headed."),
-        Benefit(icon: "calendar.badge.clock",
-                title: "Every past season",
-                detail: "Unlock the full historical archive, not just this year.")
-    ]
+    // Bullets are context-aware. For `.playerScouting` (the player-page
+    // first-tap pitch) we lead with current-season value — Recent Form,
+    // head-to-head, full-roster scouting. Triggers that explicitly opened a
+    // history feature still get the time-shaped pitch.
+    private var benefits: [Benefit] {
+        switch trigger {
+        case .playerScouting, .upgrade, .onboarding, .activation:
+            return [
+                Benefit(icon: "flame.fill",
+                        title: "Recent form",
+                        detail: "Last 7 / 15 / 30 day splits — spot hot streaks and slumps before anyone else."),
+                Benefit(icon: "person.2.fill",
+                        title: "Head-to-head matchups",
+                        detail: "Pit any two players side by side — every Statcast metric, this season."),
+                Benefit(icon: "shield.lefthalf.filled",
+                        title: "Full team scouting",
+                        detail: "Every player on every roster, not just qualified starters.")
+            ]
+        case .pastSeason, .pastSeasonsLoad, .yearCompare:
+            return [
+                Benefit(icon: "calendar.badge.clock",
+                        title: "Every past season",
+                        detail: "Back to 2020 — see how the numbers held up year by year."),
+                Benefit(icon: "arrow.left.arrow.right.circle.fill",
+                        title: "Year-over-year trends",
+                        detail: "Compare a player's percentile rankings across any two seasons."),
+                Benefit(icon: "person.2.fill",
+                        title: "Head-to-head matchups",
+                        detail: "Stack any two players across every Statcast metric.")
+            ]
+        case .playerComparison, .teamView, .winback:
+            return [
+                Benefit(icon: "person.2.fill",
+                        title: "Head-to-head matchups",
+                        detail: "Stack any two players across every Statcast metric."),
+                Benefit(icon: "shield.lefthalf.filled",
+                        title: "Full team scouting",
+                        detail: "See every player on every roster, not just qualified starters."),
+                Benefit(icon: "arrow.left.arrow.right.circle.fill",
+                        title: "Year-over-year trends",
+                        detail: "Compare any two seasons when you want the longer arc.")
+            ]
+        }
+    }
 
     var body: some View {
         VStack(spacing: 0) {

@@ -71,7 +71,7 @@ enum PaywallTrigger: Identifiable, Hashable {
         case .winback:
             return "Your Pro access has lapsed. Renew to get historical seasons, year-over-year trends, and head-to-head matchups back."
         case .playerScouting:
-            return "Unlock every past season, year-over-year trends, and head-to-head comparisons for every player — the full scouting picture."
+            return "See last 7 / 15 / 30 day form, stack players head-to-head, and scout every roster — the full picture, not just season totals."
         }
     }
 }

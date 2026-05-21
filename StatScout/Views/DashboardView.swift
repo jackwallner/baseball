@@ -12,7 +12,7 @@ struct DashboardView: View {
                 LazyVStack(spacing: 0, pinnedViews: []) {
                     unifiedControlBar
                     if !viewModel.leaderboard.isEmpty {
-                        sortControlsRow
+                        activeSortChip
                     }
                     leaderboardSection
                     if !viewModel.players.isEmpty {
@@ -79,14 +79,14 @@ struct DashboardView: View {
         .padding(.vertical, 8)
     }
 
-    // Compact header. Previously stacked 5 rows (freshness, upsell banner,
-    // season+search, category filter, qualifier toggle). The freshness text is
-    // shown only while data is actually loading (the rest of the time it's
-    // just noise); the upsell banner is gone (toolbar Pro chip + in-content
-    // cards already promote Pro); and the qualifier picker sits inline at the
-    // tail of the category row, recovering a full row of vertical space.
+    // Two-row header: season + search up top, category + Filters menu below.
+    // The Filters menu hides qualifier and sort controls behind one button so
+    // the surface stays calm. Data freshness sits above as a thin caption so
+    // users can see at a glance how stale the leaderboard is.
     private var unifiedControlBar: some View {
         VStack(spacing: 8) {
+            freshnessStrip
+
             if (viewModel.isLoading || viewModel.isHistoricalLoading) && !viewModel.players.isEmpty {
                 loadingStatusBar
             }
@@ -99,14 +99,110 @@ struct DashboardView: View {
             }
             .padding(.horizontal, 12)
 
-            HStack(spacing: 8) {
-                CategoryFilter(selectedCategory: $viewModel.selectedCategory)
-                    .layoutPriority(1)
-                QualifierMenu(selection: $viewModel.qualifierLevel)
-            }
-            .padding(.horizontal, 12)
+            CategoryFilter(selectedCategory: $viewModel.selectedCategory)
+                .padding(.horizontal, 12)
         }
-        .padding(.top, 8)
+        .padding(.top, 4)
+    }
+
+    private var freshnessStrip: some View {
+        HStack(spacing: 6) {
+            Spacer()
+            Image(systemName: "arrow.clockwise")
+                .font(.system(size: 9, weight: .semibold))
+                .foregroundStyle(SavantPalette.inkTertiary)
+            Text(freshnessLabel)
+                .font(SavantType.micro)
+                .tracking(0.3)
+                .foregroundStyle(SavantPalette.inkTertiary)
+            Spacer()
+        }
+        .padding(.horizontal, 12)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Data \(freshnessLabel)")
+    }
+
+    private var freshnessLabel: String {
+        guard let lastUpdated = viewModel.lastUpdated else { return "Data not yet loaded" }
+        let formatter = RelativeDateTimeFormatter()
+        formatter.unitsStyle = .full
+        return "Updated \(formatter.localizedString(for: lastUpdated, relativeTo: .now))"
+    }
+
+    // Single button that hosts every secondary control — qualifier scope plus
+    // the active sort metric and direction. Keeps the header to two visible
+    // rows while still putting the controls one tap away.
+    private var filtersMenu: some View {
+        Menu {
+            Section("Sort by") {
+                ForEach(viewModel.availableSortMetrics, id: \.self) { metric in
+                    Button {
+                        viewModel.setUserSortMetric(metric)
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    } label: {
+                        if metric == viewModel.currentSortMetric {
+                            Label(metric, systemImage: "checkmark")
+                        } else {
+                            Text(metric)
+                        }
+                    }
+                }
+            }
+
+            Section("Direction") {
+                Button {
+                    if !viewModel.sortDescending { viewModel.toggleSortDirection() }
+                } label: {
+                    if viewModel.sortDescending {
+                        Label("Highest first", systemImage: "checkmark")
+                    } else {
+                        Text("Highest first")
+                    }
+                }
+                Button {
+                    if viewModel.sortDescending { viewModel.toggleSortDirection() }
+                } label: {
+                    if !viewModel.sortDescending {
+                        Label("Lowest first", systemImage: "checkmark")
+                    } else {
+                        Text("Lowest first")
+                    }
+                }
+            }
+
+            Section("Qualifier") {
+                ForEach(DashboardViewModel.QualifierLevel.allCases) { level in
+                    Button {
+                        viewModel.qualifierLevel = level
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    } label: {
+                        if level == viewModel.qualifierLevel {
+                            Label("\(level.rawValue) · \(level.description)", systemImage: "checkmark")
+                        } else {
+                            Text("\(level.rawValue) · \(level.description)")
+                        }
+                    }
+                }
+            }
+        } label: {
+            HStack(spacing: 4) {
+                Image(systemName: "line.3.horizontal.decrease.circle")
+                    .font(.system(size: 11, weight: .semibold))
+                Text("Filters")
+                    .font(SavantType.micro)
+                    .tracking(0.4)
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 9, weight: .bold))
+            }
+            .foregroundStyle(SavantPalette.inkSecondary)
+            .padding(.horizontal, 10)
+            .frame(height: 30)
+            .background(SavantPalette.surface)
+            .clipShape(Capsule())
+            .overlay(Capsule().stroke(SavantPalette.hairline, lineWidth: 0.5))
+        }
+        .menuOrder(.fixed)
+        .accessibilityLabel("Filters")
     }
 
     private var seasonMenu: some View {
@@ -177,70 +273,41 @@ struct DashboardView: View {
         .clipShape(Capsule())
     }
 
-    // Explicit, always-visible sort controls. The old design buried both the
-    // metric picker and the direction toggle inside a single Menu wrapping the
-    // whole table header — undiscoverable, and the menu was unreliable inside
-    // the ScrollView (the "no descending option" report). Now: a "Sort by"
-    // chip for the metric, and a direct tap-to-toggle on the header itself.
-    private var sortControlsRow: some View {
+    // Compact, centered indicator of the active sort, with the Filters menu
+    // sitting at the trailing edge. Picker + qualifier live in the menu;
+    // tapping the chip flips the direction inline.
+    private var activeSortChip: some View {
         HStack(spacing: 8) {
-            let metrics = viewModel.availableSortMetrics
-            if !metrics.isEmpty {
-                Menu {
-                    ForEach(metrics, id: \.self) { metric in
-                        Button {
-                            viewModel.setUserSortMetric(metric)
-                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                        } label: {
-                            if metric == viewModel.currentSortMetric {
-                                Label(metric, systemImage: "checkmark")
-                            } else {
-                                Text(metric)
-                            }
-                        }
-                    }
-                } label: {
-                    HStack(spacing: 4) {
-                        Text("Sort by")
-                            .font(SavantType.micro)
-                            .tracking(0.4)
-                            .foregroundStyle(SavantPalette.inkSecondary)
-                        Text(viewModel.currentSortMetric ?? viewModel.sortLabel)
-                            .font(SavantType.smallBold)
-                            .foregroundStyle(SavantPalette.ink)
-                        Image(systemName: "chevron.down")
-                            .font(.system(size: 9, weight: .bold))
-                            .foregroundStyle(SavantPalette.inkTertiary)
-                    }
-                    .padding(.horizontal, 12)
-                    .frame(height: 30)
-                    .background(SavantPalette.surface)
-                    .clipShape(Capsule())
-                    .overlay(Capsule().stroke(SavantPalette.hairline, lineWidth: 0.5))
-                }
-                .menuOrder(.fixed)
-            }
-
-            Spacer()
-
+            Spacer(minLength: 0)
             Button {
                 viewModel.toggleSortDirection()
                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
             } label: {
-                HStack(spacing: 4) {
+                HStack(spacing: 6) {
+                    Text("Sorted by")
+                        .font(SavantType.micro)
+                        .tracking(0.4)
+                        .foregroundStyle(SavantPalette.inkSecondary)
+                    Text(viewModel.currentSortMetric ?? viewModel.sortLabel)
+                        .font(SavantType.smallBold)
+                        .foregroundStyle(SavantPalette.ink)
                     Image(systemName: viewModel.sortDescending ? "arrow.down" : "arrow.up")
                         .font(.system(size: 10, weight: .bold))
+                        .foregroundStyle(SavantPalette.savantRed)
                     Text(viewModel.sortDescending ? "Highest first" : "Lowest first")
                         .font(SavantType.micro)
                         .tracking(0.4)
+                        .foregroundStyle(SavantPalette.inkSecondary)
                 }
-                .foregroundStyle(.white)
-                .padding(.horizontal, 12)
+                .padding(.horizontal, 14)
                 .frame(height: 30)
-                .background(SavantPalette.savantRed)
+                .background(SavantPalette.surface)
                 .clipShape(Capsule())
+                .overlay(Capsule().stroke(SavantPalette.hairline, lineWidth: 0.5))
             }
             .buttonStyle(.plain)
+            Spacer(minLength: 0)
+            filtersMenu
         }
         .padding(.horizontal, 12)
         .padding(.bottom, 8)

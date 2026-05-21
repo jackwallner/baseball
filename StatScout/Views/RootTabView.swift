@@ -23,21 +23,9 @@ struct RootTabView: View {
     }
 
     var body: some View {
-        TabView(selection: $selection) {
-            statsTab
-                .tabItem { Label("Stats", systemImage: "chart.bar.fill") }
-                .tag(0)
-
-            teamsTab
-                .tabItem { Label("Teams", systemImage: "shield.lefthalf.filled") }
-                .tag(1)
-
-            compareTab
-                .tabItem { Label("Compare", systemImage: "arrow.left.arrow.right") }
-                .tag(2)
-        }
-        .tint(SavantPalette.savantRed)
-        .sheet(isPresented: $showingAbout) {
+        tabView
+            .tint(SavantPalette.savantRed)
+            .sheet(isPresented: $showingAbout) {
             NavigationStack {
                 AboutView(lastUpdated: viewModel.lastUpdated)
                     .navigationTitle("About")
@@ -51,6 +39,43 @@ struct RootTabView: View {
                     }
             }
             .presentationDragIndicator(.visible)
+        }
+    }
+
+    @ViewBuilder
+    private var tabView: some View {
+        // iOS 26 adds a Liquid Glass floating tab bar that minimizes on
+        // scroll-down — adopt natively where available and fall back to the
+        // default tab bar everywhere else. No custom bar to maintain.
+        if #available(iOS 26.0, *) {
+            TabView(selection: $selection) {
+                statsTab
+                    .tabItem { Label("Stats", systemImage: "chart.bar.fill") }
+                    .tag(0)
+
+                teamsTab
+                    .tabItem { Label("Teams", systemImage: "shield.lefthalf.filled") }
+                    .tag(1)
+
+                compareTab
+                    .tabItem { Label("Compare", systemImage: "arrow.left.arrow.right") }
+                    .tag(2)
+            }
+            .tabBarMinimizeBehavior(.onScrollDown)
+        } else {
+            TabView(selection: $selection) {
+                statsTab
+                    .tabItem { Label("Stats", systemImage: "chart.bar.fill") }
+                    .tag(0)
+
+                teamsTab
+                    .tabItem { Label("Teams", systemImage: "shield.lefthalf.filled") }
+                    .tag(1)
+
+                compareTab
+                    .tabItem { Label("Compare", systemImage: "arrow.left.arrow.right") }
+                    .tag(2)
+            }
         }
     }
 
@@ -161,7 +186,10 @@ private struct StandardDestinations: ViewModifier {
                     hasLoadedHistorical: viewModel.hasLoadedHistorical,
                     historicalLoadingMessage: viewModel.loadingMessage,
                     historicalLoadingProgress: viewModel.loadingProgress,
-                    loadHistorical: { await viewModel.loadHistoricalIfNeeded() }
+                    loadHistorical: { await viewModel.loadHistoricalIfNeeded() },
+                    fetchGameLogs: { id, season in
+                        try await viewModel.fetchGameLogs(playerId: id, season: season)
+                    }
                 )
                     .modifier(SavantNavBar())
             }
