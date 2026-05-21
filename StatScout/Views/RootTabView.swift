@@ -198,7 +198,10 @@ private struct StandardDestinations: ViewModifier {
                     team: dest.abbr,
                     players: viewModel.players(forTeam: dest.abbr),
                     season: viewModel.selectedSeason,
-                    viewModel: viewModel
+                    viewModel: viewModel,
+                    fetchTeamGameLogs: { team, season, since in
+                        try await viewModel.fetchTeamGameLogs(team: team, season: season, sinceDate: since)
+                    }
                 )
                     .modifier(SavantNavBar())
             }

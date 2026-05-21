@@ -41,6 +41,7 @@
 		C0B5ED98CED5C19CF7179A7A /* PlayerGameLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52830F232CD201E1DAC22F7C /* PlayerGameLog.swift */; };
 		C2B134691749FA08C2DFDA6A /* CompareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 924C787B5EA5949F5BB19DF5 /* CompareView.swift */; };
 		C5718F0C8435928CBF995DE5 /* StatcastAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15914E954BD86B91C09E5C88 /* StatcastAPI.swift */; };
+		D13F5E714076E4346EF8F0EA /* TeamFormCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6029BCBF6CD96B24E1EF3DDB /* TeamFormCard.swift */; };
 		D3DAADB476B1D20557FF32A4 /* StatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372D20325E276F7B6CAA3798 /* StatsView.swift */; };
 		DBAED006FBC8ACCE2A4D49FD /* StoreService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F817C1759417F135E7CD20C2 /* StoreService.swift */; };
 		DE3E81E46D644C2617940B7E /* PlayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC2DEECB438987B32405C3A /* PlayerTests.swift */; };
@@ -88,6 +89,7 @@
 		5915A8F24A5447D26C221603 /* StatScout.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = StatScout.entitlements; sourceTree = "<group>"; };
 		5BC5EE3CB654E37FE99FE844 /* StatScoutComprehensiveUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatScoutComprehensiveUITests.swift; sourceTree = "<group>"; };
 		5DC2DEECB438987B32405C3A /* PlayerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerTests.swift; sourceTree = "<group>"; };
+		6029BCBF6CD96B24E1EF3DDB /* TeamFormCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamFormCard.swift; sourceTree = "<group>"; };
 		64CFDB4111B83AFFDDABB591 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		7021023A2FAE67C688618334 /* YearComparisonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YearComparisonView.swift; sourceTree = "<group>"; };
 		74A4C751088FF846CA40BB91 /* YearComparisonTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YearComparisonTests.swift; sourceTree = "<group>"; };
@@ -252,6 +254,7 @@
 				147A7B626DB00162FDED79EA /* SettingsView.swift */,
 				F9CBAD749A639F5A5ADCF10B /* StandardStatsLeadersView.swift */,
 				372D20325E276F7B6CAA3798 /* StatsView.swift */,
+				6029BCBF6CD96B24E1EF3DDB /* TeamFormCard.swift */,
 				93AB140AC9F51D7E0F0E2C6D /* TeamsView.swift */,
 				FCF08005AEA98F7CFF7919C6 /* TeamView.swift */,
 				227F1309E0C8906969049D9F /* TrialPitchSheet.swift */,
@@ -438,6 +441,7 @@
 				C5718F0C8435928CBF995DE5 /* StatcastAPI.swift in Sources */,
 				D3DAADB476B1D20557FF32A4 /* StatsView.swift in Sources */,
 				DBAED006FBC8ACCE2A4D49FD /* StoreService.swift in Sources */,
+				D13F5E714076E4346EF8F0EA /* TeamFormCard.swift in Sources */,
 				648F3040D95418DB26BE2EE1 /* TeamView.swift in Sources */,
 				03322BA439762FE028116ADC /* TeamsView.swift in Sources */,
 				530DACB92F83D8B251DD53FA /* TrialPitchSheet.swift in Sources */,

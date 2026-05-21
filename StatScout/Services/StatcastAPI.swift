@@ -5,6 +5,7 @@ protocol StatcastProviding: Sendable {
     func fetchHistoricalPlayers() async throws -> [Player]
     func fetchCurrentPlayers() async throws -> [Player]
     func fetchGameLogs(playerId: Int, season: Int) async throws -> [PlayerGameLog]
+    func fetchTeamGameLogs(team: String, season: Int, sinceDate: Date) async throws -> [PlayerGameLog]
 }
 
 struct StatcastAPI: StatcastProviding {
@@ -52,6 +53,47 @@ struct StatcastAPI: StatcastProviding {
 
         let rows = try JSONDecoder.statScout.decode([Lenient<PlayerGameLog>].self, from: data)
         return rows.compactMap(\.value)
+    }
+
+    func fetchTeamGameLogs(team: String, season: Int, sinceDate: Date) async throws -> [PlayerGameLog] {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.timeZone = TimeZone(identifier: "America/New_York")
+        let sinceString = formatter.string(from: sinceDate)
+
+        var all: [PlayerGameLog] = []
+        let pageSize = 1000
+        var offset = 0
+        while true {
+            let endpoint = baseURL
+                .appending(path: "rest/v1/player_game_logs")
+                .appending(queryItems: [
+                    URLQueryItem(name: "select", value: "*"),
+                    URLQueryItem(name: "team", value: "eq.\(team)"),
+                    URLQueryItem(name: "season", value: "eq.\(season)"),
+                    URLQueryItem(name: "game_date", value: "gte.\(sinceString)"),
+                    URLQueryItem(name: "order", value: "game_date.desc"),
+                    URLQueryItem(name: "limit", value: String(pageSize)),
+                    URLQueryItem(name: "offset", value: String(offset)),
+                ])
+            var request = URLRequest(url: endpoint, cachePolicy: .reloadIgnoringLocalCacheData)
+            request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+            request.setValue(apiKey, forHTTPHeaderField: "apikey")
+            request.setValue("application/json", forHTTPHeaderField: "Accept")
+
+            let (data, response) = try await URLSession.shared.data(for: request)
+            guard let httpResponse = response as? HTTPURLResponse,
+                  200..<300 ~= httpResponse.statusCode || httpResponse.statusCode == 206 else {
+                throw URLError(.badServerResponse)
+            }
+
+            let rows = try JSONDecoder.statScout.decode([Lenient<PlayerGameLog>].self, from: data)
+            let page = rows.compactMap(\.value)
+            all.append(contentsOf: page)
+            if rows.count < pageSize { break }
+            offset += pageSize
+        }
+        return all
     }
 
     private func fetchPlayers(seasonFilter: String) async throws -> [Player] {
@@ -124,6 +166,10 @@ struct PreviewStatcastAPI: StatcastProviding {
     }
 
     func fetchGameLogs(playerId: Int, season: Int) async throws -> [PlayerGameLog] {
+        []
+    }
+
+    func fetchTeamGameLogs(team: String, season: Int, sinceDate: Date) async throws -> [PlayerGameLog] {
         []
     }
 }

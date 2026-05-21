@@ -6,6 +6,7 @@ struct TeamView: View {
     let players: [Player]
     var season: Int? = nil
     var viewModel: DashboardViewModel? = nil
+    var fetchTeamGameLogs: ((String, Int, Date) async throws -> [PlayerGameLog])? = nil
     @State private var searchText = ""
     // Default to Hitting so the roster always shows a meaningful sort metric.
     // The old "All" tab is gone — without an active category every value
@@ -93,6 +94,17 @@ struct TeamView: View {
                         .padding(.horizontal, 12)
                         .padding(.top, 10)
                 }
+
+                TeamFormCard(
+                    team: team,
+                    season: displaySeason,
+                    fetchTeamGameLogs: fetchTeamGameLogs,
+                    onUpgradeTap: {
+                        if PaywallGate.shared.shouldPresent(.teamView) { showingPaywall = true }
+                    }
+                )
+                .padding(.horizontal, 12)
+                .padding(.top, 12)
 
                 // Hitting / Pitching / Fielding / Running only — the "All" tab
                 // was confusing (no sort metric → every value rendered "—") and
