@@ -42,6 +42,15 @@ jobs:
           set -o pipefail
           python backend/ingest.py 2>&1 | tee ingestion.log
 
+      - name: Run per-game ingestion (Recent Form data)
+        shell: bash
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          set -o pipefail
+          python backend/ingest_game_logs.py 2>&1 | tee game_logs_ingestion.log
+
       - name: Upload artifacts on failure
         if: failure()
         uses: actions/upload-artifact@v4
