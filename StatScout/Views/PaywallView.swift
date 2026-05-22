@@ -19,6 +19,8 @@ enum PaywallTrigger: Identifiable, Hashable {
     /// native/intentional, dismissible with "Maybe later", and gated by
     /// PaywallGate so it caps at 2 per session.
     case playerScouting
+    /// Soft pitch from the blurred Recent Form teaser on the leaderboard.
+    case recentForm
 
     var icon: String {
         switch self {
@@ -32,6 +34,7 @@ enum PaywallTrigger: Identifiable, Hashable {
         case .teamView:          return "shield.lefthalf.filled"
         case .winback:           return "arrow.counterclockwise.circle.fill"
         case .playerScouting:    return "binoculars.fill"
+        case .recentForm:        return "flame.fill"
         }
     }
 
@@ -47,6 +50,7 @@ enum PaywallTrigger: Identifiable, Hashable {
         case .teamView:          return "Team Insights"
         case .winback:           return "Welcome Back"
         case .playerScouting:    return "Full Player Scouting"
+        case .recentForm:        return "Recent Form"
         }
     }
 
@@ -72,6 +76,8 @@ enum PaywallTrigger: Identifiable, Hashable {
             return "Your Pro access has lapsed. Renew to get historical seasons, year-over-year trends, and head-to-head matchups back."
         case .playerScouting:
             return "See last 7 / 15 / 30 day form, stack players head-to-head, and scout every roster — the full picture, not just season totals."
+        case .recentForm:
+            return "See every player's last 7 / 15 / 30 day form — spot who's heating up or cooling off before the season totals catch up."
         }
     }
 }

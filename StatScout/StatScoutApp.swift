@@ -246,12 +246,11 @@ struct OnboardingCards: View {
         OnboardingPage(
             icon: "chart.bar.fill",
             title: "Find Insights\nFast",
-            description: "Four tabs cover every angle of the game. See what's happening across the league in seconds.",
+            description: "Three tabs cover every angle of the game. See what's happening across the league in seconds.",
             bullets: [
-                BulletItem(text: "Leaders — sort the league by any metric", icon: "checkmark.circle.fill", color: SavantPalette.savantRed),
-                BulletItem(text: "Teams — see who's hot, who's not", icon: "checkmark.circle.fill", color: SavantPalette.savantRed),
-                BulletItem(text: "Metrics — best & worst at each stat", icon: "checkmark.circle.fill", color: SavantPalette.savantRed),
-                BulletItem(text: "Stats — traditional numbers for the curious", icon: "checkmark.circle.fill", color: SavantPalette.savantRed)
+                BulletItem(text: "Stats — sort the league, leaders, best & worst", icon: "checkmark.circle.fill", color: SavantPalette.savantRed),
+                BulletItem(text: "Teams — browse any roster, see who's hot", icon: "checkmark.circle.fill", color: SavantPalette.savantRed),
+                BulletItem(text: "Compare — stack two players head-to-head", icon: "checkmark.circle.fill", color: SavantPalette.savantRed)
             ]
         )
     ]

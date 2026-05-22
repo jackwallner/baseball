@@ -1,13 +1,17 @@
 import SwiftUI
 
 /// Last 7 / 15 / 30 day rolling form for a single player. Pro-gated: free
-/// users see a blurred preview and an upgrade CTA. Loads game logs on
-/// appear, then computes window aggregates client-side so we don't pay a
-/// round-trip when the user switches windows.
+/// users see a blurred static teaser and an upgrade CTA — no game-log fetch.
+/// Pro users load game logs once, then compute window aggregates client-side
+/// so we don't pay a round-trip when the user switches windows.
 struct RecentFormCard: View {
     @EnvironmentObject private var store: StoreService
     let player: Player
     let season: Int
+    /// League pool used to build the value→percentile curve so the recent bar
+    /// sits on the same ruler as the season bar. Filtered to the player's type
+    /// at curve-build time.
+    let leaguePlayers: [Player]
     let fetchGameLogs: ((Int, Int) async throws -> [PlayerGameLog])?
     let onUpgradeTap: () -> Void
 
@@ -15,6 +19,7 @@ struct RecentFormCard: View {
     @State private var loading = false
     @State private var loadError: String?
     @State private var windowDays: Int = 15
+    @State private var curves: LeaguePercentileCurves?
 
     private var isPitcher: Bool {
         player.playerType == "pitcher"
@@ -53,6 +58,18 @@ struct RecentFormCard: View {
         .task(id: player.playerId) {
             await load()
         }
+        .onAppear { rebuildCurves() }
+        .onChange(of: leaguePlayers.count) { _, _ in rebuildCurves() }
+    }
+
+    private func rebuildCurves() {
+        guard store.isPro else { return }
+        let labels = ["xwOBA", "Barrel%", "Hard-Hit%", "EV", "K%", "BB%"]
+        curves = LeaguePercentileCurves(
+            players: leaguePlayers,
+            playerType: player.playerType ?? (isPitcher ? "pitcher" : "batter"),
+            labels: labels
+        )
     }
 
     private var header: some View {
@@ -124,12 +141,35 @@ struct RecentFormCard: View {
             proContent
         } else {
             ZStack {
-                proContent
+                teaserBody
                     .blur(radius: 6)
                     .disabled(true)
                     .allowsHitTesting(false)
                 upgradeOverlay
             }
+        }
+    }
+
+    /// Static, non-fetching preview for free users. No game logs are loaded —
+    /// these are illustrative bars in the season percentile format so the blur
+    /// reads as "real recent-form bars" without paying the network/battery cost.
+    private var teaserBody: some View {
+        let sample: [Metric] = [
+            Metric(id: "t_xwoba",   label: "xwOBA",     value: "0.412",    percentile: 94, category: .hitting),
+            Metric(id: "t_barrel",  label: "Barrel%",   value: "18.2%",    percentile: 88, category: .hitting),
+            Metric(id: "t_hardhit", label: "Hard-Hit%", value: "52.1%",    percentile: 81, category: .hitting),
+            Metric(id: "t_ev",      label: "EV",        value: "93.4 mph", percentile: 76, category: .hitting),
+        ]
+        return VStack(spacing: 0) {
+            HStack(spacing: 12) {
+                summaryStat(label: "G", value: "12")
+                summaryStat(label: isPitcher ? "BF" : "PA", value: "48")
+                if !isPitcher { summaryStat(label: "BBE", value: "31") }
+                Spacer(minLength: 0)
+            }
+            .padding(SavantGeo.padInline)
+
+            metricBarList(sample)
         }
     }
 
@@ -170,7 +210,7 @@ struct RecentFormCard: View {
     }
 
     private func statsBody(window w: RecentFormWindow) -> some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 0) {
             HStack(spacing: 12) {
                 summaryStat(label: "G", value: "\(w.games)")
                 summaryStat(label: isPitcher ? "BF" : "PA", value: "\(w.plateAppearances)")
@@ -189,10 +229,30 @@ struct RecentFormCard: View {
                         .clipShape(Capsule())
                 }
             }
+            .padding(SavantGeo.padInline)
 
-            metricsGrid(window: w)
+            metricBarList(recentMetricRows(window: w))
         }
-        .padding(SavantGeo.padInline)
+    }
+
+    /// Recent-window metrics rendered with the exact same `MetricBar` row used
+    /// on the season percentile card — same label/bar/value layout and the same
+    /// alternating row backgrounds — so recent form reads on the identical ruler.
+    private func metricBarList(_ rows: [Metric]) -> some View {
+        VStack(spacing: 0) {
+            ForEach(Array(rows.enumerated()), id: \.element.id) { index, metric in
+                MetricBar(metric: metric)
+                    .padding(.horizontal, SavantGeo.padCard)
+                    .padding(.vertical, 12)
+                    .background(index % 2 == 0 ? SavantPalette.surface : SavantPalette.surfaceAlt)
+                    .overlay(
+                        Rectangle()
+                            .fill(SavantPalette.divider)
+                            .frame(height: SavantGeo.hairline),
+                        alignment: .bottom
+                    )
+            }
+        }
     }
 
     private func summaryStat(label: String, value: String) -> some View {
@@ -207,108 +267,42 @@ struct RecentFormCard: View {
         }
     }
 
-    private func metricsGrid(window w: RecentFormWindow) -> some View {
-        let rows = metricRows(window: w)
-        return LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
-            ForEach(rows, id: \.label) { row in
-                metricCell(row: row)
-            }
-        }
-    }
+    /// Recent-window metrics mapped to `Metric` so they render with the season
+    /// `MetricBar`. The percentile is interpolated from the league season curve
+    /// (so the recent bar sits on the same ruler as the season card); the value
+    /// is the recent-window number. Skips metrics with no window data or no
+    /// curve so we never draw a bar we can't place.
+    private func recentMetricRows(window w: RecentFormWindow) -> [Metric] {
+        let category: MetricCategory = isPitcher ? .pitching : .hitting
+        let specs: [(key: String, label: String, seasonLabel: String, format: String)] = isPitcher
+            ? [
+                ("opp_xwoba",       "xwOBA",       "xwOBA",     "%.3f"),
+                ("k_pct",           "K%",          "K%",        "%.1f%%"),
+                ("bb_pct",          "BB%",         "BB%",       "%.1f%%"),
+                ("opp_hardhit_pct", "Hard-Hit%",   "Hard-Hit%", "%.1f%%"),
+                ("opp_barrel_pct",  "Barrel%",     "Barrel%",   "%.1f%%"),
+                ("opp_ev_avg",      "EV",          "EV",        "%.1f mph"),
+            ]
+            : [
+                ("xwoba",       "xwOBA",     "xwOBA",     "%.3f"),
+                ("barrel_pct",  "Barrel%",   "Barrel%",   "%.1f%%"),
+                ("hardhit_pct", "Hard-Hit%", "Hard-Hit%", "%.1f%%"),
+                ("ev_avg",      "EV",        "EV",        "%.1f mph"),
+                ("k_pct",       "K%",        "K%",        "%.1f%%"),
+                ("bb_pct",      "BB%",       "BB%",       "%.1f%%"),
+            ]
 
-    private func metricCell(row: MetricRow) -> some View {
-        VStack(alignment: .leading, spacing: 3) {
-            Text(row.label)
-                .font(SavantType.micro)
-                .tracking(0.4)
-                .foregroundStyle(SavantPalette.inkTertiary)
-            HStack(alignment: .firstTextBaseline, spacing: 6) {
-                Text(row.display)
-                    .font(SavantType.bodyBold)
-                    .foregroundStyle(SavantPalette.ink)
-                if let delta = row.deltaDisplay {
-                    Text(delta)
-                        .font(SavantType.micro)
-                        .tracking(0.3)
-                        .foregroundStyle(row.deltaColor)
-                }
-            }
+        return specs.compactMap { spec -> Metric? in
+            guard let v = w.metrics[spec.key],
+                  let pct = curves?.curve(for: spec.seasonLabel)?.percentile(for: v) else { return nil }
+            return Metric(
+                id: spec.key,
+                label: spec.label,
+                value: String(format: spec.format, v),
+                percentile: pct,
+                category: category
+            )
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, 10)
-        .padding(.vertical, 8)
-        .background(SavantPalette.surfaceAlt)
-        .clipShape(RoundedRectangle(cornerRadius: 8))
-    }
-
-    private struct MetricRow {
-        let label: String
-        let display: String
-        let deltaDisplay: String?
-        let deltaColor: Color
-    }
-
-    /// The set of metrics worth showing — same shape both sides of the ball,
-    /// just relabeled. Skips rows the window has no data for so we don't
-    /// render hollow cells.
-    private func metricRows(window w: RecentFormWindow) -> [MetricRow] {
-        if isPitcher {
-            return [
-                row(w, key: "opp_xwoba", label: "Opp xwOBA", seasonLabel: "xwOBA", format: "%.3f", lowerIsBetter: true),
-                row(w, key: "k_pct", label: "K%", seasonLabel: "K%", format: "%.1f%%", lowerIsBetter: false),
-                row(w, key: "bb_pct", label: "BB%", seasonLabel: "BB%", format: "%.1f%%", lowerIsBetter: true),
-                row(w, key: "opp_hardhit_pct", label: "Opp Hard-Hit%", seasonLabel: "Hard-Hit%", format: "%.1f%%", lowerIsBetter: true),
-                row(w, key: "opp_barrel_pct", label: "Opp Barrel%", seasonLabel: "Barrel%", format: "%.1f%%", lowerIsBetter: true),
-                row(w, key: "opp_ev_avg", label: "Opp EV", seasonLabel: "EV", format: "%.1f mph", lowerIsBetter: true),
-            ].compactMap { $0 }
-        } else {
-            return [
-                row(w, key: "xwoba", label: "xwOBA", seasonLabel: "xwOBA", format: "%.3f", lowerIsBetter: false),
-                row(w, key: "barrel_pct", label: "Barrel%", seasonLabel: "Barrel%", format: "%.1f%%", lowerIsBetter: false),
-                row(w, key: "hardhit_pct", label: "Hard-Hit%", seasonLabel: "Hard-Hit%", format: "%.1f%%", lowerIsBetter: false),
-                row(w, key: "ev_avg", label: "EV", seasonLabel: "EV", format: "%.1f mph", lowerIsBetter: false),
-                row(w, key: "k_pct", label: "K%", seasonLabel: "K%", format: "%.1f%%", lowerIsBetter: true),
-                row(w, key: "bb_pct", label: "BB%", seasonLabel: "BB%", format: "%.1f%%", lowerIsBetter: false),
-            ].compactMap { $0 }
-        }
-    }
-
-    private func row(_ w: RecentFormWindow, key: String, label: String, seasonLabel: String, format: String, lowerIsBetter: Bool) -> MetricRow? {
-        guard let value = w.metrics[key] else { return nil }
-        let display = formatValue(value, format: format)
-        let (deltaStr, deltaColor) = deltaFromSeason(seasonLabel: seasonLabel, recent: value, lowerIsBetter: lowerIsBetter)
-        return MetricRow(label: label, display: display, deltaDisplay: deltaStr, deltaColor: deltaColor)
-    }
-
-    private func formatValue(_ value: Double, format: String) -> String {
-        if format.contains("%%") {
-            // K%/BB%/Hard-Hit% etc come in as 0–100 already.
-            return String(format: format, value)
-        }
-        return String(format: format, value)
-    }
-
-    /// Compare the window value against the player's full-season value (the
-    /// number the user sees on the percentile card above). Direction-aware
-    /// coloring — for "lower is better" metrics like K%, a drop is green.
-    private func deltaFromSeason(seasonLabel: String, recent: Double, lowerIsBetter: Bool) -> (String?, Color) {
-        guard let metric = player.metrics.first(where: { $0.label == seasonLabel }),
-              let seasonRaw = DashboardViewModel.rawNumeric(metric.value) else {
-            return (nil, SavantPalette.inkTertiary)
-        }
-        let diff = recent - seasonRaw
-        guard abs(diff) > 0.001 else { return ("·", SavantPalette.inkTertiary) }
-        let isImprovement = lowerIsBetter ? diff < 0 : diff > 0
-        let color: Color = isImprovement ? .green : SavantPalette.savantRed
-        let sign = diff > 0 ? "+" : ""
-        // Match the value scale: percent metrics show 1 decimal; rate metrics 3.
-        let formatted: String
-        if seasonRaw >= 1 {
-            formatted = String(format: "%@%.1f", sign, diff)
-        } else {
-            formatted = String(format: "%@%.3f", sign, diff)
-        }
-        return (formatted, color)
     }
 
     private var upgradeOverlay: some View {
@@ -349,7 +343,8 @@ struct RecentFormCard: View {
     }
 
     private func load() async {
-        guard let fetch = fetchGameLogs else { return }
+        // Free users see a static teaser — no game-log fetch, no battery cost.
+        guard store.isPro, let fetch = fetchGameLogs else { return }
         loading = true
         loadError = nil
         do {

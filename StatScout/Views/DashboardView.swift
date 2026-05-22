@@ -85,11 +85,17 @@ struct DashboardView: View {
     // users can see at a glance how stale the leaderboard is.
     private var unifiedControlBar: some View {
         VStack(spacing: 8) {
-            freshnessStrip
-
-            if (viewModel.isLoading || viewModel.isHistoricalLoading) && !viewModel.players.isEmpty {
-                loadingStatusBar
+            // One fixed-height slot shared by the freshness caption and the
+            // loading strip so the header never jumps as loading toggles — the
+            // bar replaces the caption in place instead of pushing rows down.
+            ZStack {
+                if (viewModel.isLoading || viewModel.isHistoricalLoading) && !viewModel.players.isEmpty {
+                    loadingStatusBar
+                } else {
+                    freshnessStrip
+                }
             }
+            .frame(height: 34)
 
             HStack(spacing: 10) {
                 seasonMenu

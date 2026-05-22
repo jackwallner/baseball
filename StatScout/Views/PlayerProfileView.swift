@@ -19,6 +19,8 @@ struct PlayerProfileView: View {
     @State private var comparisonRoute: ComparisonRoute?
     @State private var showTrialPitch = false
 
+    private let profileOpenCountKey = "profileOpenCount"
+
     enum PlayerStatTab: String, CaseIterable {
         case statcast = "Percentiles"
         case standard = "Standard Stats"
@@ -151,7 +153,13 @@ struct PlayerProfileView: View {
             PlayerComparisonView(playerA: route.playerA, playerB: route.playerB)
         }
         .onAppear {
-            if !store.isPro, PaywallGate.shared.shouldPresent(.playerScouting) {
+            // Defer the first-impression pitch: a user verifying one stat from a
+            // group chat shouldn't hit a subscription story before scrolling a
+            // single row. Show it from the *second* profile open onward (Pro-only
+            // controls — Recent Form, past seasons, Compare — still pitch on tap).
+            let opens = UserDefaults.standard.integer(forKey: profileOpenCountKey) + 1
+            UserDefaults.standard.set(opens, forKey: profileOpenCountKey)
+            if !store.isPro, opens >= 2, PaywallGate.shared.shouldPresent(.playerScouting) {
                 showTrialPitch = true
             }
         }
@@ -235,8 +243,9 @@ struct PlayerProfileView: View {
             RecentFormCard(
                 player: player,
                 season: activeSeason ?? player.season ?? Calendar.current.component(.year, from: .now),
+                leaguePlayers: allPlayers,
                 fetchGameLogs: fetchGameLogs,
-                onUpgradeTap: { paywallTrigger = .playerScouting }
+                onUpgradeTap: { paywallTrigger = .recentForm }
             )
 
             if !store.isPro {

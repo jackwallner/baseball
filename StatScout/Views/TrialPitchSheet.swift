@@ -24,7 +24,7 @@ struct TrialPitchSheet: View {
     // history feature still get the time-shaped pitch.
     private var benefits: [Benefit] {
         switch trigger {
-        case .playerScouting, .upgrade, .onboarding, .activation:
+        case .playerScouting, .recentForm, .upgrade, .onboarding, .activation:
             return [
                 Benefit(icon: "flame.fill",
                         title: "Recent form",
