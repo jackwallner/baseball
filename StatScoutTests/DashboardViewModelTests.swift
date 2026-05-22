@@ -272,4 +272,14 @@ struct MockProvider: StatcastProviding, @unchecked Sendable {
         if let error { throw error }
         return players ?? []
     }
+
+    func fetchGameLogs(playerId: Int, season: Int) async throws -> [PlayerGameLog] {
+        if let error { throw error }
+        return []
+    }
+
+    func fetchTeamGameLogs(team: String, season: Int, sinceDate: Date) async throws -> [PlayerGameLog] {
+        if let error { throw error }
+        return []
+    }
 }

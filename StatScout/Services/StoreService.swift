@@ -235,6 +235,14 @@ final class StoreService: NSObject, ObservableObject {
     private override init() {}
 
     func start() {
+        #if DEBUG
+        // UI-test / local hook: force Pro so the gated surfaces (Recent Form,
+        // Compare) render without a sandbox purchase. Never compiled into Release.
+        if ProcessInfo.processInfo.environment["FORCE_PRO"] == "1" {
+            isPro = true
+            return
+        }
+        #endif
         configureIfNeeded()
         Task { await updateCustomerProductStatus(fetchPolicy: .fetchCurrent) }
         Task { await fetchProducts() }
