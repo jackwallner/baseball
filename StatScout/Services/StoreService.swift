@@ -186,6 +186,12 @@ final class StoreService: NSObject, ObservableObject {
     @Published private(set) var isLoadingProducts: Bool = false
     @Published private(set) var lastError: String?
 
+    /// Per-product intro-offer eligibility. Populated with `fetchProducts` so
+    /// trial copy only appears for users StoreKit will actually grant a trial.
+    @Published private(set) var introEligibility: [String: Bool] = [:]
+
+    private var paywallImpressionsThisSession: Set<String> = []
+
     var proPrice: String? {
         products.first(where: { $0.productKind == .lifetime })?.storeProduct.localizedPriceString
     }
@@ -195,7 +201,7 @@ final class StoreService: NSObject, ObservableObject {
     /// upsell emphasizes the low-friction option instead of the lifetime price.
     var paywallBlurCTA: String {
         if let yearly = products.first(where: { $0.productKind == .yearly }) {
-            if let trial = yearly.introOfferLabel {
+            if isEligibleForIntroOffer(yearly), let trial = yearly.introOfferLabel {
                 return "Start \(trial)"
             }
             return "Try Pro — \(yearly.priceLabel)"
@@ -210,8 +216,32 @@ final class StoreService: NSObject, ObservableObject {
     /// so the price after the trial isn't hidden.
     var paywallBlurSubtext: String? {
         guard let yearly = products.first(where: { $0.productKind == .yearly }),
+              isEligibleForIntroOffer(yearly),
               yearly.introOfferLabel != nil else { return nil }
         return "Then \(yearly.priceLabel). Cancel anytime."
+    }
+
+    /// True when this package advertises a free trial and the user is eligible.
+    /// Unknown eligibility resolves to true so a transient lookup failure does
+    /// not hide a trial the user likely qualifies for (Vitals pattern).
+    func isEligibleForIntroOffer(_ package: Package) -> Bool {
+        guard package.introOfferLabel != nil else { return false }
+        return introEligibility[package.storeProduct.productIdentifier] ?? true
+    }
+
+    /// Reports a custom-paywall impression to RevenueCat (required for native UI).
+    func trackPaywallImpression(id: String, oncePerSession: Bool = false) {
+        configureIfNeeded()
+        #if DEBUG
+        if ProcessInfo.processInfo.environment["FORCE_PRO"] == "1" { return }
+        #endif
+        if oncePerSession {
+            guard !paywallImpressionsThisSession.contains(id) else { return }
+            paywallImpressionsThisSession.insert(id)
+        }
+        Purchases.shared.trackCustomPaywallImpression(
+            CustomPaywallImpressionParams(paywallId: id)
+        )
     }
 
     /// True when the user once held a Pro entitlement that has since expired and
@@ -258,6 +288,7 @@ final class StoreService: NSObject, ObservableObject {
             currentOffering = offering
             products = offering?.sortedPackages ?? []
             lastError = nil
+            await refreshIntroEligibility()
         } catch {
             logger.error("Product fetch failed: \(String(describing: error), privacy: .public)")
             lastError = "Couldn't load subscription options. Check your connection and try again."
@@ -304,6 +335,18 @@ final class StoreService: NSObject, ObservableObject {
             logger.error("Restore failed: \(String(describing: error), privacy: .public)")
             lastError = "Couldn't restore purchases. Try again."
         }
+    }
+
+    private func refreshIntroEligibility() async {
+        let identifiers = products
+            .filter { $0.storeProduct.introductoryDiscount != nil }
+            .map(\.storeProduct.productIdentifier)
+        guard !identifiers.isEmpty else {
+            introEligibility = [:]
+            return
+        }
+        let result = await Purchases.shared.checkTrialOrIntroDiscountEligibility(productIdentifiers: identifiers)
+        introEligibility = result.mapValues { $0.status == .eligible }
     }
 
     func apply(customerInfo: CustomerInfo) {

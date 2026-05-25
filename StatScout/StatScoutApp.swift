@@ -98,7 +98,8 @@ struct OnboardingCards: View {
     }
 
     private var hasYearlyTrial: Bool {
-        yearlyPackage?.introOfferLabel != nil
+        guard let yearly = yearlyPackage else { return false }
+        return store.isEligibleForIntroOffer(yearly) && yearly.introOfferLabel != nil
     }
 
     private var proCTALabel: String {

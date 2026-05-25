@@ -283,7 +283,7 @@ struct YearComparisonView: View {
             // Delta (in percentile points)
             HStack(spacing: 2) {
                 Text(arrow)
-                    .font(.system(size: 12, weight: .bold))
+                    .font(SavantFont.condensed(12, weight: .bold))
                 Text("\(abs(item.change))%")
                     .font(SavantType.bodyBold)
             }

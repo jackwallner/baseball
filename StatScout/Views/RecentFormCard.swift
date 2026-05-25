@@ -140,12 +140,17 @@ struct RecentFormCard: View {
         if store.isPro {
             proContent
         } else {
-            ZStack {
+            ZStack(alignment: .bottom) {
                 teaserBody
-                    .blur(radius: 6)
+                    .blur(radius: 5)
                     .disabled(true)
                     .allowsHitTesting(false)
-                upgradeOverlay
+                BlurGateUnlock(
+                    headline: "See last 7 / 15 / 30 day form for any player",
+                    cta: store.paywallBlurCTA,
+                    subtext: store.paywallBlurSubtext,
+                    action: onUpgradeTap
+                )
             }
         }
     }
@@ -303,43 +308,6 @@ struct RecentFormCard: View {
                 category: category
             )
         }
-    }
-
-    private var upgradeOverlay: some View {
-        VStack(spacing: 10) {
-            Image(systemName: "flame.fill")
-                .font(.system(size: 26, weight: .bold))
-                .foregroundStyle(SavantPalette.savantRed)
-            Text("Recent Form is a Pro feature")
-                .font(SavantType.bodyBold)
-                .foregroundStyle(SavantPalette.ink)
-            Text("See last 7 / 15 / 30 day splits for any player — spot hot streaks and slumps before anyone else.")
-                .font(SavantType.small)
-                .foregroundStyle(SavantPalette.inkSecondary)
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
-                .padding(.horizontal, 20)
-
-            Button(action: onUpgradeTap) {
-                HStack(spacing: 6) {
-                    Image(systemName: "crown.fill")
-                        .font(.system(size: 11))
-                    Text("Unlock with Pro")
-                        .font(SavantType.bodyBold)
-                }
-                .foregroundStyle(.white)
-                .padding(.horizontal, 18)
-                .frame(height: 42)
-                .background(SavantPalette.savantRed)
-                .clipShape(Capsule())
-            }
-            .buttonStyle(.plain)
-        }
-        .padding(20)
-        .background(.ultraThinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .padding(.horizontal, 20)
-        .padding(.vertical, 14)
     }
 
     private func load() async {

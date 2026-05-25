@@ -17,3 +17,13 @@ supabase/.temp/
 *.bak
 .commandcode/
 archive_output.log
+
+# Scratch video-analysis artifacts (too large / not source)
+video_to_analyze.mp4
+video_compressed.mp4
+video_audio.mp3
+video_frames/
+.stale_screenshots_backup_*/
+
+# Claude Code runtime
+.claude/scheduled_tasks.lock

@@ -2,8 +2,8 @@ import SwiftUI
 
 /// Native, Apple-Health-"Vitals"-style trial pitch. A focused, friendly
 /// pre-paywall: hero glyph, headline, feature bullets, one prominent CTA,
-/// and the trial fine print. The CTA hands off to the RevenueCat
-/// `PaywallView` for the actual transaction so we never reimplement purchase.
+/// and the trial fine print. The CTA hands off to the native `PaywallView`
+/// for the actual transaction.
 struct TrialPitchSheet: View {
     @EnvironmentObject private var store: StoreService
     @Environment(\.dismiss) private var dismiss
@@ -85,6 +85,7 @@ struct TrialPitchSheet: View {
         // half-sheet would auto-present on every player open.
         .onAppear { PaywallGate.shared.markPresented(trigger) }
         .task {
+            store.trackPaywallImpression(id: "statscout_trial_sheet")
             if store.currentOffering == nil { await store.fetchProducts() }
         }
         .onChange(of: store.isPro) { _, isPro in

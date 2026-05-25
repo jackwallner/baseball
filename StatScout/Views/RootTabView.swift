@@ -42,40 +42,22 @@ struct RootTabView: View {
         }
     }
 
-    @ViewBuilder
     private var tabView: some View {
-        // iOS 26 adds a Liquid Glass floating tab bar that minimizes on
-        // scroll-down — adopt natively where available and fall back to the
-        // default tab bar everywhere else. No custom bar to maintain.
-        if #available(iOS 26.0, *) {
-            TabView(selection: $selection) {
-                statsTab
-                    .tabItem { Label("Stats", systemImage: "chart.bar.fill") }
-                    .tag(0)
+        // iOS 26 renders a Liquid Glass floating tab bar. We deliberately do
+        // NOT adopt `.tabBarMinimizeBehavior` — the collapse-on-scroll felt
+        // unpredictable, so the bar stays put at all times.
+        TabView(selection: $selection) {
+            statsTab
+                .tabItem { Label("Stats", systemImage: "chart.bar.fill") }
+                .tag(0)
 
-                teamsTab
-                    .tabItem { Label("Teams", systemImage: "shield.lefthalf.filled") }
-                    .tag(1)
+            teamsTab
+                .tabItem { Label("Teams", systemImage: "shield.lefthalf.filled") }
+                .tag(1)
 
-                compareTab
-                    .tabItem { Label("Compare", systemImage: "arrow.left.arrow.right") }
-                    .tag(2)
-            }
-            .tabBarMinimizeBehavior(.onScrollDown)
-        } else {
-            TabView(selection: $selection) {
-                statsTab
-                    .tabItem { Label("Stats", systemImage: "chart.bar.fill") }
-                    .tag(0)
-
-                teamsTab
-                    .tabItem { Label("Teams", systemImage: "shield.lefthalf.filled") }
-                    .tag(1)
-
-                compareTab
-                    .tabItem { Label("Compare", systemImage: "arrow.left.arrow.right") }
-                    .tag(2)
-            }
+            compareTab
+                .tabItem { Label("Compare", systemImage: "arrow.left.arrow.right") }
+                .tag(2)
         }
     }
 
@@ -135,7 +117,12 @@ private struct ProToolbarButton: ViewModifier {
     /// the CTA unambiguous, and the trial-aware label appears when an intro
     /// offer is available.
     private var ctaLabel: String {
-        store.products.contains(where: { $0.introOfferLabel != nil }) ? "Try Pro" : "Get Pro"
+        if let yearly = store.products.first(where: { $0.productKind == .yearly }),
+           store.isEligibleForIntroOffer(yearly),
+           yearly.introOfferLabel != nil {
+            return "Try Pro"
+        }
+        return "Get Pro"
     }
 
     func body(content: Content) -> some View {

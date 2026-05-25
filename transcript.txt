@@ -1,0 +1,68 @@
+[0.00 - 6.12]  Just video and be talking through how I debug my app through this workflow of
+[6.12 - 11.36]  reviewing a screen recording and going through the app. So I'm going to be
+[11.36 - 19.64]  starting here by going to the baseball app. So I have it here, baseball savvy
+[19.64 - 24.28]  stats scout. Go ahead and get that installed and we're going to go through the
+[24.28 - 30.76]  full onboarding flow and basically identify every part of the app that I want
+[30.76 - 35.32]  to test and audio narrate the problems and things that I think could be
+[35.32 - 41.32]  improved or where I want the AI to focus on fixing. So once we get it
+[41.32 - 45.24]  downloaded here, we've got our onboarding flow, got skip up in the top right.
+[45.24 - 51.52]  This looks fine but it's pretty bland so I really would like if this was more
+[51.52 - 59.44]  stat baseball subcontent themed stat cast component. We can't use that
+[59.44 - 64.24]  directly but we can use with the color scheme and the bars and make it look
+[64.24 - 70.44]  like more of the stat cast baseball subcontent apps and flow so people know
+[70.44 - 73.28]  what they're getting. But this does have the right information which is good
+[73.28 - 79.92]  and AI loves word signals that's removed all signals and make a rule to never
+[79.92 - 85.20]  use signals again because it looks silly but that looks the right idea and
+[85.20 - 90.94]  free cover today. Pro and lots of trends again kind of AI slop work for a
+[90.94 - 96.04]  bitch there. We really want to have something that offers the Pro at this point
+[96.04 - 100.64]  you know some sort of soft paywall not required but some sort of pitch here of
+[100.64 - 104.76]  that being an option if this person interested because they're most often the
+[104.76 - 107.16]  most interested when they download the app they're so we're going to click play
+[107.32 - 112.88]  ball and we can go ahead and see the data here which is awesome. It does seem
+[112.88 - 119.04]  like the app was last updated yesterday at 6.04 am so that is either that should
+[119.04 - 124.76]  be wrong. We either have the something wrong with the data backup or that
+[124.76 - 128.96]  date hasn't refreshed because it should be every night gets refreshed here.
+[128.96 - 136.24]  Great we've got this here. Pratt past seasons required. Awesome we see this.
+[136.80 - 144.72]  The monthly yearly and lifetime numbers are wrong there. If we click start free
+[144.72 - 149.20]  trial we should get this brought up. Great you can actually see the information
+[149.20 - 154.56]  that it should be. Similarly here great if I click this doesn't move this
+[154.56 - 162.84]  selection there which is weird and similarly this lifetime I guess just gave
+[162.84 - 169.68]  it to me so something weird there to make sure that I was supposed to get
+[169.68 - 175.68]  that. I did purchase this or do a test purchase before so that makes sense.
+[175.68 - 180.32]  Here we can see all the players which is awesome. Great we can sort by there. I
+[180.32 - 184.04]  would like an option to change this sort by which is great I can see that here
+[184.04 - 190.40]  but also go up or down right now it just has that sort but awesome I can see the
+[190.40 - 196.12]  best players at every place with this. It's kind of weird how the header bar
+[196.12 - 203.56]  like changes there and it's kind of odd. It doesn't need to do that I can try
+[203.56 - 209.28]  searching for a player. Great I can click in that player see their data. Let me go
+[209.28 - 216.84]  to 2025 see the difference there. Year compare 2026 to 2025. This screen could
+[216.84 - 221.36]  use some work. It looks a bit silly. There's some good information here but it's
+[221.36 - 225.96]  a little hard to read so some sort of cool like overlay or showing the delta
+[225.96 - 231.48]  difference the two stats bars there and the difference overall change we can't
+[231.48 - 234.88]  just say all these stats are the same so we don't want to be doing that. This
+[234.88 - 239.92]  I should really compare with someone doesn't really work I'm guessing because
+[239.92 - 244.44]  the years are different but the right idea there that should just actually work
+[244.44 - 248.88]  and similarly here I should be able to load this up and go to his page perfect.
+[248.88 - 254.08]  That looks great. If I go to Teams there seems to be some bug when I first go to
+[254.08 - 259.44]  Teams that it initializes and bugs out here so need to make sure that we're
+[259.44 - 264.24]  having some sort of loading screens so we're not just bugging out I'm guessing
+[264.24 - 267.40]  that it's loading all these teams at once but we really only need to load the
+[267.40 - 272.28]  team that we actually want to see so we'll go to the Mariners there perfect can
+[272.28 - 276.96]  click around awesome have a great year can see the standard stats excellent.
+[276.96 - 286.40]  That looks great and I can star a team that I want to see and looks like
+[286.40 - 294.64]  when I do that it also freezes so starring a team freezes so need to fix that and
+[294.64 - 299.24]  looks like I might actually crash the app to star a team which is kind of crazy.
+[299.24 - 305.12]  We'll go to there come back good test to see what loading the app the second
+[305.12 - 312.52]  time works here here's an option to share since I'm recording I guess I can
+[312.52 - 321.32]  share it's fine I'm not really caring about this because it'll get it and here are
+[321.32 - 326.16]  stats here as well stats and metrics kind of seem silly so we
+[326.16 - 332.84]  probably should reward those to be a little different one way to see standard
+[332.84 - 343.28]  stats and stats out stat cast stats there and click in here one big little more
+[343.28 - 349.92]  obvious that if I click into one of these things I can see the highest or lowest see
+[349.92 - 357.00]  the players that are worse but still teams loads really poorly on that there so
+[357.00 - 363.00]  good to know and then it would also be nice to be able to set a on the metrics
+[363.00 - 368.56]  some sort of minimum qualification component and that way I'm not getting
+[368.56 - 372.76]  overblown with people that haven't played before so some optimization that
+[372.76 - 377.80]  needs to be done there but overall just some bug fixes the main core
+[377.80 - 381.80]  functionality is there and it looks like the pro features are doing well which
+[381.80 - 384.04]  is great

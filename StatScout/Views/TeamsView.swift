@@ -66,10 +66,6 @@ struct TeamsView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
-                seasonHeader
-                    .padding(.horizontal, 12)
-                    .padding(.bottom, 8)
-
                 if isInitiallyLoading {
                     teamsLoadingState
                 } else {
@@ -81,6 +77,9 @@ struct TeamsView: View {
         .scrollBounceBehavior(.basedOnSize)
         .background(SavantPalette.canvas.ignoresSafeArea())
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) { seasonMenu }
+        }
         .refreshable {
             await viewModel.load()
         }
@@ -133,24 +132,9 @@ struct TeamsView: View {
         .redacted(reason: .placeholder)
     }
 
-    private var seasonHeader: some View {
-        HStack {
-            seasonMenu
-            Spacer()
-            Text("\(filteredTeams.count) teams")
-                .font(SavantType.small)
-                .foregroundStyle(SavantPalette.inkTertiary)
-        }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 10)
-        .background(SavantPalette.surface)
-        .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
-        .overlay(
-            RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
-                .stroke(SavantPalette.hairline, lineWidth: 0.5)
-        )
-    }
-
+    // Nav-bar season selector — matches the Stats tab: a compact red pill with
+    // calendar + year, sitting on the navy bar. Replaces the old in-content
+    // season header card so Teams and Stats read the same.
     private var seasonMenu: some View {
         Menu {
             if viewModel.isHistoricalLoading {
@@ -187,30 +171,34 @@ struct TeamsView: View {
                 }
             }
         } label: {
-            HStack(spacing: 6) {
+            HStack(spacing: 5) {
                 Image(systemName: "calendar")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(SavantPalette.savantRed)
-                Text("Season")
-                    .font(SavantType.micro)
-                    .tracking(0.5)
-                    .foregroundStyle(SavantPalette.inkSecondary)
+                    .font(.system(size: 11, weight: .semibold))
                 Text(String(viewModel.selectedSeason))
-                    .font(SavantType.bodyBold)
-                    .foregroundStyle(SavantPalette.ink)
+                    .font(SavantType.smallBold)
                 Image(systemName: "chevron.down")
-                    .font(.system(size: 10, weight: .bold))
-                    .foregroundStyle(SavantPalette.inkTertiary)
+                    .font(.system(size: 9, weight: .bold))
             }
+            .foregroundStyle(.white)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
+            .background(SavantPalette.savantRed)
+            .clipShape(Capsule())
         }
         .menuOrder(.fixed)
+        .accessibilityLabel("Season")
+        .accessibilityValue(String(viewModel.selectedSeason))
     }
 
     private var allTeamsSection: some View {
         VStack(spacing: 0) {
             SavantSectionBar(
                 title: "TEAMS",
-                trailing: searchText.isEmpty ? nil : AnyView(
+                trailing: searchText.isEmpty ? AnyView(
+                    Text("\(filteredTeams.count) teams")
+                        .font(SavantType.micro)
+                        .foregroundStyle(SavantPalette.inkTertiary)
+                ) : AnyView(
                     Button(action: { searchText = "" }) {
                         Text("Clear")
                             .font(SavantType.micro)

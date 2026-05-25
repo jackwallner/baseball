@@ -155,12 +155,17 @@ struct TeamFormCard: View {
         if store.isPro {
             proContent
         } else {
-            ZStack {
+            ZStack(alignment: .bottom) {
                 proContent
-                    .blur(radius: 6)
+                    .blur(radius: 5)
                     .disabled(true)
                     .allowsHitTesting(false)
-                upgradeOverlay
+                BlurGateUnlock(
+                    headline: "See every team's last 7 / 15 / 30 day form",
+                    cta: store.paywallBlurCTA,
+                    subtext: store.paywallBlurSubtext,
+                    action: onUpgradeTap
+                )
             }
         }
     }
@@ -295,43 +300,6 @@ struct TeamFormCard: View {
     private func cell(_ w: RecentFormWindow, key: String, label: String, format: String) -> MetricRow? {
         guard let v = w.metrics[key] else { return nil }
         return MetricRow(label: label, display: String(format: format, v))
-    }
-
-    private var upgradeOverlay: some View {
-        VStack(spacing: 10) {
-            Image(systemName: "flame.fill")
-                .font(.system(size: 26, weight: .bold))
-                .foregroundStyle(SavantPalette.savantRed)
-            Text("Team Recent Form is a Pro feature")
-                .font(SavantType.bodyBold)
-                .foregroundStyle(SavantPalette.ink)
-            Text("See how every team is hitting and pitching over the last 7 / 15 / 30 days — spot hot rosters and slumping staffs.")
-                .font(SavantType.small)
-                .foregroundStyle(SavantPalette.inkSecondary)
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
-                .padding(.horizontal, 20)
-
-            Button(action: onUpgradeTap) {
-                HStack(spacing: 6) {
-                    Image(systemName: "crown.fill")
-                        .font(.system(size: 11))
-                    Text("Unlock with Pro")
-                        .font(SavantType.bodyBold)
-                }
-                .foregroundStyle(.white)
-                .padding(.horizontal, 18)
-                .frame(height: 42)
-                .background(SavantPalette.savantRed)
-                .clipShape(Capsule())
-            }
-            .buttonStyle(.plain)
-        }
-        .padding(20)
-        .background(.ultraThinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .padding(.horizontal, 20)
-        .padding(.vertical, 14)
     }
 
     private func load() async {

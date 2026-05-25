@@ -5,23 +5,31 @@ struct DashboardView: View {
     @Bindable var viewModel: DashboardViewModel
     @State private var showingAbout = false
     @State private var paywallTrigger: PaywallTrigger?
+    @State private var isSearching = false
 
     var body: some View {
         ZStack {
             ScrollView {
                 LazyVStack(spacing: 0, pinnedViews: []) {
                     unifiedControlBar
-                    if !viewModel.leaderboard.isEmpty {
+                    if !viewModel.players.isEmpty {
                         activeSortChip
+                        if isSearching || !viewModel.searchText.isEmpty {
+                            searchRow
+                        }
                     }
                     leaderboardSection
                     if !viewModel.players.isEmpty {
                         aboutFooter
                     }
+                    // Lets the leaderboard scroll through the floating tab bar instead of
+                    // stopping above it with canvas gray showing underneath the glass pill.
+                    Color.clear.frame(height: 88)
                 }
             }
             .scrollBounceBehavior(.basedOnSize)
             .scrollDismissesKeyboard(.interactively)
+            .scrollClipDisabled()
             .refreshable {
                 await viewModel.load()
             }
@@ -29,7 +37,8 @@ struct DashboardView: View {
                 loadingCard
             }
         }
-        .background(SavantPalette.canvas.ignoresSafeArea())
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(SavantPalette.canvas)
         .sheet(isPresented: $showingAbout) {
             NavigationStack {
                 AboutView(lastUpdated: viewModel.lastUpdated)
@@ -79,60 +88,21 @@ struct DashboardView: View {
         .padding(.vertical, 8)
     }
 
-    // Two-row header: season + search up top, category + Filters menu below.
-    // The Filters menu hides qualifier and sort controls behind one button so
-    // the surface stays calm. Data freshness sits above as a thin caption so
-    // users can see at a glance how stale the leaderboard is.
+    // Category tabs are the only persistent header row now — season lives in
+    // the nav bar, search collapses behind an icon, and sort/qualifier sit in
+    // the controls row below. A loading strip animates in above the tabs only
+    // while data is refreshing, so the header never reserves empty space.
     private var unifiedControlBar: some View {
         VStack(spacing: 8) {
-            // One fixed-height slot shared by the freshness caption and the
-            // loading strip so the header never jumps as loading toggles — the
-            // bar replaces the caption in place instead of pushing rows down.
-            ZStack {
-                if (viewModel.isLoading || viewModel.isHistoricalLoading) && !viewModel.players.isEmpty {
-                    loadingStatusBar
-                } else {
-                    freshnessStrip
-                }
+            if (viewModel.isLoading || viewModel.isHistoricalLoading) && !viewModel.players.isEmpty {
+                loadingStatusBar
+                    .transition(.move(edge: .top).combined(with: .opacity))
             }
-            .frame(height: 34)
-
-            HStack(spacing: 10) {
-                seasonMenu
-                Spacer()
-                SearchField(text: $viewModel.searchText)
-                    .layoutPriority(1)
-            }
-            .padding(.horizontal, 12)
 
             CategoryFilter(selectedCategory: $viewModel.selectedCategory)
                 .padding(.horizontal, 12)
         }
-        .padding(.top, 4)
-    }
-
-    private var freshnessStrip: some View {
-        HStack(spacing: 6) {
-            Spacer()
-            Image(systemName: "arrow.clockwise")
-                .font(.system(size: 9, weight: .semibold))
-                .foregroundStyle(SavantPalette.inkTertiary)
-            Text(freshnessLabel)
-                .font(SavantType.micro)
-                .tracking(0.3)
-                .foregroundStyle(SavantPalette.inkTertiary)
-            Spacer()
-        }
-        .padding(.horizontal, 12)
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("Data \(freshnessLabel)")
-    }
-
-    private var freshnessLabel: String {
-        guard let lastUpdated = viewModel.lastUpdated else { return "Data not yet loaded" }
-        let formatter = RelativeDateTimeFormatter()
-        formatter.unitsStyle = .full
-        return "Updated \(formatter.localizedString(for: lastUpdated, relativeTo: .now))"
+        .padding(.top, 8)
     }
 
     // Single button that hosts every secondary control — qualifier scope plus
@@ -211,112 +181,78 @@ struct DashboardView: View {
         .accessibilityLabel("Filters")
     }
 
-    private var seasonMenu: some View {
-        Menu {
-            if viewModel.isHistoricalLoading {
-                Label("Loading past seasons…", systemImage: "hourglass")
-            } else if !viewModel.hasLoadedHistorical {
-                Button {
-                    if store.isPro {
-                        Task { await viewModel.loadHistoricalIfNeeded() }
-                    } else if PaywallGate.shared.shouldPresent(.pastSeasonsLoad) {
-                        paywallTrigger = .pastSeasonsLoad
-                    }
-                } label: {
-                    Label(store.isPro ? "Load past seasons" : "Past seasons require Pro", systemImage: store.isPro ? "clock.arrow.circlepath" : "crown.fill")
-                }
-            }
-            ForEach(viewModel.availableSeasons, id: \.self) { season in
-                let isLocked = viewModel.isSeasonLocked(season)
-                Button {
-                    if isLocked {
-                        if PaywallGate.shared.shouldPresent(.pastSeason) { paywallTrigger = .pastSeason }
-                    } else {
-                        viewModel.selectedSeason = season
-                    }
-                } label: {
-                    HStack {
-                        Text(String(season))
-                        if isLocked {
-                            Image(systemName: "crown.fill")
-                                .font(.system(size: 10))
-                                .foregroundStyle(SavantPalette.inkTertiary)
-                        }
-                    }
-                }
-            }
-        } label: {
-            seasonMenuLabel
-        }
-        .menuOrder(.fixed)
-        .fixedSize()
-        .accessibilityLabel("Season")
-        .accessibilityValue(String(viewModel.selectedSeason))
-        .accessibilityHint("Choose which season's stats to view")
-    }
-
-    private var seasonMenuLabel: some View {
-        HStack(spacing: 6) {
-            Image(systemName: "calendar")
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(.white.opacity(0.9))
-            Text("Season")
-                .font(SavantType.micro)
-                .tracking(0.5)
-                .foregroundStyle(.white.opacity(0.85))
-                .lineLimit(1)
-            Text(String(viewModel.selectedSeason))
-                .font(SavantType.bodyBold)
-                .foregroundStyle(.white)
-                .lineLimit(1)
-            Image(systemName: "chevron.down")
-                .font(.system(size: 10, weight: .bold))
-                .foregroundStyle(.white.opacity(0.85))
-        }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 9)
-        .background(SavantPalette.savantRed)
-        .clipShape(Capsule())
-    }
-
-    // Compact, centered indicator of the active sort, with the Filters menu
-    // sitting at the trailing edge. Picker + qualifier live in the menu;
-    // tapping the chip flips the direction inline.
+    // Compact sort chip on the left (tap to flip direction), then a search
+    // toggle and the Filters menu trailing. The column header in the table
+    // acts as the live sort indicator, so the chip stays terse — no
+    // "Sorted by"/"Highest first" narration.
     private var activeSortChip: some View {
         HStack(spacing: 8) {
-            Spacer(minLength: 0)
             Button {
                 viewModel.toggleSortDirection()
                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
             } label: {
                 HStack(spacing: 6) {
-                    Text("Sorted by")
-                        .font(SavantType.micro)
-                        .tracking(0.4)
-                        .foregroundStyle(SavantPalette.inkSecondary)
                     Text(viewModel.currentSortMetric ?? viewModel.sortLabel)
                         .font(SavantType.smallBold)
                         .foregroundStyle(SavantPalette.ink)
                     Image(systemName: viewModel.sortDescending ? "arrow.down" : "arrow.up")
                         .font(.system(size: 10, weight: .bold))
                         .foregroundStyle(SavantPalette.savantRed)
-                    Text(viewModel.sortDescending ? "Highest first" : "Lowest first")
-                        .font(SavantType.micro)
-                        .tracking(0.4)
-                        .foregroundStyle(SavantPalette.inkSecondary)
                 }
-                .padding(.horizontal, 14)
+                .padding(.horizontal, 12)
                 .frame(height: 30)
                 .background(SavantPalette.surface)
                 .clipShape(Capsule())
                 .overlay(Capsule().stroke(SavantPalette.hairline, lineWidth: 0.5))
             }
             .buttonStyle(.plain)
+            .accessibilityLabel("Sorted by \(viewModel.currentSortMetric ?? viewModel.sortLabel), \(viewModel.sortDescending ? "highest first" : "lowest first")")
+            .accessibilityHint("Tap to flip sort direction")
             Spacer(minLength: 0)
+            searchToggle
             filtersMenu
         }
         .padding(.horizontal, 12)
-        .padding(.bottom, 8)
+        .padding(.top, 8)
+    }
+
+    // Magnifier that expands the inline search row. When a query is active it
+    // stays visually "on" so the user knows results are filtered.
+    private var searchToggle: some View {
+        Button {
+            withAnimation(.easeInOut(duration: 0.2)) { isSearching.toggle() }
+            if !isSearching { viewModel.searchText = "" }
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        } label: {
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(isActiveSearch ? .white : SavantPalette.inkSecondary)
+                .frame(width: 30, height: 30)
+                .background(isActiveSearch ? SavantPalette.savantRed : SavantPalette.surface)
+                .clipShape(Capsule())
+                .overlay(Capsule().stroke(isActiveSearch ? Color.clear : SavantPalette.hairline, lineWidth: 0.5))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Search")
+    }
+
+    private var isActiveSearch: Bool { isSearching || !viewModel.searchText.isEmpty }
+
+    private var searchRow: some View {
+        HStack(spacing: 8) {
+            SearchField(text: $viewModel.searchText, focusOnAppear: true)
+            Button("Cancel") {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    isSearching = false
+                    viewModel.searchText = ""
+                }
+            }
+            .font(SavantType.small)
+            .foregroundStyle(SavantPalette.savantRed)
+        }
+        .padding(.horizontal, 12)
+        .padding(.top, 8)
+        .transition(.move(edge: .top).combined(with: .opacity))
     }
 
     private var sortHeader: some View {
@@ -390,7 +326,7 @@ struct DashboardView: View {
                 .stroke(SavantPalette.hairline, lineWidth: 0.5)
         )
         .padding(.horizontal, 12)
-        .padding(.top, 12)
+        .padding(.top, 8)
         .padding(.bottom, 12)
     }
 

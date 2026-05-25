@@ -11,7 +11,7 @@ struct PlayerHeadshot: View {
         ZStack {
             Circle().fill(MLBTeamColor.color(team))
             Text(initials)
-                .font(.system(size: size * 0.38, weight: .bold))
+                .font(SavantFont.condensed(size * 0.38, weight: .bold))
                 .foregroundStyle(.white)
         }
         .frame(width: size, height: size)
@@ -144,7 +144,7 @@ struct MetricBar: View {
                             .frame(width: circleSize, height: circleSize)
 
                         Text("\(percentileValue)")
-                            .font(.system(size: 11, weight: .bold))
+                            .font(SavantFont.mono(11, weight: .bold))
                             .foregroundStyle(percentileValue >= 35 && percentileValue <= 75 ? SavantPalette.ink : .white)
                             .shadow(color: percentileValue >= 35 && percentileValue <= 75 ? Color.clear : Color.black.opacity(0.3), radius: 1, x: 0, y: 0.5)
                     }
@@ -175,6 +175,8 @@ struct MetricBar: View {
 
 struct SearchField: View {
     @Binding var text: String
+    var focusOnAppear: Bool = false
+    @FocusState private var isFocused: Bool
 
     var body: some View {
         HStack(spacing: 10) {
@@ -190,6 +192,12 @@ struct SearchField: View {
                 TextField("", text: $text)
                     .textInputAutocapitalization(.never)
                     .foregroundStyle(SavantPalette.ink)
+                    .focused($isFocused)
+            }
+        }
+        .onAppear {
+            if focusOnAppear {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { isFocused = true }
             }
         }
         .padding(.horizontal, 12)
@@ -447,7 +455,7 @@ struct LeaderboardTableRow: View {
     }
 
     private var displayPercentile: Int {
-        displayMetric?.percentile ?? player.overallPercentile
+        displayMetric?.percentile ?? 0
     }
 
     // Raw stat value only — never the percentile. The colored bar to the left
@@ -494,21 +502,89 @@ struct LeaderboardTableRow: View {
             .frame(width: 44, alignment: .leading)
 
             HStack(spacing: 8) {
-                PercentileBarMini(percentile: displayPercentile)
-                    .frame(width: 36)
-                Text(displayValueText)
-                    .font(SavantType.statSmall)
-                    .foregroundStyle(SavantPalette.color(forPercentile: displayPercentile))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-                    .frame(width: 48, alignment: .trailing)
-                    .monospacedDigit()
+                // A player without the sorted metric gets no bar — drawing one
+                // from their overall percentile would mislabel a different number
+                // as this column's stat. Show a muted "—" instead.
+                if displayMetric != nil {
+                    PercentileBarMini(percentile: displayPercentile)
+                        .frame(width: 36)
+                    Text(displayValueText)
+                        .font(SavantType.statSmall)
+                        .foregroundStyle(SavantPalette.color(forPercentile: displayPercentile))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                        .frame(width: 48, alignment: .trailing)
+                        .monospacedDigit()
+                } else {
+                    Text("—")
+                        .font(SavantType.statSmall)
+                        .foregroundStyle(SavantPalette.inkTertiary)
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                        .monospacedDigit()
+                }
             }
             .frame(width: 92, alignment: .trailing)
         }
         .frame(height: SavantGeo.rowHeight)
         .padding(.horizontal, SavantGeo.padInline)
         .contentShape(Rectangle())
+    }
+}
+
+// MARK: - Blur Gate Unlock
+
+/// Compact unlock affordance for Pro-gated, blurred teasers. Anchors to the
+/// bottom over a gradient that fades the blurred preview into the card surface,
+/// so the teaser stays visible as the hook instead of being buried under an
+/// opaque panel. Used by RecentFormCard, TeamFormCard, and YearComparePreview.
+struct BlurGateUnlock: View {
+    let headline: String
+    let cta: String
+    var subtext: String? = nil
+    let action: () -> Void
+
+    var body: some View {
+        VStack(spacing: 8) {
+            Text(headline)
+                .font(SavantType.smallBold)
+                .foregroundStyle(SavantPalette.ink)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+
+            Button(action: action) {
+                HStack(spacing: 6) {
+                    Image(systemName: "crown.fill")
+                        .font(.system(size: 11))
+                    Text(cta)
+                        .font(SavantType.bodyBold)
+                }
+                .foregroundStyle(.white)
+                .padding(.horizontal, 22)
+                .frame(height: 42)
+                .background(SavantPalette.savantRed)
+                .clipShape(Capsule())
+            }
+            .buttonStyle(.plain)
+
+            if let subtext {
+                Text(subtext)
+                    .font(SavantType.micro)
+                    .tracking(0.3)
+                    .foregroundStyle(SavantPalette.inkTertiary)
+                    .multilineTextAlignment(.center)
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 52)
+        .padding(.bottom, 16)
+        .frame(maxWidth: .infinity)
+        .background(
+            LinearGradient(
+                colors: [.clear, SavantPalette.surface.opacity(0.95), SavantPalette.surface],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        )
     }
 }
 

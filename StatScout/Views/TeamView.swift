@@ -89,12 +89,6 @@ struct TeamView: View {
             VStack(spacing: 0) {
                 TeamIdentityStrip(team: team, season: displaySeason)
 
-                if let viewModel {
-                    teamSeasonMenu(viewModel: viewModel)
-                        .padding(.horizontal, 12)
-                        .padding(.top, 10)
-                }
-
                 TeamFormCard(
                     team: team,
                     season: displaySeason,
@@ -118,6 +112,11 @@ struct TeamView: View {
         .background(SavantPalette.canvas.ignoresSafeArea())
         .navigationTitle(teamFullName(team))
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            if let viewModel {
+                ToolbarItem(placement: .topBarTrailing) { navSeasonMenu(viewModel: viewModel) }
+            }
+        }
         .onAppear { applyDefaultDirectionIfMetricChanged() }
         .onChange(of: selectedCategory) { _, _ in applyDefaultDirectionIfMetricChanged() }
         .sheet(isPresented: $showingPaywall) {
@@ -214,56 +213,47 @@ struct TeamView: View {
         .padding(.vertical, 48)
     }
 
-    @ViewBuilder
-    private func teamSeasonMenu(viewModel: DashboardViewModel) -> some View {
-        HStack {
-            Menu {
-                ForEach(viewModel.availableSeasons, id: \.self) { season in
-                    let isLocked = viewModel.isSeasonLocked(season)
-                    Button {
+    // Nav-bar season selector matching the Stats tab — compact red pill with
+    // calendar + year on the navy bar, instead of an in-content header row.
+    private func navSeasonMenu(viewModel: DashboardViewModel) -> some View {
+        Menu {
+            ForEach(viewModel.availableSeasons, id: \.self) { season in
+                let isLocked = viewModel.isSeasonLocked(season)
+                Button {
+                    if isLocked {
+                        if PaywallGate.shared.shouldPresent(.teamView) { showingPaywall = true }
+                    } else {
+                        viewModel.selectedSeason = season
+                    }
+                } label: {
+                    HStack {
+                        Text(String(season))
                         if isLocked {
-                            if PaywallGate.shared.shouldPresent(.teamView) { showingPaywall = true }
-                        } else {
-                            viewModel.selectedSeason = season
-                        }
-                    } label: {
-                        HStack {
-                            Text(String(season))
-                            if isLocked {
-                                Image(systemName: "crown.fill")
-                                    .font(.system(size: 10))
-                                    .foregroundStyle(Color.yellow)
-                            }
+                            Image(systemName: "crown.fill")
+                                .font(.system(size: 10))
+                                .foregroundStyle(SavantPalette.inkTertiary)
                         }
                     }
                 }
-            } label: {
-                HStack(spacing: 6) {
-                    Image(systemName: "calendar")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundStyle(.white.opacity(0.9))
-                    Text("Season")
-                        .font(SavantType.micro)
-                        .tracking(0.5)
-                        .foregroundStyle(.white.opacity(0.85))
-                        .lineLimit(1)
-                    Text(String(viewModel.selectedSeason))
-                        .font(SavantType.bodyBold)
-                        .foregroundStyle(.white)
-                        .lineLimit(1)
-                    Image(systemName: "chevron.down")
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundStyle(.white.opacity(0.85))
-                }
-                .padding(.horizontal, 14)
-                .padding(.vertical, 9)
-                .background(SavantPalette.savantRed)
-                .clipShape(Capsule())
             }
-            .menuOrder(.fixed)
-            .fixedSize()
-            Spacer()
+        } label: {
+            HStack(spacing: 5) {
+                Image(systemName: "calendar")
+                    .font(.system(size: 11, weight: .semibold))
+                Text(String(viewModel.selectedSeason))
+                    .font(SavantType.smallBold)
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 9, weight: .bold))
+            }
+            .foregroundStyle(.white)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
+            .background(SavantPalette.savantRed)
+            .clipShape(Capsule())
         }
+        .menuOrder(.fixed)
+        .accessibilityLabel("Season")
+        .accessibilityValue(String(viewModel.selectedSeason))
     }
 
     private func priorityMetrics(for category: MetricCategory) -> [String] {

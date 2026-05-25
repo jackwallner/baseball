@@ -9,68 +9,17 @@ struct YearComparePreview: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            // Mock comparison content (blurred)
+            // Mock comparison content stays visible (blurred) as the hook.
             mockContent
-                .blur(radius: 6)
-                .overlay(
-                    LinearGradient(
-                        colors: [.clear, SavantPalette.canvas.opacity(0.85)],
-                        startPoint: .center,
-                        endPoint: .bottom
-                    )
-                )
+                .blur(radius: 5)
                 .clipped()
 
-            // CTA overlay at bottom
-            VStack(spacing: 10) {
-                Image(systemName: "crown.fill")
-                    .font(.system(size: 22))
-                    .foregroundStyle(Color.yellow)
-
-                Text("See How Players Evolve")
-                    .font(SavantType.cardTitle)
-                    .foregroundStyle(SavantPalette.ink)
-
-                Text("Pro unlocks year-over-year trends. See how \(playerName)'s game changed across seasons — every metric, every category.")
-                    .font(SavantType.small)
-                    .foregroundStyle(SavantPalette.inkSecondary)
-                    .multilineTextAlignment(.center)
-                    .fixedSize(horizontal: false, vertical: true)
-
-                Button {
-                    onUnlock()
-                } label: {
-                    Text(store.paywallBlurCTA)
-                        .font(SavantType.bodyBold)
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 48)
-                        .background(SavantPalette.savantRed)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                }
-                .buttonStyle(.plain)
-
-                if let subtext = store.paywallBlurSubtext {
-                    Text(subtext)
-                        .font(SavantType.micro)
-                        .tracking(0.3)
-                        .foregroundStyle(SavantPalette.inkTertiary)
-                        .multilineTextAlignment(.center)
-                }
-            }
-            .padding(.horizontal, 24)
-            .padding(.vertical, 20)
-            .background(
-                RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
-                    .fill(SavantPalette.surface)
-                    .shadow(color: .black.opacity(0.08), radius: 12, y: -4)
+            BlurGateUnlock(
+                headline: "See how \(playerName) evolved season to season",
+                cta: store.paywallBlurCTA,
+                subtext: store.paywallBlurSubtext,
+                action: onUnlock
             )
-            .overlay(alignment: .top) {
-                Rectangle()
-                    .fill(SavantPalette.divider)
-                    .frame(height: SavantGeo.hairline)
-            }
-            .offset(y: 4)
         }
         .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
         .overlay(
@@ -96,7 +45,7 @@ struct YearComparePreview: View {
         }
         .padding(.horizontal, 12)
         .padding(.top, 12)
-        .padding(.bottom, 140) // room for CTA
+        .padding(.bottom, 24)
     }
 
     private var mockYearPicker: some View {
@@ -228,7 +177,7 @@ struct YearComparePreview: View {
 
             HStack(spacing: 2) {
                 Text(arrow)
-                    .font(.system(size: 12, weight: .bold))
+                    .font(SavantFont.condensed(12, weight: .bold))
                 Text("\(abs(delta))")
                     .font(SavantType.bodyBold)
             }

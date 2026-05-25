@@ -42,20 +42,45 @@ enum SavantPalette {
     }
 }
 
+enum SavantFont {
+    static func condensed(_ size: CGFloat, weight: Font.Weight = .regular) -> Font {
+        Font.custom(condensedName(weight), size: size)
+    }
+    static func mono(_ size: CGFloat, weight: Font.Weight = .regular) -> Font {
+        Font.custom(monoName(weight), size: size)
+    }
+
+    private static func condensedName(_ w: Font.Weight) -> String {
+        switch w {
+        case .black, .heavy:   return "RobotoCondensed-Black"
+        case .bold, .semibold: return "RobotoCondensed-Bold"
+        case .medium:          return "RobotoCondensed-Medium"
+        default:               return "RobotoCondensed-Regular"
+        }
+    }
+    private static func monoName(_ w: Font.Weight) -> String {
+        switch w {
+        case .black, .heavy, .bold: return "RobotoMono-Bold"
+        case .semibold, .medium:    return "RobotoMono-Medium"
+        default:                    return "RobotoMono-Regular"
+        }
+    }
+}
+
 enum SavantType {
-    static let playerName    = Font.system(size: 28, weight: .heavy)
-    static let pageTitle     = Font.system(size: 22, weight: .heavy)
-    static let sectionTitle  = Font.system(size: 13, weight: .heavy)
-    static let cardTitle     = Font.system(size: 16, weight: .bold)
-    static let body          = Font.system(size: 14, weight: .regular)
-    static let bodyBold      = Font.system(size: 14, weight: .semibold)
-    static let small         = Font.system(size: 12, weight: .regular)
-    static let smallBold     = Font.system(size: 12, weight: .semibold)
-    static let micro         = Font.system(size: 11, weight: .heavy)
-    static let statHero      = Font.system(size: 32, weight: .heavy).monospacedDigit()
-    static let statLarge     = Font.system(size: 20, weight: .heavy).monospacedDigit()
-    static let statMed       = Font.system(size: 14, weight: .bold).monospacedDigit()
-    static let statSmall     = Font.system(size: 12, weight: .semibold).monospacedDigit()
+    static let playerName    = SavantFont.condensed(28, weight: .black)
+    static let pageTitle     = SavantFont.condensed(22, weight: .black)
+    static let sectionTitle  = SavantFont.condensed(13, weight: .black)
+    static let cardTitle     = SavantFont.condensed(16, weight: .bold)
+    static let body          = SavantFont.condensed(14, weight: .regular)
+    static let bodyBold      = SavantFont.condensed(14, weight: .medium)
+    static let small         = SavantFont.condensed(12, weight: .regular)
+    static let smallBold     = SavantFont.condensed(12, weight: .medium)
+    static let micro         = SavantFont.condensed(11, weight: .black)
+    static let statHero      = SavantFont.mono(32, weight: .bold)
+    static let statLarge     = SavantFont.mono(20, weight: .bold)
+    static let statMed       = SavantFont.mono(14, weight: .bold)
+    static let statSmall     = SavantFont.mono(12, weight: .medium)
 }
 
 enum SavantGeo {
