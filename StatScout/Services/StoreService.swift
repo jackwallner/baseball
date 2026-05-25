@@ -113,6 +113,48 @@ extension Package {
         }
     }
 
+    /// Localized per-month price for any recurring package. For a yearly
+    /// product priced at $29.99/yr this returns "$2.50". Lifetime / non-
+    /// recurring products return nil. Used on the paywall plan card so the
+    /// annual price doesn't look like sticker shock next to monthly.
+    var monthlyEquivalentLabel: String? {
+        guard let period = storeProduct.subscriptionPeriod else { return nil }
+        let monthsDecimal: Decimal
+        switch period.unit {
+        case .day:   monthsDecimal = Decimal(period.value) / Decimal(30)
+        case .week:  monthsDecimal = Decimal(period.value) * Decimal(7) / Decimal(30)
+        case .month: monthsDecimal = Decimal(period.value)
+        case .year:  monthsDecimal = Decimal(period.value) * Decimal(12)
+        @unknown default: return nil
+        }
+        // Only show /mo breakdown for periods that aren't already monthly —
+        // showing "$4.99/mo" under a "$4.99/month" price is noise.
+        guard monthsDecimal > 1 else { return nil }
+        let perMonth = storeProduct.price / monthsDecimal
+        let formatter = storeProduct.priceFormatter ?? Self.defaultCurrencyFormatter(currencyCode: storeProduct.currencyCode)
+        return formatter.string(from: perMonth as NSDecimalNumber)
+    }
+
+    /// Compact "/mo" label suitable for a strike-through anchor on the yearly
+    /// card. Returns the package's localized monthly price (per-month for an
+    /// annual product, the price itself for a true monthly product).
+    var monthlyEquivalentAnchorLabel: String? {
+        switch productKind {
+        case .monthly:
+            return "\(storeProduct.localizedPriceString)/mo"
+        case .yearly, .lifetime, .other:
+            guard let perMonth = monthlyEquivalentLabel else { return nil }
+            return "\(perMonth)/mo"
+        }
+    }
+
+    private static func defaultCurrencyFormatter(currencyCode: String?) -> NumberFormatter {
+        let f = NumberFormatter()
+        f.numberStyle = .currency
+        if let code = currencyCode { f.currencyCode = code }
+        return f
+    }
+
     var introOfferLabel: String? {
         guard let intro = storeProduct.introductoryDiscount, intro.paymentMode == .freeTrial else {
             return nil
@@ -156,13 +198,14 @@ extension CustomerInfo {
 }
 
 extension Offering {
+    /// Paywall display order: yearly first (conversion default with trial +
+    /// savings badge), then monthly (price anchor), then lifetime (commitment).
     var sortedPackages: [Package] {
-        availablePackages.sorted {
-            let lhsKind = $0.productKind
-            let rhsKind = $1.productKind
-            if lhsKind.rawValue != rhsKind.rawValue {
-                return lhsKind.rawValue < rhsKind.rawValue
-            }
+        let displayOrder: [RCProductKind] = [.yearly, .monthly, .lifetime, .other]
+        return availablePackages.sorted {
+            let lhs = displayOrder.firstIndex(of: $0.productKind) ?? displayOrder.count
+            let rhs = displayOrder.firstIndex(of: $1.productKind) ?? displayOrder.count
+            if lhs != rhs { return lhs < rhs }
             return $0.storeProduct.productIdentifier < $1.storeProduct.productIdentifier
         }
     }
@@ -219,6 +262,33 @@ final class StoreService: NSObject, ObservableObject {
               isEligibleForIntroOffer(yearly),
               yearly.introOfferLabel != nil else { return nil }
         return "Then \(yearly.priceLabel). Cancel anytime."
+    }
+
+    /// The monthly package, when present. Used as the anchor when computing
+    /// yearly savings % and rendering a strike-through monthly-equivalent price.
+    var monthlyPackage: Package? {
+        products.first { $0.productKind == .monthly }
+    }
+
+    /// Integer savings % the yearly package offers vs. 12× the monthly price.
+    /// Returns nil unless both packages are present and the math is favorable.
+    func yearlySavingsPercent(yearly: Package) -> Int? {
+        guard yearly.productKind == .yearly, let monthly = monthlyPackage else { return nil }
+        let yearlyPrice = yearly.storeProduct.price
+        let twelveMonths = monthly.storeProduct.price * Decimal(12)
+        guard twelveMonths > 0, yearlyPrice < twelveMonths else { return nil }
+        let saving = (twelveMonths - yearlyPrice) / twelveMonths * Decimal(100)
+        var rounded = Decimal()
+        var src = saving
+        NSDecimalRound(&rounded, &src, 0, .plain)
+        let percent = NSDecimalNumber(decimal: rounded).intValue
+        return percent > 0 ? percent : nil
+    }
+
+    /// Strike-through anchor price for the yearly card — "$4.99/mo" if a
+    /// monthly package exists. Nil when there's nothing to anchor against.
+    var monthlyAnchorPriceLabel: String? {
+        monthlyPackage?.monthlyEquivalentAnchorLabel
     }
 
     /// True when this package advertises a free trial and the user is eligible.

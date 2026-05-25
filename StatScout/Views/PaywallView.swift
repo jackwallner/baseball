@@ -43,9 +43,9 @@ enum PaywallTrigger: Identifiable, Hashable {
         case .pastSeason:        return "Unlock Past Seasons"
         case .yearCompare:       return "Year-over-Year Comparison"
         case .playerComparison:  return "Player Comparison"
-        case .onboarding:        return "Go Pro"
-        case .activation:        return "Unlock the Full Game"
-        case .upgrade:           return "StatScout Pro"
+        case .onboarding:        return "Scout Like a GM"
+        case .activation:        return "Get the Full Picture"
+        case .upgrade:           return "Scout Every Player"
         case .pastSeasonsLoad:   return "Load Past Seasons"
         case .teamView:          return "Team Insights"
         case .winback:           return "Welcome Back"
@@ -57,27 +57,27 @@ enum PaywallTrigger: Identifiable, Hashable {
     var subtitle: String {
         switch self {
         case .pastSeason:
-            return "See how your favorite players ranked in previous seasons. Track the trends that tell the full story."
+            return "Track how every player ranked since 2020 — and the year-over-year trends behind today's leaders."
         case .yearCompare:
-            return "Compare a player's percentile rankings across any two seasons. See what changed, what held, and where they're headed."
+            return "Compare any player's percentile rankings across any two seasons. See what changed, what held, and where they're headed."
         case .playerComparison:
-            return "Compare any two players side by side across every metric. Find who leads in xwOBA, Barrel%, Sprint Speed, and more."
+            return "Stack any two players head-to-head across every Statcast metric — xwOBA, Barrel%, Sprint Speed, and more."
         case .onboarding:
-            return "Current season is free. Pro unlocks historical seasons, year-over-year comparisons, and head-to-head player matchups."
+            return "Recent form, head-to-head matchups, and every season back to 2020 — the full Statcast picture, on every player."
         case .activation:
-            return "You're all set with the current season. Pro adds every past season, year-over-year trends, and head-to-head player matchups — the full scouting picture."
+            return "Recent form, head-to-head matchups, and every season back to 2020 — the full Statcast picture, on every player."
         case .upgrade:
-            return "Unlock historical seasons and year-over-year comparisons."
+            return "Recent form, head-to-head matchups, and every season back to 2020 — the full Statcast picture, on every player."
         case .pastSeasonsLoad:
             return "Load historical data to explore past seasons, year-over-year trends, and more."
         case .teamView:
-            return "Get full team rosters, player breakdowns, and side-by-side comparisons for every squad."
+            return "Every player on every roster — not just qualified starters — plus side-by-side comparisons for every squad."
         case .winback:
-            return "Your Pro access has lapsed. Renew to get historical seasons, year-over-year trends, and head-to-head matchups back."
+            return "Your Pro access has lapsed. Pick it back up to get recent form, head-to-head matchups, and every past season."
         case .playerScouting:
-            return "See last 7 / 15 / 30 day form, stack players head-to-head, and scout every roster — the full picture, not just season totals."
+            return "Last 7 / 15 / 30 day form, head-to-head matchups, every roster — the full picture, not just season totals."
         case .recentForm:
-            return "See every player's last 7 / 15 / 30 day form — spot who's heating up or cooling off before the season totals catch up."
+            return "Every player's last 7 / 15 / 30 day form — catch hot streaks and slumps before the season totals catch up."
         }
     }
 
@@ -99,10 +99,10 @@ enum PaywallTrigger: Identifiable, Hashable {
     }
 
     private static let proFeatures: [(icon: String, title: String)] = [
-        ("calendar.badge.clock", "Every past season back to 2020"),
-        ("arrow.left.arrow.right.circle.fill", "Year-over-year percentile trends"),
-        ("person.2.fill", "Head-to-head player matchups"),
-        ("flame.fill", "Recent form — last 7 / 15 / 30 days")
+        ("flame.fill", "Catch hot streaks — last 7 / 15 / 30 day form"),
+        ("person.2.fill", "Head-to-head: any two players, every metric"),
+        ("shield.lefthalf.filled", "Every player on every roster — not just qualifiers"),
+        ("calendar.badge.clock", "Every season back to 2020 + year-over-year trends")
     ]
 
     var features: [(icon: String, title: String)] {
@@ -280,14 +280,27 @@ struct PaywallView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    // Reassurance, not social proof — no fabricated ratings or user counts.
+    // Reassurance + real credibility — Statcast/Savant is the source of truth
+    // for these percentiles, which is the actual moat. No fabricated ratings
+    // or user counts.
     private var trustRow: some View {
-        HStack(spacing: 6) {
-            Image(systemName: "checkmark.shield.fill")
-                .font(.system(size: 12, weight: .semibold))
-            Text("Cancel anytime · No commitment")
+        HStack(spacing: 14) {
+            HStack(spacing: 5) {
+                Image(systemName: "bolt.fill")
+                    .font(.system(size: 11, weight: .semibold))
+                Text("Statcast-grade data")
+                    .font(SavantType.smallBold)
+                    .tracking(0.2)
+            }
+            Text("·")
                 .font(SavantType.smallBold)
-                .tracking(0.2)
+            HStack(spacing: 5) {
+                Image(systemName: "checkmark.shield.fill")
+                    .font(.system(size: 11, weight: .semibold))
+                Text("Cancel anytime")
+                    .font(SavantType.smallBold)
+                    .tracking(0.2)
+            }
         }
         .foregroundStyle(SavantPalette.inkTertiary)
         .frame(maxWidth: .infinity)
@@ -300,7 +313,16 @@ struct PaywallView: View {
                     package: package,
                     isSelected: selectedPackage?.identifier == package.identifier,
                     showsTrialBadge: store.isEligibleForIntroOffer(package),
-                    isBestValue: package.productKind == .yearly
+                    isMostPopular: package.productKind == .yearly,
+                    savingsPercent: package.productKind == .yearly
+                        ? store.yearlySavingsPercent(yearly: package)
+                        : nil,
+                    perMonthLabel: package.productKind == .yearly
+                        ? package.monthlyEquivalentLabel
+                        : nil,
+                    monthlyAnchorLabel: package.productKind == .yearly
+                        ? store.monthlyAnchorPriceLabel
+                        : nil
                 ) {
                     selectedPackage = package
                 }
@@ -477,7 +499,13 @@ private struct PaywallPlanCard: View {
     let package: Package
     let isSelected: Bool
     let showsTrialBadge: Bool
-    let isBestValue: Bool
+    let isMostPopular: Bool
+    /// Integer savings vs. 12× monthly (yearly only) — drives the SAVE X% chip.
+    let savingsPercent: Int?
+    /// Per-month breakdown for an annual plan, e.g. "$2.50".
+    let perMonthLabel: String?
+    /// Strike-through monthly anchor, e.g. "$4.99/mo".
+    let monthlyAnchorLabel: String?
     let onTap: () -> Void
 
     var body: some View {
@@ -494,13 +522,13 @@ private struct PaywallPlanCard: View {
                     }
                 }
 
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: 3) {
                     HStack(spacing: 6) {
                         Text(package.displayName)
                             .font(SavantType.bodyBold)
                             .foregroundStyle(SavantPalette.ink)
-                        if isBestValue {
-                            Text("BEST VALUE")
+                        if isMostPopular {
+                            Text("MOST POPULAR")
                                 .font(SavantType.micro)
                                 .tracking(0.4)
                                 .foregroundStyle(.white)
@@ -514,14 +542,35 @@ private struct PaywallPlanCard: View {
                             .font(SavantType.micro)
                             .tracking(0.3)
                             .foregroundStyle(SavantPalette.savantRed)
+                    } else if let savingsPercent {
+                        Text("Save \(savingsPercent)% vs monthly")
+                            .font(SavantType.micro)
+                            .tracking(0.3)
+                            .foregroundStyle(SavantPalette.savantRed)
                     }
                 }
 
                 Spacer(minLength: 8)
 
-                Text(package.priceLabel)
-                    .font(SavantType.smallBold)
-                    .foregroundStyle(SavantPalette.inkSecondary)
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text(package.priceLabel)
+                        .font(SavantType.smallBold)
+                        .foregroundStyle(SavantPalette.inkSecondary)
+                    if let perMonthLabel {
+                        HStack(spacing: 5) {
+                            if let monthlyAnchorLabel, savingsPercent != nil {
+                                Text(monthlyAnchorLabel)
+                                    .font(SavantType.micro)
+                                    .foregroundStyle(SavantPalette.inkTertiary)
+                                    .strikethrough(true, color: SavantPalette.inkTertiary)
+                            }
+                            Text("\(perMonthLabel)/mo")
+                                .font(SavantType.micro)
+                                .tracking(0.2)
+                                .foregroundStyle(SavantPalette.ink)
+                        }
+                    }
+                }
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 12)
