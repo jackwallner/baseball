@@ -73,7 +73,7 @@ enum PaywallTrigger: Identifiable, Hashable {
         case .teamView:
             return "Every player on every roster — not just qualified starters — plus side-by-side comparisons for every squad."
         case .winback:
-            return "Your Pro access has lapsed. Pick it back up to get recent form, head-to-head matchups, and every past season."
+            return "Your StatScout+ access has lapsed. Pick it back up to get recent form, head-to-head matchups, and every past season."
         case .playerScouting:
             return "Last 7 / 15 / 30 day form, head-to-head matchups, every roster — the full picture, not just season totals."
         case .recentForm:
@@ -466,7 +466,7 @@ struct PaywallView: View {
             defer { isRestoring = false }
             await store.restorePurchases()
             if !store.isPro {
-                restoreMessage = store.lastError ?? "No active StatScout Pro purchase was found for this Apple ID."
+                restoreMessage = store.lastError ?? "No active StatScout+ purchase was found for this Apple ID."
             }
         }
     }

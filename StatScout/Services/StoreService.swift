@@ -247,12 +247,12 @@ final class StoreService: NSObject, ObservableObject {
             if isEligibleForIntroOffer(yearly), let trial = yearly.introOfferLabel {
                 return "Start \(trial)"
             }
-            return "Try Pro — \(yearly.priceLabel)"
+            return "Try StatScout+ — \(yearly.priceLabel)"
         }
         if let price = proPrice {
-            return "Unlock Pro — \(price)"
+            return "Unlock StatScout+ — \(price)"
         }
-        return "Unlock Pro"
+        return "Unlock StatScout+"
     }
 
     /// One-line secondary caption shown under the CTA when a trial is offered,
@@ -400,7 +400,7 @@ final class StoreService: NSObject, ObservableObject {
         do {
             let info = try await Purchases.shared.restorePurchases()
             apply(customerInfo: info)
-            lastError = isPro ? nil : "No active StatScout Pro purchase was found for this Apple ID."
+            lastError = isPro ? nil : "No active StatScout+ purchase was found for this Apple ID."
         } catch {
             logger.error("Restore failed: \(String(describing: error), privacy: .public)")
             lastError = "Couldn't restore purchases. Try again."

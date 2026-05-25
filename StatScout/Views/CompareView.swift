@@ -48,6 +48,9 @@ struct CompareView: View {
             .overlay {
                 if !store.isPro { lockedOverlay }
             }
+            // Scroll-under spacer so content can pass behind the floating tab
+            // bar — matches the Dashboard / Teams pattern.
+            Color.clear.frame(height: 88)
         }
         .scrollBounceBehavior(.basedOnSize)
         .background(SavantPalette.canvas.ignoresSafeArea())
@@ -215,7 +218,7 @@ struct CompareView: View {
             Text("Find the Edge")
                 .font(SavantType.cardTitle)
                 .foregroundStyle(SavantPalette.ink)
-            Text("Compare is a Pro feature.")
+            Text("Compare is a StatScout+ feature.")
                 .font(SavantType.small)
                 .foregroundStyle(SavantPalette.inkSecondary)
                 .multilineTextAlignment(.center)

@@ -87,7 +87,7 @@ struct RecentFormCard: View {
                     HStack(spacing: 3) {
                         Image(systemName: "crown.fill")
                             .font(.system(size: 9, weight: .bold))
-                        Text("PRO")
+                        Text("STATSCOUT+")
                             .font(SavantType.micro)
                             .tracking(0.4)
                             .fontWeight(.bold)

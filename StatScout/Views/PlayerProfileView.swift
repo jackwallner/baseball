@@ -266,7 +266,7 @@ struct PlayerProfileView: View {
                 Image(systemName: "crown.fill")
                     .font(.system(size: 14))
                     .foregroundStyle(Color.yellow)
-                Text("StatScout Pro")
+                Text("StatScout+")
                     .font(SavantType.smallBold)
                     .tracking(0.4)
                     .foregroundStyle(SavantPalette.ink)

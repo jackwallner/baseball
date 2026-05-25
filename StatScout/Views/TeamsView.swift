@@ -71,6 +71,9 @@ struct TeamsView: View {
                 } else {
                     allTeamsSection
                 }
+                // Scroll-under spacer so the last grid row isn't trapped behind
+                // the floating tab bar — matches the Dashboard pattern.
+                Color.clear.frame(height: 88)
             }
             .padding(.top, 12)
         }
@@ -147,7 +150,7 @@ struct TeamsView: View {
                         showingPaywall = true
                     }
                 } label: {
-                    Label(store.isPro ? "Load past seasons" : "Past seasons require Pro",
+                    Label(store.isPro ? "Load past seasons" : "Past seasons require StatScout+",
                           systemImage: store.isPro ? "clock.arrow.circlepath" : "crown.fill")
                 }
             }
@@ -190,26 +193,33 @@ struct TeamsView: View {
         .accessibilityValue(String(viewModel.selectedSeason))
     }
 
+    /// Logo grid replaces the old single-column list of rows. Each tile is a
+    /// big colored disk with the abbreviation + full name, a corner star for
+    /// favorites, and a long-press toggle so the row stays one-tap-to-navigate.
     private var allTeamsSection: some View {
         VStack(spacing: 0) {
-            SavantSectionBar(
-                title: "TEAMS",
-                trailing: searchText.isEmpty ? AnyView(
+            SearchField(text: $searchText)
+                .padding(.horizontal, 12)
+                .padding(.bottom, 12)
+
+            HStack {
+                Text("ALL TEAMS")
+                    .font(SavantType.micro)
+                    .tracking(0.6)
+                    .foregroundStyle(SavantPalette.inkSecondary)
+                Spacer()
+                if searchText.isEmpty {
                     Text("\(filteredTeams.count) teams")
                         .font(SavantType.micro)
                         .foregroundStyle(SavantPalette.inkTertiary)
-                ) : AnyView(
-                    Button(action: { searchText = "" }) {
-                        Text("Clear")
-                            .font(SavantType.micro)
-                            .foregroundStyle(SavantPalette.inkSecondary)
-                    }
-                )
-            )
-
-            SearchField(text: $searchText)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
+                } else {
+                    Button("Clear") { searchText = "" }
+                        .font(SavantType.micro)
+                        .foregroundStyle(SavantPalette.inkSecondary)
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.bottom, 8)
 
             if filteredTeams.isEmpty {
                 let noDataForSeason = searchText.isEmpty && viewModel.teamsWithData.isEmpty
@@ -222,50 +232,90 @@ struct TeamsView: View {
                 }
                 .padding(.vertical, 48)
             } else {
-                ForEach(Array(filteredTeams.enumerated()), id: \.element) { index, abbr in
-                    HStack(spacing: 0) {
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 3), spacing: 10) {
+                    ForEach(filteredTeams, id: \.self) { abbr in
                         NavigationLink(value: TeamDestination(abbr: abbr)) {
-                            TeamRowContent(
+                            TeamGridTile(
                                 abbr: abbr,
                                 isFavorite: teamsViewModel.isFavorite(abbr)
                             )
                         }
                         .buttonStyle(.plain)
-
-                        Button {
-                            let isFav = teamsViewModel.isFavorite(abbr)
-                            if isFav {
-                                teamsViewModel.removeFavorite()
-                            } else {
-                                teamsViewModel.setFavorite(abbr)
+                        .contextMenu {
+                            Button {
+                                if teamsViewModel.isFavorite(abbr) {
+                                    teamsViewModel.removeFavorite()
+                                } else {
+                                    teamsViewModel.setFavorite(abbr)
+                                }
+                                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                            } label: {
+                                Label(teamsViewModel.isFavorite(abbr) ? "Remove Favorite" : "Set as Favorite",
+                                      systemImage: teamsViewModel.isFavorite(abbr) ? "star.slash" : "star.fill")
                             }
-                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                        } label: {
-                            Image(systemName: teamsViewModel.isFavorite(abbr) ? "star.fill" : "star")
-                                .font(.system(size: 18, weight: .medium))
-                                .foregroundStyle(teamsViewModel.isFavorite(abbr) ? Color.yellow : SavantPalette.inkTertiary)
-                                .frame(width: 44, height: 44)
-                                .contentShape(Rectangle())
                         }
-                        .buttonStyle(.borderless)
-                    }
-                    .padding(.trailing, 12)
-
-                    if index < filteredTeams.count - 1 {
-                        Divider()
-                            .padding(.leading, 68)
                     }
                 }
+                .padding(.horizontal, 12)
+                .padding(.bottom, 12)
             }
         }
-        .background(SavantPalette.surface)
+    }
+}
+
+// MARK: - Team Grid Tile
+
+/// Large logo-led tile for the redesigned Teams grid. Tap to navigate; the
+/// favorite star sits in the upper-right corner and the full team name reads
+/// below the abbreviation disk. Long-press surfaces the favorite toggle.
+struct TeamGridTile: View {
+    let abbr: String
+    let isFavorite: Bool
+
+    var body: some View {
+        VStack(spacing: 8) {
+            ZStack(alignment: .topTrailing) {
+                ZStack {
+                    Circle()
+                        .fill(MLBTeamColor.color(abbr))
+                        .frame(width: 64, height: 64)
+                        .shadow(color: Color.black.opacity(0.08), radius: 4, y: 2)
+                    Text(abbr)
+                        .font(SavantFont.condensed(20, weight: .black))
+                        .foregroundStyle(.white)
+                }
+                .frame(maxWidth: .infinity)
+
+                if isFavorite {
+                    Image(systemName: "star.fill")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundStyle(Color.yellow)
+                        .padding(4)
+                        .background(Circle().fill(SavantPalette.surface))
+                        .overlay(Circle().stroke(SavantPalette.hairline, lineWidth: 0.5))
+                        .offset(x: 22, y: -4)
+                }
+            }
+            .frame(height: 64)
+
+            Text(teamFullName(abbr))
+                .font(SavantType.smallBold)
+                .foregroundStyle(SavantPalette.ink)
+                .lineLimit(2)
+                .minimumScaleFactor(0.8)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity)
+        }
+        .padding(.vertical, 14)
+        .padding(.horizontal, 8)
+        .frame(maxWidth: .infinity, minHeight: 130)
+        .background(isFavorite ? SavantPalette.surfaceAlt : SavantPalette.surface)
         .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
         .overlay(
             RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
-                .stroke(SavantPalette.hairline, lineWidth: 0.5)
+                .stroke(isFavorite ? SavantPalette.savantRed : SavantPalette.hairline,
+                        lineWidth: isFavorite ? 1.5 : 0.5)
         )
-        .padding(.horizontal, 12)
-        .padding(.top, 12)
     }
 }
 

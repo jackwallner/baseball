@@ -8,6 +8,10 @@ struct TeamFormCard: View {
     @EnvironmentObject private var store: StoreService
     let team: String
     let season: Int
+    /// League pool used to build the value→percentile curve so the recent team
+    /// bar sits on the same ruler as individual players' season bars. Filtered
+    /// per side (batter/pitcher) at curve-build time.
+    let leaguePlayers: [Player]
     let fetchTeamGameLogs: ((String, Int, Date) async throws -> [PlayerGameLog])?
     let onUpgradeTap: () -> Void
 
@@ -16,6 +20,8 @@ struct TeamFormCard: View {
     @State private var loadError: String?
     @State private var windowDays: Int = 15
     @State private var side: Side = .batting
+    @State private var batterCurves: LeaguePercentileCurves?
+    @State private var pitcherCurves: LeaguePercentileCurves?
 
     enum Side: String, CaseIterable, Identifiable {
         case batting, pitching
@@ -57,6 +63,14 @@ struct TeamFormCard: View {
         .task(id: team + "-" + String(season)) {
             await load()
         }
+        .onAppear { rebuildCurves() }
+        .onChange(of: leaguePlayers.count) { _, _ in rebuildCurves() }
+    }
+
+    private func rebuildCurves() {
+        let labels = ["xwOBA", "Barrel%", "Hard-Hit%", "EV", "K%", "BB%"]
+        batterCurves = LeaguePercentileCurves(players: leaguePlayers, playerType: "batter", labels: labels)
+        pitcherCurves = LeaguePercentileCurves(players: leaguePlayers, playerType: "pitcher", labels: labels)
     }
 
     private var header: some View {
@@ -74,7 +88,7 @@ struct TeamFormCard: View {
                     HStack(spacing: 3) {
                         Image(systemName: "crown.fill")
                             .font(.system(size: 9, weight: .bold))
-                        Text("PRO")
+                        Text("STATSCOUT+")
                             .font(SavantType.micro)
                             .tracking(0.4)
                             .fontWeight(.bold)
@@ -207,7 +221,7 @@ struct TeamFormCard: View {
     }
 
     private func statsBody(window w: RecentFormWindow) -> some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 0) {
             HStack(spacing: 12) {
                 summaryStat(label: "G", value: "\(w.games)")
                 summaryStat(label: side == .pitching ? "BF" : "PA", value: "\(w.plateAppearances)")
@@ -226,10 +240,10 @@ struct TeamFormCard: View {
                         .clipShape(Capsule())
                 }
             }
+            .padding(SavantGeo.padInline)
 
-            metricsGrid(window: w)
+            metricBarList(recentMetricRows(window: w))
         }
-        .padding(SavantGeo.padInline)
     }
 
     private func summaryStat(label: String, value: String) -> some View {
@@ -244,62 +258,60 @@ struct TeamFormCard: View {
         }
     }
 
-    private func metricsGrid(window w: RecentFormWindow) -> some View {
-        let rows = metricRows(window: w)
-        return LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
-            ForEach(rows, id: \.label) { row in
-                metricCell(row: row)
+    /// Renders each recent-window metric as a `MetricBar` row so the team's
+    /// recent form sits on the same percentile ruler as individual players'
+    /// season bars. The team value is the weighted aggregate already computed
+    /// upstream; the curve comes from the league pool filtered to the active
+    /// side (batter / pitcher).
+    private func metricBarList(_ rows: [Metric]) -> some View {
+        VStack(spacing: 0) {
+            ForEach(Array(rows.enumerated()), id: \.element.id) { index, metric in
+                MetricBar(metric: metric)
+                    .padding(.horizontal, SavantGeo.padCard)
+                    .padding(.vertical, 12)
+                    .background(index % 2 == 0 ? SavantPalette.surface : SavantPalette.surfaceAlt)
+                    .overlay(
+                        Rectangle()
+                            .fill(SavantPalette.divider)
+                            .frame(height: SavantGeo.hairline),
+                        alignment: .bottom
+                    )
             }
         }
     }
 
-    private func metricCell(row: MetricRow) -> some View {
-        VStack(alignment: .leading, spacing: 3) {
-            Text(row.label)
-                .font(SavantType.micro)
-                .tracking(0.4)
-                .foregroundStyle(SavantPalette.inkTertiary)
-            Text(row.display)
-                .font(SavantType.bodyBold)
-                .foregroundStyle(SavantPalette.ink)
+    private func recentMetricRows(window w: RecentFormWindow) -> [Metric] {
+        let category: MetricCategory = side == .pitching ? .pitching : .hitting
+        let curves = side == .pitching ? pitcherCurves : batterCurves
+        let specs: [(key: String, label: String, seasonLabel: String, format: String)] = side == .pitching
+            ? [
+                ("opp_xwoba",       "Opp xwOBA",     "xwOBA",     "%.3f"),
+                ("k_pct",           "K%",            "K%",        "%.1f%%"),
+                ("bb_pct",          "BB%",           "BB%",       "%.1f%%"),
+                ("opp_hardhit_pct", "Opp Hard-Hit%", "Hard-Hit%", "%.1f%%"),
+                ("opp_barrel_pct",  "Opp Barrel%",   "Barrel%",   "%.1f%%"),
+                ("opp_ev_avg",      "Opp EV",        "EV",        "%.1f mph"),
+            ]
+            : [
+                ("xwoba",       "xwOBA",     "xwOBA",     "%.3f"),
+                ("barrel_pct",  "Barrel%",   "Barrel%",   "%.1f%%"),
+                ("hardhit_pct", "Hard-Hit%", "Hard-Hit%", "%.1f%%"),
+                ("ev_avg",      "EV",        "EV",        "%.1f mph"),
+                ("k_pct",       "K%",        "K%",        "%.1f%%"),
+                ("bb_pct",      "BB%",       "BB%",       "%.1f%%"),
+            ]
+
+        return specs.compactMap { spec -> Metric? in
+            guard let v = w.metrics[spec.key],
+                  let pct = curves?.curve(for: spec.seasonLabel)?.percentile(for: v) else { return nil }
+            return Metric(
+                id: "team-\(spec.key)",
+                label: spec.label,
+                value: String(format: spec.format, v),
+                percentile: pct,
+                category: category
+            )
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, 10)
-        .padding(.vertical, 8)
-        .background(SavantPalette.surfaceAlt)
-        .clipShape(RoundedRectangle(cornerRadius: 8))
-    }
-
-    private struct MetricRow {
-        let label: String
-        let display: String
-    }
-
-    private func metricRows(window w: RecentFormWindow) -> [MetricRow] {
-        if side == .pitching {
-            return [
-                cell(w, key: "opp_xwoba", label: "Opp xwOBA", format: "%.3f"),
-                cell(w, key: "k_pct", label: "K%", format: "%.1f%%"),
-                cell(w, key: "bb_pct", label: "BB%", format: "%.1f%%"),
-                cell(w, key: "opp_hardhit_pct", label: "Opp Hard-Hit%", format: "%.1f%%"),
-                cell(w, key: "opp_barrel_pct", label: "Opp Barrel%", format: "%.1f%%"),
-                cell(w, key: "opp_ev_avg", label: "Opp EV", format: "%.1f mph"),
-            ].compactMap { $0 }
-        } else {
-            return [
-                cell(w, key: "xwoba", label: "xwOBA", format: "%.3f"),
-                cell(w, key: "barrel_pct", label: "Barrel%", format: "%.1f%%"),
-                cell(w, key: "hardhit_pct", label: "Hard-Hit%", format: "%.1f%%"),
-                cell(w, key: "ev_avg", label: "EV", format: "%.1f mph"),
-                cell(w, key: "k_pct", label: "K%", format: "%.1f%%"),
-                cell(w, key: "bb_pct", label: "BB%", format: "%.1f%%"),
-            ].compactMap { $0 }
-        }
-    }
-
-    private func cell(_ w: RecentFormWindow, key: String, label: String, format: String) -> MetricRow? {
-        guard let v = w.metrics[key] else { return nil }
-        return MetricRow(label: label, display: String(format: format, v))
     }
 
     private func load() async {

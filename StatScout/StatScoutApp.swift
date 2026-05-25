@@ -104,7 +104,7 @@ struct OnboardingCards: View {
     }
 
     private var proCTALabel: String {
-        hasYearlyTrial ? "Start Free Trial" : "Upgrade to Pro"
+        hasYearlyTrial ? "Start Free Trial" : "Upgrade to StatScout+"
     }
 
     private var trialDisclosure: String? {

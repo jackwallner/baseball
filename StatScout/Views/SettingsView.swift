@@ -61,17 +61,17 @@ struct AboutView: View {
 
     private var proStatusCard: some View {
         VStack(spacing: 0) {
-            SavantSectionBar(title: "STATSCOUT PRO")
+            SavantSectionBar(title: "STATSCOUT+")
             VStack(spacing: 0) {
                 HStack {
                     Image(systemName: store.isPro ? "crown.fill" : "crown")
                         .font(.title2)
                         .foregroundStyle(store.isPro ? Color.yellow : SavantPalette.inkTertiary)
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(store.isPro ? "Pro Unlocked" : "Free Version")
+                        Text(store.isPro ? "StatScout+ Unlocked" : "Free Version")
                             .font(SavantType.bodyBold)
                             .foregroundStyle(SavantPalette.ink)
-                        Text(store.isPro ? "Pro features are unlocked." : "Unlock historical seasons and year-over-year comparisons.")
+                        Text(store.isPro ? "All StatScout+ features are active." : "Unlock historical seasons and year-over-year comparisons.")
                             .font(SavantType.small)
                             .foregroundStyle(SavantPalette.inkSecondary)
                     }

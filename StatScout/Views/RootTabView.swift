@@ -192,9 +192,9 @@ private struct ProToolbarButton: ViewModifier {
         if let yearly = store.products.first(where: { $0.productKind == .yearly }),
            store.isEligibleForIntroOffer(yearly),
            yearly.introOfferLabel != nil {
-            return "Try Pro"
+            return "Try Free"
         }
-        return "Get Pro"
+        return "Upgrade"
     }
 
     func body(content: Content) -> some View {

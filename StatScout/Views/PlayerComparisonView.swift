@@ -65,7 +65,7 @@ struct PlayerComparisonView: View {
                             .font(SavantType.cardTitle)
                             .foregroundStyle(SavantPalette.ink)
 
-                        Text("Pro unlocks side-by-side player comparisons across every metric. See who leads in xwOBA, Barrel%, Sprint Speed, and more.")
+                        Text("StatScout+ unlocks side-by-side player comparisons across every metric. See who leads in xwOBA, Barrel%, Sprint Speed, and more.")
                             .font(SavantType.small)
                             .foregroundStyle(SavantPalette.inkSecondary)
                             .multilineTextAlignment(.center)

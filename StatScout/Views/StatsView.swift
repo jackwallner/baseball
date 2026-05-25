@@ -88,7 +88,7 @@ struct StatsView: View {
                         paywallTrigger = .pastSeasonsLoad
                     }
                 } label: {
-                    Label(store.isPro ? "Load past seasons" : "Past seasons require Pro", systemImage: store.isPro ? "clock.arrow.circlepath" : "crown.fill")
+                    Label(store.isPro ? "Load past seasons" : "Past seasons require StatScout+", systemImage: store.isPro ? "clock.arrow.circlepath" : "crown.fill")
                 }
             }
             ForEach(viewModel.availableSeasons, id: \.self) { season in

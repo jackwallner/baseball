@@ -73,7 +73,7 @@ struct DashboardView: View {
                     HStack(spacing: 6) {
                         Image(systemName: "crown.fill")
                             .font(.system(size: 10))
-                        Text("Unlock Pro")
+                        Text("Unlock StatScout+")
                             .font(SavantType.micro)
                             .tracking(0.4)
                     }

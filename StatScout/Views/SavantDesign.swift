@@ -46,8 +46,11 @@ enum SavantFont {
     static func condensed(_ size: CGFloat, weight: Font.Weight = .regular) -> Font {
         Font.custom(condensedName(weight), size: size)
     }
+    // Stat numbers route through the condensed face (plain zero) rather than
+    // RobotoMono, whose default zero glyph carries a dot/slash. The condensed
+    // family has tabular digits, so column alignment in leaderboards holds.
     static func mono(_ size: CGFloat, weight: Font.Weight = .regular) -> Font {
-        Font.custom(monoName(weight), size: size)
+        condensed(size, weight: weight).monospacedDigit()
     }
 
     private static func condensedName(_ w: Font.Weight) -> String {
@@ -56,13 +59,6 @@ enum SavantFont {
         case .bold, .semibold: return "RobotoCondensed-Bold"
         case .medium:          return "RobotoCondensed-Medium"
         default:               return "RobotoCondensed-Regular"
-        }
-    }
-    private static func monoName(_ w: Font.Weight) -> String {
-        switch w {
-        case .black, .heavy, .bold: return "RobotoMono-Bold"
-        case .semibold, .medium:    return "RobotoMono-Medium"
-        default:                    return "RobotoMono-Regular"
         }
     }
 }
