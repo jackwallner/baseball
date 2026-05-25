@@ -58,6 +58,9 @@
 		F9CFA1F577A94864AB624B41 /* SampleData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BF12CF754F018EFD7BE7729 /* SampleData.swift */; };
 		FC0DF3B89E0E8C6152BC78CF /* YearComparePreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13A6D136EE3F7A2B36956CA4 /* YearComparePreview.swift */; };
 		FE17DDC74A43A910CD4A1CE8 /* SavantModules.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C04FC271035959EFD5300A2 /* SavantModules.swift */; };
+		A1B2C3D4E5F6012345678AB /* ReviewPromptTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6012345678AA /* ReviewPromptTracker.swift */; };
+		A1B2C3D4E5F6022345678AB /* AppStoreReviewLinks.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6022345678AA /* AppStoreReviewLinks.swift */; };
+		A1B2C3D4E5F6032345678AB /* ReviewPromptSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6032345678AA /* ReviewPromptSheet.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -118,6 +121,9 @@
 		91414B3D597831487B630032 /* MetricLeadersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetricLeadersView.swift; sourceTree = "<group>"; };
 		915334798C251C448B0292EA /* RobotoCondensed-Medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "RobotoCondensed-Medium.ttf"; sourceTree = "<group>"; };
 		924C787B5EA5949F5BB19DF5 /* CompareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompareView.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6012345678AA /* ReviewPromptTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewPromptTracker.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6022345678AA /* AppStoreReviewLinks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStoreReviewLinks.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6032345678AA /* ReviewPromptSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewPromptSheet.swift; sourceTree = "<group>"; };
 		93AB140AC9F51D7E0F0E2C6D /* TeamsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamsView.swift; sourceTree = "<group>"; };
 		98410E06CAC66BDEE4137CAF /* YearAuditUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YearAuditUITests.swift; sourceTree = "<group>"; };
 		9AD97C159FCE484C7AA9DDDF /* PlayerProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerProfileView.swift; sourceTree = "<group>"; };
@@ -227,6 +233,7 @@
 				24AC831AC255A431F132DFC4 /* Models */,
 				84DA9AAE97B232CEE4958A80 /* Resources */,
 				C13D4BF64FC7CE5A7B9F7842 /* Services */,
+				A1B2C3D4E5F6042345678AA /* Utilities */,
 				D31BC3EA972E5C50A55DF25C /* ViewModels */,
 				E516C2C37EAA434D0DE07DD3 /* Views */,
 			);
@@ -244,10 +251,19 @@
 			);
 			sourceTree = "<group>";
 		};
+		A1B2C3D4E5F6042345678AA /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				A1B2C3D4E5F6022345678AA /* AppStoreReviewLinks.swift */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
 		C13D4BF64FC7CE5A7B9F7842 /* Services */ = {
 			isa = PBXGroup;
 			children = (
 				346E3D39DDC5F6FDD387016B /* PlayerCache.swift */,
+				A1B2C3D4E5F6012345678AA /* ReviewPromptTracker.swift */,
 				15914E954BD86B91C09E5C88 /* StatcastAPI.swift */,
 				F817C1759417F135E7CD20C2 /* StoreService.swift */,
 			);
@@ -286,6 +302,7 @@
 				00934226FB4C12145112549C /* MetricRankingView.swift */,
 				57A36C805E9D0AB83292B6F7 /* PaywallView.swift */,
 				7FCAA022DB7A039D9E5D4EC6 /* PlayerComparisonView.swift */,
+				A1B2C3D4E5F6032345678AA /* ReviewPromptSheet.swift */,
 				9AD97C159FCE484C7AA9DDDF /* PlayerProfileView.swift */,
 				82D4BEC37C8EF5436239336D /* RecentFormCard.swift */,
 				725784CE4007DABF6BEAA038 /* RecentFormPercentile.swift */,
@@ -475,6 +492,9 @@
 				B4DCC3A1E6B450909ED5F5DC /* Player.swift in Sources */,
 				3DA5F5AA0CC4C3141DB727AA /* PlayerCache.swift in Sources */,
 				0DBDA29FECAC0D4AC9F8A986 /* PlayerComparisonView.swift in Sources */,
+				A1B2C3D4E5F6022345678AB /* AppStoreReviewLinks.swift in Sources */,
+				A1B2C3D4E5F6032345678AB /* ReviewPromptSheet.swift in Sources */,
+				A1B2C3D4E5F6012345678AB /* ReviewPromptTracker.swift in Sources */,
 				C0B5ED98CED5C19CF7179A7A /* PlayerGameLog.swift in Sources */,
 				B56324087E4F4F901D6586E5 /* PlayerProfileView.swift in Sources */,
 				71DFA98C72F18DEFBEC07100 /* RecentFormCard.swift in Sources */,

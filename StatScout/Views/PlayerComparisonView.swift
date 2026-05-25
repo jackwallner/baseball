@@ -39,75 +39,82 @@ struct PlayerComparisonView: View {
     }
 
     var body: some View {
-        if store.isPro {
-            comparisonContent
-        } else {
-            ZStack(alignment: .bottom) {
+        Group {
+            if store.isPro {
                 comparisonContent
-                    .blur(radius: 8)
-                    .overlay(
-                        LinearGradient(
-                            colors: [.clear, SavantPalette.canvas.opacity(0.9)],
-                            startPoint: .center,
-                            endPoint: .bottom
+            } else {
+                ZStack(alignment: .bottom) {
+                    comparisonContent
+                        .blur(radius: 8)
+                        .overlay(
+                            LinearGradient(
+                                colors: [.clear, SavantPalette.canvas.opacity(0.9)],
+                                startPoint: .center,
+                                endPoint: .bottom
+                            )
                         )
-                    )
-                    .clipped()
+                        .clipped()
 
-                // CTA overlay
-                VStack(spacing: 10) {
-                    Image(systemName: "crown.fill")
-                        .font(.system(size: 22))
-                        .foregroundStyle(Color.yellow)
+                    // CTA overlay
+                    VStack(spacing: 10) {
+                        Image(systemName: "crown.fill")
+                            .font(.system(size: 22))
+                            .foregroundStyle(Color.yellow)
 
-                    Text("Find the Edge")
-                        .font(SavantType.cardTitle)
-                        .foregroundStyle(SavantPalette.ink)
+                        Text("Find the Edge")
+                            .font(SavantType.cardTitle)
+                            .foregroundStyle(SavantPalette.ink)
 
-                    Text("Pro unlocks side-by-side player comparisons across every metric. See who leads in xwOBA, Barrel%, Sprint Speed, and more.")
-                        .font(SavantType.small)
-                        .foregroundStyle(SavantPalette.inkSecondary)
-                        .multilineTextAlignment(.center)
-                        .fixedSize(horizontal: false, vertical: true)
-
-                    Button {
-                        showingPaywall = true
-                    } label: {
-                        Text(store.paywallBlurCTA)
-                            .font(SavantType.bodyBold)
-                            .foregroundStyle(.white)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 48)
-                            .background(SavantPalette.savantRed)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                    }
-                    .buttonStyle(.plain)
-
-                    if let subtext = store.paywallBlurSubtext {
-                        Text(subtext)
-                            .font(SavantType.micro)
-                            .tracking(0.3)
-                            .foregroundStyle(SavantPalette.inkTertiary)
+                        Text("Pro unlocks side-by-side player comparisons across every metric. See who leads in xwOBA, Barrel%, Sprint Speed, and more.")
+                            .font(SavantType.small)
+                            .foregroundStyle(SavantPalette.inkSecondary)
                             .multilineTextAlignment(.center)
+                            .fixedSize(horizontal: false, vertical: true)
+
+                        Button {
+                            showingPaywall = true
+                        } label: {
+                            Text(store.paywallBlurCTA)
+                                .font(SavantType.bodyBold)
+                                .foregroundStyle(.white)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 48)
+                                .background(SavantPalette.savantRed)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                        }
+                        .buttonStyle(.plain)
+
+                        if let subtext = store.paywallBlurSubtext {
+                            Text(subtext)
+                                .font(SavantType.micro)
+                                .tracking(0.3)
+                                .foregroundStyle(SavantPalette.inkTertiary)
+                                .multilineTextAlignment(.center)
+                        }
                     }
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 20)
+                    .background(
+                        RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
+                            .fill(SavantPalette.surface)
+                            .shadow(color: .black.opacity(0.08), radius: 12, y: -4)
+                    )
+                    .overlay(alignment: .top) {
+                        Rectangle()
+                            .fill(SavantPalette.divider)
+                            .frame(height: SavantGeo.hairline)
+                    }
+                    .offset(y: -8)
                 }
-                .padding(.horizontal, 24)
-                .padding(.vertical, 20)
-                .background(
-                    RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
-                        .fill(SavantPalette.surface)
-                        .shadow(color: .black.opacity(0.08), radius: 12, y: -4)
-                )
-                .overlay(alignment: .top) {
-                    Rectangle()
-                        .fill(SavantPalette.divider)
-                        .frame(height: SavantGeo.hairline)
+                .background(SavantPalette.canvas.ignoresSafeArea())
+                .sheet(isPresented: $showingPaywall) {
+                    PaywallView(trigger: .playerComparison)
                 }
-                .offset(y: -8)
             }
-            .background(SavantPalette.canvas.ignoresSafeArea())
-            .sheet(isPresented: $showingPaywall) {
-                PaywallView(trigger: .playerComparison)
+        }
+        .onAppear {
+            if store.isPro {
+                ReviewPromptTracker.recordPositiveMoment()
             }
         }
     }

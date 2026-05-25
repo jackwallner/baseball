@@ -41,7 +41,16 @@ struct DashboardView: View {
         .background(SavantPalette.canvas)
         .sheet(isPresented: $showingAbout) {
             NavigationStack {
-                AboutView(lastUpdated: viewModel.lastUpdated)
+                AboutView(
+                    lastUpdated: viewModel.lastUpdated,
+                    onRequestReview: {
+                        showingAbout = false
+                        Task { @MainActor in
+                            try? await Task.sleep(nanoseconds: 400_000_000)
+                            ReviewPromptCoordinator.shared.requestEnjoymentPrompt()
+                        }
+                    }
+                )
                     .navigationTitle("About")
                     .navigationBarTitleDisplayMode(.inline)
                     .toolbar {

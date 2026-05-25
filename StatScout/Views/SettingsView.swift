@@ -3,6 +3,7 @@ import SwiftUI
 struct AboutView: View {
     @EnvironmentObject private var store: StoreService
     let lastUpdated: Date?
+    var onRequestReview: (() -> Void)?
     @State private var paywallTrigger: PaywallTrigger?
 
     private var version: String {
@@ -146,6 +147,23 @@ struct AboutView: View {
     private var linkCard: some View {
         VStack(spacing: 0) {
             SavantSectionBar(title: "SUPPORT & PRIVACY")
+            Button {
+                if let onRequestReview {
+                    onRequestReview()
+                } else {
+                    ReviewPromptCoordinator.shared.requestEnjoymentPrompt()
+                }
+            } label: {
+                row(
+                    icon: "star.fill",
+                    title: "Rate or Send Feedback",
+                    subtitle: "Help StatScout grow — or tell us what to improve."
+                )
+            }
+            .buttonStyle(.plain)
+
+            Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline)
+
             if let supportURL = URL(string: "https://jackwallner.github.io/baseball/support.html") {
                 Link(destination: supportURL) {
                     row(

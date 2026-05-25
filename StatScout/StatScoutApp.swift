@@ -7,6 +7,7 @@ struct StatScoutApp: App {
     @StateObject private var store = StoreService.shared
 
     init() {
+        ReviewPromptTracker.recordAppLaunch()
         guard let urlString = Self.configValue(for: "SUPABASE_URL"),
               let url = URL(string: urlString),
               let key = Self.configValue(for: "SUPABASE_ANON_KEY") else {

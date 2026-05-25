@@ -1,3 +1,4 @@
+import StoreKit
 import SwiftUI
 
 struct TeamDestination: Hashable {
@@ -10,10 +11,17 @@ struct MetricRoute: Hashable {
 }
 
 struct RootTabView: View {
+    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     @EnvironmentObject private var store: StoreService
+    @Environment(\.requestReview) private var requestReview
+    @StateObject private var reviewPromptCoordinator = ReviewPromptCoordinator.shared
     @State private var viewModel: DashboardViewModel
     @State private var selection = 0
     @State private var showingAbout = false
+    @State private var showReviewPrompt = false
+    @State private var reviewPromptInitialStep: ReviewPromptSheet.Step = .enjoyment
+    @State private var reviewPromptShownThisSession = false
+    @State private var pendingNativeReviewAfterDismiss = false
     // Owned here so TeamsView can auto-push the favorite team and the user can
     // still pop back to the list.
     @State private var teamsPath = NavigationPath()
@@ -27,7 +35,16 @@ struct RootTabView: View {
             .tint(SavantPalette.savantRed)
             .sheet(isPresented: $showingAbout) {
             NavigationStack {
-                AboutView(lastUpdated: viewModel.lastUpdated)
+                AboutView(
+                    lastUpdated: viewModel.lastUpdated,
+                    onRequestReview: {
+                        showingAbout = false
+                        Task { @MainActor in
+                            try? await Task.sleep(nanoseconds: 400_000_000)
+                            ReviewPromptCoordinator.shared.requestEnjoymentPrompt()
+                        }
+                    }
+                )
                     .navigationTitle("About")
                     .navigationBarTitleDisplayMode(.inline)
                     .modifier(SavantNavBar())
@@ -40,6 +57,61 @@ struct RootTabView: View {
             }
             .presentationDragIndicator(.visible)
         }
+        .sheet(isPresented: $showReviewPrompt, onDismiss: {
+            if pendingNativeReviewAfterDismiss {
+                pendingNativeReviewAfterDismiss = false
+                requestReview()
+            }
+        }) {
+            ReviewPromptSheet(initialStep: reviewPromptInitialStep, onFinish: handleReviewPromptFinish)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .statscoutPositiveMomentForReview)) { _ in
+            scheduleReviewPromptAfterPositiveMoment()
+        }
+        .onChange(of: reviewPromptCoordinator.pendingPresentation) { _, presentation in
+            guard let presentation else { return }
+            defer { reviewPromptCoordinator.clear() }
+            guard !showReviewPrompt else { return }
+            switch presentation {
+            case .enjoymentPrompt:
+                presentReviewPrompt(step: .enjoyment)
+            case .feedbackOnly:
+                presentReviewPrompt(step: .feedback)
+            }
+        }
+    }
+
+    private func scheduleReviewPromptAfterPositiveMoment() {
+        guard ReviewPromptTracker.shouldShowAfterPositiveMoment(hasCompletedOnboarding: hasCompletedOnboarding),
+              !reviewPromptShownThisSession,
+              !showingAbout,
+              !showReviewPrompt
+        else { return }
+
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 3_500_000_000)
+            guard !showingAbout,
+                  !showReviewPrompt,
+                  ReviewPromptTracker.shouldShowAfterPositiveMoment(hasCompletedOnboarding: hasCompletedOnboarding)
+            else { return }
+            ReviewPromptTracker.consumePendingPositiveMoment()
+            reviewPromptInitialStep = .enjoyment
+            reviewPromptShownThisSession = true
+            showReviewPrompt = true
+        }
+    }
+
+    private func handleReviewPromptFinish(_ outcome: ReviewPromptDismissOutcome) {
+        showReviewPrompt = false
+        if outcome == .enjoyedMaybeLater {
+            pendingNativeReviewAfterDismiss = true
+        }
+    }
+
+    private func presentReviewPrompt(step: ReviewPromptSheet.Step) {
+        reviewPromptInitialStep = step
+        reviewPromptShownThisSession = true
+        showReviewPrompt = true
     }
 
     private var tabView: some View {

@@ -162,6 +162,10 @@ struct PlayerProfileView: View {
             if !store.isPro, opens >= 2, PaywallGate.shared.shouldPresent(.playerScouting) {
                 showTrialPitch = true
             }
+            // Third+ profile visit = engaged browsing; never on open 2 (trial pitch).
+            if opens >= 3 {
+                ReviewPromptTracker.recordPositiveMoment()
+            }
         }
     }
 
