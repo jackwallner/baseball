@@ -28,13 +28,19 @@ struct TrialPitchSheet: View {
             return [
                 Benefit(icon: "flame.fill",
                         title: "Recent form",
-                        detail: "Last 7 / 15 / 30 day splits — spot hot streaks and slumps before anyone else."),
+                        detail: "Last 7 / 15 / 30 day splits on any player or team — season vs. recent on one screen."),
                 Benefit(icon: "person.2.fill",
                         title: "Head-to-head matchups",
-                        detail: "Pit any two players side by side — every Statcast metric, this season."),
+                        detail: "Stack any two players across every Statcast percentile — xwOBA, Barrel%, Sprint Speed, and more."),
+                Benefit(icon: "arrow.left.arrow.right.circle.fill",
+                        title: "Year-over-year trends",
+                        detail: "Compare any two seasons and see which metrics moved — not just this year's snapshot."),
+                Benefit(icon: "calendar.badge.clock",
+                        title: "Every past season",
+                        detail: "Browse back to 2020 — full percentile history, not locked to the current year."),
                 Benefit(icon: "shield.lefthalf.filled",
                         title: "Full team scouting",
-                        detail: "Every player on every roster, not just qualified starters.")
+                        detail: "Every player on every roster, tap any team stat to sort the whole squad.")
             ]
         case .pastSeason, .pastSeasonsLoad, .yearCompare:
             return [

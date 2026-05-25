@@ -11,6 +11,8 @@ struct TeamView: View {
     @State private var isSearching = false
     // Default to Hitting so the roster always shows a meaningful sort metric.
     @State private var selectedCategory: MetricCategory? = .hitting
+    /// Explicit sort from tapping a team percentile bar (e.g. BB%).
+    @State private var rosterSortMetric: (label: String, category: MetricCategory)? = nil
     @State private var sortDescending = true
     @State private var lastDefaultedSortKey: String? = nil
     @State private var showingPaywall = false
@@ -24,6 +26,7 @@ struct TeamView: View {
     }
 
     private var sortMetric: (label: String, category: MetricCategory)? {
+        if let explicit = rosterSortMetric { return explicit }
         guard let category = selectedCategory else { return nil }
         for label in priorityMetrics(for: category) {
             if players.contains(where: { p in p.metrics.contains { $0.label == label && $0.category == category } }) {
@@ -85,22 +88,17 @@ struct TeamView: View {
             LazyVStack(spacing: 0) {
                 TeamIdentityStrip(team: team, season: displaySeason)
 
-                TeamFormCard(
-                    team: team,
-                    season: displaySeason,
-                    leaguePlayers: leaguePlayers,
-                    fetchTeamGameLogs: fetchTeamGameLogs,
-                    onUpgradeTap: {
-                        if PaywallGate.shared.shouldPresent(.teamView) { showingPaywall = true }
-                    }
-                )
-                .padding(.horizontal, 12)
-                .padding(.top, 12)
-
                 TeamAveragePlayerCard(
                     team: team,
                     players: players,
-                    leaguePlayers: leaguePlayers
+                    leaguePlayers: leaguePlayers,
+                    rosterSortMetric: rosterSortMetric,
+                    onSelectSortMetric: { label, category in
+                        rosterSortMetric = (label, category)
+                        selectedCategory = category
+                        applyDefaultDirectionIfMetricChanged()
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    }
                 )
                 .padding(.horizontal, 12)
                 .padding(.top, 12)
@@ -118,6 +116,18 @@ struct TeamView: View {
 
                 rosterSection
 
+                TeamFormCard(
+                    team: team,
+                    season: displaySeason,
+                    leaguePlayers: leaguePlayers,
+                    fetchTeamGameLogs: fetchTeamGameLogs,
+                    onUpgradeTap: {
+                        if PaywallGate.shared.shouldPresent(.teamView) { showingPaywall = true }
+                    }
+                )
+                .padding(.horizontal, 12)
+                .padding(.top, 12)
+
                 // Lets the roster scroll under the floating tab bar so the
                 // last rows aren't trapped behind it — matches Dashboard.
                 Color.clear.frame(height: 88)
@@ -134,7 +144,10 @@ struct TeamView: View {
             }
         }
         .onAppear { applyDefaultDirectionIfMetricChanged() }
-        .onChange(of: selectedCategory) { _, _ in applyDefaultDirectionIfMetricChanged() }
+        .onChange(of: selectedCategory) { _, _ in
+            rosterSortMetric = nil
+            applyDefaultDirectionIfMetricChanged()
+        }
         .sheet(isPresented: $showingPaywall) {
             PaywallView(trigger: .teamView)
         }
@@ -379,6 +392,8 @@ struct TeamAveragePlayerCard: View {
     let team: String
     let players: [Player]
     let leaguePlayers: [Player]
+    var rosterSortMetric: (label: String, category: MetricCategory)?
+    var onSelectSortMetric: (String, MetricCategory) -> Void
 
     enum Side: String, CaseIterable, Identifiable {
         case batting, pitching
@@ -392,12 +407,37 @@ struct TeamAveragePlayerCard: View {
     @State private var batterCurves: LeaguePercentileCurves?
     @State private var pitcherCurves: LeaguePercentileCurves?
 
-    private static let battingMetrics: [String] = ["xwOBA", "Barrel%", "Hard-Hit%", "EV", "K%", "BB%"]
-    private static let pitchingMetrics: [String] = ["xwOBA", "K%", "BB%", "Whiff%", "Barrel%", "Hard-Hit%"]
+    private var rosterPool: [Player] {
+        players.filter { ($0.playerType ?? "") == side.playerType }
+    }
+
+    /// Every metric label present on this roster for the active side, in Savant order.
+    private var metricLabels: [String] {
+        let present = Set(rosterPool.flatMap { p in
+            p.metrics.filter { $0.category == side.category }.map(\.label)
+        })
+        let ordered = side.category.metricPriorityOrder.filter { present.contains($0) }
+        let remainder = present.subtracting(side.category.metricPriorityOrder).sorted()
+        return ordered + remainder
+    }
 
     var body: some View {
         VStack(spacing: 0) {
-            header
+            SavantSectionBar(
+                title: "TEAM PERCENTILE RANKINGS",
+                trailing: AnyView(
+                    Text("TAP A STAT TO SORT ROSTER")
+                        .font(SavantType.micro)
+                        .tracking(0.4)
+                        .foregroundStyle(SavantPalette.inkTertiary)
+                )
+            )
+
+            sidePicker
+                .padding(.horizontal, SavantGeo.padInline)
+                .padding(.vertical, 8)
+                .background(SavantPalette.surfaceAlt)
+
             barList
         }
         .background(SavantPalette.surface)
@@ -411,39 +451,9 @@ struct TeamAveragePlayerCard: View {
     }
 
     private func rebuildCurves() {
-        let labels = Array(Set(Self.battingMetrics + Self.pitchingMetrics))
+        let labels = Array(Set(players.flatMap { $0.metrics.map(\.label) }))
         batterCurves = LeaguePercentileCurves(players: leaguePlayers, playerType: "batter", labels: labels)
         pitcherCurves = LeaguePercentileCurves(players: leaguePlayers, playerType: "pitcher", labels: labels)
-    }
-
-    private var header: some View {
-        VStack(spacing: 8) {
-            HStack(spacing: 8) {
-                Image(systemName: "person.crop.square.filled.and.at.rectangle")
-                    .font(.system(size: 12, weight: .bold))
-                    .foregroundStyle(SavantPalette.savantRed)
-                Text("TEAM AVERAGE")
-                    .font(SavantType.micro)
-                    .tracking(0.6)
-                    .foregroundStyle(SavantPalette.inkSecondary)
-                Spacer()
-                Text("WEIGHTED BY \(side == .pitching ? "IP" : "PA")")
-                    .font(SavantType.micro)
-                    .tracking(0.4)
-                    .foregroundStyle(SavantPalette.inkTertiary)
-            }
-            .padding(.horizontal, SavantGeo.padInline)
-            .padding(.top, 12)
-
-            sidePicker
-                .padding(.horizontal, SavantGeo.padInline)
-                .padding(.bottom, 10)
-        }
-        .background(SavantPalette.surfaceAlt)
-        .overlay(
-            Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline),
-            alignment: .bottom
-        )
     }
 
     private var sidePicker: some View {
@@ -486,32 +496,57 @@ struct TeamAveragePlayerCard: View {
             .frame(maxWidth: .infinity)
             .padding(.vertical, 22)
         } else {
+            SavantSubSectionBar(title: side.category.rawValue.uppercased())
+
             VStack(spacing: 0) {
                 ForEach(Array(rows.enumerated()), id: \.element.id) { index, metric in
-                    MetricBar(metric: metric)
-                        .padding(.horizontal, SavantGeo.padCard)
-                        .padding(.vertical, 12)
-                        .background(index % 2 == 0 ? SavantPalette.surface : SavantPalette.surfaceAlt)
-                        .overlay(
-                            Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline),
-                            alignment: .bottom
-                        )
+                    let isActive = rosterSortMetric?.label == metric.label
+                        && rosterSortMetric?.category == metric.category
+                    Button {
+                        onSelectSortMetric(metric.label, metric.category)
+                    } label: {
+                        MetricBar(metric: metric)
+                            .padding(.horizontal, SavantGeo.padCard)
+                            .padding(.vertical, 12)
+                            .background(
+                                isActive
+                                    ? SavantPalette.savantRed.opacity(0.08)
+                                    : (index % 2 == 0 ? SavantPalette.surface : SavantPalette.surfaceAlt)
+                            )
+                            .overlay(
+                                Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline),
+                                alignment: .bottom
+                            )
+                            .overlay(alignment: .leading) {
+                                if isActive {
+                                    Rectangle()
+                                        .fill(SavantPalette.savantRed)
+                                        .frame(width: 3)
+                                }
+                            }
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityHint("Sort roster by \(metric.label)")
                 }
             }
+
+            Text("Weighted by \(side == .pitching ? "IP" : "PA") across the \(side.label.lowercased()) roster")
+                .font(SavantType.micro)
+                .tracking(0.3)
+                .foregroundStyle(SavantPalette.inkTertiary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, SavantGeo.padCard)
+                .padding(.vertical, 10)
         }
     }
 
-    /// One bar per spec metric. For each metric we pull every roster player's
-    /// raw season value, weight by PA (batters) / IP (pitchers), take the
-    /// weighted mean, then map onto the league curve so the bar shares the
-    /// same ruler as individual players' season bars.
+    /// One bar per roster metric. Weighted mean → league percentile curve.
     private func aggregateRows() -> [Metric] {
         let curves = side == .pitching ? pitcherCurves : batterCurves
-        let labels = side == .pitching ? Self.pitchingMetrics : Self.battingMetrics
-        let pool = players.filter { ($0.playerType ?? "") == side.playerType }
+        let pool = rosterPool
         guard !pool.isEmpty, let curves else { return [] }
 
-        return labels.compactMap { label -> Metric? in
+        return metricLabels.compactMap { label -> Metric? in
             var weightedSum = 0.0
             var weightTotal = 0.0
             for player in pool {

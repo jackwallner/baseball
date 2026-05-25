@@ -171,14 +171,53 @@ struct OnboardingCards: View {
 
     @ViewBuilder
     private var bottomButtons: some View {
-        if isLastPage {
-            VStack(spacing: 10) {
-                // Primary action is always entering the app — never blocked on
-                // data load or a purchase, so a user can't get trapped here.
+        VStack(spacing: 10) {
+            if isLastPage {
+                if !store.isPro {
+                    Button {
+                        paywallTrigger = .onboarding
+                    } label: {
+                        Text(proCTALabel)
+                            .font(SavantType.bodyBold)
+                            .foregroundStyle(.white)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 52)
+                            .background(SavantPalette.savantNavy)
+                            .clipShape(RoundedRectangle(cornerRadius: 14))
+                    }
+                    .buttonStyle(.plain)
+
+                    if let disclosure = trialDisclosure {
+                        Text(disclosure)
+                            .font(SavantType.micro)
+                            .tracking(0.3)
+                            .foregroundStyle(SavantPalette.inkTertiary)
+                            .multilineTextAlignment(.center)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+
                 Button {
                     withAnimation { hasCompletedOnboarding = true }
                 } label: {
                     Text("Get Started")
+                        .font(SavantType.bodyBold)
+                        .foregroundStyle(store.isPro ? .white : SavantPalette.ink)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 52)
+                        .background(store.isPro ? SavantPalette.savantRed : SavantPalette.surface)
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 14)
+                                .stroke(store.isPro ? Color.clear : SavantPalette.hairline, lineWidth: 0.5)
+                        )
+                }
+                .buttonStyle(.plain)
+            } else {
+                Button {
+                    withAnimation { currentPage += 1 }
+                } label: {
+                    Text("Continue")
                         .font(SavantType.bodyBold)
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
@@ -187,8 +226,11 @@ struct OnboardingCards: View {
                         .clipShape(RoundedRectangle(cornerRadius: 14))
                 }
                 .buttonStyle(.plain)
+            }
 
-                if !dataReady {
+            // Fixed-height footer slot so the primary CTA doesn't jump between pages.
+            Group {
+                if isLastPage, !dataReady {
                     HStack(spacing: 8) {
                         ProgressView()
                             .progressViewStyle(.circular)
@@ -199,39 +241,23 @@ struct OnboardingCards: View {
                             .tracking(0.4)
                     }
                     .foregroundStyle(SavantPalette.inkSecondary)
-                    .frame(height: 20)
+                } else if isLastPage {
+                    Button {
+                        Task { await store.restorePurchases() }
+                    } label: {
+                        Text("Restore Purchases")
+                            .font(SavantType.micro)
+                            .tracking(0.4)
+                            .foregroundStyle(SavantPalette.inkTertiary)
+                    }
+                    .buttonStyle(.plain)
+                } else {
+                    Color.clear
                 }
-
-                // No Pro pitch here — the ask is deliberately deferred to a
-                // one-time full-screen paywall on the user's first meaningful
-                // action (opening a player), after they've felt the value.
-                // Restore stays so a reinstalling subscriber isn't funneled
-                // through a paywall just to get their purchase back.
-                Button {
-                    Task { await store.restorePurchases() }
-                } label: {
-                    Text("Restore Purchases")
-                        .font(SavantType.micro)
-                        .tracking(0.4)
-                        .foregroundStyle(SavantPalette.inkTertiary)
-                        .frame(height: 24)
-                }
-                .buttonStyle(.plain)
             }
-        } else {
-            Button {
-                withAnimation { currentPage += 1 }
-            } label: {
-                Text("Continue")
-                    .font(SavantType.bodyBold)
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 52)
-                    .background(SavantPalette.savantRed)
-                    .clipShape(RoundedRectangle(cornerRadius: 14))
-            }
-            .buttonStyle(.plain)
+            .frame(height: 24)
         }
+        .frame(minHeight: isLastPage ? 148 : 52, alignment: .top)
     }
 
     private let pages: [OnboardingPage] = [
@@ -253,6 +279,16 @@ struct OnboardingCards: View {
                 BulletItem(text: "Stats — sort the league, leaders, best & worst", icon: "checkmark.circle.fill", color: SavantPalette.savantRed),
                 BulletItem(text: "Teams — browse any roster, see who's hot", icon: "checkmark.circle.fill", color: SavantPalette.savantRed),
                 BulletItem(text: "Compare — stack two players head-to-head", icon: "checkmark.circle.fill", color: SavantPalette.savantRed)
+            ]
+        ),
+        OnboardingPage(
+            icon: "crown.fill",
+            title: "Go Deeper\nwith StatScout+",
+            description: "Recent form, every roster player, head-to-head matchups, and seasons back to 2020 — the full scouting toolkit.",
+            bullets: [
+                BulletItem(text: "Last 7 / 15 / 30 day form on any player or team", icon: "flame.fill", color: SavantPalette.savantRed),
+                BulletItem(text: "Head-to-head comparisons across every metric", icon: "person.2.fill", color: SavantPalette.savantRed),
+                BulletItem(text: "Year-over-year trends and every past season", icon: "calendar.badge.clock", color: SavantPalette.savantRed)
             ]
         )
     ]

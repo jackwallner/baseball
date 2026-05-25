@@ -100,12 +100,11 @@ struct SavantSectionBar: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            Rectangle().fill(SavantPalette.savantRed).frame(width: 2)
             Text(title.uppercased())
                 .font(SavantType.sectionTitle)
                 .tracking(0.8)
                 .foregroundStyle(SavantPalette.ink)
-                .padding(.leading, 10)
+                .padding(.leading, SavantGeo.padCard)
             Spacer()
             if let trailing { trailing.padding(.trailing, 12) }
         }

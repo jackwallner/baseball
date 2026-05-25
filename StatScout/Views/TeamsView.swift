@@ -234,13 +234,19 @@ struct TeamsView: View {
             } else {
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 3), spacing: 10) {
                     ForEach(filteredTeams, id: \.self) { abbr in
-                        NavigationLink(value: TeamDestination(abbr: abbr)) {
-                            TeamGridTile(
-                                abbr: abbr,
-                                isFavorite: teamsViewModel.isFavorite(abbr)
-                            )
-                        }
-                        .buttonStyle(.plain)
+                        TeamGridTile(
+                            abbr: abbr,
+                            isFavorite: teamsViewModel.isFavorite(abbr),
+                            onFavoriteTap: {
+                                if teamsViewModel.isFavorite(abbr) {
+                                    teamsViewModel.removeFavorite()
+                                } else {
+                                    teamsViewModel.setFavorite(abbr)
+                                }
+                                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                            },
+                            destination: TeamDestination(abbr: abbr)
+                        )
                         .contextMenu {
                             Button {
                                 if teamsViewModel.isFavorite(abbr) {
@@ -271,30 +277,42 @@ struct TeamsView: View {
 struct TeamGridTile: View {
     let abbr: String
     let isFavorite: Bool
+    var onFavoriteTap: (() -> Void)? = nil
+    let destination: TeamDestination
 
     var body: some View {
-        VStack(spacing: 8) {
-            ZStack(alignment: .topTrailing) {
-                ZStack {
-                    Circle()
-                        .fill(MLBTeamColor.color(abbr))
-                        .frame(width: 64, height: 64)
-                        .shadow(color: Color.black.opacity(0.08), radius: 4, y: 2)
-                    Text(abbr)
-                        .font(SavantFont.condensed(20, weight: .black))
-                        .foregroundStyle(.white)
-                }
-                .frame(maxWidth: .infinity)
+        ZStack(alignment: .topTrailing) {
+            NavigationLink(value: destination) {
+                tileBody
+            }
+            .buttonStyle(.plain)
 
-                if isFavorite {
-                    Image(systemName: "star.fill")
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundStyle(Color.yellow)
-                        .padding(4)
-                        .background(Circle().fill(SavantPalette.surface))
-                        .overlay(Circle().stroke(SavantPalette.hairline, lineWidth: 0.5))
-                        .offset(x: 22, y: -4)
-                }
+            Button {
+                onFavoriteTap?()
+            } label: {
+                Image(systemName: isFavorite ? "star.fill" : "star")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(isFavorite ? Color.yellow : SavantPalette.inkTertiary)
+                    .padding(6)
+                    .background(Circle().fill(SavantPalette.surface))
+                    .overlay(Circle().stroke(SavantPalette.hairline, lineWidth: 0.5))
+            }
+            .buttonStyle(.borderless)
+            .accessibilityLabel(isFavorite ? "Remove favorite" : "Set as favorite")
+            .padding(6)
+        }
+    }
+
+    private var tileBody: some View {
+        VStack(spacing: 8) {
+            ZStack {
+                Circle()
+                    .fill(MLBTeamColor.color(abbr))
+                    .frame(width: 64, height: 64)
+                    .shadow(color: Color.black.opacity(0.08), radius: 4, y: 2)
+                Text(abbr)
+                    .font(SavantFont.condensed(20, weight: .black))
+                    .foregroundStyle(.white)
             }
             .frame(height: 64)
 

@@ -18,8 +18,19 @@ struct PlayerProfileView: View {
     @State private var showingPlayerPicker = false
     @State private var comparisonRoute: ComparisonRoute?
     @State private var showTrialPitch = false
+    @State private var formDisplayMode: FormDisplayMode = .season
+    @State private var recentWindowDays: Int = 15
+    @State private var recentLogs: [PlayerGameLog] = []
+    @State private var recentLoading = false
+    @State private var recentCurves: LeaguePercentileCurves?
 
     private let profileOpenCountKey = "profileOpenCount"
+
+    enum FormDisplayMode: String, CaseIterable {
+        case season = "Season"
+        case recent = "Recent"
+        case both = "Both"
+    }
 
     enum PlayerStatTab: String, CaseIterable {
         case statcast = "Percentiles"
@@ -53,12 +64,6 @@ struct PlayerProfileView: View {
             guard let m = grouped[cat], !m.isEmpty else { return nil }
             return (category: cat, metrics: m.sorted { cat.sortMetrics($0.label, $1.label) })
         }
-    }
-
-    /// Baseball Savant's fixed metric ordering per category so the layout is consistent
-    /// across players — makes it easy to find the same stat in the same spot every time.
-    private var previewMetrics: [Metric] {
-        Array(groupedMetrics.flatMap { $0.metrics }.sorted { $0.percentile > $1.percentile }.prefix(3))
     }
 
     /// Players eligible for comparison: same player type (hitter↔hitter, pitcher↔pitcher),
@@ -244,13 +249,15 @@ struct PlayerProfileView: View {
         VStack(spacing: 12) {
             percentileRankingsCard
 
-            RecentFormCard(
-                player: player,
-                season: activeSeason ?? player.season ?? Calendar.current.component(.year, from: .now),
-                leaguePlayers: allPlayers,
-                fetchGameLogs: fetchGameLogs,
-                onUpgradeTap: { paywallTrigger = .recentForm }
-            )
+            if !store.isPro {
+                RecentFormCard(
+                    player: player,
+                    season: activeSeason ?? player.season ?? Calendar.current.component(.year, from: .now),
+                    leaguePlayers: allPlayers,
+                    fetchGameLogs: fetchGameLogs,
+                    onUpgradeTap: { paywallTrigger = .recentForm }
+                )
+            }
 
             if !store.isPro {
                 proUpsellCard
@@ -478,6 +485,30 @@ struct PlayerProfileView: View {
         }
     }
 
+    private var formModePicker: some View {
+        HStack(spacing: 6) {
+            ForEach(FormDisplayMode.allCases, id: \.self) { mode in
+                Button {
+                    formDisplayMode = mode
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                } label: {
+                    Text(mode.rawValue)
+                        .font(SavantType.smallBold)
+                        .foregroundStyle(formDisplayMode == mode ? .white : SavantPalette.inkSecondary)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 30)
+                        .background(formDisplayMode == mode ? SavantPalette.savantRed : SavantPalette.surface)
+                        .clipShape(Capsule())
+                        .overlay(Capsule().stroke(SavantPalette.hairline, lineWidth: 0.5))
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.horizontal, SavantGeo.padInline)
+        .padding(.vertical, 10)
+        .background(SavantPalette.surfaceAlt)
+    }
+
     private var percentileRankingsCard: some View {
         VStack(spacing: 0) {
             SavantSectionBar(
@@ -495,6 +526,30 @@ struct PlayerProfileView: View {
                 )
             )
 
+            if store.isPro {
+                formModePicker
+            }
+
+            if formDisplayMode != .season, store.isPro {
+                recentWindowPicker
+                if recentLoading {
+                    HStack(spacing: 10) {
+                        ProgressView().scaleEffect(0.75)
+                        Text("Loading recent games…")
+                            .font(SavantType.small)
+                            .foregroundStyle(SavantPalette.inkSecondary)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                } else if recentWindow == nil {
+                    Text("No games in the last \(recentWindowDays) days")
+                        .font(SavantType.small)
+                        .foregroundStyle(SavantPalette.inkSecondary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                }
+            }
+
             if groupedMetrics.isEmpty {
                 emptyStateCard(
                     icon: "chart.bar",
@@ -508,20 +563,8 @@ struct PlayerProfileView: View {
                     title: "\(group.category.rawValue.uppercased())"
                 )
 
-                ForEach(Array(group.metrics.enumerated()), id: \.element.id) { index, metric in
-                    NavigationLink(value: MetricRoute(label: metric.label, category: metric.category)) {
-                        MetricBar(metric: metric)
-                            .padding(.horizontal, SavantGeo.padCard)
-                            .padding(.vertical, 12)
-                            .background(index % 2 == 0 ? SavantPalette.surface : SavantPalette.surfaceAlt)
-                            .overlay(
-                                Rectangle()
-                                    .fill(SavantPalette.divider)
-                                    .frame(height: SavantGeo.hairline),
-                                alignment: .bottom
-                            )
-                    }
-                    .buttonStyle(.plain)
+                ForEach(Array(displayedMetrics(in: group.metrics).enumerated()), id: \.element.id) { index, metric in
+                    percentileMetricRow(metric: metric, index: index)
                 }
                 }
             }
@@ -532,6 +575,151 @@ struct PlayerProfileView: View {
             RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
                 .stroke(SavantPalette.hairline, lineWidth: 0.5)
         )
+        .task(id: "\(formDisplayMode)-\(recentWindowDays)-\(player.playerId)") {
+            guard store.isPro, formDisplayMode != .season else { return }
+            rebuildRecentCurves()
+            await loadRecentLogs()
+        }
+        .onAppear { rebuildRecentCurves() }
+        .onChange(of: allPlayers.count) { _, _ in rebuildRecentCurves() }
+    }
+
+    private var isPitcher: Bool { player.playerType == "pitcher" }
+
+    private var recentWindow: RecentFormWindow? {
+        let cutoff = Calendar.current.date(byAdding: .day, value: -recentWindowDays, to: .now) ?? .now
+        let windowLogs = recentLogs.filter { $0.gameDate >= cutoff }
+        guard !windowLogs.isEmpty else { return nil }
+        return RecentFormWindow.build(label: "Last \(recentWindowDays)", days: recentWindowDays, logs: windowLogs)
+    }
+
+    private var recentWindowPicker: some View {
+        HStack(spacing: 6) {
+            ForEach(RecentFormWindow.windows, id: \.days) { w in
+                Button {
+                    recentWindowDays = w.days
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                } label: {
+                    Text(w.label)
+                        .font(SavantType.smallBold)
+                        .foregroundStyle(recentWindowDays == w.days ? .white : SavantPalette.inkSecondary)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 28)
+                        .background(recentWindowDays == w.days ? SavantPalette.savantRed : SavantPalette.surface)
+                        .clipShape(Capsule())
+                        .overlay(Capsule().stroke(SavantPalette.hairline, lineWidth: 0.5))
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.horizontal, SavantGeo.padInline)
+        .padding(.bottom, 8)
+        .background(SavantPalette.surfaceAlt)
+    }
+
+    private func displayedMetrics(in metrics: [Metric]) -> [Metric] {
+        guard formDisplayMode == .recent, store.isPro else { return metrics }
+        return metrics.filter { recentMetric(for: $0) != nil }
+    }
+
+    @ViewBuilder
+    private func percentileMetricRow(metric: Metric, index: Int) -> some View {
+        let recentMetric = recentMetric(for: metric)
+        let rowBackground = index % 2 == 0 ? SavantPalette.surface : SavantPalette.surfaceAlt
+
+        switch formDisplayMode {
+        case .season:
+            NavigationLink(value: MetricRoute(label: metric.label, category: metric.category)) {
+                MetricBar(metric: metric)
+                    .padding(.horizontal, SavantGeo.padCard)
+                    .padding(.vertical, 12)
+                    .background(rowBackground)
+                    .overlay(
+                        Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline),
+                        alignment: .bottom
+                    )
+            }
+            .buttonStyle(.plain)
+        case .recent:
+            if let recentMetric {
+                MetricBar(metric: recentMetric)
+                    .padding(.horizontal, SavantGeo.padCard)
+                    .padding(.vertical, 12)
+                    .background(rowBackground)
+                    .overlay(
+                        Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline),
+                        alignment: .bottom
+                    )
+            }
+        case .both:
+            NavigationLink(value: MetricRoute(label: metric.label, category: metric.category)) {
+                DualMetricBar(
+                    season: metric,
+                    recent: recentMetric,
+                    recentCaption: "Last \(recentWindowDays)d"
+                )
+                .padding(.horizontal, SavantGeo.padCard)
+                .padding(.vertical, 12)
+                .background(rowBackground)
+                .overlay(
+                    Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline),
+                    alignment: .bottom
+                )
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    private func recentMetric(for seasonMetric: Metric) -> Metric? {
+        guard let w = recentWindow else { return nil }
+        let specs: [(key: String, label: String, seasonLabel: String, format: String)] = isPitcher
+            ? [
+                ("opp_xwoba", "xwOBA", "xwOBA", "%.3f"),
+                ("k_pct", "K%", "K%", "%.1f%%"),
+                ("bb_pct", "BB%", "BB%", "%.1f%%"),
+                ("opp_hardhit_pct", "Hard-Hit%", "Hard-Hit%", "%.1f%%"),
+                ("opp_barrel_pct", "Barrel%", "Barrel%", "%.1f%%"),
+                ("opp_ev_avg", "EV", "EV", "%.1f mph"),
+            ]
+            : [
+                ("xwoba", "xwOBA", "xwOBA", "%.3f"),
+                ("barrel_pct", "Barrel%", "Barrel%", "%.1f%%"),
+                ("hardhit_pct", "Hard-Hit%", "Hard-Hit%", "%.1f%%"),
+                ("ev_avg", "EV", "EV", "%.1f mph"),
+                ("k_pct", "K%", "K%", "%.1f%%"),
+                ("bb_pct", "BB%", "BB%", "%.1f%%"),
+            ]
+        guard let spec = specs.first(where: { $0.label == seasonMetric.label || $0.seasonLabel == seasonMetric.label }),
+              let v = w.metrics[spec.key],
+              let pct = recentCurves?.curve(for: spec.seasonLabel)?.percentile(for: v) else { return nil }
+        return Metric(
+            id: "recent-\(spec.key)",
+            label: seasonMetric.label,
+            value: String(format: spec.format, v),
+            percentile: pct,
+            category: seasonMetric.category
+        )
+    }
+
+    private func rebuildRecentCurves() {
+        let labels = ["xwOBA", "Barrel%", "Hard-Hit%", "EV", "K%", "BB%"]
+        recentCurves = LeaguePercentileCurves(
+            players: allPlayers,
+            playerType: player.playerType ?? (isPitcher ? "pitcher" : "batter"),
+            labels: labels
+        )
+    }
+
+    private func loadRecentLogs() async {
+        guard store.isPro, let fetch = fetchGameLogs,
+              let season = activeSeason ?? player.season else { return }
+        recentLoading = true
+        do {
+            recentLogs = try await fetch(player.playerId, season)
+        } catch {
+            recentLogs = []
+        }
+        recentLoading = false
     }
 
     private var standardStatsGridCard: some View {

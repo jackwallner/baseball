@@ -171,6 +171,38 @@ struct MetricBar: View {
     }
 }
 
+/// Season + recent percentile bars stacked in one row — same Savant layout,
+/// with a compact recent track under the season bar when both are available.
+struct DualMetricBar: View {
+    let season: Metric
+    var recent: Metric?
+    var recentCaption: String = "Recent"
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 6) {
+                Text("Season")
+                    .font(SavantType.micro)
+                    .tracking(0.4)
+                    .foregroundStyle(SavantPalette.inkTertiary)
+                    .frame(width: 52, alignment: .leading)
+                MetricBar(metric: season, showValue: true)
+            }
+
+            if let recent {
+                HStack(spacing: 6) {
+                    Text(recentCaption)
+                        .font(SavantType.micro)
+                        .tracking(0.4)
+                        .foregroundStyle(SavantPalette.savantRed)
+                        .frame(width: 52, alignment: .leading)
+                    MetricBar(metric: recent, showValue: true)
+                }
+            }
+        }
+    }
+}
+
 // MARK: - Search (restyled for light mode)
 
 struct SearchField: View {
