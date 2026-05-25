@@ -131,6 +131,10 @@ struct RootTabView: View {
                 .tabItem { Label("Compare", systemImage: "arrow.left.arrow.right") }
                 .tag(2)
         }
+        // The system draws a gray glass "platter" behind the bar that reads as a
+        // boxed border over the flat canvas. Hide it so the bar items float
+        // directly on the page.
+        .toolbarBackground(.hidden, for: .tabBar)
     }
 
     private var statsTab: some View {
