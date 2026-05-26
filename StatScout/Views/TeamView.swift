@@ -148,6 +148,13 @@ struct TeamView: View {
             rosterSortMetric = nil
             applyDefaultDirectionIfMetricChanged()
         }
+        // Season changes through the nav-bar menu rotate the roster data
+        // beneath us; clear the explicit sort so the chip never displays a
+        // metric the new season doesn't have.
+        .onChange(of: displaySeason) { _, _ in
+            rosterSortMetric = nil
+            applyDefaultDirectionIfMetricChanged()
+        }
         .sheet(isPresented: $showingPaywall) {
             PaywallView(trigger: .teamView)
         }

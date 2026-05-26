@@ -559,13 +559,16 @@ struct PlayerProfileView: View {
                 .padding(.vertical, 24)
             } else {
                 ForEach(groupedMetrics, id: \.category) { group in
-                SavantSubSectionBar(
-                    title: "\(group.category.rawValue.uppercased())"
-                )
+                    let rows = displayedMetrics(in: group.metrics)
+                    if !rows.isEmpty {
+                        SavantSubSectionBar(
+                            title: "\(group.category.rawValue.uppercased())"
+                        )
 
-                ForEach(Array(displayedMetrics(in: group.metrics).enumerated()), id: \.element.id) { index, metric in
-                    percentileMetricRow(metric: metric, index: index)
-                }
+                        ForEach(Array(rows.enumerated()), id: \.element.id) { index, metric in
+                            percentileMetricRow(metric: metric, index: index)
+                        }
+                    }
                 }
             }
         }
