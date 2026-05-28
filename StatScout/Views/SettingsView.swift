@@ -169,7 +169,7 @@ struct AboutView: View {
                     row(
                         icon: "envelope.fill",
                         title: "Contact Support",
-                        subtitle: "support@statscout.app"
+                        subtitle: "jackwallner@gmail.com"
                     )
                 }
                 .buttonStyle(.plain)
