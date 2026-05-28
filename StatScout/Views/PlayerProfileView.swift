@@ -622,7 +622,46 @@ struct PlayerProfileView: View {
 
     private func displayedMetrics(in metrics: [Metric]) -> [Metric] {
         guard formDisplayMode == .recent, store.isPro else { return metrics }
-        return metrics.filter { recentMetric(for: $0) != nil }
+        // Recent mode: render any spec that has window data, even if the player's
+        // season snapshot is missing that label (Savant sometimes omits e.g.
+        // Hard-Hit%). Inject a stub season metric in the matching category so the
+        // recent bar still renders — only `recentMetric` is drawn in this mode.
+        let targetCategory: MetricCategory = isPitcher ? .pitching : .hitting
+        let withRecent = metrics.filter { recentMetric(for: $0) != nil }
+        guard metrics.first?.category == targetCategory else { return withRecent }
+        let existing = Set(withRecent.map { $0.label })
+        let stubs: [Metric] = recentSpecs.compactMap { spec in
+            guard !existing.contains(spec.label) else { return nil }
+            let stub = Metric(
+                id: "recent-stub-\(spec.key)",
+                label: spec.label,
+                value: "",
+                percentile: 0,
+                category: targetCategory
+            )
+            return recentMetric(for: stub) != nil ? stub : nil
+        }
+        return withRecent + stubs
+    }
+
+    private var recentSpecs: [(key: String, label: String, seasonLabel: String, format: String)] {
+        isPitcher
+            ? [
+                ("opp_xwoba", "xwOBA", "xwOBA", "%.3f"),
+                ("k_pct", "K%", "K%", "%.1f%%"),
+                ("bb_pct", "BB%", "BB%", "%.1f%%"),
+                ("opp_hardhit_pct", "Hard-Hit%", "Hard-Hit%", "%.1f%%"),
+                ("opp_barrel_pct", "Barrel%", "Barrel%", "%.1f%%"),
+                ("opp_ev_avg", "EV", "Avg EV Against", "%.1f mph"),
+            ]
+            : [
+                ("xwoba", "xwOBA", "xwOBA", "%.3f"),
+                ("barrel_pct", "Barrel%", "Barrel%", "%.1f%%"),
+                ("hardhit_pct", "Hard-Hit%", "Hard-Hit%", "%.1f%%"),
+                ("ev_avg", "EV", "EV", "%.1f mph"),
+                ("k_pct", "K%", "K%", "%.1f%%"),
+                ("bb_pct", "BB%", "BB%", "%.1f%%"),
+            ]
     }
 
     @ViewBuilder
@@ -675,24 +714,7 @@ struct PlayerProfileView: View {
 
     private func recentMetric(for seasonMetric: Metric) -> Metric? {
         guard let w = recentWindow else { return nil }
-        let specs: [(key: String, label: String, seasonLabel: String, format: String)] = isPitcher
-            ? [
-                ("opp_xwoba", "xwOBA", "xwOBA", "%.3f"),
-                ("k_pct", "K%", "K%", "%.1f%%"),
-                ("bb_pct", "BB%", "BB%", "%.1f%%"),
-                ("opp_hardhit_pct", "Hard-Hit%", "Hard-Hit%", "%.1f%%"),
-                ("opp_barrel_pct", "Barrel%", "Barrel%", "%.1f%%"),
-                ("opp_ev_avg", "EV", "Avg EV Against", "%.1f mph"),
-            ]
-            : [
-                ("xwoba", "xwOBA", "xwOBA", "%.3f"),
-                ("barrel_pct", "Barrel%", "Barrel%", "%.1f%%"),
-                ("hardhit_pct", "Hard-Hit%", "Hard-Hit%", "%.1f%%"),
-                ("ev_avg", "EV", "EV", "%.1f mph"),
-                ("k_pct", "K%", "K%", "%.1f%%"),
-                ("bb_pct", "BB%", "BB%", "%.1f%%"),
-            ]
-        guard let spec = specs.first(where: { $0.label == seasonMetric.label || $0.seasonLabel == seasonMetric.label }),
+        guard let spec = recentSpecs.first(where: { $0.label == seasonMetric.label || $0.seasonLabel == seasonMetric.label }),
               let v = w.metrics[spec.key],
               let pct = recentCurves?.curve(for: spec.seasonLabel)?.percentile(for: v) else { return nil }
         return Metric(
