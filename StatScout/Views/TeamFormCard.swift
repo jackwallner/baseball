@@ -68,9 +68,11 @@ struct TeamFormCard: View {
     }
 
     private func rebuildCurves() {
-        let labels = ["xwOBA", "Barrel%", "Hard-Hit%", "EV", "K%", "BB%"]
-        batterCurves = LeaguePercentileCurves(players: leaguePlayers, playerType: "batter", labels: labels)
-        pitcherCurves = LeaguePercentileCurves(players: leaguePlayers, playerType: "pitcher", labels: labels)
+        // Pitchers' season exit velocity is labeled "Avg EV Against", not "EV".
+        let batterLabels = ["xwOBA", "Barrel%", "Hard-Hit%", "EV", "K%", "BB%"]
+        let pitcherLabels = ["xwOBA", "Barrel%", "Hard-Hit%", "Avg EV Against", "K%", "BB%"]
+        batterCurves = LeaguePercentileCurves(players: leaguePlayers, playerType: "batter", labels: batterLabels)
+        pitcherCurves = LeaguePercentileCurves(players: leaguePlayers, playerType: "pitcher", labels: pitcherLabels)
     }
 
     private var header: some View {
@@ -290,7 +292,7 @@ struct TeamFormCard: View {
                 ("bb_pct",          "BB%",           "BB%",       "%.1f%%"),
                 ("opp_hardhit_pct", "Opp Hard-Hit%", "Hard-Hit%", "%.1f%%"),
                 ("opp_barrel_pct",  "Opp Barrel%",   "Barrel%",   "%.1f%%"),
-                ("opp_ev_avg",      "Opp EV",        "EV",        "%.1f mph"),
+                ("opp_ev_avg",      "Opp EV",        "Avg EV Against", "%.1f mph"),
             ]
             : [
                 ("xwoba",       "xwOBA",     "xwOBA",     "%.3f"),

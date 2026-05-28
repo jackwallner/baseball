@@ -64,7 +64,9 @@ struct RecentFormCard: View {
 
     private func rebuildCurves() {
         guard store.isPro else { return }
-        let labels = ["xwOBA", "Barrel%", "Hard-Hit%", "EV", "K%", "BB%"]
+        // Pitchers' season exit velocity is labeled "Avg EV Against", not "EV".
+        let evLabel = isPitcher ? "Avg EV Against" : "EV"
+        let labels = ["xwOBA", "Barrel%", "Hard-Hit%", evLabel, "K%", "BB%"]
         curves = LeaguePercentileCurves(
             players: leaguePlayers,
             playerType: player.playerType ?? (isPitcher ? "pitcher" : "batter"),
@@ -286,7 +288,7 @@ struct RecentFormCard: View {
                 ("bb_pct",          "BB%",         "BB%",       "%.1f%%"),
                 ("opp_hardhit_pct", "Hard-Hit%",   "Hard-Hit%", "%.1f%%"),
                 ("opp_barrel_pct",  "Barrel%",     "Barrel%",   "%.1f%%"),
-                ("opp_ev_avg",      "EV",          "EV",        "%.1f mph"),
+                ("opp_ev_avg",      "EV",          "Avg EV Against", "%.1f mph"),
             ]
             : [
                 ("xwoba",       "xwOBA",     "xwOBA",     "%.3f"),
