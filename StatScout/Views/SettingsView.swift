@@ -164,6 +164,20 @@ struct AboutView: View {
 
             Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline)
 
+            // Always-works fallback: the native rating sheet is rate-limited and
+            // may show nothing, so keep a direct write-review link for users who
+            // explicitly want to leave a review.
+            Link(destination: AppStoreReviewLinks.writeReviewURL) {
+                row(
+                    icon: "square.and.pencil",
+                    title: "Rate on the App Store",
+                    subtitle: "Opens the App Store to write a review."
+                )
+            }
+            .buttonStyle(.plain)
+
+            Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline)
+
             if let supportURL = URL(string: "https://jackwallner.github.io/baseball/support.html") {
                 Link(destination: supportURL) {
                     row(
