@@ -103,7 +103,7 @@ struct RootTabView: View {
 
     private func handleReviewPromptFinish(_ outcome: ReviewPromptDismissOutcome) {
         showReviewPrompt = false
-        if outcome == .enjoyedMaybeLater {
+        if outcome == .enjoyed {
             pendingNativeReviewAfterDismiss = true
         }
     }

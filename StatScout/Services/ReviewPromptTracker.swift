@@ -135,11 +135,6 @@ enum ReviewPromptTracker {
         consumePendingPositiveMoment()
     }
 
-    static func markOpenedWriteReview() {
-        outcome = .openedWriteReview
-        markShown()
-    }
-
     static func markFeedbackSubmitted() {
         outcome = .submittedFeedback
         markShown()
