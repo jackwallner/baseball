@@ -622,14 +622,14 @@ struct PlayerProfileView: View {
 
     private func displayedMetrics(in metrics: [Metric]) -> [Metric] {
         guard formDisplayMode == .recent, store.isPro else { return metrics }
-        // Recent mode: render any spec that has window data, even if the player's
-        // season snapshot is missing that label (Savant sometimes omits e.g.
-        // Hard-Hit%). Inject a stub season metric in the matching category so the
-        // recent bar still renders — only `recentMetric` is drawn in this mode.
+        // Recent mode: show every season bar — metrics with window data render the
+        // recent value, the rest fall back to the season bar (handled in
+        // `percentileMetricRow`). Additionally inject a stub for any game-log spec
+        // the season snapshot omits (Savant sometimes drops e.g. Hard-Hit%) so its
+        // recent bar still appears even with no season row to hang it on.
         let targetCategory: MetricCategory = isPitcher ? .pitching : .hitting
-        let withRecent = metrics.filter { recentMetric(for: $0) != nil }
-        guard metrics.first?.category == targetCategory else { return withRecent }
-        let existing = Set(withRecent.map { $0.label })
+        guard metrics.first?.category == targetCategory else { return metrics }
+        let existing = Set(metrics.map { $0.label })
         let stubs: [Metric] = recentSpecs.compactMap { spec in
             guard !existing.contains(spec.label) else { return nil }
             let stub = Metric(
@@ -641,7 +641,7 @@ struct PlayerProfileView: View {
             )
             return recentMetric(for: stub) != nil ? stub : nil
         }
-        return withRecent + stubs
+        return metrics + stubs
     }
 
     private var recentSpecs: [(key: String, label: String, seasonLabel: String, format: String)] {
@@ -693,6 +693,20 @@ struct PlayerProfileView: View {
                         Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline),
                         alignment: .bottom
                     )
+            } else if !metric.id.hasPrefix("recent-stub-") {
+                // No game-log data for this metric — fall back to the season bar
+                // so the recent view still shows every percentile bar.
+                NavigationLink(value: MetricRoute(label: metric.label, category: metric.category)) {
+                    MetricBar(metric: metric)
+                        .padding(.horizontal, SavantGeo.padCard)
+                        .padding(.vertical, 12)
+                        .background(rowBackground)
+                        .overlay(
+                            Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline),
+                            alignment: .bottom
+                        )
+                }
+                .buttonStyle(.plain)
             }
         case .both:
             NavigationLink(value: MetricRoute(label: metric.label, category: metric.category)) {
