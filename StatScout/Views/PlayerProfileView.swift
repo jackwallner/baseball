@@ -659,6 +659,7 @@ struct PlayerProfileView: View {
                 ("barrel_pct", "Barrel%", "Barrel%", "%.1f%%"),
                 ("hardhit_pct", "Hard-Hit%", "Hard-Hit%", "%.1f%%"),
                 ("ev_avg", "EV", "EV", "%.1f mph"),
+                ("ev_max", "Max EV", "Max EV", "%.1f mph"),
                 ("k_pct", "K%", "K%", "%.1f%%"),
                 ("bb_pct", "BB%", "BB%", "%.1f%%"),
             ]
@@ -729,7 +730,8 @@ struct PlayerProfileView: View {
     private func rebuildRecentCurves() {
         // Pitchers' season exit velocity is labeled "Avg EV Against", not "EV".
         let evLabel = isPitcher ? "Avg EV Against" : "EV"
-        let labels = ["xwOBA", "Barrel%", "Hard-Hit%", evLabel, "K%", "BB%"]
+        var labels = ["xwOBA", "Barrel%", "Hard-Hit%", evLabel, "K%", "BB%"]
+        if !isPitcher { labels.append("Max EV") }
         recentCurves = LeaguePercentileCurves(
             players: allPlayers,
             playerType: player.playerType ?? (isPitcher ? "pitcher" : "batter"),

@@ -119,6 +119,14 @@ struct RecentFormWindow {
             }
         }
 
+        // Max-type metrics are a peak, not a rate: the window value is the single
+        // hardest-hit ball across the window, matching how Savant reports Max EV.
+        for key in ["ev_max", "opp_ev_max"] {
+            if let peak = logs.compactMap({ $0.metrics[key] ?? nil }).max() {
+                combined[key] = peak
+            }
+        }
+
         return RecentFormWindow(
             label: label,
             days: days,

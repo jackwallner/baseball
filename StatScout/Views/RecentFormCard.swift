@@ -66,7 +66,8 @@ struct RecentFormCard: View {
         guard store.isPro else { return }
         // Pitchers' season exit velocity is labeled "Avg EV Against", not "EV".
         let evLabel = isPitcher ? "Avg EV Against" : "EV"
-        let labels = ["xwOBA", "Barrel%", "Hard-Hit%", evLabel, "K%", "BB%"]
+        var labels = ["xwOBA", "Barrel%", "Hard-Hit%", evLabel, "K%", "BB%"]
+        if !isPitcher { labels.append("Max EV") }
         curves = LeaguePercentileCurves(
             players: leaguePlayers,
             playerType: player.playerType ?? (isPitcher ? "pitcher" : "batter"),
