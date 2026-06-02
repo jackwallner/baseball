@@ -9,6 +9,20 @@ ARCHIVE_PATH="$PROJECT_DIR/build/StatScout.xcarchive"
 
 cd "$PROJECT_DIR"
 
+# Supabase config is injected into Info.plist at build time from the environment
+# (project.yml: SUPABASE_URL/SUPABASE_ANON_KEY = $(...)). If these aren't set the
+# archive bakes in empty/garbage values and the shipped app can't reach the
+# backend. Auto-source the canonical creds file, then hard-fail if still missing.
+if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+  [ -f "$HOME/.baseball_credentials" ] && source "$HOME/.baseball_credentials"
+fi
+if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+  echo "error: SUPABASE_URL / SUPABASE_ANON_KEY not set and not found in ~/.baseball_credentials." >&2
+  echo "       Set them in the environment or that file before shipping." >&2
+  exit 1
+fi
+export SUPABASE_URL SUPABASE_ANON_KEY
+
 # Auto-increment build number so TestFlight never rejects a duplicate
 echo "==> Bumping build number..."
 CURRENT_BUILD=$(grep 'CURRENT_PROJECT_VERSION:' project.yml | sed 's/.*: *"\(.*\)".*/\1/')
