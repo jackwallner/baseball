@@ -163,7 +163,7 @@ final class DashboardViewModel {
         try await provider.fetchGameLogs(playerId: playerId, season: season)
     }
 
-    /// Team-scoped game logs since `sinceDate`. The TeamFormCard caps at 30
+    /// Team-scoped game logs since `sinceDate`. The TeamRankingsCard caps at 30
     /// days so we don't pull the whole season for an aggregate we only ever
     /// slice into 7/15/30 day windows.
     func fetchTeamGameLogs(team: String, season: Int, sinceDate: Date) async throws -> [PlayerGameLog] {

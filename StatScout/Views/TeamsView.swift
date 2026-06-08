@@ -53,10 +53,23 @@ struct TeamsView: View {
             teamFullName($0).localizedCaseInsensitiveContains(searchText) ||
             $0.localizedCaseInsensitiveContains(searchText)
         }
-        // Plain alphabetical by full team name — the old score-based / favorite-
-        // first ordering was confusing and the score itself was a mislabeled
-        // percentile. Favorites now auto-open instead of being pinned here.
+        // Plain alphabetical by full team name — the old score-based ordering was
+        // confusing and the score itself was a mislabeled percentile. The
+        // favorite is lifted into its own pinned section above the grid.
         return teams.sorted { teamFullName($0).localizedCompare(teamFullName($1)) == .orderedAscending }
+    }
+
+    /// The favorite, shown only when not actively searching so search results
+    /// stay a single uninterrupted list.
+    private var pinnedFavorite: String? {
+        guard searchText.isEmpty, let fav = teamsViewModel.favoriteTeam else { return nil }
+        return fav
+    }
+
+    /// All-teams grid with the pinned favorite removed so it isn't listed twice.
+    private var gridTeams: [String] {
+        guard let fav = pinnedFavorite else { return filteredTeams }
+        return filteredTeams.filter { $0 != fav }
     }
 
     private var isInitiallyLoading: Bool {
@@ -202,6 +215,29 @@ struct TeamsView: View {
                 .padding(.horizontal, 12)
                 .padding(.bottom, 12)
 
+            if let fav = pinnedFavorite {
+                HStack {
+                    Text("FAVORITE TEAM")
+                        .font(SavantType.micro)
+                        .tracking(0.6)
+                        .foregroundStyle(SavantPalette.inkSecondary)
+                    Spacer()
+                }
+                .padding(.horizontal, 16)
+                .padding(.bottom, 8)
+
+                FavoriteTeamCard(
+                    abbr: fav,
+                    destination: TeamDestination(abbr: fav),
+                    onRemove: {
+                        teamsViewModel.removeFavorite()
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    }
+                )
+                .padding(.horizontal, 12)
+                .padding(.bottom, 16)
+            }
+
             HStack {
                 Text("ALL TEAMS")
                     .font(SavantType.micro)
@@ -233,7 +269,7 @@ struct TeamsView: View {
                 .padding(.vertical, 48)
             } else {
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 3), spacing: 10) {
-                    ForEach(filteredTeams, id: \.self) { abbr in
+                    ForEach(gridTeams, id: \.self) { abbr in
                         TeamGridTile(
                             abbr: abbr,
                             isFavorite: teamsViewModel.isFavorite(abbr),
@@ -334,6 +370,78 @@ struct TeamGridTile: View {
                 .stroke(isFavorite ? SavantPalette.savantRed : SavantPalette.hairline,
                         lineWidth: isFavorite ? 1.5 : 0.5)
         )
+    }
+}
+
+// MARK: - Favorite Team Card
+
+/// Full-width "hero" row for the pinned favorite team. Reads as a featured item
+/// distinct from the grid below — tap anywhere to open the team, tap the star to
+/// unpin. This is what makes Favorite do something visible: your team is always
+/// one tap away at the top of the list.
+struct FavoriteTeamCard: View {
+    let abbr: String
+    let destination: TeamDestination
+    var onRemove: (() -> Void)? = nil
+
+    var body: some View {
+        ZStack(alignment: .topTrailing) {
+            NavigationLink(value: destination) {
+                HStack(spacing: 14) {
+                    ZStack {
+                        Circle()
+                            .fill(MLBTeamColor.color(abbr))
+                            .frame(width: 52, height: 52)
+                            .shadow(color: Color.black.opacity(0.08), radius: 4, y: 2)
+                        Text(abbr)
+                            .font(SavantFont.condensed(18, weight: .black))
+                            .foregroundStyle(.white)
+                    }
+
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text("YOUR TEAM")
+                            .font(SavantType.micro)
+                            .tracking(0.6)
+                            .foregroundStyle(SavantPalette.savantRed)
+                        Text(teamFullName(abbr))
+                            .font(SavantType.bodyBold)
+                            .foregroundStyle(SavantPalette.ink)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
+                    }
+
+                    Spacer(minLength: 0)
+
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(SavantPalette.inkTertiary)
+                        .padding(.trailing, 36)
+                }
+                .padding(14)
+                .frame(maxWidth: .infinity)
+                .background(SavantPalette.surfaceAlt)
+                .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
+                .overlay(
+                    RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
+                        .stroke(SavantPalette.savantRed, lineWidth: 1.5)
+                )
+            }
+            .buttonStyle(.plain)
+
+            Button {
+                onRemove?()
+            } label: {
+                Image(systemName: "star.fill")
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundStyle(Color.yellow)
+                    .padding(8)
+                    .background(Circle().fill(SavantPalette.surface))
+                    .overlay(Circle().stroke(SavantPalette.hairline, lineWidth: 0.5))
+            }
+            .buttonStyle(.borderless)
+            .accessibilityLabel("Remove favorite")
+            .padding(10)
+        }
     }
 }
 

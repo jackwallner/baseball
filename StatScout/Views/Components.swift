@@ -568,7 +568,7 @@ struct LeaderboardTableRow: View {
 /// Compact unlock affordance for Pro-gated, blurred teasers. Anchors to the
 /// bottom over a gradient that fades the blurred preview into the card surface,
 /// so the teaser stays visible as the hook instead of being buried under an
-/// opaque panel. Used by RecentFormCard, TeamFormCard, and YearComparePreview.
+/// opaque panel. Used by RecentFormCard, TeamRankingsCard, and YearComparePreview.
 struct BlurGateUnlock: View {
     let headline: String
     let cta: String
