@@ -316,7 +316,7 @@ struct TeamRankingsCard: View {
                 .padding(.vertical, 24)
         } else if let w = recentWindow {
             recentSummaryRow(w)
-            let rows = recentMetricRows(window: w)
+            let rows = recentDisplayRows(window: w)
             if !rows.isEmpty {
                 SavantSubSectionBar(title: side.category.rawValue.uppercased())
                 VStack(spacing: 0) {
@@ -380,37 +380,67 @@ struct TeamRankingsCard: View {
         }
     }
 
-    private func recentMetricRows(window w: RecentFormWindow) -> [Metric] {
-        let category: MetricCategory = side == .pitching ? .pitching : .hitting
-        let specs: [(key: String, label: String, seasonLabel: String, format: String)] = side == .pitching
+    /// Maps a recent game-log metric onto the matching season aggregate label.
+    /// Keyed by `seasonLabel` so a recent value can overlay the season bar it
+    /// corresponds to (pitchers' recent EV maps onto "Avg EV Against", etc.).
+    private var recentSpecs: [(key: String, seasonLabel: String, format: String)] {
+        side == .pitching
             ? [
-                ("opp_xwoba",       "Opp xwOBA",     "xwOBA",          "%.3f"),
-                ("k_pct",           "K%",            "K%",             "%.1f%%"),
-                ("bb_pct",          "BB%",           "BB%",            "%.1f%%"),
-                ("opp_hardhit_pct", "Opp Hard-Hit%", "Hard-Hit%",      "%.1f%%"),
-                ("opp_barrel_pct",  "Opp Barrel%",   "Barrel%",        "%.1f%%"),
-                ("opp_ev_avg",      "Opp EV",        "Avg EV Against", "%.1f mph"),
+                ("opp_xwoba",       "xwOBA",          "%.3f"),
+                ("k_pct",           "K%",             "%.1f%%"),
+                ("bb_pct",          "BB%",            "%.1f%%"),
+                ("opp_hardhit_pct", "Hard-Hit%",      "%.1f%%"),
+                ("opp_barrel_pct",  "Barrel%",        "%.1f%%"),
+                ("opp_ev_avg",      "Avg EV Against", "%.1f mph"),
             ]
             : [
-                ("xwoba",       "xwOBA",     "xwOBA",     "%.3f"),
-                ("barrel_pct",  "Barrel%",   "Barrel%",   "%.1f%%"),
-                ("hardhit_pct", "Hard-Hit%", "Hard-Hit%", "%.1f%%"),
-                ("ev_avg",      "EV",        "EV",        "%.1f mph"),
-                ("k_pct",       "K%",        "K%",        "%.1f%%"),
-                ("bb_pct",      "BB%",       "BB%",       "%.1f%%"),
+                ("xwoba",       "xwOBA",     "%.3f"),
+                ("barrel_pct",  "Barrel%",   "%.1f%%"),
+                ("hardhit_pct", "Hard-Hit%", "%.1f%%"),
+                ("ev_avg",      "EV",        "%.1f mph"),
+                ("ev_max",      "Max EV",    "%.1f mph"),
+                ("k_pct",       "K%",        "%.1f%%"),
+                ("bb_pct",      "BB%",       "%.1f%%"),
             ]
+    }
 
-        return specs.compactMap { spec -> Metric? in
-            guard let v = w.metrics[spec.key],
-                  let pct = curves?.curve(for: spec.seasonLabel)?.percentile(for: v) else { return nil }
+    /// Recent mode mirrors the season list: every season aggregate bar is shown.
+    /// Metrics with game-log data in the window render the recent value (re-placed
+    /// on the league curve); the rest fall back to their season aggregate bar — so
+    /// a team's Recent view shows the same full slate of stats as its Season view,
+    /// not just the handful the per-game feed carries. Recent specs the season
+    /// aggregate omits (Savant sometimes drops e.g. Hard-Hit%) are injected as
+    /// stubs so their recent bar still appears.
+    private func recentDisplayRows(window w: RecentFormWindow) -> [Metric] {
+        let seasonRows = aggregateSeasonRows()
+        let existing = Set(seasonRows.map(\.label))
+        let stubs: [Metric] = recentSpecs.compactMap { spec in
+            guard !existing.contains(spec.seasonLabel),
+                  recentMetric(forSeasonLabel: spec.seasonLabel, window: w) != nil else { return nil }
             return Metric(
-                id: "team-\(spec.key)",
-                label: spec.label,
-                value: String(format: spec.format, v),
-                percentile: pct,
-                category: category
+                id: "team-recent-stub-\(spec.key)",
+                label: spec.seasonLabel,
+                value: "",
+                percentile: 0,
+                category: side.category
             )
         }
+        return (seasonRows + stubs).map { recentMetric(forSeasonLabel: $0.label, window: w) ?? $0 }
+    }
+
+    /// The recent-window bar for a given season label, or nil if the window has
+    /// no game-log data for it (caller falls back to the season aggregate bar).
+    private func recentMetric(forSeasonLabel label: String, window w: RecentFormWindow) -> Metric? {
+        guard let spec = recentSpecs.first(where: { $0.seasonLabel == label }),
+              let v = w.metrics[spec.key],
+              let pct = curves?.curve(for: label)?.percentile(for: v) else { return nil }
+        return Metric(
+            id: "team-recent-\(spec.key)",
+            label: label,
+            value: String(format: spec.format, v),
+            percentile: pct,
+            category: side.category
+        )
     }
 
     private func load() async {
@@ -455,7 +485,7 @@ struct TeamRankingsCard: View {
     private func rebuildCurves() {
         // Cover both the season aggregate labels (every roster metric) and the
         // recent specs' season labels (e.g. pitchers' "Avg EV Against").
-        let recentSeasonLabels = ["xwOBA", "Barrel%", "Hard-Hit%", "EV", "Avg EV Against", "K%", "BB%"]
+        let recentSeasonLabels = ["xwOBA", "Barrel%", "Hard-Hit%", "EV", "Max EV", "Avg EV Against", "K%", "BB%"]
         let rosterLabels = players.flatMap { $0.metrics.map(\.label) }
         let labels = Array(Set(rosterLabels + recentSeasonLabels))
         batterCurves = LeaguePercentileCurves(players: leaguePlayers, playerType: "batter", labels: labels)
