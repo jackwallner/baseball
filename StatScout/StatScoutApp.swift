@@ -108,10 +108,12 @@ struct OnboardingCards: View {
     }
 
     private var trialDisclosure: String? {
-        guard let yearly = yearlyPackage, let trial = yearly.introOfferLabel else {
+        guard let yearly = yearlyPackage,
+              store.isEligibleForIntroOffer(yearly),
+              let trial = yearly.introOfferLabel else {
             return nil
         }
-        return "\(trial), then \(yearly.priceLabel). Auto-renews until cancelled in Settings › Apple ID › Subscriptions. Cancel at least 24 hours before the trial ends to avoid being charged."
+        return "\(trial.capitalized), then \(yearly.priceLabel). Auto-renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel in Settings › Apple ID › Subscriptions."
     }
 
     var body: some View {
@@ -173,7 +175,24 @@ struct OnboardingCards: View {
     private var bottomButtons: some View {
         VStack(spacing: 10) {
             if isLastPage {
-                if !store.isPro {
+                if store.isPro {
+                    getStartedButton(prominent: true)
+                } else {
+                    // Secondary "Get Started" (continue on the free tier) sits
+                    // ABOVE the trial CTA so the primary button lands in the exact
+                    // spot the user has been tapping "Continue" — the CTA never
+                    // jumps to a new place between the last two taps.
+                    getStartedButton(prominent: false)
+
+                    if let disclosure = trialDisclosure {
+                        Text(disclosure)
+                            .font(SavantType.micro)
+                            .tracking(0.3)
+                            .foregroundStyle(SavantPalette.inkTertiary)
+                            .multilineTextAlignment(.center)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+
                     Button {
                         paywallTrigger = .onboarding
                     } label: {
@@ -186,33 +205,7 @@ struct OnboardingCards: View {
                             .clipShape(RoundedRectangle(cornerRadius: 14))
                     }
                     .buttonStyle(.plain)
-
-                    if let disclosure = trialDisclosure {
-                        Text(disclosure)
-                            .font(SavantType.micro)
-                            .tracking(0.3)
-                            .foregroundStyle(SavantPalette.inkTertiary)
-                            .multilineTextAlignment(.center)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
                 }
-
-                Button {
-                    withAnimation { hasCompletedOnboarding = true }
-                } label: {
-                    Text("Get Started")
-                        .font(SavantType.bodyBold)
-                        .foregroundStyle(store.isPro ? .white : SavantPalette.ink)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 52)
-                        .background(store.isPro ? SavantPalette.savantRed : SavantPalette.surface)
-                        .clipShape(RoundedRectangle(cornerRadius: 14))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 14)
-                                .stroke(store.isPro ? Color.clear : SavantPalette.hairline, lineWidth: 0.5)
-                        )
-                }
-                .buttonStyle(.plain)
             } else {
                 Button {
                     withAnimation { currentPage += 1 }
@@ -257,7 +250,29 @@ struct OnboardingCards: View {
             }
             .frame(height: 24)
         }
-        .frame(minHeight: isLastPage ? 148 : 52, alignment: .top)
+        .frame(minHeight: isLastPage ? 148 : 52, alignment: .bottom)
+    }
+
+    /// "Get Started" dismisses onboarding into the free tier. `prominent` is the
+    /// solo state (Pro users, where it's the only — and primary — action);
+    /// otherwise it renders as the de-emphasized secondary above the trial CTA.
+    private func getStartedButton(prominent: Bool) -> some View {
+        Button {
+            withAnimation { hasCompletedOnboarding = true }
+        } label: {
+            Text("Get Started")
+                .font(SavantType.bodyBold)
+                .foregroundStyle(prominent ? .white : SavantPalette.ink)
+                .frame(maxWidth: .infinity)
+                .frame(height: 52)
+                .background(prominent ? SavantPalette.savantRed : SavantPalette.surface)
+                .clipShape(RoundedRectangle(cornerRadius: 14))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14)
+                        .stroke(prominent ? Color.clear : SavantPalette.hairline, lineWidth: 0.5)
+                )
+        }
+        .buttonStyle(.plain)
     }
 
     private let pages: [OnboardingPage] = [

@@ -145,7 +145,7 @@ struct RecentFormCard: View {
         } else {
             ZStack(alignment: .bottom) {
                 teaserBody
-                    .blur(radius: 5)
+                    .blur(radius: 8)
                     .disabled(true)
                     .allowsHitTesting(false)
                 BlurGateUnlock(

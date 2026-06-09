@@ -45,15 +45,20 @@ struct CompareView: View {
             .padding(.bottom, 16)
             .blur(radius: store.isPro ? 0 : 5)
             .disabled(!store.isPro)
-            .overlay {
-                if !store.isPro { lockedOverlay }
-            }
             // Scroll-under spacer so content can pass behind the floating tab
             // bar — matches the Dashboard / Teams pattern.
             Color.clear.frame(height: 88)
         }
         .scrollBounceBehavior(.basedOnSize)
         .background(SavantPalette.canvas.ignoresSafeArea())
+        // Bottom-anchored unlock so the blurred Compare cards stay visible as a
+        // teaser above the gate, instead of being fully covered by the box.
+        .overlay(alignment: .bottom) {
+            if !store.isPro {
+                lockedOverlay
+                    .padding(.bottom, 100)
+            }
+        }
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             if store.isPro, !viewModel.hasLoadedHistorical, !viewModel.isHistoricalLoading {

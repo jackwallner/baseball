@@ -86,7 +86,7 @@ struct TeamRankingsCard: View {
                 .stroke(SavantPalette.hairline, lineWidth: 0.5)
         )
         .task(id: "\(team)-\(season)-\(mode.rawValue)") {
-            if mode == .recent { await load() }
+            if mode == .recent, store.isPro { await load() }
         }
         .onAppear { rebuildCurves() }
         .onChange(of: leaguePlayers.count) { _, _ in rebuildCurves() }
@@ -282,8 +282,8 @@ struct TeamRankingsCard: View {
             recentBars
         } else {
             ZStack(alignment: .bottom) {
-                recentBars
-                    .blur(radius: 5)
+                recentTeaser
+                    .blur(radius: 8)
                     .disabled(true)
                     .allowsHitTesting(false)
                 BlurGateUnlock(
@@ -292,6 +292,49 @@ struct TeamRankingsCard: View {
                     subtext: store.paywallBlurSubtext,
                     action: onUpgradeTap
                 )
+            }
+        }
+    }
+
+    /// Static, non-fetching preview for free users — illustrative team bars in
+    /// the recent-form layout. No game logs are fetched (no network/battery cost)
+    /// and no real team data is shown, so the blur can't be read through to leak
+    /// the actual recent numbers.
+    private var recentTeaser: some View {
+        let sample: [Metric] = side == .batting
+            ? [
+                Metric(id: "tt_xwoba",   label: "xwOBA",     value: "0.342",    percentile: 84, category: .hitting),
+                Metric(id: "tt_barrel",  label: "Barrel%",   value: "9.8%",     percentile: 77, category: .hitting),
+                Metric(id: "tt_hardhit", label: "Hard-Hit%", value: "43.5%",    percentile: 71, category: .hitting),
+                Metric(id: "tt_ev",      label: "EV",        value: "90.1 mph", percentile: 66, category: .hitting),
+            ]
+            : [
+                Metric(id: "tt_xwoba", label: "xwOBA",     value: "0.298", percentile: 81, category: .pitching),
+                Metric(id: "tt_k",     label: "K%",        value: "25.1%", percentile: 76, category: .pitching),
+                Metric(id: "tt_bb",    label: "BB%",       value: "7.2%",  percentile: 70, category: .pitching),
+                Metric(id: "tt_hh",    label: "Hard-Hit%", value: "36.4%", percentile: 73, category: .pitching),
+            ]
+        return VStack(spacing: 0) {
+            HStack(spacing: 12) {
+                summaryStat(label: "G", value: "14")
+                summaryStat(label: side == .pitching ? "BF" : "PA", value: "521")
+                if side == .batting { summaryStat(label: "BBE", value: "318") }
+                Spacer(minLength: 0)
+            }
+            .padding(SavantGeo.padInline)
+
+            SavantSubSectionBar(title: side.category.rawValue.uppercased())
+            VStack(spacing: 0) {
+                ForEach(Array(sample.enumerated()), id: \.element.id) { index, metric in
+                    MetricBar(metric: metric)
+                        .padding(.horizontal, SavantGeo.padCard)
+                        .padding(.vertical, 12)
+                        .background(index % 2 == 0 ? SavantPalette.surface : SavantPalette.surfaceAlt)
+                        .overlay(
+                            Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline),
+                            alignment: .bottom
+                        )
+                }
             }
         }
     }
@@ -444,7 +487,8 @@ struct TeamRankingsCard: View {
     }
 
     private func load() async {
-        guard let fetch = fetchTeamGameLogs else { return }
+        // Free users see a static teaser — never fetch real team game logs.
+        guard store.isPro, let fetch = fetchTeamGameLogs else { return }
         loading = true
         loadError = nil
         do {
