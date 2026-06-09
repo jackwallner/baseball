@@ -170,7 +170,7 @@ struct TrialPitchSheet: View {
     private var footer: some View {
         VStack(spacing: 10) {
             Button {
-                startTrialOrPaywall()
+                buyYearly()
             } label: {
                 ZStack {
                     Text(store.paywallBlurCTA)
@@ -189,22 +189,16 @@ struct TrialPitchSheet: View {
             .buttonStyle(.plain)
             .disabled(isPurchasing)
 
-            // Full auto-renew disclosure when this CTA buys the trial directly;
-            // the shorter "Then $X. Cancel anytime." caption only for the
-            // PaywallView-handoff case (no trial-eligible yearly to buy here).
-            if let disclosure = store.trialDisclosureText {
+            // Full auto-renew disclosure — this CTA buys the yearly plan
+            // directly (trial when eligible, paid otherwise), so the renewal
+            // terms must sit beside the purchase point (Apple 3.1.2).
+            if let disclosure = store.yearlyCTADisclosureText {
                 Text(disclosure)
                     .font(SavantType.micro)
                     .tracking(0.2)
                     .foregroundStyle(SavantPalette.inkTertiary)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
-            } else if let subtext = store.paywallBlurSubtext {
-                Text(subtext)
-                    .font(SavantType.micro)
-                    .tracking(0.3)
-                    .foregroundStyle(SavantPalette.inkTertiary)
-                    .multilineTextAlignment(.center)
             }
 
             if let purchaseError {
@@ -242,12 +236,12 @@ struct TrialPitchSheet: View {
         )
     }
 
-    // Low-friction path: when a trial-eligible yearly plan exists, buy it in
-    // place so the user never sees a second paywall. Falls back to the full
-    // PaywallView only when there's no trial to start (e.g. already used, or the
-    // user needs to choose among plans). Success dismisses via onChange(isPro).
-    private func startTrialOrPaywall() {
-        guard let yearly = store.trialEligibleYearlyPackage else {
+    // One-tap conversion: buy the yearly plan in place — trial when eligible,
+    // straight purchase otherwise — so this pop-up never hands off to a second
+    // paywall. PaywallView is only the emergency fallback when products didn't
+    // load. Success dismisses via onChange(isPro).
+    private func buyYearly() {
+        guard let yearly = store.yearlyPackage else {
             showingPaywall = true
             return
         }
@@ -260,10 +254,10 @@ struct TrialPitchSheet: View {
                 case .purchased, .pending:
                     break
                 case .cancelled:
-                    purchaseError = "Trial cancelled. Tap again to start."
+                    purchaseError = "Purchase cancelled. Tap again to continue."
                 }
             } catch {
-                purchaseError = store.lastError ?? "Couldn't start your trial. Please try again."
+                purchaseError = store.lastError ?? "Couldn't complete the purchase. Please try again."
             }
         }
     }

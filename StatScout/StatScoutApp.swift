@@ -96,26 +96,15 @@ struct OnboardingCards: View {
     private var isLastPage: Bool { currentPage == pages.count - 1 }
     private var dataReady: Bool { viewModel.isReady }
 
-    private var yearlyPackage: Package? {
-        store.products.first(where: { $0.productKind == .yearly })
-    }
-
-    private var hasYearlyTrial: Bool {
-        guard let yearly = yearlyPackage else { return false }
-        return store.isEligibleForIntroOffer(yearly) && yearly.introOfferLabel != nil
-    }
-
+    /// CTA label / disclosure mirror the direct-purchase pop-ups: trial copy
+    /// when eligible, price-forward yearly copy otherwise. Both come from
+    /// StoreService so every one-tap conversion surface reads the same.
     private var proCTALabel: String {
-        hasYearlyTrial ? "Start Free Trial" : "Upgrade to StatScout+"
+        store.yearlyPackage != nil ? store.paywallBlurCTA : "Upgrade to StatScout+"
     }
 
     private var trialDisclosure: String? {
-        guard let yearly = yearlyPackage,
-              store.isEligibleForIntroOffer(yearly),
-              let trial = yearly.introOfferLabel else {
-            return nil
-        }
-        return "\(trial.capitalized), then \(yearly.priceLabel). Auto-renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel in Settings › Apple ID › Subscriptions."
+        store.yearlyCTADisclosureText
     }
 
     var body: some View {
@@ -196,7 +185,7 @@ struct OnboardingCards: View {
                     }
 
                     Button {
-                        startTrialOrPaywall()
+                        buyYearly()
                     } label: {
                         ZStack {
                             Text(proCTALabel)
@@ -301,12 +290,12 @@ struct OnboardingCards: View {
         .buttonStyle(.plain)
     }
 
-    // One-tap trial: buy the trial-eligible yearly plan in place. Falls back to
-    // the full PaywallView only when there's no trial to start (label is
-    // "Upgrade to StatScout+" then, and the user picks a plan there). Success
-    // flips store.isPro, which finishes onboarding via the onChange handler.
-    private func startTrialOrPaywall() {
-        guard let yearly = store.trialEligibleYearlyPackage else {
+    // One-tap conversion: buy the yearly plan in place — trial when eligible,
+    // straight purchase otherwise — never a second paywall. PaywallView is only
+    // the emergency fallback when products didn't load. Success flips
+    // store.isPro, which finishes onboarding via the onChange handler.
+    private func buyYearly() {
+        guard let yearly = store.yearlyPackage else {
             paywallTrigger = .onboarding
             return
         }
@@ -319,10 +308,10 @@ struct OnboardingCards: View {
                 case .purchased, .pending:
                     break
                 case .cancelled:
-                    trialError = "Trial cancelled. Tap again to start."
+                    trialError = "Purchase cancelled. Tap again to continue."
                 }
             } catch {
-                trialError = store.lastError ?? "Couldn't start your trial. Please try again."
+                trialError = store.lastError ?? "Couldn't complete the purchase. Please try again."
             }
         }
     }

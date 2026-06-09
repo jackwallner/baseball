@@ -264,25 +264,25 @@ final class StoreService: NSObject, ObservableObject {
         return "Then \(yearly.priceLabel). Cancel anytime."
     }
 
-    /// The yearly package when it advertises a free trial the user qualifies for.
-    /// This is the one-tap "Start Free Trial" target: the soft pitch surfaces
-    /// (onboarding, TrialPitchSheet, blur CTAs) purchase this directly and only
-    /// fall back to the full `PaywallView` when it's nil (no trial available, or
-    /// the user needs to choose between plans).
-    var trialEligibleYearlyPackage: Package? {
-        guard let yearly = products.first(where: { $0.productKind == .yearly }),
-              isEligibleForIntroOffer(yearly),
-              yearly.introOfferLabel != nil else { return nil }
-        return yearly
+    /// The yearly package — the one-tap conversion target for every trial /
+    /// teaser pop-up (onboarding, TrialPitchSheet, blur CTAs). Those surfaces
+    /// purchase this directly, trial or not; the full `PaywallView` is only the
+    /// fallback when this is nil (products not loaded), or for deliberate
+    /// upgrade entry points where the user should pick a plan.
+    var yearlyPackage: Package? {
+        products.first { $0.productKind == .yearly }
     }
 
-    /// Full Apple-3.1.2 auto-renew disclosure for the trial-eligible yearly plan,
-    /// shown next to any direct "Start Free Trial" button so the price after the
-    /// trial and the renewal terms are present at the point of purchase.
-    var trialDisclosureText: String? {
-        guard let yearly = trialEligibleYearlyPackage,
-              let trial = yearly.introOfferLabel else { return nil }
-        return "\(trial.capitalized), then \(yearly.priceLabel). Auto-renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel in Settings › Apple ID › Subscriptions."
+    /// Full Apple-3.1.2 auto-renew disclosure for the yearly plan, shown next
+    /// to any direct-purchase CTA so the price (and trial terms, when offered)
+    /// are present at the point of purchase.
+    var yearlyCTADisclosureText: String? {
+        guard let yearly = yearlyPackage else { return nil }
+        let renew = "Auto-renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel in Settings › Apple ID › Subscriptions."
+        if isEligibleForIntroOffer(yearly), let trial = yearly.introOfferLabel {
+            return "\(trial.capitalized), then \(yearly.priceLabel). \(renew)"
+        }
+        return "\(yearly.priceLabel). \(renew)"
     }
 
     /// The monthly package, when present. Used as the anchor when computing
