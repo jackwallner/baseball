@@ -14,7 +14,7 @@ struct TeamView: View {
     @State private var selectedCategory: MetricCategory? = .hitting
     @State private var sortDescending = true
     @State private var lastDefaultedSortKey: String? = nil
-    @State private var showingPaywall = false
+    @State private var showingTrial = false
 
     enum TeamTab: String, CaseIterable {
         case percentiles = "Percentiles"
@@ -127,8 +127,8 @@ struct TeamView: View {
         .onChange(of: displaySeason) { _, _ in
             applyDefaultDirectionIfMetricChanged()
         }
-        .sheet(isPresented: $showingPaywall) {
-            PaywallView(trigger: .teamView)
+        .sheet(isPresented: $showingTrial) {
+            TrialPitchSheet(trigger: .teamView)
         }
     }
 
@@ -167,7 +167,7 @@ struct TeamView: View {
                 leaguePlayers: leaguePlayers,
                 fetchTeamGameLogs: fetchTeamGameLogs,
                 onUpgradeTap: {
-                    if PaywallGate.shared.shouldPresent(.teamView) { showingPaywall = true }
+                    if PaywallGate.shared.shouldPresent(.teamView) { showingTrial = true }
                 }
             )
         }
@@ -373,7 +373,7 @@ struct TeamView: View {
                 let isLocked = viewModel.isSeasonLocked(season)
                 Button {
                     if isLocked {
-                        if PaywallGate.shared.shouldPresent(.teamView) { showingPaywall = true }
+                        if PaywallGate.shared.shouldPresent(.teamView) { showingTrial = true }
                     } else {
                         viewModel.selectedSeason = season
                     }

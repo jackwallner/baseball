@@ -37,7 +37,7 @@ struct TeamsView: View {
     @Binding var path: NavigationPath
     @State private var teamsViewModel = TeamsViewModel()
     @State private var searchText = ""
-    @State private var showingPaywall = false
+    @State private var showingTrial = false
     // Auto-enter the favorite team once per launch; popping back must not
     // re-push it, or the user can never reach the list.
     @State private var didAutoEnterFavorite = false
@@ -100,8 +100,8 @@ struct TeamsView: View {
             await viewModel.load()
         }
         .onAppear(perform: autoEnterFavoriteIfNeeded)
-        .sheet(isPresented: $showingPaywall) {
-            PaywallView(trigger: .teamView)
+        .sheet(isPresented: $showingTrial) {
+            TrialPitchSheet(trigger: .teamView)
         }
     }
 
@@ -160,7 +160,7 @@ struct TeamsView: View {
                     if store.isPro {
                         Task { await viewModel.loadHistoricalIfNeeded() }
                     } else if PaywallGate.shared.shouldPresent(.teamView) {
-                        showingPaywall = true
+                        showingTrial = true
                     }
                 } label: {
                     Label(store.isPro ? "Load past seasons" : "Past seasons require StatScout+",
@@ -171,7 +171,7 @@ struct TeamsView: View {
                 let isLocked = viewModel.isSeasonLocked(season)
                 Button {
                     if isLocked {
-                        if PaywallGate.shared.shouldPresent(.teamView) { showingPaywall = true }
+                        if PaywallGate.shared.shouldPresent(.teamView) { showingTrial = true }
                     } else {
                         viewModel.selectedSeason = season
                     }

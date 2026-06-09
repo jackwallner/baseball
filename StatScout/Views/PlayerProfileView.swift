@@ -17,7 +17,10 @@ struct PlayerProfileView: View {
     @State private var paywallTrigger: PaywallTrigger?
     @State private var showingPlayerPicker = false
     @State private var comparisonRoute: ComparisonRoute?
-    @State private var showTrialPitch = false
+    // Contextual trial pitches (compare, recent form, year compare, first-open)
+    // all route through the low-friction TrialPitchSheet — its CTA starts the
+    // yearly trial directly. PaywallView stays for the deliberate upsell card.
+    @State private var trialPitchTrigger: PaywallTrigger?
     @State private var formDisplayMode: FormDisplayMode = .season
     @State private var recentWindowDays: Int = 15
     @State private var recentLogs: [PlayerGameLog] = []
@@ -129,7 +132,7 @@ struct PlayerProfileView: View {
                     if store.isPro {
                         showingPlayerPicker = true
                     } else {
-                        paywallTrigger = .playerComparison
+                        trialPitchTrigger = .playerComparison
                     }
                 } label: {
                     Image(systemName: "person.2.fill")
@@ -149,8 +152,8 @@ struct PlayerProfileView: View {
                 comparisonRoute = ComparisonRoute(playerA: player, playerB: selected)
             }
         }
-        .sheet(isPresented: $showTrialPitch) {
-            TrialPitchSheet(trigger: .playerScouting)
+        .sheet(item: $trialPitchTrigger) { trigger in
+            TrialPitchSheet(trigger: trigger)
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
         }
@@ -165,7 +168,7 @@ struct PlayerProfileView: View {
             let opens = UserDefaults.standard.integer(forKey: profileOpenCountKey) + 1
             UserDefaults.standard.set(opens, forKey: profileOpenCountKey)
             if !store.isPro, opens >= 2, PaywallGate.shared.shouldPresent(.playerScouting) {
-                showTrialPitch = true
+                trialPitchTrigger = .playerScouting
             }
             // Third+ profile visit = engaged browsing; never on open 2 (trial pitch).
             if opens >= 3 {
@@ -255,7 +258,7 @@ struct PlayerProfileView: View {
                     season: activeSeason ?? player.season ?? Calendar.current.component(.year, from: .now),
                     leaguePlayers: allPlayers,
                     fetchGameLogs: fetchGameLogs,
-                    onUpgradeTap: { paywallTrigger = .recentForm }
+                    onUpgradeTap: { trialPitchTrigger = .recentForm }
                 )
             }
 
@@ -358,7 +361,7 @@ struct PlayerProfileView: View {
             }
         } else {
             YearComparePreview(playerName: player.name) {
-                paywallTrigger = .yearCompare
+                trialPitchTrigger = .yearCompare
             }
         }
     }
@@ -448,7 +451,7 @@ struct PlayerProfileView: View {
                         Button {
                             if isLocked {
                                 if PaywallGate.shared.shouldPresent(.pastSeason) {
-                                    paywallTrigger = .pastSeason
+                                    trialPitchTrigger = .pastSeason
                                 }
                             } else {
                                 selectedPercentileSeason = season

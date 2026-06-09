@@ -90,6 +90,8 @@ struct OnboardingCards: View {
     @Binding var hasCompletedOnboarding: Bool
     @State private var currentPage = 0
     @State private var paywallTrigger: PaywallTrigger?
+    @State private var isStartingTrial = false
+    @State private var trialError: String?
 
     private var isLastPage: Bool { currentPage == pages.count - 1 }
     private var dataReady: Bool { viewModel.isReady }
@@ -194,17 +196,41 @@ struct OnboardingCards: View {
                     }
 
                     Button {
-                        paywallTrigger = .onboarding
+                        startTrialOrPaywall()
                     } label: {
-                        Text(proCTALabel)
-                            .font(SavantType.bodyBold)
-                            .foregroundStyle(.white)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 52)
-                            .background(SavantPalette.savantNavy)
-                            .clipShape(RoundedRectangle(cornerRadius: 14))
+                        ZStack {
+                            Text(proCTALabel)
+                                .opacity(isStartingTrial ? 0 : 1)
+                            if isStartingTrial {
+                                ProgressView().tint(.white)
+                            }
+                        }
+                        .font(SavantType.bodyBold)
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 52)
+                        .background(SavantPalette.savantNavy)
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
                     }
                     .buttonStyle(.plain)
+                    .disabled(isStartingTrial)
+
+                    if let trialError {
+                        Text(trialError)
+                            .font(SavantType.micro)
+                            .foregroundStyle(SavantPalette.savantRed)
+                            .multilineTextAlignment(.center)
+                    }
+
+                    // Terms/Privacy must sit beside the purchase point now that
+                    // this CTA can buy the trial directly (no PaywallView handoff).
+                    HStack(spacing: 12) {
+                        Link("Terms", destination: StatScoutLegal.termsURL)
+                        Link("Privacy", destination: StatScoutLegal.privacyURL)
+                    }
+                    .font(SavantType.micro)
+                    .tracking(0.3)
+                    .foregroundStyle(SavantPalette.inkTertiary)
                 }
             } else {
                 Button {
@@ -273,6 +299,32 @@ struct OnboardingCards: View {
                 )
         }
         .buttonStyle(.plain)
+    }
+
+    // One-tap trial: buy the trial-eligible yearly plan in place. Falls back to
+    // the full PaywallView only when there's no trial to start (label is
+    // "Upgrade to StatScout+" then, and the user picks a plan there). Success
+    // flips store.isPro, which finishes onboarding via the onChange handler.
+    private func startTrialOrPaywall() {
+        guard let yearly = store.trialEligibleYearlyPackage else {
+            paywallTrigger = .onboarding
+            return
+        }
+        trialError = nil
+        isStartingTrial = true
+        Task { @MainActor in
+            defer { isStartingTrial = false }
+            do {
+                switch try await store.purchase(yearly) {
+                case .purchased, .pending:
+                    break
+                case .cancelled:
+                    trialError = "Trial cancelled. Tap again to start."
+                }
+            } catch {
+                trialError = store.lastError ?? "Couldn't start your trial. Please try again."
+            }
+        }
     }
 
     private let pages: [OnboardingPage] = [

@@ -10,6 +10,8 @@ struct TrialPitchSheet: View {
 
     let trigger: PaywallTrigger
     @State private var showingPaywall = false
+    @State private var isPurchasing = false
+    @State private var purchaseError: String?
 
     private struct Benefit: Identifiable {
         let id = UUID()
@@ -168,25 +170,57 @@ struct TrialPitchSheet: View {
     private var footer: some View {
         VStack(spacing: 10) {
             Button {
-                showingPaywall = true
+                startTrialOrPaywall()
             } label: {
-                Text(store.paywallBlurCTA)
-                    .font(SavantType.bodyBold)
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 50)
-                    .background(SavantPalette.savantRed)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                ZStack {
+                    Text(store.paywallBlurCTA)
+                        .opacity(isPurchasing ? 0 : 1)
+                    if isPurchasing {
+                        ProgressView().tint(.white)
+                    }
+                }
+                .font(SavantType.bodyBold)
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity)
+                .frame(height: 50)
+                .background(SavantPalette.savantRed)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
             }
             .buttonStyle(.plain)
+            .disabled(isPurchasing)
 
-            if let subtext = store.paywallBlurSubtext {
+            // Full auto-renew disclosure when this CTA buys the trial directly;
+            // the shorter "Then $X. Cancel anytime." caption only for the
+            // PaywallView-handoff case (no trial-eligible yearly to buy here).
+            if let disclosure = store.trialDisclosureText {
+                Text(disclosure)
+                    .font(SavantType.micro)
+                    .tracking(0.2)
+                    .foregroundStyle(SavantPalette.inkTertiary)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+            } else if let subtext = store.paywallBlurSubtext {
                 Text(subtext)
                     .font(SavantType.micro)
                     .tracking(0.3)
                     .foregroundStyle(SavantPalette.inkTertiary)
                     .multilineTextAlignment(.center)
             }
+
+            if let purchaseError {
+                Text(purchaseError)
+                    .font(SavantType.small)
+                    .foregroundStyle(SavantPalette.savantRed)
+                    .multilineTextAlignment(.center)
+            }
+
+            HStack(spacing: 12) {
+                Link("Terms", destination: StatScoutLegal.termsURL)
+                Link("Privacy", destination: StatScoutLegal.privacyURL)
+            }
+            .font(SavantType.micro)
+            .tracking(0.3)
+            .foregroundStyle(SavantPalette.inkTertiary)
 
             Button("Maybe later") { dismiss() }
                 .font(SavantType.small)
@@ -206,6 +240,32 @@ struct TrialPitchSheet: View {
                 )
                 .ignoresSafeArea(edges: .bottom)
         )
+    }
+
+    // Low-friction path: when a trial-eligible yearly plan exists, buy it in
+    // place so the user never sees a second paywall. Falls back to the full
+    // PaywallView only when there's no trial to start (e.g. already used, or the
+    // user needs to choose among plans). Success dismisses via onChange(isPro).
+    private func startTrialOrPaywall() {
+        guard let yearly = store.trialEligibleYearlyPackage else {
+            showingPaywall = true
+            return
+        }
+        purchaseError = nil
+        isPurchasing = true
+        Task { @MainActor in
+            defer { isPurchasing = false }
+            do {
+                switch try await store.purchase(yearly) {
+                case .purchased, .pending:
+                    break
+                case .cancelled:
+                    purchaseError = "Trial cancelled. Tap again to start."
+                }
+            } catch {
+                purchaseError = store.lastError ?? "Couldn't start your trial. Please try again."
+            }
+        }
     }
 }
 

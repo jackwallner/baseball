@@ -38,8 +38,11 @@ struct StatsView: View {
             ToolbarItem(placement: .topBarLeading) { seasonMenu }
             ToolbarItem(placement: .principal) { modeMenu }
         }
+        // Contextual past-season pitches route through the low-friction
+        // TrialPitchSheet (its CTA starts the yearly trial directly), not the
+        // full multi-plan PaywallView.
         .sheet(item: $paywallTrigger) { trigger in
-            PaywallView(trigger: trigger)
+            TrialPitchSheet(trigger: trigger)
         }
     }
 

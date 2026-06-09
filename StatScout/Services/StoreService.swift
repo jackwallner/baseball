@@ -264,6 +264,27 @@ final class StoreService: NSObject, ObservableObject {
         return "Then \(yearly.priceLabel). Cancel anytime."
     }
 
+    /// The yearly package when it advertises a free trial the user qualifies for.
+    /// This is the one-tap "Start Free Trial" target: the soft pitch surfaces
+    /// (onboarding, TrialPitchSheet, blur CTAs) purchase this directly and only
+    /// fall back to the full `PaywallView` when it's nil (no trial available, or
+    /// the user needs to choose between plans).
+    var trialEligibleYearlyPackage: Package? {
+        guard let yearly = products.first(where: { $0.productKind == .yearly }),
+              isEligibleForIntroOffer(yearly),
+              yearly.introOfferLabel != nil else { return nil }
+        return yearly
+    }
+
+    /// Full Apple-3.1.2 auto-renew disclosure for the trial-eligible yearly plan,
+    /// shown next to any direct "Start Free Trial" button so the price after the
+    /// trial and the renewal terms are present at the point of purchase.
+    var trialDisclosureText: String? {
+        guard let yearly = trialEligibleYearlyPackage,
+              let trial = yearly.introOfferLabel else { return nil }
+        return "\(trial.capitalized), then \(yearly.priceLabel). Auto-renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel in Settings › Apple ID › Subscriptions."
+    }
+
     /// The monthly package, when present. Used as the anchor when computing
     /// yearly savings % and rendering a strike-through monthly-equivalent price.
     var monthlyPackage: Package? {

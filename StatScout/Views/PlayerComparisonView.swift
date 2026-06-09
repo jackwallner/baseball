@@ -10,7 +10,7 @@ struct PlayerComparisonView: View {
     @EnvironmentObject private var store: StoreService
     let playerA: Player
     let playerB: Player
-    @State private var showingPaywall = false
+    @State private var showingTrial = false
 
     private var comparisonMetrics: [(label: String, category: MetricCategory, a: Metric?, b: Metric?)] {
         var seen = Set<String>()
@@ -72,7 +72,7 @@ struct PlayerComparisonView: View {
                             .fixedSize(horizontal: false, vertical: true)
 
                         Button {
-                            showingPaywall = true
+                            showingTrial = true
                         } label: {
                             Text(store.paywallBlurCTA)
                                 .font(SavantType.bodyBold)
@@ -107,8 +107,8 @@ struct PlayerComparisonView: View {
                     .offset(y: -8)
                 }
                 .background(SavantPalette.canvas.ignoresSafeArea())
-                .sheet(isPresented: $showingPaywall) {
-                    PaywallView(trigger: .playerComparison)
+                .sheet(isPresented: $showingTrial) {
+                    TrialPitchSheet(trigger: .playerComparison)
                 }
             }
         }
