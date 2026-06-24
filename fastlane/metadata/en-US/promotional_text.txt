@@ -1,1 +1,1 @@
-Every qualified hitter and pitcher, ranked. Player profiles, leaderboards, team rosters — Pro unlocks historical seasons and player comparisons.
+See where any MLB player truly ranks. Statcast-style percentiles for Hitting, Pitching, Fielding & Speed — spot the elite and the overrated in seconds.
