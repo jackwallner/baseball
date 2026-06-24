@@ -23,9 +23,12 @@ enum ReviewPromptTracker {
     private static let positiveMomentCountKey = "reviewPrompt.positiveMomentCount"
     private static let pendingPositiveMomentKey = "reviewPrompt.pendingPositiveMoment"
 
-    static let minimumLaunchCount = 5
-    static let minimumDaysSinceFirstOpen = 7
-    static let cooldownDays = 120
+    // Early-stage tuning: widen the intake while the install base (and rating
+    // count) is small. Still well inside Apple's 3-prompts/365-days cap, and the
+    // enjoyment pre-filter keeps unhappy users off the public Store.
+    static let minimumLaunchCount = 3
+    static let minimumDaysSinceFirstOpen = 3
+    static let cooldownDays = 60
 
     static var appLaunchCount: Int {
         get { max(defaults.integer(forKey: launchCountKey), 0) }
