@@ -247,10 +247,10 @@ final class StoreService: NSObject, ObservableObject {
             if isEligibleForIntroOffer(yearly), let trial = yearly.introOfferLabel {
                 return "Start \(trial)"
             }
-            return "Try StatScout+ — \(yearly.priceLabel)"
+            return "Try StatScout+ for \(yearly.priceLabel)"
         }
         if let price = proPrice {
-            return "Unlock StatScout+ — \(price)"
+            return "Unlock StatScout+ for \(price)"
         }
         return "Unlock StatScout+"
     }

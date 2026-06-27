@@ -57,27 +57,27 @@ enum PaywallTrigger: Identifiable, Hashable {
     var subtitle: String {
         switch self {
         case .pastSeason:
-            return "Track how every player ranked since 2020 — and the year-over-year trends behind today's leaders."
+            return "Track how every player ranked since 2020, plus the year-over-year trends behind today's leaders."
         case .yearCompare:
             return "Compare any player's percentile rankings across any two seasons. See what changed, what held, and where they're headed."
         case .playerComparison:
-            return "Stack any two players head-to-head across every Statcast metric — xwOBA, Barrel%, Sprint Speed, and more."
+            return "Stack any two players head-to-head across every Statcast metric: xwOBA, Barrel%, Sprint Speed, and more."
         case .onboarding:
-            return "Recent form, head-to-head matchups, and every season back to 2020 — the full Statcast picture, on every player."
+            return "Recent form, head-to-head matchups, and every season back to 2020. The full Statcast picture on every player."
         case .activation:
-            return "Recent form, head-to-head matchups, and every season back to 2020 — the full Statcast picture, on every player."
+            return "Recent form, head-to-head matchups, and every season back to 2020. The full Statcast picture on every player."
         case .upgrade:
-            return "Recent form, head-to-head matchups, and every season back to 2020 — the full Statcast picture, on every player."
+            return "Recent form, head-to-head matchups, and every season back to 2020. The full Statcast picture on every player."
         case .pastSeasonsLoad:
             return "Load historical data to explore past seasons, year-over-year trends, and more."
         case .teamView:
-            return "Every player on every roster — not just qualified starters — plus side-by-side comparisons for every squad."
+            return "Every player on every roster, not just qualified starters, plus side-by-side comparisons for every squad."
         case .winback:
             return "Your StatScout+ access has lapsed. Pick it back up to get recent form, head-to-head matchups, and every past season."
         case .playerScouting:
-            return "Last 7 / 15 / 30 day form, head-to-head matchups, every roster — the full picture, not just season totals."
+            return "Last 7 / 15 / 30 day form, head-to-head matchups, every roster. The full picture, not just season totals."
         case .recentForm:
-            return "Every player's last 7 / 15 / 30 day form — catch hot streaks and slumps before the season totals catch up."
+            return "Every player's last 7 / 15 / 30 day form. Catch hot streaks and slumps before the season totals catch up."
         }
     }
 
@@ -99,9 +99,9 @@ enum PaywallTrigger: Identifiable, Hashable {
     }
 
     private static let proFeatures: [(icon: String, title: String)] = [
-        ("flame.fill", "Catch hot streaks — last 7 / 15 / 30 day form"),
+        ("flame.fill", "Catch hot streaks: last 7 / 15 / 30 day form"),
         ("person.2.fill", "Head-to-head: any two players, every metric"),
-        ("shield.lefthalf.filled", "Every player on every roster — not just qualifiers"),
+        ("shield.lefthalf.filled", "Every player on every roster, not just qualifiers"),
         ("calendar.badge.clock", "Every season back to 2020 + year-over-year trends")
     ]
 
@@ -196,15 +196,15 @@ struct PaywallView: View {
             VStack(spacing: 0) {
                 heroHeader
 
-                VStack(spacing: 20) {
+                VStack(spacing: 16) {
                     featureList
                     trustRow
                     planCards
                     purchaseSection
                 }
                 .padding(.horizontal, 20)
-                .padding(.top, 22)
-                .padding(.bottom, 28)
+                .padding(.top, 16)
+                .padding(.bottom, 20)
             }
         }
         .ignoresSafeArea(edges: .top)
@@ -227,13 +227,13 @@ struct PaywallView: View {
                 .padding(.horizontal, 28)
                 .padding(.bottom, 12)
 
-            VStack(spacing: 12) {
+            VStack(spacing: 10) {
                 ZStack {
                     Circle()
                         .fill(.white.opacity(0.12))
-                        .frame(width: 78, height: 78)
+                        .frame(width: 70, height: 70)
                     Image(systemName: trigger.icon)
-                        .font(.system(size: 34, weight: .semibold))
+                        .font(.system(size: 30, weight: .semibold))
                         .foregroundStyle(.white)
                 }
 
@@ -246,23 +246,26 @@ struct PaywallView: View {
                     .font(SavantType.playerName)
                     .foregroundStyle(.white)
                     .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.9)
 
                 Text(trigger.subtitle)
                     .font(SavantType.small)
                     .foregroundStyle(.white.opacity(0.85))
                     .multilineTextAlignment(.center)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(.horizontal, 26)
+                    .lineLimit(3)
+                    .minimumScaleFactor(0.9)
+                    .padding(.horizontal, 22)
             }
-            .padding(.top, 72)
-            .padding(.bottom, 28)
+            .padding(.top, 64)
+            .padding(.bottom, 22)
             .frame(maxWidth: .infinity)
         }
         .fixedSize(horizontal: false, vertical: true)
     }
 
     private var featureList: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: 10) {
             ForEach(trigger.features, id: \.title) { feature in
                 HStack(spacing: 12) {
                     Image(systemName: feature.icon)
@@ -433,6 +436,19 @@ struct PaywallView: View {
     // MARK: - Actions
 
     private func selectDefaultPackageIfNeeded() {
+        #if DEBUG
+        if let mode = PaywallScreenshotMode.current, !store.products.isEmpty {
+            switch mode {
+            case .monthly:
+                selectedPackage = store.products.first { $0.productKind == .monthly }
+            case .lifetime:
+                selectedPackage = store.products.first { $0.productKind == .lifetime }
+            case .yearly, .trial:
+                selectedPackage = store.products.first { $0.productKind == .yearly }
+            }
+            return
+        }
+        #endif
         guard selectedPackage == nil, !store.products.isEmpty else { return }
         selectedPackage = store.products.first { $0.productKind == .yearly }
             ?? store.products.first
