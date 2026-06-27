@@ -1,0 +1,1 @@
+Visual Statcast percentile rankings and MLB Savant-style metrics. See where every qualified player ranks across Hitting, Pitching, Fielding, and Running.

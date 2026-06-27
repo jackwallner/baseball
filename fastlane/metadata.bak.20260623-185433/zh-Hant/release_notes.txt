@@ -1,0 +1,1 @@
+Now includes year-over-year metric tracking: tap the year toggle on any player profile to see how their percentiles shifted season to season. Also includes player comparison mode and historical season loading for Pro subscribers.

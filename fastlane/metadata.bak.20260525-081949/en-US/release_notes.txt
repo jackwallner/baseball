@@ -1,0 +1,7 @@
+- Faster startup with current-season-first loading and visible progress indicators
+- StatScout Pro unlocks historical seasons on demand, player comparisons, and year-over-year tracking with Monthly, Yearly, or Lifetime purchase options
+- Player profile layout with tabbed navigation: Percentile Rankings, Standard Stats, and Year Compare
+- Category-filtered leaderboards for Hitting, Pitching, Fielding, and Running
+- Team rosters with player headshots, team colors, and internal rankings
+- Nightly data refresh keeps all stats current through the previous day's games
+- Privacy-first: no accounts, no sign-up, no ads, and no third-party tracking

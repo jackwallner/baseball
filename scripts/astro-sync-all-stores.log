@@ -1,0 +1,54 @@
+
+==> ae (UAE) locales=[ar-SA, en-GB, en-US] — 32 kw
+    batch fail: timed out
+    added ~0 new (31 existing)
+
+==> al (Albania) locales=[en-GB, en-US] — 27 kw
+    batch fail: timed out
+    added ~0 new (26 existing)
+
+==> am (Armenia) locales=[ru, en-GB, en-US] — 32 kw
+    batch fail: timed out
+    added ~0 new (31 existing)
+
+==> ar (Argentina) locales=[es-ES, es-MX, en-US] — 32 kw
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~0 new (0 existing)
+
+==> at (Austria) locales=[de-DE, en-US] — 32 kw
+    added ~6 new (31 existing)
+
+==> au (Australia) locales=[en-AU, en-US] — 27 kw
+    added ~14 new (0 existing)
+
+==> az (Azerbaijan) locales=[tr, ru, en-US] — 37 kw
+    added ~6 new (36 existing)
+
+==> be (Belgium) locales=[fr-FR, nl-NL, de-DE, en-US] — 40 kw
+    batch fail: timed out
+    added ~0 new (39 existing)
+
+==> bg (Bulgaria) locales=[en-GB, en-US] — 27 kw
+    batch fail: timed out
+    added ~0 new (26 existing)
+
+==> bh (Bahrain) locales=[ar-SA, en-US] — 32 kw
+    batch fail: timed out
+    batch fail: timed out
+    added ~8 new (0 existing)
+
+==> bo (Bolivia) locales=[es-ES, es-MX, en-US] — 32 kw
+    batch fail: timed out
+    added ~21 new (0 existing)
+
+==> br (Brazil) locales=[pt-BR, en-US] — 32 kw
+    batch fail: timed out
+    batch fail: timed out
+    batch fail: timed out
+    added ~8 new (0 existing)
+
+==> ca (Canada) locales=[en-CA, fr-CA, en-US] — 31 kw
+    batch fail: timed out
+==> RESUME store us
+
+==> us (United States) locales=[en-US] — 45 kw

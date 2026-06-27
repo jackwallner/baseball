@@ -1,0 +1,13 @@
+{
+  "appId": "6763945657",
+  "appName": "Baseball Savvy StatScout",
+  "bundleId": "com.jackwallner.baseball",
+  "store": "us",
+  "syncedAt": "2026-05-26T23:24:22Z",
+  "keywordStrategy": "v2-pop-diff",
+  "trackedCount": 53,
+  "activeListCount": 53,
+  "allAstroStores": [
+    "qa"
+  ]
+}

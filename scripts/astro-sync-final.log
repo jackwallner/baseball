@@ -1,0 +1,463 @@
+
+==> ae (UAE) locales=[ar-SA, en-GB, en-US] — 34 kw
+    added ~0 new (43 existing)
+
+==> al (Albania) locales=[en-GB, en-US] — 27 kw
+    added ~0 new (36 existing)
+
+==> am (Armenia) locales=[ru, en-GB, en-US] — 32 kw
+    added ~0 new (38 existing)
+
+==> ar (Argentina) locales=[es-ES, es-MX, en-US] — 33 kw
+    batch fail: timed out
+    added ~0 new (42 existing)
+
+==> at (Austria) locales=[de-DE, en-US] — 32 kw
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~6 new (0 existing)
+
+==> au (Australia) locales=[en-AU, en-US] — 27 kw
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~0 new (35 existing)
+
+==> az (Azerbaijan) locales=[tr, ru, en-US] — 37 kw
+    batch fail: timed out
+    batch fail: HTTP Error 500: Internal Server Error
+    batch fail: timed out
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~3 new (0 existing)
+
+==> be (Belgium) locales=[fr-FR, nl-NL, de-DE, en-US] — 42 kw
+    added ~1 new (54 existing)
+
+==> bg (Bulgaria) locales=[en-GB, en-US] — 27 kw
+    added ~0 new (36 existing)
+
+==> bh (Bahrain) locales=[ar-SA, en-US] — 34 kw
+    batch fail: timed out
+    added ~0 new (40 existing)
+
+==> bo (Bolivia) locales=[es-ES, es-MX, en-US] — 33 kw
+    batch fail: timed out
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~13 new (0 existing)
+
+==> br (Brazil) locales=[pt-BR, en-US] — 33 kw
+    batch fail: HTTP Error 500: Internal Server Error
+    batch fail: timed out
+    added ~3 new (0 existing)
+
+==> ca (Canada) locales=[en-CA, fr-CA, en-US] — 32 kw
+    batch fail: timed out
+    added ~0 new (0 existing)
+
+==> ch (Switzerland) locales=[de-DE, fr-FR, it, en-US] — 42 kw
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~11 new (0 existing)
+
+==> cl (Chile) locales=[es-ES, es-MX, en-US] — 33 kw
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~8 new (25 existing)
+
+==> cn (China mainland) locales=[zh-Hans, en-US] — 34 kw
+    batch fail: timed out
+    batch fail: HTTP Error 500: Internal Server Error
+    batch fail: HTTP Error 500: Internal Server Error
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~3 new (35 existing)
+
+==> co (Colombia) locales=[es-ES, es-MX, en-US] — 33 kw
+    batch fail: timed out
+    added ~13 new (0 existing)
+
+==> cr (Costa Rica) locales=[es-ES, es-MX, en-US] — 33 kw
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~8 new (28 existing)
+
+==> cy (Cyprus) locales=[el, en-GB, en-US] — 35 kw
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~3 new (41 existing)
+
+==> cz (Czech Republic) locales=[cs, en-US] — 33 kw
+    added ~0 new (38 existing)
+
+==> de (Germany) locales=[de-DE, en-US] — 32 kw
+    batch fail: timed out
+    added ~3 new (33 existing)
+
+==> dk (Denmark) locales=[da, en-US] — 32 kw
+    batch fail: timed out
+    batch fail: timed out
+    added ~0 new (31 existing)
+
+==> do (Dominican Republic) locales=[es-ES, es-MX, en-US] — 33 kw
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~1 new (0 existing)
+
+==> dz (Algeria) locales=[fr-FR, ar-SA, en-US] — 39 kw
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~0 new (38 existing)
+
+==> ec (Ecuador) locales=[es-ES, es-MX, en-US] — 33 kw
+    batch fail: timed out
+    batch fail: timed out
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~11 new (0 existing)
+
+==> ee (Estonia) locales=[en-GB, en-US] — 27 kw
+    batch fail: HTTP Error 500: Internal Server Error
+    batch fail: timed out
+    batch fail: timed out
+    added ~0 new (0 existing)
+
+==> eg (Egypt) locales=[ar-SA, en-GB, en-US] — 34 kw
+    batch fail: timed out
+    added ~20 new (0 existing)
+
+==> es (Spain) locales=[es-ES, ca, en-US] — 38 kw
+    batch fail: timed out
+    batch fail: timed out
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~8 new (10 existing)
+
+==> fi (Finland) locales=[fi, en-US] — 32 kw
+    added ~0 new (32 existing)
+
+==> fr (France) locales=[fr-FR, en-US] — 32 kw
+    added ~0 new (32 existing)
+
+==> gb (UK) locales=[en-GB, en-US] — 27 kw
+    added ~0 new (29 existing)
+
+==> gh (Ghana) locales=[en-GB, en-US] — 27 kw
+    added ~0 new (27 existing)
+
+==> gr (Greece) locales=[el, en-US] — 35 kw
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~0 new (27 existing)
+
+==> gt (Guatemala) locales=[es-ES, es-MX, en-US] — 33 kw
+    batch fail: timed out
+    added ~0 new (32 existing)
+
+==> hk (Hong Kong) locales=[zh-Hant, en-GB, en-US] — 34 kw
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~0 new (24 existing)
+
+==> hn (Honduras) locales=[es-ES, es-MX, en-US] — 33 kw
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~3 new (0 existing)
+
+==> hr (Croatia) locales=[hr, en-US] — 35 kw
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~0 new (32 existing)
+
+==> hu (Hungary) locales=[hu, en-US] — 34 kw
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~0 new (33 existing)
+
+==> id (Indonesia) locales=[id, en-US] — 34 kw
+    batch fail: HTTP Error 500: Internal Server Error
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~7 new (0 existing)
+
+==> ie (Ireland) locales=[en-GB, en-US] — 27 kw
+    added ~0 new (27 existing)
+
+==> il (Israel) locales=[he, en-GB, en-US] — 35 kw
+    added ~0 new (34 existing)
+
+==> in (India) locales=[hi, en-GB, en-US] — 33 kw
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~0 new (34 existing)
+
+==> iq (Iraq) locales=[ar-SA, en-US] — 34 kw
+    batch fail: timed out
+    batch fail: timed out
+    added ~0 new (17 existing)
+
+==> is (Iceland) locales=[en-GB, en-US] — 27 kw
+    batch fail: timed out
+    batch fail: timed out
+    added ~5 new (0 existing)
+
+==> it (Italy) locales=[it, en-US] — 32 kw
+    batch fail: timed out
+    added ~6 new (0 existing)
+
+==> jo (Jordan) locales=[ar-SA, en-US] — 34 kw
+    batch fail: timed out
+    added ~8 new (17 existing)
+
+==> jp (Japan) locales=[ja, en-US] — 35 kw
+    batch fail: timed out
+    batch fail: HTTP Error 500: Internal Server Error
+    batch fail: HTTP Error 500: Internal Server Error
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~5 new (24 existing)
+
+==> ke (Kenya) locales=[en-GB, en-US] — 27 kw
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~19 new (0 existing)
+
+==> kg (Kyrgyzstan) locales=[ru, en-US] — 32 kw
+    batch fail: timed out
+    batch fail: timed out
+    added ~8 new (39 existing)
+
+==> kh (Cambodia) locales=[en-US, th] — 33 kw
+    added ~0 new (33 existing)
+
+==> kr (South Korea) locales=[ko, en-US] — 35 kw
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~0 new (26 existing)
+
+==> kw (Kuwait) locales=[ar-SA, en-US] — 34 kw
+    batch fail: HTTP Error 500: Internal Server Error
+    batch fail: HTTP Error 500: Internal Server Error
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~8 new (0 existing)
+
+==> kz (Kazakhstan) locales=[ru, en-US] — 32 kw
+    batch fail: HTTP Error 500: Internal Server Error
+    batch fail: HTTP Error 500: Internal Server Error
+    batch fail: timed out
+    added ~0 new (0 existing)
+
+==> lb (Lebanon) locales=[ar-SA, fr-FR, en-US] — 39 kw
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~0 new (31 existing)
+
+==> lk (Sri Lanka) locales=[en-GB, en-US] — 27 kw
+    added ~1 new (41 existing)
+
+==> lu (Luxembourg) locales=[fr-FR, de-DE, en-US] — 37 kw
+    added ~5 new (32 existing)
+
+==> lv (Latvia) locales=[en-GB, en-US] — 27 kw
+    added ~0 new (27 existing)
+
+==> ma (Morocco) locales=[fr-FR, ar-SA, en-US] — 39 kw
+    batch fail: HTTP Error 500: Internal Server Error
+    batch fail: timed out
+    batch fail: HTTP Error 500: Internal Server Error
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~0 new (8 existing)
+
+==> mn (Mongolia) locales=[en-US] — 27 kw
+    batch fail: timed out
+    added ~0 new (26 existing)
+
+==> mo (Macau) locales=[zh-Hant, en-US] — 34 kw
+    added ~2 new (38 existing)
+
+==> mx (Mexico) locales=[es-MX, en-US] — 33 kw
+    batch fail: timed out
+    batch fail: timed out
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~0 new (39 existing)
+
+==> my (Malaysia) locales=[ms, en-GB, en-US] — 35 kw
+    batch fail: HTTP Error 500: Internal Server Error
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~8 new (13 existing)
+
+==> nl (Netherlands) locales=[nl-NL, en-US] — 32 kw
+    batch fail: HTTP Error 500: Internal Server Error
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~2 new (40 existing)
+
+==> no (Norway) locales=[no, en-US] — 31 kw
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~15 new (116 existing)
+
+==> np (Nepal) locales=[en-GB, en-US] — 27 kw
+    batch fail: timed out
+    added ~8 new (16 existing)
+
+==> nz (New Zealand) locales=[en-AU, en-GB, en-US] — 27 kw
+    batch fail: timed out
+    batch fail: timed out
+    added ~8 new (0 existing)
+
+==> om (Oman) locales=[ar-SA, en-US] — 34 kw
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    added ~0 new (0 existing)
+
+==> pa (Panama) locales=[es-ES, es-MX, en-US] — 33 kw
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    added ~5 new (0 existing)
+
+==> pe (Peru) locales=[es-ES, es-MX, en-US] — 33 kw
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    added ~0 new (0 existing)
+
+==> ph (Philippines) locales=[en-US, en-GB] — 27 kw
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    added ~0 new (0 existing)
+
+==> pk (Pakistan) locales=[en-GB, en-US] — 27 kw
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    added ~0 new (0 existing)
+
+==> pl (Poland) locales=[pl, en-US] — 33 kw
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    added ~8 new (0 existing)
+
+==> pt (Portugal) locales=[pt-PT, en-US] — 33 kw
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~0 new (26 existing)
+
+==> py (Paraguay) locales=[es-ES, es-MX, en-US] — 33 kw
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    added ~0 new (0 existing)
+
+==> qa (Qatar) locales=[ar-SA, en-US] — 34 kw
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    added ~0 new (0 existing)
+
+==> ro (Romania) locales=[ro, en-US] — 33 kw
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    added ~0 new (0 existing)
+
+==> ru (Russia) locales=[ru, en-US] — 32 kw
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    added ~0 new (0 existing)
+
+==> sa (Saudi Arabia) locales=[ar-SA, en-US] — 34 kw
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    added ~0 new (0 existing)
+
+==> se (Sweden) locales=[sv, en-US] — 32 kw
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    added ~0 new (0 existing)
+
+==> sg (Singapore) locales=[en-GB, en-US] — 27 kw
+    batch fail: Remote end closed connection without response
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    added ~0 new (0 existing)
+
+==> si (Slovenia) locales=[hr, it, en-US] — 40 kw
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    added ~0 new (0 existing)
+
+==> sk (Slovakia) locales=[sk, cs, en-US] — 34 kw
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    added ~0 new (0 existing)
+
+==> sv (El Salvador) locales=[es-ES, es-MX, en-US] — 33 kw
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    added ~8 new (0 existing)
+
+==> th (Thailand) locales=[th, en-US] — 33 kw
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    added ~0 new (0 existing)
+
+==> tr (Türkiye) locales=[tr, en-US] — 32 kw
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    added ~0 new (0 existing)
+
+==> tw (Taiwan) locales=[zh-Hant, en-US] — 34 kw
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    added ~0 new (0 existing)
+
+==> ua (Ukraine) locales=[uk, ru, en-US] — 35 kw
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    added ~0 new (0 existing)
+
+==> us (United States) locales=[en-US] — 45 kw
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    added ~0 new (0 existing)
+
+==> uz (Uzbekistan) locales=[ru, en-US] — 32 kw
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    added ~0 new (0 existing)
+
+==> vn (Vietnam) locales=[vi, en-US] — 35 kw
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    added ~0 new (0 existing)
+
+==> za (South Africa) locales=[en-GB, en-US] — 27 kw
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: [Errno 54] Connection reset by peer
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~0 new (0 existing)
+
+Wrote /Users/jackwallner/baseball/scripts/astro-keywords-by-store/ (91 stores) — playbook: astro-global-aso-go-2026.md

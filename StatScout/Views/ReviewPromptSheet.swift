@@ -31,14 +31,15 @@ final class ReviewPromptCoordinator: ObservableObject {
 enum ReviewPromptDismissOutcome: Sendable {
     case notNow
     case feedbackSubmitted
-    /// User said they're enjoying the app — host fires the native StoreKit
-    /// rating prompt once in `onDismiss` (in-app, no Safari/App Store detour).
-    case enjoyed
+    case openedWriteReview
+    /// User chose "Yes" but dismissed the pitch without opening the store — host may call `requestReview()` once in `onDismiss`.
+    case enjoyedMaybeLater
 }
 
 struct ReviewPromptSheet: View {
     enum Step {
         case enjoyment
+        case reviewPitch
         case feedback
     }
 
@@ -62,6 +63,8 @@ struct ReviewPromptSheet: View {
                 switch step {
                 case .enjoyment:
                     enjoymentContent
+                case .reviewPitch:
+                    reviewPitchContent
                 case .feedback:
                     feedbackContent
                 }
@@ -86,6 +89,7 @@ struct ReviewPromptSheet: View {
     private var navigationTitle: String {
         switch step {
         case .enjoyment: "Enjoying StatScout?"
+        case .reviewPitch: "Support an indie app"
         case .feedback: "Help us improve"
         }
     }
@@ -111,10 +115,7 @@ struct ReviewPromptSheet: View {
 
             VStack(spacing: 10) {
                 Button {
-                    // Happy user: mark a cooldown and let the host fire Apple's
-                    // native rating sheet on dismiss — no extra screen, no detour.
-                    ReviewPromptTracker.markShown()
-                    finish(.enjoyed)
+                    step = .reviewPitch
                 } label: {
                     primaryButtonLabel("Yes, I'm enjoying it")
                 }
@@ -124,6 +125,44 @@ struct ReviewPromptSheet: View {
                     step = .feedback
                 } label: {
                     secondaryButtonLabel("Not really")
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.horizontal, 24)
+        .padding(.bottom, 24)
+    }
+
+    private var reviewPitchContent: some View {
+        VStack(spacing: 18) {
+            Text("StatScout is built by one indie developer. No ads, no accounts, and your scouting data stays on your phone.")
+                .font(SavantType.body)
+                .foregroundStyle(SavantPalette.inkSecondary)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.top, 8)
+
+            Text("An honest App Store review takes seconds and helps more fans find a clean Statcast percentile scout.")
+                .font(SavantType.small)
+                .foregroundStyle(SavantPalette.inkTertiary)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+
+            VStack(spacing: 10) {
+                Button {
+                    ReviewPromptTracker.markOpenedWriteReview()
+                    UIApplication.shared.open(AppStoreReviewLinks.writeReviewURL)
+                    finish(.openedWriteReview)
+                } label: {
+                    primaryButtonLabel("Rate on the App Store")
+                }
+                .buttonStyle(.plain)
+
+                Button {
+                    ReviewPromptTracker.markShown()
+                    finish(.enjoyedMaybeLater)
+                } label: {
+                    secondaryButtonLabel("Maybe later")
                 }
                 .buttonStyle(.plain)
             }

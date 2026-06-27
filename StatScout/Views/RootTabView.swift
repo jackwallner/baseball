@@ -58,6 +58,7 @@ struct RootTabView: View {
             .presentationDragIndicator(.visible)
         }
         .sheet(isPresented: $showReviewPrompt, onDismiss: {
+            ReviewPromptTracker.markShown()
             if pendingNativeReviewAfterDismiss {
                 pendingNativeReviewAfterDismiss = false
                 requestReview()
@@ -103,7 +104,7 @@ struct RootTabView: View {
 
     private func handleReviewPromptFinish(_ outcome: ReviewPromptDismissOutcome) {
         showReviewPrompt = false
-        if outcome == .enjoyed {
+        if outcome == .enjoyedMaybeLater {
             pendingNativeReviewAfterDismiss = true
         }
     }

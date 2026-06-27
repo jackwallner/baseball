@@ -1,0 +1,15 @@
+{
+  "syncedAt": "2026-05-26T23:24:22Z",
+  "appId": "6763945657",
+  "storeCount": 1,
+  "stores": {
+    "qa": {
+      "locales": [
+        "ar-SA",
+        "en-US"
+      ],
+      "planned": 34,
+      "added": 3
+    }
+  }
+}

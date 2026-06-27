@@ -1,0 +1,286 @@
+SYNC START 03:02:59
+
+==> ae (UAE) locales=[ar-SA, en-GB, en-US] — 33 kw
+    added ~5 new (37 existing)
+
+==> al (Albania) locales=[en-GB, en-US] — 26 kw
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~0 new (32 existing)
+
+==> am (Armenia) locales=[ru, en-GB, en-US] — 31 kw
+    batch fail: HTTP Error 500: Internal Server Error
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~2 new (0 existing)
+
+==> ar (Argentina) locales=[es-ES, es-MX, en-US] — 32 kw
+    batch fail: HTTP Error 500: Internal Server Error
+    batch fail: timed out
+    added ~4 new (0 existing)
+
+==> at (Austria) locales=[de-DE, en-US] — 31 kw
+    added ~5 new (37 existing)
+
+==> au (Australia) locales=[en-AU, en-US] — 26 kw
+    added ~3 new (32 existing)
+
+==> az (Azerbaijan) locales=[tr, ru, en-US] — 36 kw
+    added ~4 new (42 existing)
+
+==> be (Belgium) locales=[fr-FR, nl-NL, de-DE, en-US] — 41 kw
+    added ~9 new (45 existing)
+
+==> bg (Bulgaria) locales=[en-GB, en-US] — 26 kw
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~0 new (32 existing)
+
+==> bh (Bahrain) locales=[ar-SA, en-US] — 33 kw
+    batch fail: timed out
+    batch fail: HTTP Error 500: Internal Server Error
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~0 new (40 existing)
+
+==> bo (Bolivia) locales=[es-ES, es-MX, en-US] — 32 kw
+=== RESUME SYNC 2026-05-26T03:13:21Z ===
+==> sync fr (attempt 1)
+
+==> fr (France) locales=[fr-FR, en-US] — 31 kw
+==> sync fr (attempt 2)
+
+==> fr (France) locales=[fr-FR, en-US] — 31 kw
+==> sync fr (attempt 3)
+
+==> fr (France) locales=[fr-FR, en-US] — 31 kw
+    batch fail: HTTP Error 500: Internal Server Error
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~0 new (16 existing)
+
+Wrote /Users/jackwallner/baseball/scripts/astro-keywords-by-store/ (1 stores) — playbook: astro-global-aso-go-2026.md
+==> sync es (attempt 1)
+
+==> es (Spain) locales=[es-ES, ca, en-US] — 37 kw
+    batch fail: HTTP Error 500: Internal Server Error
+    batch fail: HTTP Error 500: Internal Server Error
+    batch fail: HTTP Error 500: Internal Server Error
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~5 new (0 existing)
+
+Wrote /Users/jackwallner/baseball/scripts/astro-keywords-by-store/ (1 stores) — playbook: astro-global-aso-go-2026.md
+==> sync it (attempt 1)
+
+==> it (Italy) locales=[it, en-US] — 31 kw
+    batch fail: HTTP Error 500: Internal Server Error
+    batch fail: HTTP Error 500: Internal Server Error
+    batch fail: HTTP Error 500: Internal Server Error
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~0 new (0 existing)
+
+Wrote /Users/jackwallner/baseball/scripts/astro-keywords-by-store/ (1 stores) — playbook: astro-global-aso-go-2026.md
+==> sync nl (attempt 1)
+
+==> nl (Netherlands) locales=[nl-NL, en-US] — 31 kw
+    batch fail: HTTP Error 500: Internal Server Error
+    batch fail: HTTP Error 500: Internal Server Error
+    batch fail: HTTP Error 500: Internal Server Error
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~0 new (0 existing)
+
+Wrote /Users/jackwallner/baseball/scripts/astro-keywords-by-store/ (1 stores) — playbook: astro-global-aso-go-2026.md
+==> sync se (attempt 1)
+
+==> se (Sweden) locales=[sv, en-US] — 31 kw
+    batch fail: HTTP Error 500: Internal Server Error
+    batch fail: HTTP Error 500: Internal Server Error
+    batch fail: HTTP Error 500: Internal Server Error
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~0 new (0 existing)
+
+Wrote /Users/jackwallner/baseball/scripts/astro-keywords-by-store/ (1 stores) — playbook: astro-global-aso-go-2026.md
+==> sync no (attempt 1)
+
+==> no (Norway) locales=[no, en-US] — 30 kw
+    batch fail: HTTP Error 500: Internal Server Error
+    batch fail: HTTP Error 500: Internal Server Error
+    batch fail: HTTP Error 500: Internal Server Error
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~0 new (0 existing)
+
+Wrote /Users/jackwallner/baseball/scripts/astro-keywords-by-store/ (1 stores) — playbook: astro-global-aso-go-2026.md
+==> sync fi (attempt 1)
+
+==> fi (Finland) locales=[fi, en-US] — 31 kw
+    batch fail: HTTP Error 500: Internal Server Error
+    batch fail: HTTP Error 500: Internal Server Error
+    batch fail: HTTP Error 500: Internal Server Error
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~0 new (0 existing)
+
+Wrote /Users/jackwallner/baseball/scripts/astro-keywords-by-store/ (1 stores) — playbook: astro-global-aso-go-2026.md
+==> sync pl (attempt 1)
+
+==> pl (Poland) locales=[pl, en-US] — 32 kw
+    batch fail: HTTP Error 500: Internal Server Error
+    batch fail: HTTP Error 500: Internal Server Error
+    batch fail: timed out
+    batch fail: timed out
+    added ~0 new (0 existing)
+
+Wrote /Users/jackwallner/baseball/scripts/astro-keywords-by-store/ (1 stores) — playbook: astro-global-aso-go-2026.md
+==> sync pt (attempt 1)
+
+==> pt (Portugal) locales=[pt-PT, en-US] — 32 kw
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~24 new (0 existing)
+
+Wrote /Users/jackwallner/baseball/scripts/astro-keywords-by-store/ (1 stores) — playbook: astro-global-aso-go-2026.md
+==> sync ie (attempt 1)
+
+==> ie (Ireland) locales=[en-GB, en-US] — 26 kw
+    added ~24 new (0 existing)
+
+Wrote /Users/jackwallner/baseball/scripts/astro-keywords-by-store/ (1 stores) — playbook: astro-global-aso-go-2026.md
+==> sync ru (attempt 1)
+
+==> ru (Russia) locales=[ru, en-US] — 31 kw
+    added ~31 new (0 existing)
+
+Wrote /Users/jackwallner/baseball/scripts/astro-keywords-by-store/ (1 stores) — playbook: astro-global-aso-go-2026.md
+==> sync ua (attempt 1)
+
+==> ua (Ukraine) locales=[uk, ru, en-US] — 34 kw
+    batch fail: timed out
+    added ~28 new (0 existing)
+
+Wrote /Users/jackwallner/baseball/scripts/astro-keywords-by-store/ (1 stores) — playbook: astro-global-aso-go-2026.md
+==> sync sk (attempt 1)
+
+==> sk (Slovakia) locales=[sk, cs, en-US] — 33 kw
+    batch fail: timed out
+    added ~22 new (0 existing)
+
+Wrote /Users/jackwallner/baseball/scripts/astro-keywords-by-store/ (1 stores) — playbook: astro-global-aso-go-2026.md
+==> sync hu (attempt 1)
+
+==> hu (Hungary) locales=[hu, en-US] — 33 kw
+    batch fail: HTTP Error 500: Internal Server Error
+    batch fail: timed out
+    added ~19 new (0 existing)
+
+Wrote /Users/jackwallner/baseball/scripts/astro-keywords-by-store/ (1 stores) — playbook: astro-global-aso-go-2026.md
+==> sync ro (attempt 1)
+
+==> ro (Romania) locales=[ro, en-US] — 32 kw
+    batch fail: timed out
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~12 new (0 existing)
+
+Wrote /Users/jackwallner/baseball/scripts/astro-keywords-by-store/ (1 stores) — playbook: astro-global-aso-go-2026.md
+==> sync gr (attempt 1)
+
+==> gr (Greece) locales=[el, en-US] — 34 kw
+    batch fail: timed out
+    added ~20 new (0 existing)
+
+Wrote /Users/jackwallner/baseball/scripts/astro-keywords-by-store/ (1 stores) — playbook: astro-global-aso-go-2026.md
+==> sync hr (attempt 1)
+
+==> hr (Croatia) locales=[hr, en-US] — 34 kw
+    batch fail: timed out
+    batch fail: timed out
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~16 new (0 existing)
+
+Wrote /Users/jackwallner/baseball/scripts/astro-keywords-by-store/ (1 stores) — playbook: astro-global-aso-go-2026.md
+==> sync si (attempt 1)
+
+==> si (Slovenia) locales=[hr, it, en-US] — 39 kw
+    batch fail: timed out
+    batch fail: timed out
+    batch fail: timed out
+    added ~16 new (0 existing)
+
+Wrote /Users/jackwallner/baseball/scripts/astro-keywords-by-store/ (1 stores) — playbook: astro-global-aso-go-2026.md
+==> sync lv (attempt 1)
+
+==> lv (Latvia) locales=[en-GB, en-US] — 26 kw
+    batch fail: timed out
+    batch fail: timed out
+    added ~10 new (0 existing)
+
+Wrote /Users/jackwallner/baseball/scripts/astro-keywords-by-store/ (1 stores) — playbook: astro-global-aso-go-2026.md
+==> sync lu (attempt 1)
+
+==> lu (Luxembourg) locales=[fr-FR, de-DE, en-US] — 36 kw
+    batch fail: timed out
+    added ~29 new (0 existing)
+
+Wrote /Users/jackwallner/baseball/scripts/astro-keywords-by-store/ (1 stores) — playbook: astro-global-aso-go-2026.md
+==> sync is (attempt 1)
+error: Astro MCP not reachable — open Astro and enable MCP
+==> sync is (attempt 2)
+
+==> is (Iceland) locales=[en-GB, en-US] — 26 kw
+    added ~26 new (0 existing)
+
+Wrote /Users/jackwallner/baseball/scripts/astro-keywords-by-store/ (1 stores) — playbook: astro-global-aso-go-2026.md
+==> sync tr (attempt 1)
+
+==> tr (Türkiye) locales=[tr, en-US] — 31 kw
+    batch fail: timed out
+    batch fail: timed out
+    added ~16 new (0 existing)
+
+Wrote /Users/jackwallner/baseball/scripts/astro-keywords-by-store/ (1 stores) — playbook: astro-global-aso-go-2026.md
+==> sync kz (attempt 1)
+
+==> kz (Kazakhstan) locales=[ru, en-US] — 31 kw
+    batch fail: timed out
+    batch fail: HTTP Error 500: Internal Server Error
+    added ~16 new (0 existing)
+
+Wrote /Users/jackwallner/baseball/scripts/astro-keywords-by-store/ (1 stores) — playbook: astro-global-aso-go-2026.md
+==> sync kg (attempt 1)
+
+==> kg (Kyrgyzstan) locales=[ru, en-US] — 31 kw
+    batch fail: HTTP Error 500: Internal Server Error
+    batch fail: HTTP Error 500: Internal Server Error
+    batch fail: timed out
+    added ~8 new (0 existing)
+
+Wrote /Users/jackwallner/baseball/scripts/astro-keywords-by-store/ (1 stores) — playbook: astro-global-aso-go-2026.md
+==> sync uz (attempt 1)
+
+==> uz (Uzbekistan) locales=[ru, en-US] — 31 kw
+[1/30] sync nz attempt 1
+[2/30] sync jp attempt 1
+[2/30] sync jp attempt 2
+[3/30] sync kr attempt 1
+[4/30] sync hk attempt 1
+[5/30] sync tw attempt 1
+[6/30] sync mo attempt 1
+[7/30] sync sg attempt 1
+[8/30] sync my attempt 1
+[9/30] sync th attempt 1
+[10/30] sync vn attempt 1
+[11/30] sync id attempt 1
+[12/30] sync ph attempt 1
+[13/30] sync in attempt 1
+[14/30] sync kh attempt 1
+[15/30] sync mn attempt 1
+[16/30] sync np attempt 1
+[17/30] sync lk attempt 1
+[18/30] sync sa attempt 1
+[19/30] sync il attempt 1
+[20/30] sync jo attempt 1
+[21/30] sync kw attempt 1
+[22/30] sync lb attempt 1
+[23/30] sync om attempt 1
+[24/30] sync qa attempt 1
+[25/30] sync iq attempt 1
+[26/30] sync ma attempt 1
+[27/30] sync gh attempt 1
+[28/30] sync ke attempt 1
+[29/30] sync za attempt 1
+[30/30] sync pk attempt 1
+=== FULL SUMMARY PASS ===
+summary storeCount=91 stores=91
+sync failed: none

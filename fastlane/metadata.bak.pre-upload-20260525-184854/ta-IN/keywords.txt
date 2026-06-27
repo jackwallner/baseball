@@ -1,0 +1,1 @@
+statcast,savant,mlb,பேஸ்பால்,புள்ளிவிவரம்,சதவீதம்,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs

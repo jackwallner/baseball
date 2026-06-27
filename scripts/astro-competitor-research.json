@@ -1,0 +1,369 @@
+{
+  "scannedAt": "2026-05-26T02:32:06Z",
+  "stores": {
+    "us": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "ca": {
+      "term": "mlb statcast",
+      "competitors": []
+    },
+    "mx": {
+      "term": "estadísticas béisbol",
+      "competitors": []
+    },
+    "br": {
+      "term": "estatísticas beisebol",
+      "competitors": []
+    },
+    "ar": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "bo": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "cl": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "co": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "cr": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "do": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "ec": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "sv": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "gt": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "hn": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "pa": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "py": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "pe": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "gb": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "de": {
+      "term": "baseball statistiken",
+      "competitors": []
+    },
+    "fr": {
+      "term": "statistiques baseball",
+      "competitors": []
+    },
+    "es": {
+      "term": "estadísticas béisbol",
+      "competitors": []
+    },
+    "it": {
+      "term": "statistiche baseball",
+      "error": "HTTP Error 500: Internal Server Error"
+    },
+    "nl": {
+      "term": "honkbal statistieken",
+      "competitors": []
+    },
+    "at": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "be": {
+      "term": "baseball statcast",
+      "error": "timed out"
+    },
+    "ch": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "se": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "no": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "dk": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "fi": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "pl": {
+      "term": "statystyki baseball",
+      "competitors": []
+    },
+    "pt": {
+      "term": "baseball statcast",
+      "error": "timed out"
+    },
+    "ie": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "ru": {
+      "term": "бейсбол статистика",
+      "competitors": []
+    },
+    "ua": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "cz": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "sk": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "hu": {
+      "term": "baseball statcast",
+      "error": "timed out"
+    },
+    "ro": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "gr": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "hr": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "bg": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "si": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "ee": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "lv": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "lu": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "is": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "cy": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "tr": {
+      "term": "beyzbol istatistik",
+      "competitors": []
+    },
+    "az": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "kz": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "kg": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "uz": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "al": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "au": {
+      "term": "baseball stats",
+      "competitors": []
+    },
+    "nz": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "jp": {
+      "term": "野球 スタッツ",
+      "competitors": []
+    },
+    "kr": {
+      "term": "야구 통계",
+      "competitors": []
+    },
+    "cn": {
+      "term": "棒球 数据",
+      "competitors": []
+    },
+    "hk": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "tw": {
+      "term": "棒球 統計",
+      "competitors": []
+    },
+    "mo": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "sg": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "my": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "th": {
+      "term": "เบสบอล สถิติ",
+      "error": "timed out"
+    },
+    "vn": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "id": {
+      "term": "statistik baseball",
+      "competitors": []
+    },
+    "ph": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "in": {
+      "term": "baseball stats app",
+      "competitors": []
+    },
+    "kh": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "mn": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "np": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "lk": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "sa": {
+      "term": "بيسبول إحصائيات",
+      "competitors": []
+    },
+    "ae": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "eg": {
+      "term": "baseball statcast",
+      "error": "timed out"
+    },
+    "il": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "jo": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "kw": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "lb": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "om": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "qa": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "bh": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "iq": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "ma": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "dz": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "gh": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "ke": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "za": {
+      "term": "baseball statcast",
+      "error": "timed out"
+    },
+    "pk": {
+      "term": "baseball statcast",
+      "competitors": []
+    },
+    "am": {
+      "term": "baseball statcast",
+      "competitors": []
+    }
+  }
+}
