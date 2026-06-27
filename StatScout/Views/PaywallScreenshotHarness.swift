@@ -1,0 +1,39 @@
+#if DEBUG
+import SwiftUI
+
+struct PaywallScreenshotHarness: View {
+    let mode: PaywallScreenshotMode
+    @StateObject private var store = StoreService.shared
+
+    var body: some View {
+        Group {
+            if mode == .trial {
+                trialBackdrop {
+                    TrialPitchSheet(trigger: .upgrade)
+                }
+            } else {
+                PaywallView(trigger: .upgrade)
+            }
+        }
+        .environmentObject(store)
+        .task {
+            if store.products.isEmpty { await store.fetchProducts() }
+        }
+    }
+
+    private func trialBackdrop<Content: View>(@ViewBuilder content: () -> Content) -> some View {
+        ZStack {
+            SavantPalette.canvas.ignoresSafeArea()
+            Color.black.opacity(0.18).ignoresSafeArea()
+            VStack {
+                Spacer()
+                content()
+                    .frame(maxHeight: UIScreen.main.bounds.height * 0.72)
+                    .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                    .padding(.horizontal, 8)
+                    .padding(.bottom, 6)
+            }
+        }
+    }
+}
+#endif
