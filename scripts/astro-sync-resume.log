@@ -1,0 +1,55 @@
+==> RESUME mx 02:31:55
+
+==> mx (Mexico) locales=[es-MX, en-US] — 32 kw
+    batch fail: timed out
+    batch fail: timed out
+    added ~8 new (0 existing)
+
+Wrote /Users/jackwallner/baseball/scripts/astro-keywords-by-store/ (1 stores) — playbook: astro-global-aso-go-2026.md
+==> RESUME sv 02:38:15
+
+==> sv (El Salvador) locales=[es-ES, es-MX, en-US] — 32 kw
+    batch fail: timed out
+    batch fail: timed out
+    added ~13 new (0 existing)
+
+Wrote /Users/jackwallner/baseball/scripts/astro-keywords-by-store/ (1 stores) — playbook: astro-global-aso-go-2026.md
+==> RESUME gt 02:44:34
+
+==> gt (Guatemala) locales=[es-ES, es-MX, en-US] — 32 kw
+    batch fail: timed out
+    added ~24 new (0 existing)
+
+Wrote /Users/jackwallner/baseball/scripts/astro-keywords-by-store/ (1 stores) — playbook: astro-global-aso-go-2026.md
+==> RESUME hn 02:48:01
+
+==> hn (Honduras) locales=[es-ES, es-MX, en-US] — 32 kw
+    added ~32 new (0 existing)
+
+Wrote /Users/jackwallner/baseball/scripts/astro-keywords-by-store/ (1 stores) — playbook: astro-global-aso-go-2026.md
+==> RESUME pa 02:48:34
+
+==> pa (Panama) locales=[es-ES, es-MX, en-US] — 32 kw
+    batch fail: timed out
+    batch fail: timed out
+    added ~16 new (0 existing)
+
+Wrote /Users/jackwallner/baseball/scripts/astro-keywords-by-store/ (1 stores) — playbook: astro-global-aso-go-2026.md
+==> RESUME py 02:54:52
+
+==> py (Paraguay) locales=[es-ES, es-MX, en-US] — 32 kw
+    batch fail: HTTP Error 500: Internal Server Error
+    batch fail: timed out
+    added ~16 new (0 existing)
+
+Wrote /Users/jackwallner/baseball/scripts/astro-keywords-by-store/ (1 stores) — playbook: astro-global-aso-go-2026.md
+==> RESUME pe 02:58:16
+
+==> pe (Peru) locales=[es-ES, es-MX, en-US] — 32 kw
+    added ~32 new (0 existing)
+
+Wrote /Users/jackwallner/baseball/scripts/astro-keywords-by-store/ (1 stores) — playbook: astro-global-aso-go-2026.md
+==> RESUME gb 02:58:52
+
+==> gb (UK) locales=[en-GB, en-US] — 27 kw
+    batch fail: timed out

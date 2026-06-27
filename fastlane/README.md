@@ -23,13 +23,29 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 Download current metadata + screenshots from App Store Connect into /tmp/asc-live
 
+### ios fill_deprecated_locales
+
+```sh
+[bundle exec] fastlane ios fill_deprecated_locales
+```
+
+Fill whats_new + promotional_text on deprecated locales that ASC still requires
+
 ### ios upload_metadata
 
 ```sh
 [bundle exec] fastlane ios upload_metadata
 ```
 
-Upload screenshots and metadata to App Store Connect
+Upload screenshots and metadata to App Store Connect (fastlane 2.234+)
+
+### ios submit_review
+
+```sh
+[bundle exec] fastlane ios submit_review
+```
+
+Submit the draft version for App Store review (metadata already uploaded)
 
 ----
 

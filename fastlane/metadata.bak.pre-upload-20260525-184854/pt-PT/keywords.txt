@@ -1,0 +1,1 @@
+statcast,savant,mlb,beisebol,estatística,percentil,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs

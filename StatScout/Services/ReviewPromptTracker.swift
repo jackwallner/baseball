@@ -23,12 +23,12 @@ enum ReviewPromptTracker {
     private static let positiveMomentCountKey = "reviewPrompt.positiveMomentCount"
     private static let pendingPositiveMomentKey = "reviewPrompt.pendingPositiveMoment"
 
-    // Early-stage tuning: widen the intake while the install base (and rating
-    // count) is small. Still well inside Apple's 3-prompts/365-days cap, and the
-    // enjoyment pre-filter keeps unhappy users off the public Store.
-    static let minimumLaunchCount = 3
-    static let minimumDaysSinceFirstOpen = 3
-    static let cooldownDays = 60
+    // Enjoyment pre-filter keeps unhappy users off the public Store; thresholds
+    // match the Vitals portfolio standard for passive prompts.
+    static let minimumLaunchCount = 5
+    static let minimumDaysSinceFirstOpen = 7
+    static let minimumPositiveMoments = 3
+    static let cooldownDays = 120
 
     static var appLaunchCount: Int {
         get { max(defaults.integer(forKey: launchCountKey), 0) }
@@ -119,6 +119,7 @@ enum ReviewPromptTracker {
         guard hasCompletedOnboarding else { return false }
         guard passivePromptAllowed(now: now) else { return false }
         guard appLaunchCount >= minimumLaunchCount else { return false }
+        guard positiveMomentCount >= minimumPositiveMoments else { return false }
         guard let first = firstAppOpenDate else { return false }
         let minInterval = TimeInterval(minimumDaysSinceFirstOpen) * 86_400
         guard now.timeIntervalSince(first) >= minInterval else { return false }
@@ -136,6 +137,11 @@ enum ReviewPromptTracker {
     static func markShown(now: Date = .now) {
         lastShownDate = now
         consumePendingPositiveMoment()
+    }
+
+    static func markOpenedWriteReview() {
+        outcome = .openedWriteReview
+        markShown()
     }
 
     static func markFeedbackSubmitted() {

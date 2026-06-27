@@ -1,0 +1,602 @@
+{
+  "ar-SA": {
+    "keywords": {
+      "old": "statcast,savant,mlb,بيسبول,إحصائيات,نسبة,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs",
+      "new": "savant,بيسبول,إحصائيات,نسبة,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy,تصنيف,مقارنة",
+      "len": 92
+    },
+    "subtitle": {
+      "old": "نسب MLB Statcast",
+      "new": "نسب MLB Statcast"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "bn-BD": {
+    "keywords": {
+      "old": "statcast,savant,mlb,বেসবল,পরিসংখ্যান,শতাংশ,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs",
+      "new": "statcast,savant,mlb,বেসবল,পরিসংখ্যান,শতাংশ,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy",
+      "len": 94
+    },
+    "subtitle": {
+      "old": "Percentile Rankings & Stats",
+      "new": "Percentile Rankings & Stats"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "ca": {
+    "keywords": {
+      "old": "statcast,savant,mlb,beisbol,estadística,percentil,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs",
+      "new": "savant,beisbol,estadística,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy,mètriques,rànquing",
+      "len": 97
+    },
+    "subtitle": {
+      "old": "Percentils MLB Statcast",
+      "new": "Percentils MLB Statcast"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "cs": {
+    "keywords": {
+      "old": "statcast,savant,mlb,baseball,statistiky,percentil,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs",
+      "new": "statcast,savant,mlb,statistiky,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy,statistiky",
+      "len": 93
+    },
+    "subtitle": {
+      "old": "Percentile Rankings & Stats",
+      "new": "Percentile Rankings & Stats"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "da": {
+    "keywords": {
+      "old": "statcast,savant,mlb,baseball,statistik,percentil,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs",
+      "new": "savant,statistik,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy,statistik,ranking,sammenligning",
+      "len": 100
+    },
+    "subtitle": {
+      "old": "MLB Statcast Percentiler",
+      "new": "MLB Statcast Percentiler"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "de-DE": {
+    "keywords": {
+      "old": "statcast,savant,mlb,baseball,statistik,perzentil,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs",
+      "new": "savant,statistik,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy,metriken,vergleich,leaderboard",
+      "len": 99
+    },
+    "subtitle": {
+      "old": "MLB Statcast Perzentile",
+      "new": "MLB Statcast Perzentile"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "el": {
+    "keywords": {
+      "old": "statcast,savant,mlb,μπέιζμπολ,στατιστικά,ποσοστό,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs",
+      "new": "statcast,savant,mlb,μπέιζμπολ,στατιστικά,ποσοστό,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy",
+      "len": 100
+    },
+    "subtitle": {
+      "old": "Percentile Rankings & Stats",
+      "new": "Percentile Rankings & Stats"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "en-AU": {
+    "keywords": {
+      "old": "statcast,savant,mlb,wrc,xwoba,oaa,barrel,sprint,velo,scout,sports,strike,percentile,wrcplus,dfs",
+      "new": "savant,wrc,xwoba,oaa,barrel,sprint,velo,sports,strike,wrcplus,dfs,fantasy,metrics,leaderboard",
+      "len": 93
+    },
+    "subtitle": {
+      "old": "MLB Statcast Percentiles",
+      "new": "MLB Statcast Percentiles"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "en-CA": {
+    "keywords": {
+      "old": "statcast,savant,mlb,wrc,xwoba,oaa,barrel,sprint,velo,scout,sports,strike,percentile,wrcplus,dfs",
+      "new": "savant,wrc,xwoba,oaa,barrel,sprint,velo,sports,strike,wrcplus,dfs,fantasy,metrics,leaderboard",
+      "len": 93
+    },
+    "subtitle": {
+      "old": "MLB Statcast Percentiles",
+      "new": "MLB Statcast Percentiles"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "en-GB": {
+    "keywords": {
+      "old": "statcast,savant,mlb,wrc,xwoba,oaa,barrel,sprint,velo,scout,sports,strike,percentile,wrcplus,dfs",
+      "new": "savant,wrc,xwoba,oaa,barrel,sprint,velo,sports,strike,wrcplus,dfs,fantasy,metrics,leaderboard",
+      "len": 93
+    },
+    "subtitle": {
+      "old": "MLB Statcast Percentiles",
+      "new": "MLB Statcast Percentiles"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "en-US": {
+    "keywords": {
+      "old": "statcast,savant,mlb,wrc,xwoba,oaa,barrel,sprint,velo,scout,sports,strike,percentile,wrcplus,dfs",
+      "new": "savant,wrc,xwoba,oaa,barrel,sprint,velo,sports,strike,wrcplus,dfs,fantasy,metrics,leaderboard",
+      "len": 93
+    },
+    "subtitle": {
+      "old": "MLB Statcast Percentiles",
+      "new": "MLB Statcast Percentiles"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "es-ES": {
+    "keywords": {
+      "old": "statcast,savant,mlb,béisbol,estadística,percentil,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs",
+      "new": "savant,béisbol,estadística,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy,métricas,ranking",
+      "len": 95
+    },
+    "subtitle": {
+      "old": "Percentiles MLB Statcast",
+      "new": "Percentiles MLB Statcast"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "es-MX": {
+    "keywords": {
+      "old": "statcast,savant,mlb,béisbol,estadística,percentil,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs",
+      "new": "savant,béisbol,estadística,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy,métricas,ranking",
+      "len": 95
+    },
+    "subtitle": {
+      "old": "Percentiles MLB Statcast",
+      "new": "Percentiles MLB Statcast"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "fi": {
+    "keywords": {
+      "old": "statcast,savant,mlb,baseball,tilastot,prosentti,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs",
+      "new": "savant,tilastot,prosentti,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy,tilastot,ranking",
+      "len": 94
+    },
+    "subtitle": {
+      "old": "MLB Statcast Prosentit",
+      "new": "MLB Statcast Prosentit"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "fr-CA": {
+    "keywords": {
+      "old": "statcast,savant,mlb,baseball,stats,percentile,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs",
+      "new": "savant,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy,métriques,classement,comparaison",
+      "len": 91
+    },
+    "subtitle": {
+      "old": "Percentiles MLB Statcast",
+      "new": "Percentiles MLB Statcast"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "fr-FR": {
+    "keywords": {
+      "old": "statcast,savant,mlb,baseball,stats,percentile,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs",
+      "new": "savant,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy,métriques,classement,comparaison",
+      "len": 91
+    },
+    "subtitle": {
+      "old": "Percentiles MLB Statcast",
+      "new": "Percentiles MLB Statcast"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "gu-IN": {
+    "keywords": {
+      "old": "statcast,savant,mlb,બેસબોલ,આંકડા,ટકાવારી,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs",
+      "new": "statcast,savant,mlb,બેસબોલ,આંકડા,ટકાવારી,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy",
+      "len": 92
+    },
+    "subtitle": {
+      "old": "Percentile Rankings & Stats",
+      "new": "Percentile Rankings & Stats"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "he": {
+    "keywords": {
+      "old": "statcast,savant,mlb,בייסבול,סטטיסטיקה,אחוזון,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs",
+      "new": "statcast,savant,mlb,בייסבול,סטטיסטיקה,אחוזון,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy",
+      "len": 96
+    },
+    "subtitle": {
+      "old": "Percentile Rankings & Stats",
+      "new": "Percentile Rankings & Stats"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "hi": {
+    "keywords": {
+      "old": "statcast,savant,mlb,बेसबॉल,आंकड़े,प्रतिशत,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs",
+      "new": "savant,बेसबॉल,आंकड़े,प्रतिशत,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy,रैंकिंग,तुलना",
+      "len": 94
+    },
+    "subtitle": {
+      "old": "MLB Statcast प्रतिशत",
+      "new": "MLB Statcast प्रतिशत"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "hr": {
+    "keywords": {
+      "old": "statcast,savant,mlb,bejzbol,statistika,postotak,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs",
+      "new": "statcast,savant,mlb,bejzbol,statistika,postotak,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy",
+      "len": 99
+    },
+    "subtitle": {
+      "old": "Percentile Rankings & Stats",
+      "new": "Percentile Rankings & Stats"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "hu": {
+    "keywords": {
+      "old": "statcast,savant,mlb,baseball,statisztika,százalék,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs",
+      "new": "statcast,savant,mlb,statisztika,százalék,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy",
+      "len": 92
+    },
+    "subtitle": {
+      "old": "Percentile Rankings & Stats",
+      "new": "Percentile Rankings & Stats"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "id": {
+    "keywords": {
+      "old": "statcast,savant,mlb,baseball,statistik,persentil,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs",
+      "new": "statcast,savant,mlb,statistik,persentil,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy",
+      "len": 91
+    },
+    "subtitle": {
+      "old": "Percentile Rankings & Stats",
+      "new": "Percentile Rankings & Stats"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "it": {
+    "keywords": {
+      "old": "statcast,savant,mlb,baseball,statistiche,percentile,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike",
+      "new": "savant,statistiche,percentile,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy,metriche",
+      "len": 90
+    },
+    "subtitle": {
+      "old": "Percentili MLB Statcast",
+      "new": "Percentili MLB Statcast"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "ja": {
+    "keywords": {
+      "old": "statcast,savant,mlb,野球,統計,パーセンタイル,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs",
+      "new": "statcast,savant,野球,統計,パーセンタイル,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy,ランキング,比較,メトリクス",
+      "len": 96
+    },
+    "subtitle": {
+      "old": "MLBスタットキャスト順位",
+      "new": "MLBスタットキャスト順位"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "kn-IN": {
+    "keywords": {
+      "old": "statcast,savant,mlb,ಬೇಸ್ಬಾಲ್,ಅಂಕಿಅಂಶ,ಶೇಕಡಾ,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs",
+      "new": "statcast,savant,mlb,ಬೇಸ್ಬಾಲ್,ಅಂಕಿಅಂಶ,ಶೇಕಡಾ,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy",
+      "len": 94
+    },
+    "subtitle": {
+      "old": "Percentile Rankings & Stats",
+      "new": "Percentile Rankings & Stats"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "ko": {
+    "keywords": {
+      "old": "statcast,savant,mlb,야구,통계,백분위,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs",
+      "new": "statcast,savant,야구,통계,백분위,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy,순위,비교,메트릭",
+      "len": 87
+    },
+    "subtitle": {
+      "old": "MLB 스탯캐스트 백분위",
+      "new": "MLB 스탯캐스트 백분위"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "ml-IN": {
+    "keywords": {
+      "old": "statcast,savant,mlb,ബേസ്ബോൾ,സ്ഥിതിവിവരം,ശതമാനം,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs",
+      "new": "statcast,savant,mlb,ബേസ്ബോൾ,സ്ഥിതിവിവരം,ശതമാനം,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy",
+      "len": 98
+    },
+    "subtitle": {
+      "old": "Percentile Rankings & Stats",
+      "new": "Percentile Rankings & Stats"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "mr-IN": {
+    "keywords": {
+      "old": "statcast,savant,mlb,बेसबॉल,आकडेवारी,टक्केवारी,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs",
+      "new": "statcast,savant,mlb,बेसबॉल,आकडेवारी,टक्केवारी,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy",
+      "len": 97
+    },
+    "subtitle": {
+      "old": "Percentile Rankings & Stats",
+      "new": "Percentile Rankings & Stats"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "ms": {
+    "keywords": {
+      "old": "statcast,savant,mlb,besbol,statistik,peratus,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs",
+      "new": "statcast,savant,mlb,besbol,statistik,peratus,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy",
+      "len": 96
+    },
+    "subtitle": {
+      "old": "Percentile Rankings & Stats",
+      "new": "Percentile Rankings & Stats"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "nl-NL": {
+    "keywords": {
+      "old": "statcast,savant,mlb,honkbal,statistiek,percentiel,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs",
+      "new": "savant,honkbal,statistiek,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy,metrics,ranglijst",
+      "len": 95
+    },
+    "subtitle": {
+      "old": "MLB Statcast Percentielen",
+      "new": "MLB Statcast Percentielen"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "no": {
+    "keywords": {
+      "old": "statcast,savant,mlb,baseball,statistikk,percentil,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs",
+      "new": "savant,statistikk,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy,statistikk,ranking",
+      "len": 88
+    },
+    "subtitle": {
+      "old": "MLB Statcast Percentiler",
+      "new": "MLB Statcast Percentiler"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "or-IN": {
+    "keywords": {
+      "old": "statcast,savant,mlb,ବେସବଲ,ପରିସଂଖ୍ୟା,ଶତାଂଶ,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs",
+      "new": "statcast,savant,mlb,ବେସବଲ,ପରିସଂଖ୍ୟା,ଶତାଂଶ,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy",
+      "len": 93
+    },
+    "subtitle": {
+      "old": "Percentile Rankings & Stats",
+      "new": "Percentile Rankings & Stats"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "pa-IN": {
+    "keywords": {
+      "old": "statcast,savant,mlb,ਬੇਸਬਾਲ,ਅੰਕੜੇ,ਪ੍ਰਤੀਸ਼ਤ,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs",
+      "new": "statcast,savant,mlb,ਬੇਸਬਾਲ,ਅੰਕੜੇ,ਪ੍ਰਤੀਸ਼ਤ,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy",
+      "len": 93
+    },
+    "subtitle": {
+      "old": "Percentile Rankings & Stats",
+      "new": "Percentile Rankings & Stats"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "pl": {
+    "keywords": {
+      "old": "statcast,savant,mlb,baseball,statystyki,percentyl,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs",
+      "new": "savant,statystyki,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy,metryki,ranking,porównanie",
+      "len": 96
+    },
+    "subtitle": {
+      "old": "Percentyle MLB Statcast",
+      "new": "Percentyle MLB Statcast"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "pt-BR": {
+    "keywords": {
+      "old": "statcast,savant,mlb,beisebol,estatística,percentil,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs",
+      "new": "savant,beisebol,estatística,percentil,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy,métricas",
+      "len": 98
+    },
+    "subtitle": {
+      "old": "Percentis MLB Statcast",
+      "new": "Percentis MLB Statcast"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "pt-PT": {
+    "keywords": {
+      "old": "statcast,savant,mlb,beisebol,estatística,percentil,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs",
+      "new": "savant,beisebol,estatística,percentil,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy,métricas",
+      "len": 98
+    },
+    "subtitle": {
+      "old": "Percentis MLB Statcast",
+      "new": "Percentis MLB Statcast"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "ro": {
+    "keywords": {
+      "old": "statcast,savant,mlb,baseball,statistici,percentil,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs",
+      "new": "statcast,savant,mlb,statistici,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy,statistici",
+      "len": 93
+    },
+    "subtitle": {
+      "old": "Percentile Rankings & Stats",
+      "new": "Percentile Rankings & Stats"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "ru": {
+    "keywords": {
+      "old": "statcast,savant,mlb,бейсбол,статистика,процентиль,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs",
+      "new": "savant,бейсбол,статистика,процентиль,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy,статистика",
+      "len": 99
+    },
+    "subtitle": {
+      "old": "Процентили MLB Statcast",
+      "new": "Процентили MLB Statcast"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "sk": {
+    "keywords": {
+      "old": "statcast,savant,mlb,baseball,štatistiky,percentil,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs",
+      "new": "statcast,savant,mlb,štatistiky,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy,štatistiky",
+      "len": 93
+    },
+    "subtitle": {
+      "old": "Percentile Rankings & Stats",
+      "new": "Percentile Rankings & Stats"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "sl-SI": {
+    "keywords": {
+      "old": "statcast,savant,mlb,baseball,statistika,percentil,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs",
+      "new": "statcast,savant,mlb,statistika,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy,lestvica",
+      "len": 91
+    },
+    "subtitle": {
+      "old": "Percentile Rankings & Stats",
+      "new": "Percentile Rankings & Stats"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "sv": {
+    "keywords": {
+      "old": "statcast,savant,mlb,baseboll,statistik,percentil,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs",
+      "new": "savant,baseboll,statistik,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy,statistik,ranking",
+      "len": 95
+    },
+    "subtitle": {
+      "old": "MLB Statcast Percentiler",
+      "new": "MLB Statcast Percentiler"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "ta-IN": {
+    "keywords": {
+      "old": "statcast,savant,mlb,பேஸ்பால்,புள்ளிவிவரம்,சதவீதம்,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs",
+      "new": "statcast,savant,mlb,பேஸ்பால்,புள்ளிவிவரம்,சதவீதம்,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs",
+      "len": 93
+    },
+    "subtitle": {
+      "old": "Percentile Rankings & Stats",
+      "new": "Percentile Rankings & Stats"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "te-IN": {
+    "keywords": {
+      "old": "statcast,savant,mlb,బేస్బాల్,గణాంకాలు,శాతం,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs",
+      "new": "statcast,savant,mlb,బేస్బాల్,గణాంకాలు,శాతం,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy",
+      "len": 94
+    },
+    "subtitle": {
+      "old": "Percentile Rankings & Stats",
+      "new": "Percentile Rankings & Stats"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "th": {
+    "keywords": {
+      "old": "statcast,savant,mlb,เบสบอล,สถิติ,เปอร์เซ็นไทล์,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs",
+      "new": "statcast,savant,เบสบอล,สถิติ,เปอร์เซ็นไทล์,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy",
+      "len": 94
+    },
+    "subtitle": {
+      "old": "เปอร์เซ็นไทล์ MLB",
+      "new": "เปอร์เซ็นไทล์ MLB"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "tr": {
+    "keywords": {
+      "old": "statcast,savant,mlb,beyzbol,istatistik,yüzdelik,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs",
+      "new": "savant,beyzbol,istatistik,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy,istatistik,sıralama",
+      "len": 97
+    },
+    "subtitle": {
+      "old": "MLB Statcast Yüzdelik",
+      "new": "MLB Statcast Yüzdelik"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "uk": {
+    "keywords": {
+      "old": "statcast,savant,mlb,бейсбол,статистика,відсоток,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs",
+      "new": "savant,бейсбол,статистика,відсоток,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy,статистика",
+      "len": 97
+    },
+    "subtitle": {
+      "old": "Процентилі MLB Statcast",
+      "new": "Процентилі MLB Statcast"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "ur-PK": {
+    "keywords": {
+      "old": "statcast,savant,mlb,بیسبال,اعداد,فیصد,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs",
+      "new": "statcast,savant,mlb,بیسبال,اعداد,فیصد,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy,درجہ",
+      "len": 94
+    },
+    "subtitle": {
+      "old": "Percentile Rankings & Stats",
+      "new": "Percentile Rankings & Stats"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "vi": {
+    "keywords": {
+      "old": "statcast,savant,mlb,bongchay,thongke,phantram,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs",
+      "new": "statcast,savant,mlb,bongchay,thongke,phantram,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy",
+      "len": 97
+    },
+    "subtitle": {
+      "old": "Percentile Rankings & Stats",
+      "new": "Percentile Rankings & Stats"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "zh-Hans": {
+    "keywords": {
+      "old": "statcast,savant,mlb,棒球,统计,百分位,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs",
+      "new": "savant,棒球,统计,百分位,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy,排名,对比,指标",
+      "len": 77
+    },
+    "subtitle": {
+      "old": "MLB Statcast百分位",
+      "new": "MLB Statcast百分位"
+    },
+    "name": "Baseball Savvy StatScout"
+  },
+  "zh-Hant": {
+    "keywords": {
+      "old": "statcast,savant,mlb,棒球,統計,百分位,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs",
+      "new": "savant,棒球,統計,百分位,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy,排名,對比,指標",
+      "len": 77
+    },
+    "subtitle": {
+      "old": "MLB Statcast百分位",
+      "new": "MLB Statcast百分位"
+    },
+    "name": "Baseball Savvy StatScout"
+  }
+}
