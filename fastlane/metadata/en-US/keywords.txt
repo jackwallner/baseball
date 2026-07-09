@@ -1,1 +1,1 @@
-savant,xwoba,oaa,wrc,wrcplus,barrel,era,exit,velocity,hitting,pitching,fielding,metrics,leaderboard
+savant,xwoba,oaa,wrc,wrcplus,barrel,exit,velocity,hitting,pitching,fielding,metrics,analytics,launch

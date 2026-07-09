@@ -1,1 +1,1 @@
-savant,бейсбол,статистика,процентиль,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy,статистика
+savant,бейсбол,статистика,процентиль,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs,fantasy

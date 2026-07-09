@@ -1,38 +1,26 @@
 # Baseball — Project Guide
 
-## Scripts
+StatScout: Statcast percentiles / player-comparison app (iOS). XcodeGen
+project/scheme: `StatScout`, simulator device `agent-baseball`.
 
-- `scripts/testflight.sh` — push to TestFlight / ship a build
-- `scripts/pull-appstore-metadata.sh` — snapshots `fastlane/metadata/` to `metadata.bak.<timestamp>/`, then runs `fastlane deliver download_metadata`. ALWAYS run before editing `fastlane/metadata/*.txt` so ASC web-UI edits aren't clobbered. After pulling, diff against the snapshot to confirm what changed remotely.
-- `scripts/upload-appstore-metadata.sh` — `fastlane upload_metadata` (screenshots + listing copy, no binary, no submit-for-review).
+**This repo is the fastlane template for the other iOS apps** — keep `Appfile`,
+`metadata/en-US/`, `screenshots/en-US/`, and `Fastfile` review info canonical
+here and copy outward.
 
-ASC API key (shared across apps): `~/.baseball_credentials` (`ASC_API_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_PATH`).
+**App Store reviews:** enjoyment funnel in `StatScout/Services/ReviewPromptTracker.swift`
+(passive triggers: 3rd+ player profile open, Pro player comparison). App Store
+ID `6743780853`; feedback `jackwallner+bb@gmail.com`.
 
-This project is the fastlane template for other iOS projects — keep `Appfile`, `metadata/en-US/`, `screenshots/en-US/`, and `Fastfile` review info canonical here.
+## Backend / data pipeline (Statcast)
 
-**App Store reviews:** StatScout uses the enjoyment funnel in `StatScout/Services/ReviewPromptTracker.swift` (passive triggers: 3rd+ player profile open, Pro player comparison). App Store ID `6743780853`; feedback `jackwallner+bb@gmail.com`.
+Unlike the other apps, StatScout is backed by a Supabase Statcast dataset fed by a nightly pipeline.
 
-## Simulator — dedicated, headless (required)
+- **Supabase migrations**: in `supabase/migrations/`, applied after any schema change. Check CLI (`which supabase`), link (`supabase link --project-ref <ref>`, ref is in `SUPABASE_URL`), then `supabase db push`.
+- **Data refresh workflows**: nightly `.github/workflows/nightly-statcast.yml`; manual `gh workflow run nightly-statcast.yml`; watch with `gh run watch <run-id>`.
+- **Env vars**: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (GitHub secrets), `STATCAST_SEASON` (optional, defaults to current season). App reads `SUPABASE_URL` + `SUPABASE_ANON_KEY` from `~/.baseball_credentials` (Supabase project is `babzqsbmcunrezsdpyng` as of 2026-05-03 — refresh the ANON_KEY there if it rotates).
+- **Common issues**: FanGraphs blocks cloud IPs (403) — using MLB Stats API instead. Supabase upsert needs the composite PK on `(id, season)` (migration `20260502000000_ensure_composite_pk.sql`). Node 20 deprecation handled via `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true`.
+- **TestFlight upload** sources the creds first: `source ~/.baseball_credentials && bash scripts/testflight.sh`.
 
-This project owns the simulator device `agent-baseball`. Multiple agents work in
-parallel on this machine: NEVER build/test against a shared named destination
-(e.g. `name=iPhone 17 Pro`) and NEVER open Simulator.app — it steals Jack's
-mouse/keyboard. Everything runs headless. Full guide: `~/docs/ios-agent-simulators.md`
-
-```bash
-UDID=$(agent-sim boot baseball)        # create if needed + boot headless; prints UDID
-xcodebuild -project StatScout.xcodeproj -scheme StatScout -destination "id=$UDID" build
-xcodebuild test -project StatScout.xcodeproj -scheme StatScout -destination "id=$UDID"
-APP=$(find ~/Library/Developer/Xcode/DerivedData/StatScout-*/Build/Products -maxdepth 2 -name "*.app" -path "*iphonesimulator*" | head -1)
-xcrun simctl install "$UDID" "$APP" && xcrun simctl launch "$UDID" "$(defaults read "$APP/Info" CFBundleIdentifier)"
-axe describe-ui --udid "$UDID"        # inspect UI via accessibility tree
-axe tap --label "Continue" --udid "$UDID"   # interact without mouse/keyboard
-agent-sim screenshot baseball          # PNG at /tmp/agent-baseball.png
-agent-sim shutdown baseball            # free resources when done
-```
-
-## TestFlight on every update
-
-After finishing a change and pushing to git, ALWAYS upload a new TestFlight build by
-running `./scripts/testflight.sh` — do this unprompted on every push that changes app
-code. Jack tests every update on his device and shouldn't have to ask.
+---
+Shared iOS conventions (build, simulator, release scripts, ASC key, review funnel, signing, gotchas):
+always-loaded global CLAUDE.md + the `ios-dev` skill.

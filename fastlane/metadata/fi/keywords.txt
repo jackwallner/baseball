@@ -1,1 +1,1 @@
-savant,tilastot,prosentti,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy,tilastot,ranking
+savant,baseball,tilastot,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy,ranking,vertailu,lyönti

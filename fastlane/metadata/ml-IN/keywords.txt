@@ -1,1 +1,1 @@
-statcast,savant,mlb,ബേസ്ബോൾ,സ്ഥിതിവിവരം,ശതമാനം,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy
+savant,ബേസ്ബോൾ,സ്ഥിതിവിവരം,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs,fantasy,റാങ്കിംഗ്

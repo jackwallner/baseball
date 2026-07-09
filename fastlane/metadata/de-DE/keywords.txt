@@ -1,1 +1,1 @@
-savant,statistik,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy,metriken,vergleich,leaderboard
+xwoba,oaa,wrc,wrcplus,barrel,exit,velocity,hitting,pitching,fielding,metrics,analytics,hardhit,xslg

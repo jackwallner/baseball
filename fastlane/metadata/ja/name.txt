@@ -1,1 +1,1 @@
-Baseball Savvy StatScout
+MLBスタットキャスト百分位スカウト分析アプリ用
