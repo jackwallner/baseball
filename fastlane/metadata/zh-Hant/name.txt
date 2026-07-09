@@ -1,1 +1,1 @@
-Baseball Savvy StatScout
+MLB棒球Statcast百分位球探數據分析應用

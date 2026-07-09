@@ -1,1 +1,1 @@
-statcast,savant,เบสบอล,สถิติ,เปอร์เซ็นไทล์,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy
+savant,เบสบอล,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs,fantasy,เปรียบเทียบ,ตี,ขว้าง,รับ

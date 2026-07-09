@@ -1,0 +1,805 @@
+{
+  "locales": {
+    "ar-SA": {
+      "store": "sa",
+      "title": "ستاتكاست MLB · نسب مئوية",
+      "subtitle": "ترتيب النسب المئوية MLB Statca",
+      "keywords": "xwoba,oaa,wrc,wrcplus,barrel,exit,velocity,hitting,pitching,fielding,metrics,analytics,hardhit,xslg",
+      "title_len": 24,
+      "subtitle_len": 30,
+      "keywords_len": 99,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "Localized title; no English brand paste. MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 99/100.",
+      "ok": true
+    },
+    "bn-BD": {
+      "store": "in",
+      "title": "MLB স্ট্যাটকাস্ট শতাংশ স্কাউট",
+      "subtitle": "MLB Statcast শতাংশ র‍্যাঙ্কিং ",
+      "keywords": "xwoba,oaa,wrc,wrcplus,barrel,exit,velocity,hitting,pitching,fielding,metrics,analytics,hardhit,xslg",
+      "title_len": 29,
+      "subtitle_len": 30,
+      "keywords_len": 99,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "Localized title; no English brand paste. MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 99/100.",
+      "ok": true
+    },
+    "ca": {
+      "store": "es",
+      "title": "Statcast MLB · Percentils Sava",
+      "subtitle": "Rangs percentils MLB Statcast",
+      "keywords": "savant,beisbol,estadística,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs,fantasy,mètriques",
+      "title_len": 30,
+      "subtitle_len": 29,
+      "keywords_len": 94,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "Localized title; no English brand paste. MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 94/100.",
+      "ok": true
+    },
+    "cs": {
+      "store": "cz",
+      "title": "MLB Statcast · Percentil Scout",
+      "subtitle": "Percentilové žebříčky Statcast",
+      "keywords": "xwoba,oaa,wrc,wrcplus,barrel,exit,velocity,hitting,pitching,fielding,metrics,analytics,hardhit,xslg",
+      "title_len": 30,
+      "subtitle_len": 30,
+      "keywords_len": 99,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "Localized title; no English brand paste. MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 99/100.",
+      "ok": true
+    },
+    "da": {
+      "store": "dk",
+      "title": "MLB Statcast · Percentil Scout",
+      "subtitle": "MLB Statcast percentilrangerin",
+      "keywords": "savant,baseball,statistik,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy,ranking,sammenligning",
+      "title_len": 30,
+      "subtitle_len": 30,
+      "keywords_len": 99,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "Localized title; no English brand paste. MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 99/100.",
+      "ok": true
+    },
+    "de-DE": {
+      "store": "de",
+      "title": "Statcast Perzentile · MLB Scou",
+      "subtitle": "MLB Statcast Perzentil-Ränge",
+      "keywords": "xwoba,oaa,wrc,wrcplus,barrel,exit,velocity,hitting,pitching,fielding,metrics,analytics,hardhit,xslg",
+      "title_len": 30,
+      "subtitle_len": 28,
+      "keywords_len": 99,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "Localized title; no English brand paste. MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 99/100.",
+      "ok": true
+    },
+    "el": {
+      "store": "gr",
+      "title": "MLB Statcast · Ποσοστό Scout",
+      "subtitle": "Κατάταξη ποσοστιαίων Statcast",
+      "keywords": "savant,μπέιζμπολ,στατιστικά,ποσοστό,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy,κατάταξη",
+      "title_len": 28,
+      "subtitle_len": 29,
+      "keywords_len": 96,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "Localized title; no English brand paste. MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 96/100.",
+      "ok": true
+    },
+    "en-AU": {
+      "store": "au",
+      "title": "Baseball Savvy StatScout",
+      "subtitle": "MLB Statcast Percentile Ranks",
+      "keywords": "savant,xwoba,oaa,wrc,wrcplus,barrel,exit,velocity,hitting,pitching,fielding,metrics,analytics,launch",
+      "title_len": 24,
+      "subtitle_len": 29,
+      "keywords_len": 100,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "StatScout brand in title (en-*). MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 100/100.",
+      "ok": true
+    },
+    "en-CA": {
+      "store": "ca",
+      "title": "Baseball Savvy StatScout",
+      "subtitle": "MLB Statcast Percentile Ranks",
+      "keywords": "savant,xwoba,oaa,wrc,wrcplus,barrel,exit,velocity,hitting,pitching,fielding,metrics,analytics,launch",
+      "title_len": 24,
+      "subtitle_len": 29,
+      "keywords_len": 100,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "StatScout brand in title (en-*). MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 100/100.",
+      "ok": true
+    },
+    "en-GB": {
+      "store": "gb",
+      "title": "Baseball Savvy StatScout",
+      "subtitle": "MLB Statcast Percentile Ranks",
+      "keywords": "savant,xwoba,oaa,wrc,wrcplus,barrel,exit,velocity,hitting,pitching,fielding,metrics,analytics,launch",
+      "title_len": 24,
+      "subtitle_len": 29,
+      "keywords_len": 100,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "StatScout brand in title (en-*). MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 100/100.",
+      "ok": true
+    },
+    "en-US": {
+      "store": "us",
+      "title": "Baseball Savvy StatScout",
+      "subtitle": "MLB Statcast Percentile Ranks",
+      "keywords": "savant,xwoba,oaa,wrc,wrcplus,barrel,exit,velocity,hitting,pitching,fielding,metrics,analytics,launch",
+      "title_len": 24,
+      "subtitle_len": 29,
+      "keywords_len": 100,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "StatScout brand in title (en-*). MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 100/100.",
+      "ok": true
+    },
+    "es-ES": {
+      "store": "es",
+      "title": "Statcast MLB · Percentiles Sav",
+      "subtitle": "Rangos percentiles MLB Statcas",
+      "keywords": "xwoba,oaa,wrc,wrcplus,barrel,exit,velocity,hitting,pitching,fielding,metrics,analytics,hardhit,xslg",
+      "title_len": 30,
+      "subtitle_len": 30,
+      "keywords_len": 99,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "Localized title; no English brand paste. MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 99/100.",
+      "ok": true
+    },
+    "es-MX": {
+      "store": "mx",
+      "title": "Statcast MLB · Percentiles Sav",
+      "subtitle": "Rangos percentiles MLB Statcas",
+      "keywords": "xwoba,oaa,wrc,wrcplus,barrel,exit,velocity,hitting,pitching,fielding,metrics,analytics,hardhit,xslg",
+      "title_len": 30,
+      "subtitle_len": 30,
+      "keywords_len": 99,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "Localized title; no English brand paste. MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 99/100.",
+      "ok": true
+    },
+    "fi": {
+      "store": "fi",
+      "title": "MLB Statcast · Prosentti Scout",
+      "subtitle": "MLB Statcast prosenttijärjesty",
+      "keywords": "savant,baseball,tilastot,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy,ranking,vertailu,lyönti",
+      "title_len": 30,
+      "subtitle_len": 30,
+      "keywords_len": 100,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "Localized title; no English brand paste. MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 100/100.",
+      "ok": true
+    },
+    "fr-CA": {
+      "store": "ca",
+      "title": "Statcast MLB · Stats Savant",
+      "subtitle": "Classements percentiles Statca",
+      "keywords": "xwoba,oaa,wrc,wrcplus,barrel,exit,velocity,hitting,pitching,fielding,metrics,analytics,hardhit,xslg",
+      "title_len": 27,
+      "subtitle_len": 30,
+      "keywords_len": 99,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "Localized title; no English brand paste. MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 99/100.",
+      "ok": true
+    },
+    "fr-FR": {
+      "store": "fr",
+      "title": "Statcast MLB · Stats Savant",
+      "subtitle": "Classements percentiles Statca",
+      "keywords": "xwoba,oaa,wrc,wrcplus,barrel,exit,velocity,hitting,pitching,fielding,metrics,analytics,hardhit,xslg",
+      "title_len": 27,
+      "subtitle_len": 30,
+      "keywords_len": 99,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "Localized title; no English brand paste. MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 99/100.",
+      "ok": true
+    },
+    "gu-IN": {
+      "store": "in",
+      "title": "MLB સ્ટેટકાસ્ટ ટકાવારી સ્કાઉટ",
+      "subtitle": "MLB Statcast ટકાવારી રેન્ક ડેટ",
+      "keywords": "xwoba,oaa,wrc,wrcplus,barrel,exit,velocity,hitting,pitching,fielding,metrics,analytics,hardhit,xslg",
+      "title_len": 29,
+      "subtitle_len": 30,
+      "keywords_len": 99,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "Localized title; no English brand paste. MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 99/100.",
+      "ok": true
+    },
+    "he": {
+      "store": "il",
+      "title": "סטטקאסט MLB · אחוזונים סקאוט",
+      "subtitle": "דירוג אחוזונים MLB Statcast",
+      "keywords": "savant,בייסבול,סטטיסטיקה,אחוזון,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs,fantasy,השוואה",
+      "title_len": 28,
+      "subtitle_len": 27,
+      "keywords_len": 96,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "Localized title; no English brand paste. MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 96/100.",
+      "ok": true
+    },
+    "hi": {
+      "store": "in",
+      "title": "MLB स्टैटकास्ट प्रतिशत स्काउट ",
+      "subtitle": "MLB Statcast प्रतिशत रैंकिंग ड",
+      "keywords": "savant,बेसबॉल,आंकड़े,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs,fantasy,तुलना,बल्लेबाजी",
+      "title_len": 30,
+      "subtitle_len": 30,
+      "keywords_len": 94,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "Localized title; no English brand paste. MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 94/100.",
+      "ok": true
+    },
+    "hr": {
+      "store": "hr",
+      "title": "MLB Statcast · Postotak Scout",
+      "subtitle": "Percentilni rangovi MLB Statca",
+      "keywords": "xwoba,oaa,wrc,wrcplus,barrel,exit,velocity,hitting,pitching,fielding,metrics,analytics,hardhit,xslg",
+      "title_len": 29,
+      "subtitle_len": 30,
+      "keywords_len": 99,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "Localized title; no English brand paste. MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 99/100.",
+      "ok": true
+    },
+    "hu": {
+      "store": "hu",
+      "title": "MLB Statcast · Százalék Scout",
+      "subtitle": "MLB Statcast százalékos rang",
+      "keywords": "xwoba,oaa,wrc,wrcplus,barrel,exit,velocity,hitting,pitching,fielding,metrics,analytics,hardhit,xslg",
+      "title_len": 29,
+      "subtitle_len": 28,
+      "keywords_len": 99,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "Localized title; no English brand paste. MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 99/100.",
+      "ok": true
+    },
+    "id": {
+      "store": "id",
+      "title": "Statcast MLB · Persentil Scout",
+      "subtitle": "Peringkat persentil MLB Statca",
+      "keywords": "xwoba,oaa,wrc,wrcplus,barrel,exit,velocity,hitting,pitching,fielding,metrics,analytics,hardhit,xslg",
+      "title_len": 30,
+      "subtitle_len": 30,
+      "keywords_len": 99,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "Localized title; no English brand paste. MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 99/100.",
+      "ok": true
+    },
+    "it": {
+      "store": "it",
+      "title": "Statcast MLB · Percentili Sava",
+      "subtitle": "Classifiche percentili Statcas",
+      "keywords": "xwoba,oaa,wrc,wrcplus,barrel,exit,velocity,hitting,pitching,fielding,metrics,analytics,hardhit,xslg",
+      "title_len": 30,
+      "subtitle_len": 30,
+      "keywords_len": 99,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "Localized title; no English brand paste. MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 99/100.",
+      "ok": true
+    },
+    "ja": {
+      "store": "jp",
+      "title": "MLBスタットキャスト百分位スカウト分析アプリ用",
+      "subtitle": "MLBスタットキャスト百分位順位と分析データ表示",
+      "keywords": "statcast,savant,野球,統計,パーセンタイル,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs,fantasy,ランキング,比較,打撃",
+      "title_len": 24,
+      "subtitle_len": 24,
+      "keywords_len": 99,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "Localized title; no English brand paste. MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 99/100.",
+      "ok": true
+    },
+    "kn-IN": {
+      "store": "in",
+      "title": "MLB ಸ್ಟ್ಯಾಟ್‌ಕಾಸ್ಟ್ ಶೇಕಡಾ ಸ್ಕೌ",
+      "subtitle": "MLB Statcast ಶೇಕಡಾ ರ್ಯಾಂಕ್ ಡೇಟ",
+      "keywords": "xwoba,oaa,wrc,wrcplus,barrel,exit,velocity,hitting,pitching,fielding,metrics,analytics,hardhit,xslg",
+      "title_len": 30,
+      "subtitle_len": 30,
+      "keywords_len": 99,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "Localized title; no English brand paste. MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 99/100.",
+      "ok": true
+    },
+    "ko": {
+      "store": "kr",
+      "title": "MLB 스탯캐스트 백분위 스카우트 분석 앱용",
+      "subtitle": "MLB 스탯캐스트 백분위 순위 및 분석 데이터",
+      "keywords": "xwoba,oaa,wrc,wrcplus,barrel,exit,velocity,hitting,pitching,fielding,metrics,analytics,hardhit,xslg",
+      "title_len": 24,
+      "subtitle_len": 25,
+      "keywords_len": 99,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "Localized title; no English brand paste. MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 99/100.",
+      "ok": true
+    },
+    "ml-IN": {
+      "store": "in",
+      "title": "MLB സ്റ്റാറ്റ്‌കാസ്റ്റ് ശതമാനം",
+      "subtitle": "MLB Statcast ശതമാന റാങ്ക് ഡാറ്",
+      "keywords": "savant,ബേസ്ബോൾ,സ്ഥിതിവിവരം,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs,fantasy,റാങ്കിംഗ്",
+      "title_len": 30,
+      "subtitle_len": 30,
+      "keywords_len": 94,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "Localized title; no English brand paste. MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 94/100.",
+      "ok": true
+    },
+    "mr-IN": {
+      "store": "in",
+      "title": "MLB स्टॅटकास्ट टक्केवारी स्काउ",
+      "subtitle": "MLB Statcast टक्केवारी रँकिंग ",
+      "keywords": "xwoba,oaa,wrc,wrcplus,barrel,exit,velocity,hitting,pitching,fielding,metrics,analytics,hardhit,xslg",
+      "title_len": 30,
+      "subtitle_len": 30,
+      "keywords_len": 99,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "Localized title; no English brand paste. MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 99/100.",
+      "ok": true
+    },
+    "ms": {
+      "store": "my",
+      "title": "Statcast MLB · Peratus Scout",
+      "subtitle": "Kedudukan peratus MLB Statcast",
+      "keywords": "xwoba,oaa,wrc,wrcplus,barrel,exit,velocity,hitting,pitching,fielding,metrics,analytics,hardhit,xslg",
+      "title_len": 28,
+      "subtitle_len": 30,
+      "keywords_len": 99,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "Localized title; no English brand paste. MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 99/100.",
+      "ok": true
+    },
+    "nl-NL": {
+      "store": "nl",
+      "title": "MLB Statcast · Percentiel Scou",
+      "subtitle": "MLB Statcast percentielranglij",
+      "keywords": "xwoba,oaa,wrc,wrcplus,barrel,exit,velocity,hitting,pitching,fielding,metrics,analytics,hardhit,xslg",
+      "title_len": 30,
+      "subtitle_len": 30,
+      "keywords_len": 99,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "Localized title; no English brand paste. MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 99/100.",
+      "ok": true
+    },
+    "no": {
+      "store": "no",
+      "title": "MLB Statcast · Percentil Scout",
+      "subtitle": "MLB Statcast percentilrangerin",
+      "keywords": "xwoba,oaa,wrc,wrcplus,barrel,exit,velocity,hitting,pitching,fielding,metrics,analytics,hardhit,xslg",
+      "title_len": 30,
+      "subtitle_len": 30,
+      "keywords_len": 99,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "Localized title; no English brand paste. MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 99/100.",
+      "ok": true
+    },
+    "or-IN": {
+      "store": "in",
+      "title": "MLB ଷ୍ଟାଟକାସ୍ଟ ଶତାଂଶ ସ୍କାଉଟ୍",
+      "subtitle": "MLB Statcast ଶତାଂଶ ର୍ୟାଙ୍କ ଡାଟ",
+      "keywords": "xwoba,oaa,wrc,wrcplus,barrel,exit,velocity,hitting,pitching,fielding,metrics,analytics,hardhit,xslg",
+      "title_len": 28,
+      "subtitle_len": 30,
+      "keywords_len": 99,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "Localized title; no English brand paste. MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 99/100.",
+      "ok": true
+    },
+    "pa-IN": {
+      "store": "in",
+      "title": "MLB ਸਟੈਟਕਾਸਟ ਪ੍ਰਤੀਸ਼ਤ ਸਕਾਊਟ",
+      "subtitle": "MLB Statcast ਪ੍ਰਤੀਸ਼ਤ ਰੈਂਕ ਡੇਟ",
+      "keywords": "xwoba,oaa,wrc,wrcplus,barrel,exit,velocity,hitting,pitching,fielding,metrics,analytics,hardhit,xslg",
+      "title_len": 27,
+      "subtitle_len": 30,
+      "keywords_len": 99,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "Localized title; no English brand paste. MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 99/100.",
+      "ok": true
+    },
+    "pl": {
+      "store": "pl",
+      "title": "Statcast MLB · Percentyle Scou",
+      "subtitle": "Rankingi percentyli MLB Statca",
+      "keywords": "savant,baseball,statystyki,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs,fantasy,metryki,ranking",
+      "title_len": 30,
+      "subtitle_len": 30,
+      "keywords_len": 100,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "Localized title; no English brand paste. MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 100/100.",
+      "ok": true
+    },
+    "pt-BR": {
+      "store": "br",
+      "title": "Statcast MLB · Percentis Savan",
+      "subtitle": "Rankings percentis MLB Statcas",
+      "keywords": "savant,beisebol,estatística,percentil,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs,fantasy",
+      "title_len": 30,
+      "subtitle_len": 30,
+      "keywords_len": 95,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "Localized title; no English brand paste. MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 95/100.",
+      "ok": true
+    },
+    "pt-PT": {
+      "store": "pt",
+      "title": "Statcast MLB · Percentis Savan",
+      "subtitle": "Rankings percentis MLB Statcas",
+      "keywords": "savant,beisebol,estatística,percentil,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs,fantasy",
+      "title_len": 30,
+      "subtitle_len": 30,
+      "keywords_len": 95,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "Localized title; no English brand paste. MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 95/100.",
+      "ok": true
+    },
+    "ro": {
+      "store": "ro",
+      "title": "Statcast MLB · Percentile Scou",
+      "subtitle": "Clasamente percentile MLB Stat",
+      "keywords": "xwoba,oaa,wrc,wrcplus,barrel,exit,velocity,hitting,pitching,fielding,metrics,analytics,hardhit,xslg",
+      "title_len": 30,
+      "subtitle_len": 30,
+      "keywords_len": 99,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "Localized title; no English brand paste. MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 99/100.",
+      "ok": true
+    },
+    "ru": {
+      "store": "ru",
+      "title": "MLB Statcast · Процентили Scou",
+      "subtitle": "Процентильные ранги MLB Statca",
+      "keywords": "savant,бейсбол,статистика,процентиль,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs,fantasy",
+      "title_len": 30,
+      "subtitle_len": 30,
+      "keywords_len": 94,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "Localized title; no English brand paste. MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 94/100.",
+      "ok": true
+    },
+    "sk": {
+      "store": "sk",
+      "title": "MLB Statcast · Percentil Scout",
+      "subtitle": "Percentilové rebríčky Statcast",
+      "keywords": "xwoba,oaa,wrc,wrcplus,barrel,exit,velocity,hitting,pitching,fielding,metrics,analytics,hardhit,xslg",
+      "title_len": 30,
+      "subtitle_len": 30,
+      "keywords_len": 99,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "Localized title; no English brand paste. MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 99/100.",
+      "ok": true
+    },
+    "sl-SI": {
+      "store": "si",
+      "title": "MLB Statcast · Percentil Scout",
+      "subtitle": "Percentilni rangi MLB Statcast",
+      "keywords": "xwoba,oaa,wrc,wrcplus,barrel,exit,velocity,hitting,pitching,fielding,metrics,analytics,hardhit,xslg",
+      "title_len": 30,
+      "subtitle_len": 30,
+      "keywords_len": 99,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "Localized title; no English brand paste. MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 99/100.",
+      "ok": true
+    },
+    "sv": {
+      "store": "se",
+      "title": "MLB Statcast · Percentil Scout",
+      "subtitle": "MLB Statcast percentilrankning",
+      "keywords": "savant,baseboll,statistik,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy,ranking,jämförelse",
+      "title_len": 30,
+      "subtitle_len": 30,
+      "keywords_len": 96,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "Localized title; no English brand paste. MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 96/100.",
+      "ok": true
+    },
+    "ta-IN": {
+      "store": "in",
+      "title": "MLB ஸ்டாட்காஸ்ட் சதவீத ஸ்கவுட்",
+      "subtitle": "MLB Statcast சதவீத தரவரிசை தரவ",
+      "keywords": "xwoba,oaa,wrc,wrcplus,barrel,exit,velocity,hitting,pitching,fielding,metrics,analytics,hardhit,xslg",
+      "title_len": 30,
+      "subtitle_len": 30,
+      "keywords_len": 99,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "Localized title; no English brand paste. MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 99/100.",
+      "ok": true
+    },
+    "te-IN": {
+      "store": "in",
+      "title": "MLB స్టాట్‌కాస్ట్ శాతం స్కౌట్",
+      "subtitle": "MLB Statcast శాతం ర్యాంక్ డేటా",
+      "keywords": "xwoba,oaa,wrc,wrcplus,barrel,exit,velocity,hitting,pitching,fielding,metrics,analytics,hardhit,xslg",
+      "title_len": 29,
+      "subtitle_len": 30,
+      "keywords_len": 99,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "Localized title; no English brand paste. MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 99/100.",
+      "ok": true
+    },
+    "th": {
+      "store": "th",
+      "title": "สถิติ MLB Statcast เปอร์เซ็นไท",
+      "subtitle": "อันดับเปอร์เซ็นไทล์ MLB Statca",
+      "keywords": "savant,เบสบอล,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs,fantasy,เปรียบเทียบ,ตี,ขว้าง,รับ",
+      "title_len": 30,
+      "subtitle_len": 30,
+      "keywords_len": 96,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "Localized title; no English brand paste. MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 96/100.",
+      "ok": true
+    },
+    "tr": {
+      "store": "tr",
+      "title": "MLB Statcast · Yüzdelik Scout",
+      "subtitle": "MLB Statcast yüzdelik sıralama",
+      "keywords": "savant,beyzbol,istatistik,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy,karşılaştırma,vuruş",
+      "title_len": 29,
+      "subtitle_len": 30,
+      "keywords_len": 97,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "Localized title; no English brand paste. MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 97/100.",
+      "ok": true
+    },
+    "uk": {
+      "store": "ua",
+      "title": "MLB Statcast · Відсотки Scout",
+      "subtitle": "Процентильні ранги MLB Statcas",
+      "keywords": "savant,бейсбол,статистика,відсоток,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy,рейтинг",
+      "title_len": 29,
+      "subtitle_len": 30,
+      "keywords_len": 94,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "Localized title; no English brand paste. MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 94/100.",
+      "ok": true
+    },
+    "ur-PK": {
+      "store": "sa",
+      "title": "MLB اسٹیٹ کاسٹ فیصد اسکاؤٹ",
+      "subtitle": "MLB Statcast فیصد درجہ بندی ڈی",
+      "keywords": "xwoba,oaa,wrc,wrcplus,barrel,exit,velocity,hitting,pitching,fielding,metrics,analytics,hardhit,xslg",
+      "title_len": 26,
+      "subtitle_len": 30,
+      "keywords_len": 99,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "Localized title; no English brand paste. MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 99/100.",
+      "ok": true
+    },
+    "vi": {
+      "store": "vn",
+      "title": "MLB Statcast · Phần trăm Scout",
+      "subtitle": "Xếp hạng phần trăm MLB Statcas",
+      "keywords": "savant,bongchay,thongke,phantram,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy,xephang,soanh",
+      "title_len": 30,
+      "subtitle_len": 30,
+      "keywords_len": 98,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "Localized title; no English brand paste. MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 98/100.",
+      "ok": true
+    },
+    "zh-Hans": {
+      "store": "cn",
+      "title": "MLB棒球Statcast百分位球探数据分析应用",
+      "subtitle": "MLB Statcast百分位排名与棒球数据分析",
+      "keywords": "xwoba,oaa,wrc,wrcplus,barrel,exit,velocity,hitting,pitching,fielding,metrics,analytics,hardhit,xslg",
+      "title_len": 24,
+      "subtitle_len": 24,
+      "keywords_len": 99,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "Localized title; no English brand paste. MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 99/100.",
+      "ok": true
+    },
+    "zh-Hant": {
+      "store": "tw",
+      "title": "MLB棒球Statcast百分位球探數據分析應用",
+      "subtitle": "MLB Statcast百分位排名與棒球數據分析",
+      "keywords": "xwoba,oaa,wrc,wrcplus,barrel,exit,velocity,hitting,pitching,fielding,metrics,analytics,hardhit,xslg",
+      "title_len": 24,
+      "subtitle_len": 24,
+      "keywords_len": 99,
+      "keyword_overlaps": [],
+      "astro_en_kept": [],
+      "astro_proof": [
+        "Native/transliterated keywords only; no EN loanwords met pop≥6 in this store."
+      ],
+      "rationale": "Localized title; no English brand paste. MLB Statcast percentile ranks positioning; keywords deduped vs title+subtitle, packed 99/100.",
+      "ok": true
+    }
+  },
+  "issues": []
+}

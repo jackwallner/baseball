@@ -1,1 +1,1 @@
-savant,statistik,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy,statistik,ranking,sammenligning
+savant,baseball,statistik,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy,ranking,sammenligning

@@ -1,1 +1,1 @@
-statcast,savant,mlb,ବେସବଲ,ପରିସଂଖ୍ୟା,ଶତାଂଶ,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy
+xwoba,oaa,wrc,wrcplus,barrel,exit,velocity,hitting,pitching,fielding,metrics,analytics,hardhit,xslg
