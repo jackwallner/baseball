@@ -1,6 +1,6 @@
 # Astro ASO setup — Baseball Savvy StatScout
 
-> Playbook: [`astro-global-aso-go-2026.md`](astro-global-aso-go-2026.md) · say **"go"** to re-run.
+> Playbook: [global ASO rollout archive](~/ios/archive/aso/2026-05/astro-global-aso-go-2026.md) · say **"go"** to re-run.
 
 Last **go** run: **2026-05-26**
 
