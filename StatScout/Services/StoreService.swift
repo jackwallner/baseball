@@ -16,8 +16,13 @@ enum RevenueCatConfig {
 }
 
 enum StatScoutSeason {
+    /// The season the nightly pipeline is currently writing. Single source of
+    /// truth for the current/historical split — the API filters, the two-tier
+    /// cache partition, and the free-tier gate all read this, so the yearly
+    /// rollover is a one-line change.
+    static let current = 2026
     /// The only season available without Pro. Everything older is gated.
-    static let free = 2026
+    static let free = current
 }
 
 enum StatScoutLegal {

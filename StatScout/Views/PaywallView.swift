@@ -110,7 +110,7 @@ enum PaywallTrigger: Identifiable, Hashable {
     }
 }
 
-/// Native StatScout Pro paywall. Purchases flow through `StoreService.purchase`
+/// Native StatScout+ paywall. Purchases flow through `StoreService.purchase`
 /// → `Purchases.shared.purchase` so RevenueCat records transactions unchanged.
 struct PaywallView: View {
     @EnvironmentObject private var store: StoreService
@@ -237,7 +237,7 @@ struct PaywallView: View {
                         .foregroundStyle(.white)
                 }
 
-                Text("STATSCOUT PRO")
+                Text("STATSCOUT+")
                     .font(SavantType.micro)
                     .tracking(2.5)
                     .foregroundStyle(.white.opacity(0.65))
@@ -463,8 +463,12 @@ struct PaywallView: View {
             defer { isPurchasing = false }
             do {
                 switch try await store.purchase(package) {
-                case .purchased, .pending:
+                case .purchased:
                     break
+                case .pending:
+                    // Ask-to-Buy / deferred payment: nothing is unlocked yet and
+                    // no error occurred — tell the user instead of going silent.
+                    restoreMessage = "Purchase pending approval. StatScout+ unlocks automatically once it's approved."
                 case .cancelled:
                     errorMessage = "Purchase cancelled. Tap again to continue."
                 }

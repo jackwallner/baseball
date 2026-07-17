@@ -29,6 +29,23 @@ struct StatScoutApp: App {
 
     var body: some Scene {
         WindowGroup {
+            #if DEBUG
+            if let mode = PaywallScreenshotMode.current {
+                PaywallScreenshotHarness(mode: mode)
+                    .environmentObject(store)
+                    .preferredColorScheme(.light)
+            } else if let api {
+                ContentView(api: api)
+                    .environmentObject(store)
+                    .preferredColorScheme(.light)
+                    .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
+                        Task { await store.updateCustomerProductStatus() }
+                    }
+            } else {
+                ConfigMissingView()
+                    .preferredColorScheme(.light)
+            }
+            #else
             if let api {
                 ContentView(api: api)
                     .environmentObject(store)
@@ -40,6 +57,7 @@ struct StatScoutApp: App {
                 ConfigMissingView()
                     .preferredColorScheme(.light)
             }
+            #endif
         }
     }
 }
@@ -92,6 +110,7 @@ struct OnboardingCards: View {
     @State private var paywallTrigger: PaywallTrigger?
     @State private var isStartingTrial = false
     @State private var trialError: String?
+    @State private var isRestoring = false
 
     private var isLastPage: Bool { currentPage == pages.count - 1 }
     private var dataReady: Bool { viewModel.isReady }
@@ -251,14 +270,26 @@ struct OnboardingCards: View {
                     .foregroundStyle(SavantPalette.inkSecondary)
                 } else if isLastPage {
                     Button {
-                        Task { await store.restorePurchases() }
+                        // Surface the outcome through the same trialError line the
+                        // purchase CTA uses — a restore that silently does nothing
+                        // reads as a dead button. Success flips isPro, which
+                        // finishes onboarding via onChange.
+                        isRestoring = true
+                        Task { @MainActor in
+                            defer { isRestoring = false }
+                            await store.restorePurchases()
+                            if !store.isPro {
+                                trialError = store.lastError ?? "No active StatScout+ purchase was found for this Apple ID."
+                            }
+                        }
                     } label: {
-                        Text("Restore Purchases")
+                        Text(isRestoring ? "Restoring…" : "Restore Purchases")
                             .font(SavantType.micro)
                             .tracking(0.4)
                             .foregroundStyle(SavantPalette.inkTertiary)
                     }
                     .buttonStyle(.plain)
+                    .disabled(isRestoring)
                 } else {
                     Color.clear
                 }
@@ -305,8 +336,12 @@ struct OnboardingCards: View {
             defer { isStartingTrial = false }
             do {
                 switch try await store.purchase(yearly) {
-                case .purchased, .pending:
+                case .purchased:
                     break
+                case .pending:
+                    // Ask-to-Buy / deferred payment: onboarding stays up because
+                    // isPro hasn't flipped — explain instead of appearing dead.
+                    trialError = "Purchase pending approval. StatScout+ unlocks automatically once it's approved."
                 case .cancelled:
                     trialError = "Purchase cancelled. Tap again to continue."
                 }

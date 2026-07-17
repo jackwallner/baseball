@@ -49,7 +49,14 @@ struct LeaguePercentileCurves {
     /// which is fine as long as enough players do.
     @MainActor
     init(players: [Player], playerType: String, labels: [String]) {
-        let pool = players.filter { $0.playerType == playerType }
+        // Two-way players anchor both pools (they hit and pitch), mirroring
+        // Player.matchesPlayerType so curve populations match the leaderboards.
+        let pool = players.filter {
+            let type = $0.playerType?.lowercased()
+            return playerType == "pitcher"
+                ? (type == "pitcher" || type == "two_way")
+                : (type != "pitcher")
+        }
         var result: [String: LeaguePercentileCurve] = [:]
         for label in labels {
             var pts: [(Double, Double)] = []

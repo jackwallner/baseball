@@ -24,11 +24,11 @@ struct StatcastAPI: StatcastProviding {
     }
 
     func fetchHistoricalPlayers() async throws -> [Player] {
-        try await fetchPlayers(seasonFilter: "lt.2026")
+        try await fetchPlayers(seasonFilter: "lt.\(StatScoutSeason.current)")
     }
 
     func fetchCurrentPlayers() async throws -> [Player] {
-        try await fetchPlayers(seasonFilter: "eq.2026")
+        try await fetchPlayers(seasonFilter: "eq.\(StatScoutSeason.current)")
     }
 
     func fetchGameLogs(playerId: Int, season: Int) async throws -> [PlayerGameLog] {
@@ -158,11 +158,11 @@ struct PreviewStatcastAPI: StatcastProviding {
     }
 
     func fetchHistoricalPlayers() async throws -> [Player] {
-        SampleData.players.filter { ($0.season ?? 0) < 2026 }
+        SampleData.players.filter { ($0.season ?? 0) < StatScoutSeason.current }
     }
 
     func fetchCurrentPlayers() async throws -> [Player] {
-        SampleData.players.filter { ($0.season ?? 0) >= 2026 }
+        SampleData.players.filter { ($0.season ?? 0) >= StatScoutSeason.current }
     }
 
     func fetchGameLogs(playerId: Int, season: Int) async throws -> [PlayerGameLog] {

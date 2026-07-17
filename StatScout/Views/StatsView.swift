@@ -87,7 +87,9 @@ struct StatsView: View {
                 Button {
                     if store.isPro {
                         Task { await viewModel.loadHistoricalIfNeeded() }
-                    } else if PaywallGate.shared.shouldPresent(.pastSeasonsLoad) {
+                    } else {
+                        // Explicit tap — always answer it; the gate only caps
+                        // automatic pop-ups.
                         paywallTrigger = .pastSeasonsLoad
                     }
                 } label: {
@@ -98,7 +100,7 @@ struct StatsView: View {
                 let isLocked = viewModel.isSeasonLocked(season)
                 Button {
                     if isLocked {
-                        if PaywallGate.shared.shouldPresent(.pastSeason) { paywallTrigger = .pastSeason }
+                        paywallTrigger = .pastSeason
                     } else {
                         viewModel.selectedSeason = season
                     }

@@ -167,7 +167,9 @@ struct TeamView: View {
                 leaguePlayers: leaguePlayers,
                 fetchTeamGameLogs: fetchTeamGameLogs,
                 onUpgradeTap: {
-                    if PaywallGate.shared.shouldPresent(.teamView) { showingTrial = true }
+                    // Explicit tap — always answer it; the gate only caps
+                    // automatic pop-ups.
+                    showingTrial = true
                 }
             )
         }
@@ -373,7 +375,7 @@ struct TeamView: View {
                 let isLocked = viewModel.isSeasonLocked(season)
                 Button {
                     if isLocked {
-                        if PaywallGate.shared.shouldPresent(.teamView) { showingTrial = true }
+                        showingTrial = true
                     } else {
                         viewModel.selectedSeason = season
                     }

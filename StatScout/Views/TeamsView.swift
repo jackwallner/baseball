@@ -159,7 +159,9 @@ struct TeamsView: View {
                 Button {
                     if store.isPro {
                         Task { await viewModel.loadHistoricalIfNeeded() }
-                    } else if PaywallGate.shared.shouldPresent(.teamView) {
+                    } else {
+                        // Explicit tap — always answer it; the gate only caps
+                        // automatic pop-ups.
                         showingTrial = true
                     }
                 } label: {
@@ -171,7 +173,7 @@ struct TeamsView: View {
                 let isLocked = viewModel.isSeasonLocked(season)
                 Button {
                     if isLocked {
-                        if PaywallGate.shared.shouldPresent(.teamView) { showingTrial = true }
+                        showingTrial = true
                     } else {
                         viewModel.selectedSeason = season
                     }
