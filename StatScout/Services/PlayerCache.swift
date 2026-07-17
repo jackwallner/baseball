@@ -117,8 +117,8 @@ struct TwoTierPlayerCache: PlayerCaching {
     }
 
     func savePlayers(_ players: [Player]) throws {
-        let historicalPlayers = players.filter { ($0.season ?? 0) < 2026 }
-        let currentPlayers = players.filter { ($0.season ?? 0) >= 2026 }
+        let historicalPlayers = players.filter { ($0.season ?? 0) < StatScoutSeason.current }
+        let currentPlayers = players.filter { ($0.season ?? 0) >= StatScoutSeason.current }
         if !historicalPlayers.isEmpty {
             try historical.savePlayers(historicalPlayers)
         }

@@ -85,7 +85,7 @@ struct TeamRankingsCard: View {
             RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
                 .stroke(SavantPalette.hairline, lineWidth: 0.5)
         )
-        .task(id: "\(team)-\(season)-\(mode.rawValue)") {
+        .task(id: "\(team)-\(season)-\(mode.rawValue)-\(store.isPro)") {
             if mode == .recent, store.isPro { await load() }
         }
         .onAppear { rebuildCurves() }
@@ -217,7 +217,8 @@ struct TeamRankingsCard: View {
 
     /// One bar per roster metric — PA/IP-weighted mean placed on the league curve.
     private func aggregateSeasonRows() -> [Metric] {
-        let pool = players.filter { ($0.playerType ?? "") == side.playerType }
+        // matchesPlayerType keeps two-way players in both pools (Ohtani hits AND pitches).
+        let pool = players.filter { $0.matchesPlayerType(for: side.category) }
         guard !pool.isEmpty, let curves else { return [] }
 
         let present = Set(pool.flatMap { p in

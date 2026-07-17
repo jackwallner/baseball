@@ -25,6 +25,7 @@ struct PlayerProfileView: View {
     @State private var recentWindowDays: Int = 15
     @State private var recentLogs: [PlayerGameLog] = []
     @State private var recentLoading = false
+    @State private var recentLoadError: String?
     @State private var recentCurves: LeaguePercentileCurves?
 
     private let profileOpenCountKey = "profileOpenCount"
@@ -356,6 +357,13 @@ struct PlayerProfileView: View {
                 historicalLoadingCard
             } else if !hasLoadedHistorical, loadHistorical != nil {
                 loadHistoricalCard
+            } else if history.count < 2 {
+                ContentUnavailableView {
+                    Label("Not enough history", systemImage: "calendar.badge.clock")
+                } description: {
+                    Text("\(player.name) doesn't have multiple seasons of data to compare.")
+                }
+                .padding(.vertical, 48)
             } else {
                 YearComparisonView(history: history)
             }
@@ -450,9 +458,9 @@ struct PlayerProfileView: View {
                         let isLocked = season != StatScoutSeason.free && !store.isPro
                         Button {
                             if isLocked {
-                                if PaywallGate.shared.shouldPresent(.pastSeason) {
-                                    trialPitchTrigger = .pastSeason
-                                }
+                                // Explicit tap on a locked season — always answer it.
+                                // PaywallGate only caps automatic pop-ups.
+                                trialPitchTrigger = .pastSeason
                             } else {
                                 selectedPercentileSeason = season
                             }
@@ -529,11 +537,14 @@ struct PlayerProfileView: View {
                 )
             )
 
-            if store.isPro {
+            // Recent mode only makes sense for the live season — the 7/15/30-day
+            // window is anchored to today, so on a historical season it would
+            // always read "No games in the last N days".
+            if store.isPro, isCurrentSeasonActive {
                 formModePicker
             }
 
-            if formDisplayMode != .season, store.isPro {
+            if formDisplayMode != .season, store.isPro, isCurrentSeasonActive {
                 recentWindowPicker
                 if recentLoading {
                     HStack(spacing: 10) {
@@ -544,6 +555,13 @@ struct PlayerProfileView: View {
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
+                } else if let recentLoadError {
+                    Text(recentLoadError)
+                        .font(SavantType.small)
+                        .foregroundStyle(SavantPalette.inkSecondary)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
                 } else if recentWindow == nil {
                     Text("No games in the last \(recentWindowDays) days")
                         .font(SavantType.small)
@@ -581,8 +599,8 @@ struct PlayerProfileView: View {
             RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
                 .stroke(SavantPalette.hairline, lineWidth: 0.5)
         )
-        .task(id: "\(formDisplayMode)-\(recentWindowDays)-\(player.playerId)") {
-            guard store.isPro, formDisplayMode != .season else { return }
+        .task(id: "\(formDisplayMode)-\(recentWindowDays)-\(player.playerId)-\(activeSeason ?? 0)-\(store.isPro)") {
+            guard store.isPro, effectiveFormDisplayMode != .season else { return }
             rebuildRecentCurves()
             await loadRecentLogs()
         }
@@ -591,6 +609,19 @@ struct PlayerProfileView: View {
     }
 
     private var isPitcher: Bool { player.playerType == "pitcher" }
+
+    /// Recent-form is anchored to today's date, so it's only meaningful while
+    /// viewing the current season. Historical seasons render season bars only.
+    private var isCurrentSeasonActive: Bool {
+        (activeSeason ?? StatScoutSeason.current) == StatScoutSeason.current
+    }
+
+    /// The mode rows actually render in — forced back to `.season` on a
+    /// historical season so a user who toggled Recent/Both doesn't see stale
+    /// current-season windows against past-season bars.
+    private var effectiveFormDisplayMode: FormDisplayMode {
+        isCurrentSeasonActive ? formDisplayMode : .season
+    }
 
     private var recentWindow: RecentFormWindow? {
         let cutoff = Calendar.current.date(byAdding: .day, value: -recentWindowDays, to: .now) ?? .now
@@ -624,7 +655,7 @@ struct PlayerProfileView: View {
     }
 
     private func displayedMetrics(in metrics: [Metric]) -> [Metric] {
-        guard formDisplayMode == .recent, store.isPro else { return metrics }
+        guard effectiveFormDisplayMode == .recent, store.isPro else { return metrics }
         // Recent mode: show every season bar — metrics with window data render the
         // recent value, the rest fall back to the season bar (handled in
         // `percentileMetricRow`). Additionally inject a stub for any game-log spec
@@ -673,7 +704,7 @@ struct PlayerProfileView: View {
         let recentMetric = recentMetric(for: metric)
         let rowBackground = index % 2 == 0 ? SavantPalette.surface : SavantPalette.surfaceAlt
 
-        switch formDisplayMode {
+        switch effectiveFormDisplayMode {
         case .season:
             NavigationLink(value: MetricRoute(label: metric.label, category: metric.category)) {
                 MetricBar(metric: metric)
@@ -760,10 +791,14 @@ struct PlayerProfileView: View {
         guard store.isPro, let fetch = fetchGameLogs,
               let season = activeSeason ?? player.season else { return }
         recentLoading = true
+        recentLoadError = nil
         do {
             recentLogs = try await fetch(player.playerId, season)
         } catch {
+            // Distinguish "no games" from "fetch failed" — otherwise a network
+            // error renders as an honest-looking "No games in the last N days".
             recentLogs = []
+            recentLoadError = "Couldn't load recent games. Check your connection and try again."
         }
         recentLoading = false
     }

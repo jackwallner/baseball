@@ -251,8 +251,12 @@ struct TrialPitchSheet: View {
             defer { isPurchasing = false }
             do {
                 switch try await store.purchase(yearly) {
-                case .purchased, .pending:
+                case .purchased:
                     break
+                case .pending:
+                    // Ask-to-Buy / deferred payment: not unlocked yet, not an
+                    // error — the sheet stays up, so say what's happening.
+                    purchaseError = "Purchase pending approval. StatScout+ unlocks automatically once it's approved."
                 case .cancelled:
                     purchaseError = "Purchase cancelled. Tap again to continue."
                 }

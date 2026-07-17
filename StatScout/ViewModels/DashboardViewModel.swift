@@ -572,7 +572,7 @@ final class DashboardViewModel {
             if let cache = cache as? TwoTierPlayerCache {
                 return cache.loadHistoricalPlayers()
             }
-            return ((try? cache?.loadPlayers()) ?? []).filter { ($0.season ?? 0) < 2026 }
+            return ((try? cache?.loadPlayers()) ?? []).filter { ($0.season ?? 0) < StatScoutSeason.current }
         }.value
 
         loadingMessage = "Preparing season history…"

@@ -66,7 +66,14 @@ struct CompareView: View {
             }
         }
         .sheet(item: $picker) { target in
-            ComparePlayerPicker(players: players) { selected in
+            // Hide the other slot's pick so a player can't be compared to themselves.
+            ComparePlayerPicker(players: players.filter { candidate in
+                switch target {
+                case .playerA: return candidate.playerId != playerB?.playerId
+                case .playerB: return candidate.playerId != playerA?.playerId
+                case .yearPlayer: return true
+                }
+            }) { selected in
                 switch target {
                 case .playerA: playerA = selected
                 case .playerB: playerB = selected
