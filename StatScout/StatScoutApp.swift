@@ -217,18 +217,21 @@ struct OnboardingCards: View {
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .frame(height: 52)
-                        .background(SavantPalette.savantNavy)
+                        .background(SavantPalette.savantRed)
                         .clipShape(RoundedRectangle(cornerRadius: 14))
                     }
                     .buttonStyle(.plain)
                     .disabled(isStartingTrial)
 
-                    if let trialError {
-                        Text(trialError)
-                            .font(SavantType.micro)
-                            .foregroundStyle(SavantPalette.savantRed)
-                            .multilineTextAlignment(.center)
-                    }
+                    // Reserved fixed-height status line: a restore/purchase result
+                    // fills this slot in place instead of being inserted, so the
+                    // CTAs above it never shift under the user's thumb.
+                    Text(trialError ?? " ")
+                        .font(SavantType.micro)
+                        .foregroundStyle(SavantPalette.savantRed)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 32, alignment: .top)
 
                     // Terms/Privacy must sit beside the purchase point now that
                     // this CTA can buy the trial directly (no PaywallView handoff).
@@ -300,23 +303,31 @@ struct OnboardingCards: View {
     }
 
     /// "Get Started" dismisses onboarding into the free tier. `prominent` is the
-    /// solo state (Pro users, where it's the only — and primary — action);
-    /// otherwise it renders as the de-emphasized secondary above the trial CTA.
+    /// solo state (Pro users, where it's the only — and primary — action, a
+    /// filled button); otherwise it's a de-emphasized, borderless text link that
+    /// sits above the red trial CTA so it never competes for the tap.
     private func getStartedButton(prominent: Bool) -> some View {
         Button {
             withAnimation { hasCompletedOnboarding = true }
         } label: {
-            Text("Get Started")
-                .font(SavantType.bodyBold)
-                .foregroundStyle(prominent ? .white : SavantPalette.ink)
-                .frame(maxWidth: .infinity)
-                .frame(height: 52)
-                .background(prominent ? SavantPalette.savantRed : SavantPalette.surface)
-                .clipShape(RoundedRectangle(cornerRadius: 14))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 14)
-                        .stroke(prominent ? Color.clear : SavantPalette.hairline, lineWidth: 0.5)
-                )
+            if prominent {
+                Text("Get Started")
+                    .font(SavantType.bodyBold)
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 52)
+                    .background(SavantPalette.savantRed)
+                    .clipShape(RoundedRectangle(cornerRadius: 14))
+            } else {
+                // Borderless free-tier exit: still legible and tappable (App
+                // Review needs the free path visible) but no box, so it reads as
+                // a quiet "skip" next to the prominent red trial button.
+                Text("Get Started")
+                    .font(SavantType.body)
+                    .foregroundStyle(SavantPalette.inkTertiary)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 44)
+            }
         }
         .buttonStyle(.plain)
     }
