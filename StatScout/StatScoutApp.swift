@@ -183,26 +183,54 @@ struct OnboardingCards: View {
 
     @ViewBuilder
     private var bottomButtons: some View {
+        // Layout invariant: the primary red button and the 24pt footer slot are
+        // the ONLY things below the top of this stack that set the button's Y.
+        // The button + footer slot are IDENTICAL on every page (Continue and the
+        // trial CTA are both a 52pt red button with the same 24pt slot beneath),
+        // and everything else (Get Started, status line, disclosure, Terms/
+        // Privacy) lives ABOVE the button where it grows upward. Because the
+        // stack is bottom-anchored, that upper content can never move the button,
+        // so the red button is pixel-identical across all onboarding pages.
         VStack(spacing: 10) {
+            if isLastPage && !store.isPro {
+                // --- Above the primary button (grows upward, never moves it) ---
+                getStartedButton(prominent: false)
+
+                // Reserved fixed-height status line: a restore/purchase result
+                // fills this slot in place instead of being inserted, so nothing
+                // above the button shifts either.
+                Text(trialError ?? " ")
+                    .font(SavantType.micro)
+                    .foregroundStyle(SavantPalette.savantRed)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 32, alignment: .top)
+
+                if let disclosure = trialDisclosure {
+                    Text(disclosure)
+                        .font(SavantType.micro)
+                        .tracking(0.3)
+                        .foregroundStyle(SavantPalette.inkTertiary)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                // Terms/Privacy sit just above the purchase point (this CTA can
+                // buy the trial directly, no PaywallView handoff).
+                HStack(spacing: 12) {
+                    Link("Terms", destination: StatScoutLegal.termsURL)
+                    Link("Privacy", destination: StatScoutLegal.privacyURL)
+                }
+                .font(SavantType.micro)
+                .tracking(0.3)
+                .foregroundStyle(SavantPalette.inkTertiary)
+            }
+
+            // --- Primary red button: identical 52pt slot on every page ---
             if isLastPage {
                 if store.isPro {
                     getStartedButton(prominent: true)
                 } else {
-                    // Secondary "Get Started" (continue on the free tier) sits
-                    // ABOVE the trial CTA so the primary button lands in the exact
-                    // spot the user has been tapping "Continue" — the CTA never
-                    // jumps to a new place between the last two taps.
-                    getStartedButton(prominent: false)
-
-                    if let disclosure = trialDisclosure {
-                        Text(disclosure)
-                            .font(SavantType.micro)
-                            .tracking(0.3)
-                            .foregroundStyle(SavantPalette.inkTertiary)
-                            .multilineTextAlignment(.center)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-
                     Button {
                         buyYearly()
                     } label: {
@@ -222,26 +250,6 @@ struct OnboardingCards: View {
                     }
                     .buttonStyle(.plain)
                     .disabled(isStartingTrial)
-
-                    // Reserved fixed-height status line: a restore/purchase result
-                    // fills this slot in place instead of being inserted, so the
-                    // CTAs above it never shift under the user's thumb.
-                    Text(trialError ?? " ")
-                        .font(SavantType.micro)
-                        .foregroundStyle(SavantPalette.savantRed)
-                        .multilineTextAlignment(.center)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 32, alignment: .top)
-
-                    // Terms/Privacy must sit beside the purchase point now that
-                    // this CTA can buy the trial directly (no PaywallView handoff).
-                    HStack(spacing: 12) {
-                        Link("Terms", destination: StatScoutLegal.termsURL)
-                        Link("Privacy", destination: StatScoutLegal.privacyURL)
-                    }
-                    .font(SavantType.micro)
-                    .tracking(0.3)
-                    .foregroundStyle(SavantPalette.inkTertiary)
                 }
             } else {
                 Button {
@@ -258,7 +266,10 @@ struct OnboardingCards: View {
                 .buttonStyle(.plain)
             }
 
-            // Fixed-height footer slot so the primary CTA doesn't jump between pages.
+            // --- Fixed 24pt footer slot BELOW the button, identical every page.
+            // On the last page it carries Restore (or the loading state); on the
+            // others it is empty. Its constant height is what keeps the button's
+            // bottom edge — and therefore its Y — pinned across pages.
             Group {
                 if isLastPage, !dataReady {
                     HStack(spacing: 8) {
@@ -271,7 +282,7 @@ struct OnboardingCards: View {
                             .tracking(0.4)
                     }
                     .foregroundStyle(SavantPalette.inkSecondary)
-                } else if isLastPage {
+                } else if isLastPage && !store.isPro {
                     Button {
                         // Surface the outcome through the same trialError line the
                         // purchase CTA uses — a restore that silently does nothing
@@ -299,7 +310,7 @@ struct OnboardingCards: View {
             }
             .frame(height: 24)
         }
-        .frame(minHeight: isLastPage ? 148 : 52, alignment: .bottom)
+        .frame(maxWidth: .infinity, alignment: .bottom)
     }
 
     /// "Get Started" dismisses onboarding into the free tier. `prominent` is the
