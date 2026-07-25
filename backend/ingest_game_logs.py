@@ -47,6 +47,31 @@ CHUNK_DAYS = 7
 # picture even if a player only had 1 PA in a given game.
 MIN_PA_TO_RECORD = 1
 
+# --- Pitch-level classification -------------------------------------------
+# Whiff% and Chase% are properties of individual pitches, so they can't be
+# derived from the terminal-PA frame the rate stats use — they need a second
+# pass over every pitch in the chunk.
+
+# Statcast `description` values that represent a swing and miss.
+WHIFF_DESCRIPTIONS = frozenset({
+    "swinging_strike",
+    "swinging_strike_blocked",
+    "foul_tip",
+    "missed_bunt",
+})
+# Every description where the batter offered at the pitch.
+SWING_DESCRIPTIONS = WHIFF_DESCRIPTIONS | frozenset({
+    "foul",
+    "foul_bunt",
+    "bunt_foul_tip",
+    "hit_into_play",
+})
+# Savant `zone`: 1-9 are the strike-zone thirds, 11-14 the outside quadrants.
+OUT_OF_ZONE = frozenset({11, 12, 13, 14})
+# Savant's sweet-spot launch-angle band, inclusive.
+SWEETSPOT_LA_MIN = 8.0
+SWEETSPOT_LA_MAX = 32.0
+
 
 def _resolve_season() -> int:
     now = datetime.now(UTC)
@@ -103,6 +128,116 @@ def _team_for_side(row: pd.Series, side: str) -> str:
         return row["home_team"] if top else row["away_team"]
 
 
+def _round(value: Optional[float], places: int) -> Optional[float]:
+    if value is None or pd.isna(value):
+        return None
+    return round(float(value), places)
+
+
+def _pitch_aggregates(
+    df: pd.DataFrame, id_col: str, include_pitch_shape: bool
+) -> dict[tuple, dict]:
+    """Per-(player, game) aggregates that need every pitch in the chunk.
+
+    The rate stats aggregate the terminal pitch of each plate appearance, but
+    Whiff%, Chase% and the swing/pitch tracking metrics are per-pitch — a
+    hitter's whiffs mostly happen on pitches that don't end the PA. Keyed by
+    ``(player_id, game_date)`` so the PA-level pass can join against it.
+
+    ``include_pitch_shape`` adds release velocity / spin / extension, which are
+    properties of the pitcher, not the batter.
+    """
+    if df.empty:
+        return {}
+
+    work = pd.DataFrame({
+        "player": df[id_col],
+        "game_date": df["game_date"],
+        "is_swing": df["description"].isin(SWING_DESCRIPTIONS),
+        "is_whiff": df["description"].isin(WHIFF_DESCRIPTIONS),
+        "is_oz": df["zone"].isin(OUT_OF_ZONE),
+    })
+    work["oz_swing"] = work["is_swing"] & work["is_oz"]
+
+    keys = ["player", "game_date"]
+    counts = work.groupby(keys, dropna=True).agg(
+        pitches=("is_swing", "size"),
+        swings=("is_swing", "sum"),
+        whiffs=("is_whiff", "sum"),
+        oz_pitches=("is_oz", "sum"),
+        oz_swings=("oz_swing", "sum"),
+    )
+
+    # Bat tracking is only recorded on swings, so averaging over all pitches
+    # would drag the mean toward whichever pitches happened to be taken.
+    swing_cols = [c for c in ("bat_speed", "swing_length") if c in df.columns]
+    swing_means = pd.DataFrame(index=counts.index)
+    if swing_cols:
+        swings_only = pd.DataFrame({
+            "player": df[id_col],
+            "game_date": df["game_date"],
+            **{c: df[c] for c in swing_cols},
+        })[work["is_swing"].to_numpy()]
+        if not swings_only.empty:
+            swing_means = swings_only.groupby(keys, dropna=True)[swing_cols].mean()
+
+    shape_means = pd.DataFrame(index=counts.index)
+    if include_pitch_shape:
+        shape_cols = [
+            c for c in ("release_speed", "release_spin_rate", "release_extension")
+            if c in df.columns
+        ]
+        if shape_cols:
+            shape = pd.DataFrame({
+                "player": df[id_col],
+                "game_date": df["game_date"],
+                **{c: df[c] for c in shape_cols},
+            })
+            shape_means = shape.groupby(keys, dropna=True)[shape_cols].mean()
+
+    merged = counts.join(swing_means, how="left").join(shape_means, how="left")
+    return {key: row.to_dict() for key, row in merged.iterrows()}
+
+
+def _expected_stat(grp: pd.DataFrame, column: str) -> tuple[Optional[float], int]:
+    """Savant-style xBA / xSLG over a plate-appearance group.
+
+    Statcast populates ``estimated_ba_using_speedangle`` and its xSLG twin only
+    on batted balls — they are null on strikeouts, walks, hit-by-pitches and
+    sacrifices. A plain mean would therefore drop strikeouts and inflate the
+    result. Savant's denominator is at-bats, so strikeouts count as an 0-for and
+    walks / HBP / sacrifices are excluded entirely.
+
+    Returns ``(value, at_bats)``; value is None when the group has no at-bats.
+    """
+    if column not in grp.columns:
+        return None, 0
+    values = grp[column]
+    is_strikeout = grp["events"].fillna("").str.contains("strikeout", na=False)
+    at_bat = values.notna() | is_strikeout
+    denom = int(at_bat.sum())
+    if denom == 0:
+        return None, 0
+    total = float(values.where(at_bat).fillna(0.0).sum())
+    return total / denom, denom
+
+
+def _weighted_expected_woba(grp: pd.DataFrame) -> tuple[Optional[float], float]:
+    """xwOBA as Savant defines it: sum(xwOBA value) / sum(wOBA denominator).
+
+    ``woba_denom`` is 0 for events that don't count against wOBA (sacrifice
+    bunts), so dividing by it rather than taking a plain mean keeps those plate
+    appearances from diluting the rate.
+    """
+    if "estimated_woba_using_speedangle" not in grp.columns:
+        return None, 0.0
+    denom = float(grp.get("woba_denom", pd.Series(dtype=float)).fillna(0).sum())
+    if denom <= 0:
+        return None, 0.0
+    total = float(grp["estimated_woba_using_speedangle"].fillna(0.0).sum())
+    return total / denom, denom
+
+
 def _aggregate_batters(df: pd.DataFrame) -> list[dict]:
     """Aggregate a pitch-level chunk to per-batter-per-game rows."""
     if df.empty:
@@ -116,6 +251,8 @@ def _aggregate_batters(df: pd.DataFrame) -> list[dict]:
 
     pa_df["batter_team"] = pa_df.apply(lambda r: _team_for_side(r, "batter"), axis=1)
     pa_df["pitcher_team"] = pa_df.apply(lambda r: _team_for_side(r, "pitcher"), axis=1)
+
+    pitch_agg = _pitch_aggregates(df, "batter", include_pitch_shape=False)
 
     rows: list[dict] = []
     grouped = pa_df.groupby(["batter", "game_date"], dropna=True)
@@ -137,15 +274,45 @@ def _aggregate_batters(df: pd.DataFrame) -> list[dict]:
         hardhit_count = int((bbe["launch_speed"] >= 95).sum())
         # launch_speed_angle code 6 == Barrel in Statcast classification.
         barrel_count = int((bbe.get("launch_speed_angle", pd.Series(dtype=float)) == 6).sum())
+        launch_angles = bbe["launch_angle"].dropna() if "launch_angle" in bbe.columns else pd.Series(dtype=float)
+        sweetspot_count = int(
+            ((launch_angles >= SWEETSPOT_LA_MIN) & (launch_angles <= SWEETSPOT_LA_MAX)).sum()
+        )
+
+        xwoba, woba_denom = _weighted_expected_woba(grp)
+        xba, at_bats = _expected_stat(grp, "estimated_ba_using_speedangle")
+        xslg, _ = _expected_stat(grp, "estimated_slg_using_speedangle")
+        pitches = pitch_agg.get((batter_id, game_date), {})
+        swings = int(pitches.get("swings") or 0)
+        oz_pitches = int(pitches.get("oz_pitches") or 0)
 
         metrics = {
-            "xwoba": _mean(grp.get("estimated_woba_using_speedangle", pd.Series(dtype=float))),
+            "xwoba": _round(xwoba, 3),
+            "xba": _round(xba, 3),
+            "xslg": _round(xslg, 3),
+            # xISO is the identity xSLG - xBA, so it only exists when both do.
+            "xiso": _round(xslg - xba, 3) if (xslg is not None and xba is not None) else None,
             "ev_avg": _mean(bbe["launch_speed"]) if bbe_count else None,
             "ev_max": (round(float(bbe["launch_speed"].max()), 1) if bbe_count else None),
             "hardhit_pct": _pct(hardhit_count, bbe_count),
             "barrel_pct": _pct(barrel_count, bbe_count),
+            "sweetspot_pct": _pct(sweetspot_count, len(launch_angles)),
+            "la_avg": _round(launch_angles.mean(), 1) if len(launch_angles) else None,
             "k_pct": _pct(k_count, pa),
             "bb_pct": _pct(bb_count, pa),
+            "whiff_pct": _pct(int(pitches.get("whiffs") or 0), swings),
+            "chase_pct": _pct(int(pitches.get("oz_swings") or 0), oz_pitches),
+            "bat_speed": _round(pitches.get("bat_speed"), 1),
+            "swing_length": _round(pitches.get("swing_length"), 2),
+            # Denominators, underscore-prefixed so the app can tell them apart
+            # from displayable metrics. Storing them lets any rolling window be
+            # recomputed exactly instead of PA-weighting per-game rates.
+            "_pitches": int(pitches.get("pitches") or 0),
+            "_swings": swings,
+            "_oz_pitches": oz_pitches,
+            "_bbe": bbe_count,
+            "_at_bats": at_bats,
+            "_woba_denom": _round(woba_denom, 1),
         }
 
         team = grp["batter_team"].mode().iat[0] if not grp["batter_team"].mode().empty else None
@@ -154,7 +321,7 @@ def _aggregate_batters(df: pd.DataFrame) -> list[dict]:
         rows.append({
             "player_id": int(batter_id),
             "season": int(grp["game_year"].iat[0]) if "game_year" in grp.columns else _resolve_season(),
-            "game_date": str(game_date),
+            "game_date": pd.Timestamp(game_date).strftime("%Y-%m-%d"),
             "player_type": "batter",
             "team": team,
             "opponent": opp,
@@ -178,6 +345,8 @@ def _aggregate_pitchers(df: pd.DataFrame) -> list[dict]:
     pa_df["batter_team"] = pa_df.apply(lambda r: _team_for_side(r, "batter"), axis=1)
     pa_df["pitcher_team"] = pa_df.apply(lambda r: _team_for_side(r, "pitcher"), axis=1)
 
+    pitch_agg = _pitch_aggregates(df, "pitcher", include_pitch_shape=True)
+
     rows: list[dict] = []
     grouped = pa_df.groupby(["pitcher", "game_date"], dropna=True)
     for (pitcher_id, game_date), grp in grouped:
@@ -196,14 +365,39 @@ def _aggregate_pitchers(df: pd.DataFrame) -> list[dict]:
         bb_count = int((events.isin(["walk", "intent_walk"])).sum())
         hardhit_count = int((bbe["launch_speed"] >= 95).sum())
         barrel_count = int((bbe.get("launch_speed_angle", pd.Series(dtype=float)) == 6).sum())
+        bb_types = bbe["bb_type"].fillna("") if "bb_type" in bbe.columns else pd.Series(dtype=str)
+
+        opp_xwoba, woba_denom = _weighted_expected_woba(grp)
+        opp_xba, at_bats = _expected_stat(grp, "estimated_ba_using_speedangle")
+        opp_xslg, _ = _expected_stat(grp, "estimated_slg_using_speedangle")
+        pitches = pitch_agg.get((pitcher_id, game_date), {})
+        swings = int(pitches.get("swings") or 0)
+        oz_pitches = int(pitches.get("oz_pitches") or 0)
 
         metrics = {
-            "opp_xwoba": _mean(grp.get("estimated_woba_using_speedangle", pd.Series(dtype=float))),
+            "opp_xwoba": _round(opp_xwoba, 3),
+            "opp_xba": _round(opp_xba, 3),
+            "opp_xslg": _round(opp_xslg, 3),
             "opp_ev_avg": _mean(bbe["launch_speed"]) if bbe_count else None,
+            "opp_ev_max": (round(float(bbe["launch_speed"].max()), 1) if bbe_count else None),
             "opp_hardhit_pct": _pct(hardhit_count, bbe_count),
             "opp_barrel_pct": _pct(barrel_count, bbe_count),
             "k_pct": _pct(k_count, bf),
             "bb_pct": _pct(bb_count, bf),
+            "whiff_pct": _pct(int(pitches.get("whiffs") or 0), swings),
+            "chase_pct": _pct(int(pitches.get("oz_swings") or 0), oz_pitches),
+            "gb_pct": _pct(int((bb_types == "ground_ball").sum()), bbe_count),
+            "fb_pct": _pct(int((bb_types == "fly_ball").sum()), bbe_count),
+            "velo_avg": _round(pitches.get("release_speed"), 1),
+            "spin_avg": _round(pitches.get("release_spin_rate"), 0),
+            "extension_avg": _round(pitches.get("release_extension"), 2),
+            # See the batter aggregator — denominators for exact window recompute.
+            "_pitches": int(pitches.get("pitches") or 0),
+            "_swings": swings,
+            "_oz_pitches": oz_pitches,
+            "_bbe": bbe_count,
+            "_at_bats": at_bats,
+            "_woba_denom": _round(woba_denom, 1),
         }
 
         team = grp["pitcher_team"].mode().iat[0] if not grp["pitcher_team"].mode().empty else None
@@ -212,7 +406,7 @@ def _aggregate_pitchers(df: pd.DataFrame) -> list[dict]:
         rows.append({
             "player_id": int(pitcher_id),
             "season": int(grp["game_year"].iat[0]) if "game_year" in grp.columns else _resolve_season(),
-            "game_date": str(game_date),
+            "game_date": pd.Timestamp(game_date).strftime("%Y-%m-%d"),
             "player_type": "pitcher",
             "team": team,
             "opponent": opp,
