@@ -56,6 +56,17 @@ enum PurchaseState {
     case pending
 }
 
+enum StoreServiceError: LocalizedError {
+    case purchasesUnavailableInSimulator
+
+    var errorDescription: String? {
+        switch self {
+        case .purchasesUnavailableInSimulator:
+            return "Purchases are unavailable in simulator builds."
+        }
+    }
+}
+
 enum RCProductKind: Int {
     case lifetime = 0
     case yearly = 1
@@ -327,7 +338,7 @@ final class StoreService: NSObject, ObservableObject {
 
     /// Reports a custom-paywall impression to RevenueCat (required for native UI).
     func trackPaywallImpression(id: String, oncePerSession: Bool = false) {
-        configureIfNeeded()
+        guard configureIfNeeded() else { return }
         #if DEBUG
         if ProcessInfo.processInfo.environment["FORCE_PRO"] == "1" { return }
         #endif
@@ -369,13 +380,13 @@ final class StoreService: NSObject, ObservableObject {
             return
         }
         #endif
-        configureIfNeeded()
+        guard configureIfNeeded() else { return }
         Task { await updateCustomerProductStatus(fetchPolicy: .fetchCurrent) }
         Task { await fetchProducts() }
     }
 
     func fetchProducts() async {
-        configureIfNeeded()
+        guard configureIfNeeded() else { return }
         isLoadingProducts = true
         defer { isLoadingProducts = false }
         do {
@@ -393,7 +404,9 @@ final class StoreService: NSObject, ObservableObject {
 
     @discardableResult
     func purchase(_ product: Package) async throws -> PurchaseState {
-        configureIfNeeded()
+        guard configureIfNeeded() else {
+            throw StoreServiceError.purchasesUnavailableInSimulator
+        }
         purchaseInFlight = true
         defer { purchaseInFlight = false }
 
@@ -409,7 +422,7 @@ final class StoreService: NSObject, ObservableObject {
     }
 
     func updateCustomerProductStatus(fetchPolicy: CacheFetchPolicy = .default) async {
-        configureIfNeeded()
+        guard configureIfNeeded() else { return }
         do {
             let info = try await Purchases.shared.customerInfo(fetchPolicy: fetchPolicy)
             apply(customerInfo: info)
@@ -421,7 +434,10 @@ final class StoreService: NSObject, ObservableObject {
     }
 
     func restorePurchases() async {
-        configureIfNeeded()
+        guard configureIfNeeded() else {
+            lastError = StoreServiceError.purchasesUnavailableInSimulator.localizedDescription
+            return
+        }
         lastError = nil
         do {
             let info = try await Purchases.shared.restorePurchases()
@@ -457,14 +473,21 @@ final class StoreService: NSObject, ObservableObject {
         }
     }
 
-    private func configureIfNeeded() {
-        guard !isConfigured else { return }
+    @discardableResult
+    private func configureIfNeeded() -> Bool {
+        guard !isConfigured else { return true }
+        #if targetEnvironment(simulator)
+        logger.info("Skipping RevenueCat configuration in simulator")
+        return false
+        #else
         #if DEBUG
         Purchases.logLevel = .debug
         #endif
         Purchases.configure(withAPIKey: RevenueCatConfig.apiKey)
         Purchases.shared.delegate = self
         isConfigured = true
+        return true
+        #endif
     }
 }
 
