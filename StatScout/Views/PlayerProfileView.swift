@@ -171,7 +171,10 @@ struct PlayerProfileView: View {
             if !store.isPro, opens >= 2, PaywallGate.shared.shouldPresent(.playerScouting) {
                 trialPitchTrigger = .playerScouting
             }
-            // Third+ profile visit = engaged browsing; never on open 2 (trial pitch).
+            // Engaged browsing, but only counted once the user has come back on
+            // separate days — see ReviewPromptTracker.minimumDistinctUseDays.
+            // Opening three profiles in one sitting used to be enough, which is
+            // browsing depth, not satisfaction.
             if opens >= 3 {
                 ReviewPromptTracker.recordPositiveMoment()
             }

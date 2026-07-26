@@ -44,10 +44,15 @@ struct RootTabView: View {
         tabView
             .tint(SavantPalette.savantRed)
             .sheet(isPresented: $showReviewPrompt, onDismiss: {
-            ReviewPromptTracker.markShown()
+            // "Maybe later" already recorded a soft defer; calling markShown
+            // here would clear it and apply the full 120-day cooldown to a
+            // user who most likely never saw Apple's prompt at all.
             if pendingNativeReviewAfterDismiss {
                 pendingNativeReviewAfterDismiss = false
+                ReviewPromptTracker.markSoftDeferred()
                 requestReview()
+            } else if !ReviewPromptTracker.isSoftDeferred {
+                ReviewPromptTracker.markShown()
             }
         }) {
             ReviewPromptSheet(initialStep: reviewPromptInitialStep, onFinish: handleReviewPromptFinish)
