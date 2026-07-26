@@ -8,6 +8,17 @@ struct TeamDestination: Hashable {
 struct MetricRoute: Hashable {
     let label: String
     let category: MetricCategory
+    /// Which season's leaderboard to open. The player profile has its own
+    /// season selector, so a route from a 2024 profile has to carry 2024 —
+    /// otherwise tapping K% there opened the current-season leaderboard.
+    var season: Int? = nil
+}
+
+/// Drill-down from a traditional stat row to its league leaderboard.
+struct StandardStatRoute: Hashable {
+    let stat: String
+    let category: StandardStatCategory
+    var season: Int? = nil
 }
 
 struct RootTabView: View {
@@ -393,7 +404,25 @@ private struct StandardDestinations: ViewModifier {
                     .modifier(SavantNavBar())
             }
             .navigationDestination(for: MetricRoute.self) { route in
-                MetricRankingView(metricLabel: route.label, metricCategory: route.category, players: viewModel.seasonPlayers, season: viewModel.selectedSeason)
+                let season = route.season ?? viewModel.selectedSeason
+                MetricRankingView(
+                    metricLabel: route.label,
+                    metricCategory: route.category,
+                    players: viewModel.players(forSeason: season),
+                    season: season
+                )
+                    .modifier(SavantNavBar())
+            }
+            .navigationDestination(for: StandardStatRoute.self) { route in
+                let season = route.season ?? viewModel.selectedSeason
+                StandardStatsLeadersView(
+                    players: viewModel.players(forSeason: season),
+                    initialStat: route.stat,
+                    initialCategory: route.category,
+                    season: season
+                )
+                    .navigationTitle("\(route.stat) · \(season)")
+                    .navigationBarTitleDisplayMode(.inline)
                     .modifier(SavantNavBar())
             }
             .navigationDestination(for: ComparisonRoute.self) { route in
