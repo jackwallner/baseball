@@ -23,7 +23,18 @@ final class DashboardViewModel {
     var sortDescending = true
     // Defaults to current year, but `load()` will reset to the most recent season
     // that actually has data once the cache/network resolves so first paint isn't an empty state.
-    var selectedSeason: Int = Calendar.current.component(.year, from: Date())
+    var selectedSeason: Int = Calendar.current.component(.year, from: Date()) {
+        didSet {
+            guard oldValue != selectedSeason else { return }
+            // Past seasons live in the bundled historical cache, which loads
+            // lazily. Pull it in on demand so picking a year just works —
+            // Pro users used to have to tap a separate "Load past seasons"
+            // row first, which read as a bug more than a feature.
+            if selectedSeason < StatScoutSeason.current, isPro, !hasLoadedHistorical, !isHistoricalLoading {
+                Task { await loadHistoricalIfNeeded() }
+            }
+        }
+    }
     // User-selected sort metric per category. Overrides the auto-priority pick when present
     // and still valid for the current season's data.
     var userSortMetricByCategory: [MetricCategory: String] = [:]
@@ -181,13 +192,17 @@ final class DashboardViewModel {
     }
     #endif
 
-    // Seasons present in fetched data, descending. Falls back to the current year while loading.
+    /// Every season the app can show, newest first — a fixed range, not a
+    /// reflection of what's currently loaded.
+    ///
+    /// This used to derive from `playerHistories`, which only holds the current
+    /// season until historical data is explicitly loaded. The effect was that a
+    /// free user opened the season picker and saw a single year plus a generic
+    /// "past seasons require StatScout+" row: the thing they were being sold
+    /// was invisible. Listing the real years and marking the locked ones lets
+    /// someone reach for the specific season they came for.
     var availableSeasons: [Int] {
-        let seasons = Set(playerHistories.values.flatMap { $0 }.compactMap(\.season))
-        guard !seasons.isEmpty else {
-            return [Calendar.current.component(.year, from: Date())]
-        }
-        return seasons.sorted(by: >)
+        Array(StatScoutSeason.earliest...StatScoutSeason.current).reversed()
     }
 
     // Players filtered by selected season - pull from histories to get all years.

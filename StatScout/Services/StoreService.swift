@@ -23,6 +23,10 @@ enum StatScoutSeason {
     static let current = 2026
     /// The only season available without Pro. Everything older is gated.
     static let free = current
+    /// Oldest season in the dataset. Statcast percentile history runs from
+    /// 2015, and the bundled players-historical.plist ships all of it, so the
+    /// season menus can list every year without waiting on a fetch.
+    static let earliest = 2015
 }
 
 enum StatScoutLegal {

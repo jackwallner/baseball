@@ -91,24 +91,16 @@ struct StatsView: View {
         Menu {
             if viewModel.isHistoricalLoading {
                 Label("Loading past seasons…", systemImage: "hourglass")
-            } else if !viewModel.hasLoadedHistorical {
-                Button {
-                    if store.isPro {
-                        Task { await viewModel.loadHistoricalIfNeeded() }
-                    } else {
-                        // Explicit tap — always answer it; the gate only caps
-                        // automatic pop-ups.
-                        paywallTrigger = .pastSeasonsLoad
-                    }
-                } label: {
-                    Label(store.isPro ? "Load past seasons" : "Past seasons require StatScout+", systemImage: store.isPro ? "clock.arrow.circlepath" : "crown.fill")
-                }
             }
+            // Every season is listed, locked ones included. Tapping a locked
+            // year pitches that specific year rather than "unlock more".
             ForEach(viewModel.availableSeasons, id: \.self) { season in
                 let isLocked = viewModel.isSeasonLocked(season)
                 Button {
                     if isLocked {
-                        paywallTrigger = .pastSeason
+                        // Explicit tap — always answer it; the gate only caps
+                        // automatic pop-ups.
+                        paywallTrigger = .lockedSeason(season)
                     } else {
                         viewModel.selectedSeason = season
                     }

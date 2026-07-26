@@ -42,11 +42,10 @@ struct PlayerProfileView: View {
         case yearCompare = "Year Compare"
     }
 
+    /// Every season the dataset covers, not just the ones already loaded for
+    /// this player. A locked year has to be visible to be worth unlocking.
     private var availablePercentileSeasons: [Int] {
-        let fromHistory = history.compactMap(\.season)
-        var set = Set(fromHistory)
-        if let s = player.season { set.insert(s) }
-        return Array(set).sorted(by: >)
+        Array(StatScoutSeason.earliest...StatScoutSeason.current).reversed()
     }
 
     private var activeSeason: Int? {
@@ -460,7 +459,7 @@ struct PlayerProfileView: View {
                             if isLocked {
                                 // Explicit tap on a locked season — always answer it.
                                 // PaywallGate only caps automatic pop-ups.
-                                trialPitchTrigger = .pastSeason
+                                trialPitchTrigger = .lockedSeason(season)
                             } else {
                                 selectedPercentileSeason = season
                             }

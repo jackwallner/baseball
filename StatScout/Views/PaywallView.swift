@@ -5,6 +5,10 @@ enum PaywallTrigger: Identifiable, Hashable {
     var id: Self { self }
 
     case pastSeason
+    /// A specific locked year the user reached for. Naming the year they were
+    /// curious about converts better than a generic "unlock more" pitch, so the
+    /// season menus route through this rather than `.pastSeason`.
+    case lockedSeason(Int)
     case yearCompare
     case playerComparison
     case onboarding
@@ -25,6 +29,7 @@ enum PaywallTrigger: Identifiable, Hashable {
     var icon: String {
         switch self {
         case .pastSeason:        return "calendar.badge.clock"
+        case .lockedSeason:      return "calendar.badge.clock"
         case .yearCompare:       return "arrow.left.arrow.right.circle.fill"
         case .playerComparison:  return "person.2.fill"
         case .onboarding:        return "crown.fill"
@@ -41,6 +46,7 @@ enum PaywallTrigger: Identifiable, Hashable {
     var title: String {
         switch self {
         case .pastSeason:        return "Unlock Past Seasons"
+        case .lockedSeason(let year): return "Unlock \(year)"
         case .yearCompare:       return "Year-over-Year Comparison"
         case .playerComparison:  return "Player Comparison"
         case .onboarding:        return "Scout Like a GM"
@@ -58,6 +64,8 @@ enum PaywallTrigger: Identifiable, Hashable {
         switch self {
         case .pastSeason:
             return "Track how every player ranked since 2015, plus the year-over-year trends behind today's leaders."
+        case .lockedSeason(let year):
+            return "See every player's \(year) percentile rankings, and how they stack up against any other season."
         case .yearCompare:
             return "Compare any player's percentile rankings across any two seasons. See what changed, what held, and where they're headed."
         case .playerComparison:
@@ -85,6 +93,7 @@ enum PaywallTrigger: Identifiable, Hashable {
     var paywallImpressionId: String {
         switch self {
         case .pastSeason:        return "statscout_paywall_past_season"
+        case .lockedSeason:      return "statscout_paywall_locked_season"
         case .yearCompare:       return "statscout_paywall_year_compare"
         case .playerComparison:  return "statscout_paywall_player_comparison"
         case .onboarding:        return "statscout_paywall_onboarding"

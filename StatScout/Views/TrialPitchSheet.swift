@@ -44,6 +44,18 @@ struct TrialPitchSheet: View {
                         title: "Full team scouting",
                         detail: "Every player on every roster, tap any team stat to sort the whole squad.")
             ]
+        case .lockedSeason(let year):
+            return [
+                Benefit(icon: "calendar.badge.clock",
+                        title: "The \(year) season",
+                        detail: "Every player's \(year) percentile rankings, plus every other season back to 2015."),
+                Benefit(icon: "arrow.left.arrow.right.circle.fill",
+                        title: "Year-over-year trends",
+                        detail: "Put \(year) side by side with any other season and see what moved."),
+                Benefit(icon: "person.2.fill",
+                        title: "Head-to-head matchups",
+                        detail: "Stack any two players across every Statcast metric.")
+            ]
         case .pastSeason, .pastSeasonsLoad, .yearCompare:
             return [
                 Benefit(icon: "calendar.badge.clock",
