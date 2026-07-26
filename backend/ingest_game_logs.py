@@ -72,6 +72,28 @@ OUT_OF_ZONE = frozenset({11, 12, 13, 14})
 SWEETSPOT_LA_MIN = 8.0
 SWEETSPOT_LA_MAX = 32.0
 
+# --- Traditional counting stats -------------------------------------------
+# Derived from the terminal-PA `events` column so recent windows can report a
+# real AVG / OBP / SLG rather than only Statcast rates.
+
+HIT_EVENTS = {"single": 1, "double": 2, "triple": 3, "home_run": 4}
+# A plate appearance that isn't an at-bat. Walks, hit-by-pitches and sacrifices
+# are excluded from AB by rule; truncated_pa is a PA the game ended mid-way
+# through, so it isn't one either.
+NON_AT_BAT_EVENTS = frozenset({
+    "walk",
+    "intent_walk",
+    "hit_by_pitch",
+    "sac_fly",
+    "sac_fly_double_play",
+    "sac_bunt",
+    "sac_bunt_double_play",
+    "catcher_interf",
+    "truncated_pa",
+})
+SAC_FLY_EVENTS = frozenset({"sac_fly", "sac_fly_double_play"})
+WALK_EVENTS = frozenset({"walk", "intent_walk"})
+
 # Savant reports pitchers' velocity and spin as *fastball* figures. Averaging
 # every pitch instead would drag a starter's number down by their changeup and
 # curveball, so the app couldn't place it on Savant's Fastball Velo scale.
@@ -213,6 +235,47 @@ def _pitch_aggregates(
     return {key: row.to_dict() for key, row in merged.iterrows()}
 
 
+def _counting_stats(grp: pd.DataFrame) -> dict[str, int]:
+    """Traditional counting line for one player-game, from terminal-PA events.
+
+    Stored underscore-prefixed so the rollup sums them rather than treating
+    them as rates; the window's AVG / OBP / SLG are then derived from the sums,
+    which is the only way to get those right — averaging per-game batting
+    averages would weight an 0-for-1 the same as a 4-for-4.
+
+    RBI, runs, stolen bases and caught stealing aren't recoverable from
+    pitch-level data and stay season-only.
+    """
+    events = grp["events"].fillna("")
+    counts = events.value_counts()
+
+    singles = int(counts.get("single", 0))
+    doubles = int(counts.get("double", 0))
+    triples = int(counts.get("triple", 0))
+    homers = int(counts.get("home_run", 0))
+    hits = singles + doubles + triples + homers
+
+    at_bats = int((~events.isin(NON_AT_BAT_EVENTS)).sum())
+    walks = int(events.isin(WALK_EVENTS).sum())
+    hbp = int(counts.get("hit_by_pitch", 0))
+    sac_flies = int(events.isin(SAC_FLY_EVENTS).sum())
+    strikeouts = int(events.str.contains("strikeout", na=False).sum())
+    total_bases = singles + 2 * doubles + 3 * triples + 4 * homers
+
+    return {
+        "_ab": at_bats,
+        "_h": hits,
+        "_2b": doubles,
+        "_3b": triples,
+        "_hr": homers,
+        "_tb": total_bases,
+        "_bb": walks,
+        "_so": strikeouts,
+        "_hbp": hbp,
+        "_sf": sac_flies,
+    }
+
+
 def _expected_stat(grp: pd.DataFrame, column: str) -> tuple[Optional[float], int]:
     """Savant-style xBA / xSLG over a plate-appearance group.
 
@@ -328,6 +391,7 @@ def _aggregate_batters(df: pd.DataFrame) -> list[dict]:
             "_at_bats": at_bats,
             "_woba_denom": _round(woba_denom, 1),
         }
+        metrics.update(_counting_stats(grp))
 
         team = grp["batter_team"].mode().iat[0] if not grp["batter_team"].mode().empty else None
         opp = grp["pitcher_team"].mode().iat[0] if not grp["pitcher_team"].mode().empty else None
@@ -415,6 +479,8 @@ def _aggregate_pitchers(df: pd.DataFrame) -> list[dict]:
             "_at_bats": at_bats,
             "_woba_denom": _round(woba_denom, 1),
         }
+        # Same counting line, read as "allowed" on a pitcher's row.
+        metrics.update(_counting_stats(grp))
 
         team = grp["pitcher_team"].mode().iat[0] if not grp["pitcher_team"].mode().empty else None
         opp = grp["batter_team"].mode().iat[0] if not grp["batter_team"].mode().empty else None

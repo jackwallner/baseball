@@ -82,7 +82,10 @@ COUNT_PREFIX = "_"
 
 # How many decimals each metric rounds to, by suffix convention.
 def _places(metric: str) -> int:
-    if metric in ("spin_avg",):
+    if metric in ("spin_avg", "fb_spin_avg"):
+        return 0
+    # Traditional counting stats are whole numbers.
+    if metric in ("ab", "h", "2b", "3b", "hr", "tb", "bb", "so", "hbp", "sf"):
         return 0
     if metric.endswith(("_pct", "_avg")) or metric in ("bat_speed", "ev_max", "opp_ev_max"):
         return 1
@@ -173,6 +176,12 @@ def _aggregate(logs: list[dict]) -> dict[str, Any]:
     for metric, peak in peaks.items():
         result[metric] = round(peak, _places(metric))
 
+    # Traditional stats are counts, so they sum across the window and the rate
+    # stats derive from the sums. Averaging per-game batting averages instead
+    # would weight an 0-for-1 the same as a 4-for-4.
+    totals = _sum_counts(logs)
+    result.update(_traditional_rates(totals))
+
     # xISO is the xSLG - xBA identity; recompute it from the window values so it
     # stays consistent with them rather than being weight-averaged separately.
     for iso, slg, ba in (("xiso", "xslg", "xba"), ("opp_xiso", "opp_xslg", "opp_xba")):
@@ -180,6 +189,51 @@ def _aggregate(logs: list[dict]) -> dict[str, Any]:
             result[iso] = round(result[slg] - result[ba], 3)
 
     return result
+
+
+COUNTING_KEYS = ("_ab", "_h", "_2b", "_3b", "_hr", "_tb", "_bb", "_so", "_hbp", "_sf")
+
+
+def _sum_counts(logs: list[dict]) -> dict[str, int]:
+    """Total each traditional counting stat across the window."""
+    totals: dict[str, int] = {}
+    for log in logs:
+        metrics = log.get("metrics") or {}
+        for key in COUNTING_KEYS:
+            value = metrics.get(key)
+            if value is not None:
+                totals[key] = totals.get(key, 0) + int(value)
+    return totals
+
+
+def _traditional_rates(totals: dict[str, int]) -> dict[str, Any]:
+    """AVG / OBP / SLG / OPS from summed counts, plus the counts themselves.
+
+    Each is omitted when its denominator is zero, so a window with no at-bats
+    reads as "no data" rather than a .000 average.
+    """
+    out: dict[str, Any] = {}
+    ab = totals.get("_ab", 0)
+    bb = totals.get("_bb", 0)
+    hbp = totals.get("_hbp", 0)
+    sf = totals.get("_sf", 0)
+    hits = totals.get("_h", 0)
+
+    if ab > 0:
+        out["avg"] = round(hits / ab, 3)
+        out["slg"] = round(totals.get("_tb", 0) / ab, 3)
+    on_base_denom = ab + bb + hbp + sf
+    if on_base_denom > 0:
+        out["obp"] = round((hits + bb + hbp) / on_base_denom, 3)
+    if "obp" in out and "slg" in out:
+        out["ops"] = round(out["obp"] + out["slg"], 3)
+
+    # Surface the counting line too — "6 HR in the last 15 days" is the thing
+    # people actually quote, and it can't be recovered from the rates.
+    for key in COUNTING_KEYS:
+        if key in totals:
+            out[key.lstrip("_")] = totals[key]
+    return out
 
 
 def _delta(now: dict[str, Any], then: dict[str, Any]) -> dict[str, Any]:

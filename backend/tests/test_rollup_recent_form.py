@@ -130,3 +130,39 @@ def test_as_of_and_totals_are_recorded():
 def test_empty_input_produces_nothing():
     assert _aggregate([]) == {}
     assert build_rows([], date(2026, 7, 20)) == []
+
+
+def test_traditional_rates_derive_from_summed_counts():
+    """A 4-for-4 game and an 0-for-1 make a .800 window, not a .500 one.
+
+    Averaging the two per-game averages (1.000 and .000) would say .500 —
+    which is why the counting stats sum rather than weight-average.
+    """
+    logs = [
+        _log("2026-07-20", {"_ab": 4, "_h": 4, "_tb": 7, "_bb": 0, "_hbp": 0, "_sf": 0}),
+        _log("2026-07-19", {"_ab": 1, "_h": 0, "_tb": 0, "_bb": 0, "_hbp": 0, "_sf": 0}),
+    ]
+    result = _aggregate(logs)
+    assert result["avg"] == pytest.approx(0.800)
+    assert result["slg"] == pytest.approx(1.400)
+    assert result["ab"] == 5
+    assert result["h"] == 4
+
+
+def test_obp_denominator_includes_walks_hbp_and_sac_flies():
+    logs = [
+        _log("2026-07-20", {"_ab": 3, "_h": 1, "_tb": 1, "_bb": 1, "_hbp": 1, "_sf": 1}),
+    ]
+    result = _aggregate(logs)
+    # (1 + 1 + 1) / (3 + 1 + 1 + 1)
+    assert result["obp"] == pytest.approx(0.500)
+    assert result["ops"] == pytest.approx(0.500 + 1 / 3, abs=1e-3)
+
+
+def test_window_with_no_at_bats_omits_average():
+    """An all-walks window has no AVG, rather than a .000 one."""
+    logs = [_log("2026-07-20", {"_ab": 0, "_h": 0, "_tb": 0, "_bb": 2, "_hbp": 0, "_sf": 0})]
+    result = _aggregate(logs)
+    assert "avg" not in result
+    assert "slg" not in result
+    assert result["obp"] == pytest.approx(1.0)
