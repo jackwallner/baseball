@@ -474,12 +474,6 @@ struct LeaderboardTableRow: View {
     let player: Player
     var metricLabel: String? = nil
     var metricCategory: MetricCategory? = nil
-    /// Render the percentile in the value column instead of the raw stat.
-    /// Used by the team roster's "All" view, where hitters and pitchers are
-    /// interleaved: raw xwOBA runs the opposite direction for a pitcher, so a
-    /// mixed list sorted best-first shows a jumbled value column. Percentile is
-    /// already direction-corrected by Savant, so it reads monotonically.
-    var showsPercentileValue: Bool = false
 
     private var displayMetric: Metric? {
         guard let label = metricLabel else { return nil }
@@ -500,9 +494,6 @@ struct LeaderboardTableRow: View {
     // already conveys percentile visually; numeric percentile in this column
     // duplicates that signal and reads as "the stat value" at a glance.
     private var displayValueText: String {
-        if showsPercentileValue {
-            return displayMetric == nil ? "—" : "\(displayPercentile)"
-        }
         if let metric = displayMetric, !metric.value.isEmpty {
             return metric.value
         }
