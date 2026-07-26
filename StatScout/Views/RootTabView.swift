@@ -392,6 +392,12 @@ private struct StandardDestinations: ViewModifier {
                     loadHistorical: { await viewModel.loadHistoricalIfNeeded() },
                     fetchGameLogs: { id, season in
                         try await viewModel.fetchGameLogs(playerId: id, season: season)
+                    },
+                    recentFormLookup: { id, window in
+                        viewModel.recentForm(for: id, window: window)
+                    },
+                    loadRecentForm: { window in
+                        await viewModel.loadRecentFormIfNeeded(window: window)
                     }
                 )
                     .modifier(SavantNavBar())

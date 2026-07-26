@@ -11,6 +11,9 @@ struct PlayerProfileView: View {
     var historicalLoadingProgress = 0.12
     var loadHistorical: (() async -> Void)?
     var fetchGameLogs: ((Int, Int) async throws -> [PlayerGameLog])?
+    /// Pre-aggregated rolling window for this player, when one is loaded.
+    var recentFormLookup: ((Int, RecentWindow) -> RecentForm?)?
+    var loadRecentForm: ((RecentWindow) async -> Void)?
     @State private var showPercentileInfo = false
     @State private var selectedTab: PlayerStatTab = .statcast
     @State private var selectedPercentileSeason: Int? = nil
@@ -28,6 +31,8 @@ struct PlayerProfileView: View {
     @State private var recentLoadError: String?
     @State private var recentCurves: LeaguePercentileCurves?
     @State private var showingSeasonPicker = false
+    @State private var standardMode: FormDisplayMode = .season
+    @State private var standardWindow: RecentWindow = .fortnight
     @State private var favorites = FavoritesStore.shared
 
     private let profileOpenCountKey = "profileOpenCount"
@@ -931,6 +936,38 @@ struct PlayerProfileView: View {
             }
     }
 
+    /// Traditional stat label → the rollup's key. RBI, runs, stolen bases and
+    /// caught stealing aren't derivable from pitch-level data, so they have no
+    /// recent counterpart and keep their season row alone.
+    private static let standardRecentKeys: [String: String] = [
+        "AVG": "avg", "OBP": "obp", "SLG": "slg", "OPS": "ops",
+        "H": "h", "HR": "hr", "2B": "2b", "3B": "3b",
+        "BB": "bb", "SO": "so", "AB": "ab",
+    ]
+
+    private var standardRecentForm: RecentForm? {
+        recentFormLookup?(player.playerId, standardWindow)
+    }
+
+    /// The recent-window version of one traditional stat, or nil when the
+    /// window has no figure for it. Percentile comes from the same league
+    /// season distribution the season row uses, so both sit on one ruler.
+    private func recentStandardMetric(for seasonMetric: Metric) -> Metric? {
+        guard let key = Self.standardRecentKeys[seasonMetric.label],
+              let value = standardRecentForm?.metrics[key] else { return nil }
+        let isRate = ["AVG", "OBP", "SLG", "OPS"].contains(seasonMetric.label)
+        let text = isRate
+            ? String(format: "%.3f", value)
+            : String(format: "%.0f", value)
+        return Metric(
+            id: "std-recent-\(seasonMetric.label)",
+            label: seasonMetric.label,
+            value: text,
+            percentile: standardStatPercentile(label: seasonMetric.label, value: value) ?? 0,
+            category: seasonMetric.category
+        )
+    }
+
     private var standardStatsGridCard: some View {
         VStack(spacing: 0) {
             // The season already appears in the picker on the right; printing
@@ -939,6 +976,15 @@ struct PlayerProfileView: View {
                 title: "STANDARD STATS",
                 trailing: AnyView(seasonMenu)
             )
+
+            // Recent only means something on the live season — the window is
+            // anchored to today, so on a past season it would always be empty.
+            if store.isPro, isCurrentSeasonActive {
+                standardModePicker
+                if standardMode != .season {
+                    standardWindowPicker
+                }
+            }
 
             if (displayedPlayer.standardStats ?? []).isEmpty {
                 emptyStateCard(
@@ -969,21 +1015,97 @@ struct PlayerProfileView: View {
         )
     }
 
+    private var effectiveStandardMode: FormDisplayMode {
+        (store.isPro && isCurrentSeasonActive) ? standardMode : .season
+    }
+
+    private var standardModePicker: some View {
+        HStack(spacing: 6) {
+            ForEach(FormDisplayMode.allCases, id: \.self) { mode in
+                Button {
+                    standardMode = mode
+                    if mode != .season {
+                        Task { await loadRecentForm?(standardWindow) }
+                    }
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                } label: {
+                    Text(mode.rawValue)
+                        .font(SavantType.smallBold)
+                        .foregroundStyle(standardMode == mode ? .white : SavantPalette.inkSecondary)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 30)
+                        .background(standardMode == mode ? SavantPalette.savantRed : SavantPalette.surface)
+                        .clipShape(Capsule())
+                        .overlay(Capsule().stroke(SavantPalette.hairline, lineWidth: 0.5))
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.horizontal, SavantGeo.padInline)
+        .padding(.vertical, 10)
+        .background(SavantPalette.surfaceAlt)
+    }
+
+    private var standardWindowPicker: some View {
+        HStack(spacing: 6) {
+            ForEach(RecentWindow.allCases) { window in
+                Button {
+                    standardWindow = window
+                    Task { await loadRecentForm?(window) }
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                } label: {
+                    Text(window.label)
+                        .font(SavantType.smallBold)
+                        .foregroundStyle(standardWindow == window ? .white : SavantPalette.inkSecondary)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 28)
+                        .background(standardWindow == window ? SavantPalette.savantRed : SavantPalette.surface)
+                        .clipShape(Capsule())
+                        .overlay(Capsule().stroke(SavantPalette.hairline, lineWidth: 0.5))
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.horizontal, SavantGeo.padInline)
+        .padding(.bottom, 8)
+        .background(SavantPalette.surfaceAlt)
+    }
+
+    @ViewBuilder
     private func standardRows(_ metrics: [Metric], startingIndex: Int = 0) -> some View {
         ForEach(Array(metrics.enumerated()), id: \.element.id) { offset, metric in
+            let recent = recentStandardMetric(for: metric)
+            let background = (startingIndex + offset) % 2 == 0 ? SavantPalette.surface : SavantPalette.surfaceAlt
+
             NavigationLink(value: StandardStatRoute(
                 stat: metric.label,
                 category: isPitcher ? .pitching : .hitting,
                 season: activeSeason
             )) {
-                MetricBar(metric: metric)
-                    .padding(.horizontal, SavantGeo.padCard)
-                    .padding(.vertical, 12)
-                    .background((startingIndex + offset) % 2 == 0 ? SavantPalette.surface : SavantPalette.surfaceAlt)
-                    .overlay(
-                        Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline),
-                        alignment: .bottom
-                    )
+                Group {
+                    switch effectiveStandardMode {
+                    case .season:
+                        MetricBar(metric: metric)
+                    case .recent:
+                        // No recent figure for this stat — fall back to season
+                        // rather than dropping the row, matching the
+                        // percentile card's behaviour.
+                        MetricBar(metric: recent ?? metric)
+                    case .both:
+                        DualMetricBar(
+                            season: metric,
+                            recent: recent,
+                            recentCaption: "Last \(standardWindow.rawValue)d"
+                        )
+                    }
+                }
+                .padding(.horizontal, SavantGeo.padCard)
+                .padding(.vertical, 12)
+                .background(background)
+                .overlay(
+                    Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline),
+                    alignment: .bottom
+                )
             }
             .buttonStyle(.plain)
         }
