@@ -41,11 +41,26 @@ struct TeamsView: View {
     // Auto-enter the favorite team once per launch; popping back must not
     // re-push it, or the user can never reach the list.
     @State private var didAutoEnterFavorite = false
+    @State private var showingSeasonPicker = false
+    @State private var lockedSeasonTrigger: PaywallTrigger?
 
     private static let allTeams: [String] = [
         "ARI", "ATL", "BAL", "BOS", "CHC", "CWS", "CIN", "CLE", "COL", "DET",
         "HOU", "KC", "LAA", "LAD", "MIA", "MIL", "MIN", "NYM", "NYY", "OAK",
         "PHI", "PIT", "SD", "SEA", "SF", "STL", "TB", "TEX", "TOR", "WSH"
+    ]
+
+    /// Six divisions of five, in standings order. Grouping this way is what
+    /// lets all thirty teams fit one screen without scrolling — and it's how
+    /// people already hold the league in their heads, so it reads faster than
+    /// an alphabetical wall even before the space saving.
+    static let divisions: [(name: String, teams: [String])] = [
+        ("AL East",    ["BAL", "BOS", "NYY", "TB", "TOR"]),
+        ("AL Central", ["CWS", "CLE", "DET", "KC", "MIN"]),
+        ("AL West",    ["HOU", "LAA", "OAK", "SEA", "TEX"]),
+        ("NL East",    ["ATL", "MIA", "NYM", "PHI", "WSH"]),
+        ("NL Central", ["CHC", "CIN", "MIL", "PIT", "STL"]),
+        ("NL West",    ["ARI", "COL", "LAD", "SD", "SF"]),
     ]
 
     private var filteredTeams: [String] {
@@ -94,7 +109,13 @@ struct TeamsView: View {
         .background(SavantPalette.canvas.ignoresSafeArea())
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .topBarLeading) { seasonMenu }
+            // Red pill draws its own capsule — see StatsView.
+            if #available(iOS 26.0, *) {
+                ToolbarItem(placement: .topBarLeading) { seasonMenu }
+                    .sharedBackgroundVisibility(.hidden)
+            } else {
+                ToolbarItem(placement: .topBarLeading) { seasonMenu }
+            }
         }
         .refreshable {
             await viewModel.load()
@@ -102,6 +123,9 @@ struct TeamsView: View {
         .onAppear(perform: autoEnterFavoriteIfNeeded)
         .sheet(isPresented: $showingTrial) {
             TrialPitchSheet(trigger: .teamView)
+        }
+        .sheet(item: $lockedSeasonTrigger) { trigger in
+            TrialPitchSheet(trigger: trigger)
         }
     }
 
@@ -152,42 +176,8 @@ struct TeamsView: View {
     // calendar + year, sitting on the navy bar. Replaces the old in-content
     // season header card so Teams and Stats read the same.
     private var seasonMenu: some View {
-        Menu {
-            if viewModel.isHistoricalLoading {
-                Label("Loading past seasons…", systemImage: "hourglass")
-            } else if !viewModel.hasLoadedHistorical {
-                Button {
-                    if store.isPro {
-                        Task { await viewModel.loadHistoricalIfNeeded() }
-                    } else {
-                        // Explicit tap — always answer it; the gate only caps
-                        // automatic pop-ups.
-                        showingTrial = true
-                    }
-                } label: {
-                    Label(store.isPro ? "Load past seasons" : "Past seasons require StatScout+",
-                          systemImage: store.isPro ? "clock.arrow.circlepath" : "crown.fill")
-                }
-            }
-            ForEach(viewModel.availableSeasons, id: \.self) { season in
-                let isLocked = viewModel.isSeasonLocked(season)
-                Button {
-                    if isLocked {
-                        showingTrial = true
-                    } else {
-                        viewModel.selectedSeason = season
-                    }
-                } label: {
-                    HStack {
-                        Text(String(season))
-                        if isLocked {
-                            Image(systemName: "crown.fill")
-                                .font(.system(size: 10))
-                                .foregroundStyle(SavantPalette.inkTertiary)
-                        }
-                    }
-                }
-            }
+        Button {
+            showingSeasonPicker = true
         } label: {
             HStack(spacing: 5) {
                 Image(systemName: "calendar")
@@ -198,12 +188,26 @@ struct TeamsView: View {
                     .font(.system(size: 9, weight: .bold))
             }
             .foregroundStyle(.white)
+            .fixedSize()
             .padding(.horizontal, 10)
             .padding(.vertical, 5)
             .background(SavantPalette.savantRed)
             .clipShape(Capsule())
         }
-        .menuOrder(.fixed)
+        .buttonStyle(.plain)
+        .popover(isPresented: $showingSeasonPicker, arrowEdge: .bottom) {
+            SeasonPickerPopover(
+                seasons: viewModel.availableSeasons,
+                selected: viewModel.selectedSeason,
+                isLocked: { viewModel.isSeasonLocked($0) }
+            ) { season in
+                if viewModel.isSeasonLocked(season) {
+                    lockedSeasonTrigger = .lockedSeason(season)
+                } else {
+                    viewModel.selectedSeason = season
+                }
+            }
+        }
         .accessibilityLabel("Season")
         .accessibilityValue(String(viewModel.selectedSeason))
     }
@@ -269,41 +273,105 @@ struct TeamsView: View {
                          : "Try a different search term.")
                 }
                 .padding(.vertical, 48)
+            } else if searchText.isEmpty {
+                divisionGrid
             } else {
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 3), spacing: 10) {
+                // A search result has no meaningful division shape, so it falls
+                // back to a flat run of whatever matched.
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 5), spacing: 8) {
                     ForEach(gridTeams, id: \.self) { abbr in
-                        TeamGridTile(
-                            abbr: abbr,
-                            isFavorite: teamsViewModel.isFavorite(abbr),
-                            onFavoriteTap: {
-                                if teamsViewModel.isFavorite(abbr) {
-                                    teamsViewModel.removeFavorite()
-                                } else {
-                                    teamsViewModel.setFavorite(abbr)
-                                }
-                                UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                            },
-                            destination: TeamDestination(abbr: abbr)
-                        )
-                        .contextMenu {
-                            Button {
-                                if teamsViewModel.isFavorite(abbr) {
-                                    teamsViewModel.removeFavorite()
-                                } else {
-                                    teamsViewModel.setFavorite(abbr)
-                                }
-                                UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                            } label: {
-                                Label(teamsViewModel.isFavorite(abbr) ? "Remove Favorite" : "Set as Favorite",
-                                      systemImage: teamsViewModel.isFavorite(abbr) ? "star.slash" : "star.fill")
-                            }
-                        }
+                        teamDot(abbr)
                     }
                 }
                 .padding(.horizontal, 12)
                 .padding(.bottom, 12)
             }
         }
+    }
+
+    /// Six labelled rows of five. Sized so the whole league sits on one screen.
+    private var divisionGrid: some View {
+        VStack(spacing: 10) {
+            ForEach(Self.divisions, id: \.name) { division in
+                VStack(spacing: 6) {
+                    HStack {
+                        Text(division.name.uppercased())
+                            .font(SavantType.micro)
+                            .tracking(0.6)
+                            .foregroundStyle(SavantPalette.inkTertiary)
+                        Spacer()
+                    }
+                    HStack(spacing: 8) {
+                        ForEach(division.teams, id: \.self) { abbr in
+                            teamDot(abbr)
+                        }
+                    }
+                }
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.bottom, 12)
+    }
+
+    /// One team: the color disk with its abbreviation, a favorite star when
+    /// set, and a long-press to toggle it. No full team name — at five across
+    /// there isn't room, and the cap colors plus abbreviation are how people
+    /// recognise a club anyway.
+    private func teamDot(_ abbr: String) -> some View {
+        NavigationLink(value: TeamDestination(abbr: abbr)) {
+            // The disk already carries the abbreviation, so no caption beneath —
+            // it printed the same three letters twice and ate the vertical room
+            // the six division rows need.
+            VStack(spacing: 4) {
+                ZStack(alignment: .topTrailing) {
+                    TeamAbbrDisk(abbr: abbr)
+                    if teamsViewModel.isFavorite(abbr) {
+                        Image(systemName: "star.fill")
+                            .font(.system(size: 9, weight: .bold))
+                            .foregroundStyle(Color.yellow)
+                            .padding(2)
+                            .background(SavantPalette.surface, in: Circle())
+                            .offset(x: 3, y: -3)
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.plain)
+        .contextMenu {
+            Button {
+                if teamsViewModel.isFavorite(abbr) {
+                    teamsViewModel.removeFavorite()
+                } else {
+                    teamsViewModel.setFavorite(abbr)
+                }
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            } label: {
+                Label(teamsViewModel.isFavorite(abbr) ? "Remove Favorite" : "Set as Favorite",
+                      systemImage: teamsViewModel.isFavorite(abbr) ? "star.slash" : "star.fill")
+            }
+        }
+        .accessibilityLabel(teamFullName(abbr))
+    }
+}
+
+/// Team color disk with the abbreviation centered — the compact unit the
+/// division grid is built from.
+private struct TeamAbbrDisk: View {
+    let abbr: String
+
+    var body: some View {
+        ZStack {
+            Circle().fill(MLBTeamColor.color(abbr))
+            Text(displayTeamAbbr(abbr))
+                .font(SavantFont.condensed(13, weight: .bold))
+                .foregroundStyle(.white)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+                .padding(.horizontal, 2)
+        }
+        .frame(width: 52, height: 52)
+        .overlay(Circle().stroke(Color.white.opacity(0.25), lineWidth: 0.5))
     }
 }
 
