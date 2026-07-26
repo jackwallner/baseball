@@ -242,13 +242,22 @@ struct HotColdView: View {
     /// Illustrative board for the blurred gate. Static on purpose: a locked
     /// screen shouldn't spend the user's data on a fetch they can't read.
     private var teaserBoard: some View {
+        // Enough rows to fill the viewport behind the gate. Six left a dead
+        // grey void under the unlock panel, which read as a broken screen
+        // rather than a paywall.
         let rows: [(name: String, team: String, initials: String, then: Double, now: Double, games: Int)] = [
-            ("Riser One",   "HOU", "RO", 0.248, 0.421, 13),
-            ("Riser Two",   "ATL", "RT", 0.263, 0.418, 12),
-            ("Riser Three", "NYY", "RH", 0.291, 0.402, 14),
-            ("Riser Four",  "LAD", "RF", 0.277, 0.381, 11),
-            ("Riser Five",  "SEA", "RV", 0.302, 0.375, 13),
-            ("Riser Six",   "KC",  "RS", 0.288, 0.361, 12),
+            ("Riser One",    "HOU", "RO", 0.248, 0.421, 13),
+            ("Riser Two",    "ATL", "RT", 0.263, 0.418, 12),
+            ("Riser Three",  "NYY", "RH", 0.291, 0.402, 14),
+            ("Riser Four",   "LAD", "RF", 0.277, 0.381, 11),
+            ("Riser Five",   "SEA", "RV", 0.302, 0.375, 13),
+            ("Riser Six",    "KC",  "RS", 0.288, 0.361, 12),
+            ("Riser Seven",  "PHI", "RS", 0.271, 0.354, 10),
+            ("Riser Eight",  "BAL", "RE", 0.264, 0.347, 12),
+            ("Riser Nine",   "CHC", "RN", 0.259, 0.341, 11),
+            ("Riser Ten",    "TEX", "RT", 0.283, 0.338, 13),
+            ("Riser Eleven", "MIL", "RE", 0.276, 0.332, 12),
+            ("Riser Twelve", "SD",  "RT", 0.269, 0.327, 14),
         ]
         return VStack(spacing: 0) {
             SavantSectionBar(title: "HOTTEST IN THE LEAGUE")
