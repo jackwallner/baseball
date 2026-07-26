@@ -28,6 +28,7 @@ struct PlayerProfileView: View {
     @State private var recentLoadError: String?
     @State private var recentCurves: LeaguePercentileCurves?
     @State private var showingSeasonPicker = false
+    @State private var favorites = FavoritesStore.shared
 
     private let profileOpenCountKey = "profileOpenCount"
 
@@ -128,18 +129,16 @@ struct PlayerProfileView: View {
         .navigationTitle(player.name)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    if store.isPro {
-                        showingPlayerPicker = true
-                    } else {
-                        trialPitchTrigger = .playerComparison
-                    }
-                } label: {
-                    Image(systemName: "person.2.fill")
-                        .foregroundStyle(.white)
-                }
-                .accessibilityLabel("Compare with another player")
+            // Bare glyphs on the navy bar; the iOS 26 Liquid Glass container
+            // wraps them in a pale capsule that reads as a stray button.
+            if #available(iOS 26.0, *) {
+                ToolbarItem(placement: .topBarTrailing) { favoriteButton }
+                    .sharedBackgroundVisibility(.hidden)
+                ToolbarItem(placement: .topBarTrailing) { compareButton }
+                    .sharedBackgroundVisibility(.hidden)
+            } else {
+                ToolbarItem(placement: .topBarTrailing) { favoriteButton }
+                ToolbarItem(placement: .topBarTrailing) { compareButton }
             }
         }
         .sheet(isPresented: $showPercentileInfo) {
@@ -179,6 +178,35 @@ struct PlayerProfileView: View {
                 ReviewPromptTracker.recordPositiveMoment()
             }
         }
+    }
+
+    /// Following a player is free. It's the signal the Hot/Cold tab and the
+    /// review funnel read from, so gating it would suppress the thing we most
+    /// want people to do.
+    private var favoriteButton: some View {
+        let isFavorite = favorites.isFavorite(playerId: player.playerId)
+        return Button {
+            favorites.toggleFavorite(playerId: player.playerId)
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        } label: {
+            Image(systemName: isFavorite ? "star.fill" : "star")
+                .foregroundStyle(isFavorite ? Color.yellow : .white)
+        }
+        .accessibilityLabel(isFavorite ? "Unfollow \(player.name)" : "Follow \(player.name)")
+    }
+
+    private var compareButton: some View {
+        Button {
+            if store.isPro {
+                showingPlayerPicker = true
+            } else {
+                trialPitchTrigger = .playerComparison
+            }
+        } label: {
+            Image(systemName: "person.2.fill")
+                .foregroundStyle(.white)
+        }
+        .accessibilityLabel("Compare with another player")
     }
 
     private var tabSelector: some View {

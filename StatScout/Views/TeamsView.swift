@@ -1,41 +1,26 @@
 import SwiftUI
 
-@Observable
-final class TeamsViewModel {
-    private static let favoritesKey = "favoriteTeam"
+/// Thin wrapper over the shared `FavoritesStore` so the Teams tab and the
+/// player profile can't drift apart on what "favorite" means.
+@MainActor
+struct TeamsViewModel {
+    private let store = FavoritesStore.shared
 
-    var favoriteTeam: String? {
-        didSet {
-            if let team = favoriteTeam {
-                UserDefaults.standard.set(team, forKey: Self.favoritesKey)
-            } else {
-                UserDefaults.standard.removeObject(forKey: Self.favoritesKey)
-            }
-        }
-    }
+    var favoriteTeam: String? { store.team }
 
-    init() {
-        self.favoriteTeam = UserDefaults.standard.string(forKey: Self.favoritesKey)
-    }
+    func isFavorite(_ team: String) -> Bool { store.isFavorite(team: team) }
 
-    func isFavorite(_ team: String) -> Bool {
-        favoriteTeam == team
-    }
+    func setFavorite(_ team: String) { store.setFavorite(team: team) }
 
-    func setFavorite(_ team: String) {
-        favoriteTeam = team
-    }
-
-    func removeFavorite() {
-        favoriteTeam = nil
-    }
+    func removeFavorite() { store.setFavorite(team: nil) }
 }
 
 struct TeamsView: View {
     @EnvironmentObject private var store: StoreService
     let viewModel: DashboardViewModel
     @Binding var path: NavigationPath
-    @State private var teamsViewModel = TeamsViewModel()
+    private let teamsViewModel = TeamsViewModel()
+    @State private var favorites = FavoritesStore.shared
     @State private var searchText = ""
     @State private var showingTrial = false
     // Auto-enter the favorite team once per launch; popping back must not
