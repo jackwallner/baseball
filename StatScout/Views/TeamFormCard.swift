@@ -43,8 +43,12 @@ struct TeamRankingsCard: View {
     }
 
     enum Mode: String, CaseIterable, Identifiable {
-        case season = "Season", recent = "Recent"
+        case season = "Season", recent = "Recent", both = "Both"
         var id: String { rawValue }
+
+        /// Whether this mode needs game logs — and therefore whether the
+        /// window picker is worth showing.
+        var usesRecent: Bool { self != .season }
     }
 
     /// Smallest team-window PA we'll treat as trustworthy — below this we flag
@@ -62,21 +66,26 @@ struct TeamRankingsCard: View {
                 trailing: store.isPro ? nil : AnyView(proBadge)
             )
 
-            sidePicker
-                .padding(.horizontal, SavantGeo.padInline)
-                .padding(.vertical, 8)
-                .background(SavantPalette.surfaceAlt)
+            // Side and mode share one row. They used to be stacked, which with
+            // the identity strip, the tab selector and the window picker put
+            // the first actual stat past halfway down the screen.
+            HStack(spacing: 8) {
+                sidePicker
+                Spacer(minLength: 8)
+                modePicker
+            }
+            .padding(.horizontal, SavantGeo.padInline)
+            .padding(.vertical, 8)
+            .background(SavantPalette.surfaceAlt)
 
-            modePicker
-
-            if mode == .recent {
+            if mode.usesRecent {
                 windowPicker
             }
 
-            if mode == .season {
-                seasonBars
-            } else {
-                recentSection
+            switch mode {
+            case .season: seasonBars
+            case .recent: recentSection
+            case .both: bothSection
             }
         }
         .background(SavantPalette.surface)
@@ -86,7 +95,7 @@ struct TeamRankingsCard: View {
                 .stroke(SavantPalette.hairline, lineWidth: 0.5)
         )
         .task(id: "\(team)-\(season)-\(mode.rawValue)-\(store.isPro)") {
-            if mode == .recent, store.isPro { await load() }
+            if mode.usesRecent, store.isPro { await load() }
         }
         .onAppear { rebuildCurves() }
         .onChange(of: leaguePlayers.count) { _, _ in rebuildCurves() }
@@ -143,10 +152,12 @@ struct TeamRankingsCard: View {
                     UIImpactFeedbackGenerator(style: .light).impactOccurred()
                 } label: {
                     Text(m.rawValue)
-                        .font(SavantType.smallBold)
+                        .font(SavantType.micro)
+                        .tracking(0.3)
+                        .fontWeight(.semibold)
                         .foregroundStyle(mode == m ? .white : SavantPalette.inkSecondary)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 30)
+                        .padding(.horizontal, 9)
+                        .frame(height: 26)
                         .background(mode == m ? SavantPalette.savantRed : SavantPalette.surface)
                         .clipShape(Capsule())
                         .overlay(Capsule().stroke(SavantPalette.hairline, lineWidth: 0.5))
@@ -154,9 +165,68 @@ struct TeamRankingsCard: View {
                 .buttonStyle(.plain)
             }
         }
-        .padding(.horizontal, SavantGeo.padInline)
-        .padding(.vertical, 10)
-        .background(SavantPalette.surfaceAlt)
+        .fixedSize()
+    }
+
+    /// Season and recent bars paired on one row, the same DualMetricBar the
+    /// player page uses — so a team reads the way a player does.
+    private var bothSection: some View {
+        let seasonRows = aggregateSeasonRows()
+        // Deliberately NOT recentDisplayRows: that falls back to the season
+        // aggregate when the window has no data for a metric, which is right
+        // for Recent (show the full slate) but a lie here — it would print the
+        // season number under a "Last 15d" label and imply nothing moved.
+        let recentRows: [String: Metric] = {
+            guard let w = recentWindow else { return [:] }
+            let pairs = seasonRows.compactMap { row -> (String, Metric)? in
+                guard let recent = recentMetric(forSeasonLabel: row.label, window: w) else { return nil }
+                return (row.label, recent)
+            }
+            return Dictionary(pairs, uniquingKeysWith: { first, _ in first })
+        }()
+
+        return VStack(spacing: 0) {
+            if loading {
+                loadingRow
+            } else if let loadError {
+                errorRow(loadError)
+            } else {
+                ForEach(Array(seasonRows.enumerated()), id: \.element.id) { index, metric in
+                    DualMetricBar(
+                        season: metric,
+                        recent: recentRows[metric.label],
+                        recentCaption: "Last \(windowDays)d"
+                    )
+                    .padding(.horizontal, SavantGeo.padCard)
+                    .padding(.vertical, 10)
+                    .background(index % 2 == 0 ? SavantPalette.surface : SavantPalette.surfaceAlt)
+                    .overlay(
+                        Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline),
+                        alignment: .bottom
+                    )
+                }
+            }
+        }
+    }
+
+    private var loadingRow: some View {
+        HStack(spacing: 10) {
+            ProgressView().scaleEffect(0.75)
+            Text("Loading recent games…")
+                .font(SavantType.small)
+                .foregroundStyle(SavantPalette.inkSecondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 24)
+    }
+
+    private func errorRow(_ message: String) -> some View {
+        Text(message)
+            .font(SavantType.small)
+            .foregroundStyle(SavantPalette.inkSecondary)
+            .multilineTextAlignment(.center)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 24)
     }
 
     private var windowPicker: some View {
@@ -430,21 +500,33 @@ struct TeamRankingsCard: View {
     private var recentSpecs: [(key: String, seasonLabel: String, format: String)] {
         side == .pitching
             ? [
-                ("opp_xwoba",       "xwOBA",          "%.3f"),
-                ("k_pct",           "K%",             "%.1f%%"),
-                ("bb_pct",          "BB%",            "%.1f%%"),
-                ("opp_hardhit_pct", "Hard-Hit%",      "%.1f%%"),
-                ("opp_barrel_pct",  "Barrel%",        "%.1f%%"),
-                ("opp_ev_avg",      "Avg EV Against", "%.1f mph"),
+                ("opp_xwoba",       "xwOBA",           "%.3f"),
+                ("opp_xba",         "xBA",             "%.3f"),
+                ("opp_xslg",        "xSLG",            "%.3f"),
+                ("k_pct",           "K%",              "%.1f%%"),
+                ("bb_pct",          "BB%",             "%.1f%%"),
+                ("opp_hardhit_pct", "Hard-Hit%",       "%.1f%%"),
+                ("opp_barrel_pct",  "Barrel%",         "%.1f%%"),
+                ("opp_ev_avg",      "Avg EV Against",  "%.1f mph"),
+                ("opp_ev_max",      "Max EV Against",  "%.1f mph"),
+                ("fb_velo_avg",     "Fastball Velo",   "%.1f mph"),
+                ("fb_spin_avg",     "Fastball Spin",   "%.0f rpm"),
             ]
             : [
-                ("xwoba",       "xwOBA",     "%.3f"),
-                ("barrel_pct",  "Barrel%",   "%.1f%%"),
-                ("hardhit_pct", "Hard-Hit%", "%.1f%%"),
-                ("ev_avg",      "EV",        "%.1f mph"),
-                ("ev_max",      "Max EV",    "%.1f mph"),
-                ("k_pct",       "K%",        "%.1f%%"),
-                ("bb_pct",      "BB%",       "%.1f%%"),
+                ("xwoba",        "xwOBA",        "%.3f"),
+                ("xba",          "xBA",          "%.3f"),
+                ("xslg",         "xSLG",         "%.3f"),
+                ("xiso",         "xISO",         "%.3f"),
+                ("barrel_pct",   "Barrel%",      "%.1f%%"),
+                ("hardhit_pct",  "Hard-Hit%",    "%.1f%%"),
+                ("ev_avg",       "EV",           "%.1f mph"),
+                ("ev_max",       "Max EV",       "%.1f mph"),
+                ("k_pct",        "K%",           "%.1f%%"),
+                ("bb_pct",       "BB%",          "%.1f%%"),
+                ("whiff_pct",    "Whiff%",       "%.1f%%"),
+                ("chase_pct",    "Chase%",       "%.1f%%"),
+                ("bat_speed",    "Bat Speed",    "%.1f mph"),
+                ("swing_length", "Swing Length", "%.2f ft"),
             ]
     }
 

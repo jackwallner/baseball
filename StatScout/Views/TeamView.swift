@@ -154,8 +154,9 @@ struct TeamView: View {
     var body: some View {
         ScrollView {
             LazyVStack(spacing: 0) {
-                TeamIdentityStrip(team: team, season: displaySeason)
-
+                // No identity strip: the nav bar already shows the team name
+                // (as the switcher) and the season pill, so it was repeating
+                // both and pushing the first real stat past halfway down.
                 tabSelector
                     .padding(.horizontal, 12)
                     .padding(.top, 12)
