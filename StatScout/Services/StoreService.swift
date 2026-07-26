@@ -240,7 +240,15 @@ final class StoreService: NSObject, ObservableObject {
     @Published private(set) var products: [Package] = []
     @Published private(set) var currentOffering: Offering?
     @Published private(set) var customerInfo: CustomerInfo?
+    #if DEBUG
+    /// Local-only StatScout+ override so Pro-gated surfaces (Recent Form,
+    /// past seasons, Compare) can be exercised in the simulator, where
+    /// RevenueCat is intentionally never configured. Set the
+    /// `STATSCOUT_FORCE_PRO=1` environment variable on the scheme/launch.
+    @Published private(set) var isPro: Bool = ProcessInfo.processInfo.environment["STATSCOUT_FORCE_PRO"] == "1"
+    #else
     @Published private(set) var isPro: Bool = false
+    #endif
     @Published private(set) var purchaseInFlight: Bool = false
     @Published private(set) var isLoadingProducts: Bool = false
     @Published private(set) var lastError: String?

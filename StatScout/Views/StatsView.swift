@@ -35,7 +35,15 @@ struct StatsView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(SavantPalette.canvas)
         .toolbar {
-            ToolbarItem(placement: .topBarLeading) { seasonMenu }
+            // The season pill draws its own red capsule; iOS 26 wraps toolbar
+            // items in a Liquid Glass capsule of their own, which stacks into a
+            // washed-out double-pill. Hide the system one where it exists.
+            if #available(iOS 26.0, *) {
+                ToolbarItem(placement: .topBarLeading) { seasonMenu }
+                    .sharedBackgroundVisibility(.hidden)
+            } else {
+                ToolbarItem(placement: .topBarLeading) { seasonMenu }
+            }
             ToolbarItem(placement: .principal) { modeMenu }
         }
         // Contextual past-season pitches route through the low-friction

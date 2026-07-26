@@ -45,7 +45,7 @@ struct RootTabView: View {
                         }
                     }
                 )
-                    .navigationTitle("About")
+                    .navigationTitle("Settings")
                     .navigationBarTitleDisplayMode(.inline)
                     .modifier(SavantNavBar())
                     .toolbar {
@@ -115,27 +115,84 @@ struct RootTabView: View {
         showReviewPrompt = true
     }
 
+    /// Hand-rolled tab bar rather than `TabView`.
+    ///
+    /// On iOS 26 a `TabView` always draws its own Liquid Glass "platter" behind
+    /// the items, and `.toolbarBackground(.hidden, for: .tabBar)` is a no-op
+    /// against it — which is what made the bar read as a gray box sitting on
+    /// the canvas. Owning the bar outright means there is no system background
+    /// to fight: the capsule below is the only chrome drawn.
+    ///
+    /// Each tab stays alive and toggles visibility (matching Vitals' MainTabView)
+    /// so navigation stacks and scroll positions survive switching. The inactive
+    /// tabs are hidden from VoiceOver as well as from sight — at `opacity(0)`
+    /// they'd otherwise still be reachable via the rotor.
     private var tabView: some View {
-        // iOS 26 renders a Liquid Glass floating tab bar. We deliberately do
-        // NOT adopt `.tabBarMinimizeBehavior` — the collapse-on-scroll felt
-        // unpredictable, so the bar stays put at all times.
-        TabView(selection: $selection) {
-            statsTab
-                .tabItem { Label("Stats", systemImage: "chart.bar.fill") }
-                .tag(0)
+        ZStack(alignment: .bottom) {
+            ForEach(Tab.allCases) { tab in
+                tabContent(tab)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .opacity(selection == tab.rawValue ? 1 : 0)
+                    .allowsHitTesting(selection == tab.rawValue)
+                    .accessibilityHidden(selection != tab.rawValue)
+            }
 
-            teamsTab
-                .tabItem { Label("Teams", systemImage: "shield.lefthalf.filled") }
-                .tag(1)
-
-            compareTab
-                .tabItem { Label("Compare", systemImage: "arrow.left.arrow.right") }
-                .tag(2)
+            floatingTabBar
         }
-        // The system draws a gray glass "platter" behind the bar that reads as a
-        // boxed border over the flat canvas. Hide it so the bar items float
-        // directly on the page.
-        .toolbarBackground(.hidden, for: .tabBar)
+        .ignoresSafeArea(edges: .bottom)
+    }
+
+    private enum Tab: Int, CaseIterable, Identifiable {
+        case stats, teams, compare
+
+        var id: Int { rawValue }
+
+        var title: String {
+            switch self {
+            case .stats: return "Stats"
+            case .teams: return "Teams"
+            case .compare: return "Compare"
+            }
+        }
+
+        var icon: String {
+            switch self {
+            case .stats: return "chart.bar.fill"
+            case .teams: return "shield.lefthalf.filled"
+            case .compare: return "arrow.left.arrow.right"
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func tabContent(_ tab: Tab) -> some View {
+        switch tab {
+        case .stats: statsTab
+        case .teams: teamsTab
+        case .compare: compareTab
+        }
+    }
+
+    private var floatingTabBar: some View {
+        HStack(spacing: 0) {
+            ForEach(Tab.allCases) { tab in
+                TabBarButton(
+                    icon: tab.icon,
+                    label: tab.title,
+                    isSelected: selection == tab.rawValue
+                ) {
+                    guard selection != tab.rawValue else { return }
+                    selection = tab.rawValue
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                }
+            }
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 6)
+        .background(.ultraThinMaterial.opacity(0.8), in: Capsule())
+        .overlay(Capsule().stroke(SavantPalette.hairline, lineWidth: 0.5))
+        .shadow(color: .black.opacity(0.10), radius: 12, y: 4)
+        .padding(.bottom, 12)
     }
 
     private var statsTab: some View {
@@ -144,7 +201,7 @@ struct RootTabView: View {
                 .navigationTitle("Stats")
                 .navigationBarTitleDisplayMode(.inline)
                 .modifier(SavantNavBar())
-                .modifier(ProToolbarButton())
+                .modifier(HomeTabToolbar(showingSettings: $showingAbout))
                 .modifier(StandardDestinations(viewModel: viewModel))
         }
     }
@@ -155,7 +212,7 @@ struct RootTabView: View {
                 .navigationTitle("Teams")
                 .navigationBarTitleDisplayMode(.inline)
                 .modifier(SavantNavBar())
-                .modifier(ProToolbarButton())
+                .modifier(HomeTabToolbar(showingSettings: $showingAbout))
                 .modifier(StandardDestinations(viewModel: viewModel))
         }
     }
@@ -169,10 +226,43 @@ struct RootTabView: View {
                 .navigationTitle("Compare")
                 .navigationBarTitleDisplayMode(.inline)
                 .modifier(SavantNavBar())
-                .modifier(ProToolbarButton())
+                .modifier(HomeTabToolbar(showingSettings: $showingAbout))
         }
     }
 
+}
+
+/// One item in the hand-rolled floating tab bar. The selected pill uses the
+/// Savant red at low opacity rather than a filled capsule so the bar stays
+/// light over whatever content scrolls beneath it.
+private struct TabBarButton: View {
+    let icon: String
+    let label: String
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 3) {
+                Image(systemName: icon)
+                    .font(.system(size: 17, weight: .semibold))
+                Text(label)
+                    .font(SavantType.micro)
+                    .tracking(0.3)
+                    .fontWeight(.semibold)
+            }
+            .foregroundStyle(isSelected ? SavantPalette.savantRed : SavantPalette.inkSecondary)
+            .frame(width: 84, height: 44)
+            .background(
+                isSelected ? SavantPalette.savantRed.opacity(0.12) : .clear,
+                in: Capsule()
+            )
+        }
+        .buttonStyle(.plain)
+        .animation(.easeInOut(duration: 0.2), value: isSelected)
+        .accessibilityLabel(label)
+        .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : [.isButton])
+    }
 }
 
 private struct SavantNavBar: ViewModifier {
@@ -184,8 +274,17 @@ private struct SavantNavBar: ViewModifier {
     }
 }
 
-private struct ProToolbarButton: ViewModifier {
+/// Trailing toolbar group shared by the three home tabs: a settings gear, then
+/// the upgrade CTA when the user isn't subscribed.
+///
+/// The gear is the only entry point to Settings that isn't buried — it used to
+/// live only in a link under the bottom of the leaderboard, which nobody
+/// scrolls to. Trailing rather than leading because Stats already owns the
+/// leading slot with its season pill, and a control that moves between tabs
+/// isn't an anchor.
+private struct HomeTabToolbar: ViewModifier {
     @EnvironmentObject private var store: StoreService
+    @Binding var showingSettings: Bool
     @State private var paywallTrigger: PaywallTrigger?
 
     /// Yellow crown + short action verb on a filled pill. The old version was
@@ -202,29 +301,52 @@ private struct ProToolbarButton: ViewModifier {
         return "Upgrade"
     }
 
+    private var upgradeButton: some View {
+        Button {
+            paywallTrigger = store.defaultUpgradeTrigger
+        } label: {
+            HStack(spacing: 4) {
+                Image(systemName: "crown.fill")
+                    .font(.system(size: 10, weight: .bold))
+                Text(ctaLabel)
+                    .font(SavantType.micro)
+                    .tracking(0.4)
+                    .fontWeight(.bold)
+            }
+            .foregroundStyle(SavantPalette.savantNavy)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
+            .background(Color.yellow)
+            .clipShape(Capsule())
+        }
+        .accessibilityLabel("\(ctaLabel) — unlock all features")
+    }
+
+    private var settingsButton: some View {
+        Button {
+            showingSettings = true
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        } label: {
+            Image(systemName: "gearshape.fill")
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(.white)
+        }
+        .accessibilityLabel("Settings")
+    }
+
     func body(content: Content) -> some View {
         content
             .toolbar {
+                // Declared before the CTA so the gear sits to its left.
+                ToolbarItem(placement: .topBarTrailing) { settingsButton }
                 if !store.isPro {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button {
-                            paywallTrigger = store.defaultUpgradeTrigger
-                        } label: {
-                            HStack(spacing: 4) {
-                                Image(systemName: "crown.fill")
-                                    .font(.system(size: 10, weight: .bold))
-                                Text(ctaLabel)
-                                    .font(SavantType.micro)
-                                    .tracking(0.4)
-                                    .fontWeight(.bold)
-                            }
-                            .foregroundStyle(SavantPalette.savantNavy)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 5)
-                            .background(Color.yellow)
-                            .clipShape(Capsule())
-                        }
-                        .accessibilityLabel("\(ctaLabel) — unlock all features")
+                    // The yellow pill is its own capsule; suppress the iOS 26
+                    // Liquid Glass container so it doesn't read as a double-pill.
+                    if #available(iOS 26.0, *) {
+                        ToolbarItem(placement: .topBarTrailing) { upgradeButton }
+                            .sharedBackgroundVisibility(.hidden)
+                    } else {
+                        ToolbarItem(placement: .topBarTrailing) { upgradeButton }
                     }
                 }
             }

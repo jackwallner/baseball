@@ -10,15 +10,40 @@ struct TeamView: View {
     @State private var selectedTab: TeamTab = .percentiles
     @State private var searchText = ""
     @State private var isSearching = false
-    // Default to Hitting so the roster always shows a meaningful sort metric.
-    @State private var selectedCategory: MetricCategory? = .hitting
+    // Defaults to All (nil). Hitting used to be the default, which quietly hid
+    // most of the roster: a Hitting filter drops every pitcher and also every
+    // position player Savant hasn't given hitting percentiles to, so a 40-man
+    // roster rendered as ~10 rows with no hint that anyone was missing.
+    @State private var selectedCategory: MetricCategory? = nil
     @State private var sortDescending = true
     @State private var lastDefaultedSortKey: String? = nil
     @State private var showingTrial = false
+    @State private var rosterSide: RosterSide = .all
+    @State private var qualifierLevel: DashboardViewModel.QualifierLevel = .all
 
     enum TeamTab: String, CaseIterable {
         case percentiles = "Percentiles"
         case roster = "Roster"
+    }
+
+    /// Which half of the roster to show. Independent of the metric category —
+    /// a user looking for a specific reliever shouldn't have to know that
+    /// "Pitching" is also the name of a percentile group.
+    enum RosterSide: String, CaseIterable, Identifiable {
+        case all = "All"
+        case hitters = "Hitters"
+        case pitchers = "Pitchers"
+
+        var id: String { rawValue }
+
+        func matches(_ player: Player) -> Bool {
+            let isPitcher = player.playerType?.lowercased() == "pitcher"
+            switch self {
+            case .all: return true
+            case .hitters: return !isPitcher
+            case .pitchers: return isPitcher
+            }
+        }
     }
 
     private var displaySeason: Int {
@@ -40,7 +65,9 @@ struct TeamView: View {
     }
 
     private var sortLabel: String {
-        if selectedCategory == nil { return "xwOBA" }
+        // "All" ranks hitters and pitchers together, which only works on
+        // percentile — see LeaderboardTableRow.showsPercentileValue.
+        if selectedCategory == nil { return "PCTL" }
         return sortMetric?.label ?? "Top Category"
     }
 
@@ -65,25 +92,55 @@ struct TeamView: View {
     private var filteredPlayers: [Player] {
         let bySearch = searchText.isEmpty ? players : players.filter {
             $0.name.localizedCaseInsensitiveContains(searchText)
+                || $0.displayPosition.localizedCaseInsensitiveContains(searchText)
         }
-        let byType = bySearch.filter { $0.matchesPlayerType(for: selectedCategory) }
+        let bySide = bySearch.filter { rosterSide.matches($0) }
+        let byType = bySide.filter { $0.matchesPlayerType(for: selectedCategory) }
         let byCategory = selectedCategory == nil
             ? byType
             : byType.filter { p in p.metrics.contains { $0.category == selectedCategory } }
+        let byQualifier = byCategory.filter { isQualified($0) }
         guard sortMetric != nil else {
-            return byCategory.sorted {
+            return byQualifier.sorted {
                 sortDescending ? fallbackPercentile($0) > fallbackPercentile($1) : fallbackPercentile($0) < fallbackPercentile($1)
             }
         }
-        let ranked = byCategory.filter { rawValue($0) != nil }.sorted {
+        let ranked = byQualifier.filter { rawValue($0) != nil }.sorted {
             let v1 = rawValue($0) ?? 0
             let v2 = rawValue($1) ?? 0
             return sortDescending ? v1 > v2 : v1 < v2
         }
-        let tail = byCategory.filter { rawValue($0) == nil }.sorted {
+        let tail = byQualifier.filter { rawValue($0) == nil }.sorted {
             fallbackPercentile($0) > fallbackPercentile($1)
         }
         return ranked + tail
+    }
+
+    /// Roster-local qualifier. Mirrors DashboardViewModel.isQualified but reads
+    /// this view's own picker — the roster defaults to All so a bench bat or a
+    /// September call-up still appears.
+    private func isQualified(_ player: Player) -> Bool {
+        switch qualifierLevel {
+        case .all:
+            return true
+        case .qualified:
+            // Savant only assigns percentiles above its own thresholds, so
+            // "has a percentile here" is the authoritative signal.
+            if let selectedCategory {
+                return player.metrics.contains { $0.category == selectedCategory }
+            }
+            return !player.metrics.isEmpty
+        case .any:
+            let stats = player.standardStats ?? []
+            let value: (Set<String>) -> Double = { labels in
+                guard let stat = stats.first(where: { labels.contains($0.label.uppercased()) }) else { return 0 }
+                return Double(stat.value.filter { "0123456789.".contains($0) }) ?? 0
+            }
+            if player.playerType?.lowercased() == "pitcher" {
+                return value(["IP"]) >= DashboardViewModel.QualifierLevel.any.minIP
+            }
+            return value(["PA", "AB"]) >= Double(DashboardViewModel.QualifierLevel.any.minPA)
+        }
     }
 
     var body: some View {
@@ -114,7 +171,13 @@ struct TeamView: View {
         .toolbar {
             ToolbarItem(placement: .principal) { teamSwitcherMenu }
             if let viewModel {
-                ToolbarItem(placement: .topBarTrailing) { navSeasonMenu(viewModel: viewModel) }
+                // Red season pill draws its own capsule — see StatsView.
+                if #available(iOS 26.0, *) {
+                    ToolbarItem(placement: .topBarTrailing) { navSeasonMenu(viewModel: viewModel) }
+                        .sharedBackgroundVisibility(.hidden)
+                } else {
+                    ToolbarItem(placement: .topBarTrailing) { navSeasonMenu(viewModel: viewModel) }
+                }
             }
         }
         .onAppear { applyDefaultDirectionIfMetricChanged() }
@@ -179,7 +242,7 @@ struct TeamView: View {
 
     private var rosterContent: some View {
         VStack(spacing: 0) {
-            CategoryFilter(selectedCategory: $selectedCategory)
+            CategoryFilter(selectedCategory: $selectedCategory, showAllOption: true)
                 .padding(.horizontal, 12)
                 .padding(.top, 12)
 
@@ -249,9 +312,93 @@ struct TeamView: View {
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Search")
+
+            rosterFiltersMenu
         }
         .padding(.horizontal, 12)
         .padding(.top, 12)
+    }
+
+    /// Mirrors the Stats page's Filters menu so the two leaderboards behave the
+    /// same way. Hitters/Pitchers is the roster-specific addition — it's the
+    /// question people actually ask of a team page.
+    private var rosterFiltersMenu: some View {
+        Menu {
+            Section("Show") {
+                ForEach(RosterSide.allCases) { side in
+                    Button {
+                        rosterSide = side
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    } label: {
+                        if side == rosterSide {
+                            Label(side.rawValue, systemImage: "checkmark")
+                        } else {
+                            Text(side.rawValue)
+                        }
+                    }
+                }
+            }
+
+            Section("Minimum playing time") {
+                ForEach(DashboardViewModel.QualifierLevel.allCases) { level in
+                    Button {
+                        qualifierLevel = level
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    } label: {
+                        if level == qualifierLevel {
+                            Label("\(level.rawValue) · \(level.description)", systemImage: "checkmark")
+                        } else {
+                            Text("\(level.rawValue) · \(level.description)")
+                        }
+                    }
+                }
+            }
+
+            Section("Direction") {
+                Button {
+                    if !sortDescending { sortDescending = true }
+                } label: {
+                    if sortDescending {
+                        Label("Highest first", systemImage: "checkmark")
+                    } else {
+                        Text("Highest first")
+                    }
+                }
+                Button {
+                    if sortDescending { sortDescending = false }
+                } label: {
+                    if !sortDescending {
+                        Label("Lowest first", systemImage: "checkmark")
+                    } else {
+                        Text("Lowest first")
+                    }
+                }
+            }
+        } label: {
+            HStack(spacing: 4) {
+                Image(systemName: "line.3.horizontal.decrease.circle")
+                    .font(.system(size: 11, weight: .semibold))
+                Text("Filters")
+                    .font(SavantType.micro)
+                    .tracking(0.4)
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 9, weight: .bold))
+            }
+            .foregroundStyle(isFiltered ? .white : SavantPalette.inkSecondary)
+            .padding(.horizontal, 10)
+            .frame(height: 30)
+            .background(isFiltered ? SavantPalette.savantRed : SavantPalette.surface)
+            .clipShape(Capsule())
+            .overlay(Capsule().stroke(isFiltered ? Color.clear : SavantPalette.hairline, lineWidth: 0.5))
+        }
+        .menuOrder(.fixed)
+        .accessibilityLabel("Filters")
+    }
+
+    /// Highlights the Filters pill whenever something is actually being hidden,
+    /// so a short roster is never a mystery.
+    private var isFiltered: Bool {
+        rosterSide != .all || qualifierLevel != .all || selectedCategory != nil
     }
 
     private var searchRow: some View {
@@ -303,7 +450,8 @@ struct TeamView: View {
                             rank: index + 1,
                             player: player,
                             metricLabel: rowDisplayMetric.label,
-                            metricCategory: rowDisplayMetric.category
+                            metricCategory: rowDisplayMetric.category,
+                            showsPercentileValue: selectedCategory == nil
                         )
                     }
                     .buttonStyle(.plain)
