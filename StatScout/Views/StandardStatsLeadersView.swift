@@ -8,9 +8,24 @@ enum StandardStatCategory: String, CaseIterable {
 struct StandardStatsLeadersView: View {
     @EnvironmentObject private var store: StoreService
     let players: [Player]
-    @State private var selectedCategory: StandardStatCategory = .hitting
-    @State private var selectedStat: String = "AVG"
+    /// Set when arrived at by tapping a specific stat on a player profile, so
+    /// the leaderboard opens on the stat that was tapped rather than AVG.
+    var season: Int? = nil
+    @State private var selectedCategory: StandardStatCategory
+    @State private var selectedStat: String
     @State private var sortDescending = true
+
+    init(
+        players: [Player],
+        initialStat: String = "AVG",
+        initialCategory: StandardStatCategory = .hitting,
+        season: Int? = nil
+    ) {
+        self.players = players
+        self.season = season
+        _selectedCategory = State(initialValue: initialCategory)
+        _selectedStat = State(initialValue: initialStat)
+    }
 
     /// Stats where lower is the better outcome — sort defaults to ascending so the
     /// leader (lowest ERA, fewest losses, etc.) sits at the top.

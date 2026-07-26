@@ -27,6 +27,7 @@ struct PlayerProfileView: View {
     @State private var recentLoading = false
     @State private var recentLoadError: String?
     @State private var recentCurves: LeaguePercentileCurves?
+    @State private var showingSeasonPicker = false
 
     private let profileOpenCountKey = "profileOpenCount"
 
@@ -449,48 +450,43 @@ struct PlayerProfileView: View {
     // MARK: - Cards
 
     private var seasonMenu: some View {
-        let seasons = availablePercentileSeasons
-        return Group {
-            if seasons.count > 1 {
-                Menu {
-                    ForEach(seasons, id: \.self) { season in
-                        let isLocked = season != StatScoutSeason.free && !store.isPro
-                        Button {
-                            if isLocked {
-                                // Explicit tap on a locked season — always answer it.
-                                // PaywallGate only caps automatic pop-ups.
-                                trialPitchTrigger = .lockedSeason(season)
-                            } else {
-                                selectedPercentileSeason = season
-                            }
-                        } label: {
-                            // See StatsView — an HStack row stretches the menu.
-                            if isLocked {
-                                Label(String(season), systemImage: "crown.fill")
-                            } else {
-                                Text(String(season))
-                            }
-                        }
-                    }
-                } label: {
-                    HStack(spacing: 4) {
-                        Text(seasonLabel)
-                            .font(SavantType.micro)
-                            .tracking(0.5)
-                            .foregroundStyle(SavantPalette.inkSecondary)
-                        Image(systemName: "chevron.down")
-                            .font(.system(size: 9, weight: .bold))
-                            .foregroundStyle(SavantPalette.inkSecondary)
-                    }
-                }
-                .menuOrder(.fixed)
-            } else {
+        Button {
+            showingSeasonPicker = true
+        } label: {
+            HStack(spacing: 4) {
                 Text(seasonLabel)
                     .font(SavantType.micro)
                     .tracking(0.5)
                     .foregroundStyle(SavantPalette.inkSecondary)
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 9, weight: .bold))
+                    .foregroundStyle(SavantPalette.inkSecondary)
+            }
+            .fixedSize()
+        }
+        .buttonStyle(.plain)
+        // Same compact popover the Stats and Teams tabs use, so every season
+        // control in the app behaves identically.
+        .popover(isPresented: $showingSeasonPicker, arrowEdge: .bottom) {
+            SeasonPickerPopover(
+                seasons: availablePercentileSeasons,
+                selected: activeSeason ?? StatScoutSeason.current,
+                isLocked: { $0 != StatScoutSeason.free && !store.isPro }
+            ) { season in
+                if season != StatScoutSeason.free && !store.isPro {
+                    // Explicit tap on a locked season — always answer it.
+                    // PaywallGate only caps automatic pop-ups.
+                    trialPitchTrigger = .lockedSeason(season)
+                } else {
+                    selectedPercentileSeason = season
+                    if season < StatScoutSeason.current, !hasLoadedHistorical {
+                        Task { await loadHistorical?() }
+                    }
+                }
             }
         }
+        .accessibilityLabel("Season")
+        .accessibilityValue(seasonLabel)
     }
 
     private var formModePicker: some View {
@@ -725,7 +721,7 @@ struct PlayerProfileView: View {
 
         switch effectiveFormDisplayMode {
         case .season:
-            NavigationLink(value: MetricRoute(label: metric.label, category: metric.category)) {
+            NavigationLink(value: MetricRoute(label: metric.label, category: metric.category, season: activeSeason)) {
                 MetricBar(metric: metric)
                     .padding(.horizontal, SavantGeo.padCard)
                     .padding(.vertical, 12)
@@ -749,7 +745,7 @@ struct PlayerProfileView: View {
             } else if !metric.id.hasPrefix("recent-stub-") {
                 // No game-log data for this metric — fall back to the season bar
                 // so the recent view still shows every percentile bar.
-                NavigationLink(value: MetricRoute(label: metric.label, category: metric.category)) {
+                NavigationLink(value: MetricRoute(label: metric.label, category: metric.category, season: activeSeason)) {
                     MetricBar(metric: metric)
                         .padding(.horizontal, SavantGeo.padCard)
                         .padding(.vertical, 12)
@@ -776,7 +772,7 @@ struct PlayerProfileView: View {
                         )
                 }
             } else {
-                NavigationLink(value: MetricRoute(label: metric.label, category: metric.category)) {
+                NavigationLink(value: MetricRoute(label: metric.label, category: metric.category, season: activeSeason)) {
                     DualMetricBar(
                         season: metric,
                         recent: recentMetric,
@@ -944,14 +940,21 @@ struct PlayerProfileView: View {
 
     private func standardRows(_ metrics: [Metric], startingIndex: Int = 0) -> some View {
         ForEach(Array(metrics.enumerated()), id: \.element.id) { offset, metric in
-            MetricBar(metric: metric)
-                .padding(.horizontal, SavantGeo.padCard)
-                .padding(.vertical, 12)
-                .background((startingIndex + offset) % 2 == 0 ? SavantPalette.surface : SavantPalette.surfaceAlt)
-                .overlay(
-                    Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline),
-                    alignment: .bottom
-                )
+            NavigationLink(value: StandardStatRoute(
+                stat: metric.label,
+                category: isPitcher ? .pitching : .hitting,
+                season: activeSeason
+            )) {
+                MetricBar(metric: metric)
+                    .padding(.horizontal, SavantGeo.padCard)
+                    .padding(.vertical, 12)
+                    .background((startingIndex + offset) % 2 == 0 ? SavantPalette.surface : SavantPalette.surfaceAlt)
+                    .overlay(
+                        Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline),
+                        alignment: .bottom
+                    )
+            }
+            .buttonStyle(.plain)
         }
     }
 

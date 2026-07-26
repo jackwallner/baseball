@@ -214,6 +214,15 @@ final class DashboardViewModel {
         return allSeasonPlayers.filter { seenIds.insert($0.playerId).inserted }
     }
 
+    /// Unique players for an arbitrary season, not just the selected one.
+    /// Drill-down leaderboards opened from a player profile need the season
+    /// that profile is showing, which can differ from `selectedSeason`.
+    func players(forSeason season: Int) -> [Player] {
+        let all = playerHistories.values.flatMap { $0 }.filter { $0.season == season }
+        var seen = Set<Int>()
+        return all.filter { seen.insert($0.playerId).inserted }
+    }
+
     var filteredPlayers: [Player] {
         seasonPlayers.filter { player in
             let matchesSearch = searchText.isEmpty
