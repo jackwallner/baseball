@@ -214,6 +214,67 @@ final class DashboardViewModel {
         return allSeasonPlayers.filter { seenIds.insert($0.playerId).inserted }
     }
 
+    // MARK: - Recent form
+
+    /// Rolling windows keyed by length, cached per season so flipping between
+    /// 7 / 15 / 30 doesn't refetch what's already in hand.
+    var recentFormByWindow: [Int: [Int: RecentForm]] = [:]
+    var recentFormLoadingWindows: Set<Int> = []
+    var recentFormError: String?
+    private var recentFormSeason: Int?
+
+    /// The window the Stats leaderboard and trend arrows read from.
+    var recentWindow: RecentWindow = .fortnight
+
+    /// True while the leaderboard is showing recent form rather than season
+    /// totals. Pro-gated at the call site — free users get a blurred teaser.
+    var showingRecent = false
+
+    func recentForm(for playerId: Int, window: RecentWindow? = nil) -> RecentForm? {
+        recentFormByWindow[(window ?? recentWindow).rawValue]?[playerId]
+    }
+
+    var isRecentFormLoading: Bool {
+        recentFormLoadingWindows.contains(recentWindow.rawValue)
+    }
+
+    /// The last game date covered by the loaded window, for honest labelling.
+    var recentFormAsOf: Date? {
+        recentFormByWindow[recentWindow.rawValue]?.values.compactMap(\.asOf).max()
+    }
+
+    func loadRecentFormIfNeeded(window: RecentWindow? = nil) async {
+        let target = window ?? recentWindow
+        // Season changed under us — the cache describes a different year.
+        if recentFormSeason != selectedSeason {
+            recentFormByWindow.removeAll()
+            recentFormSeason = selectedSeason
+        }
+        guard recentFormByWindow[target.rawValue] == nil,
+              !recentFormLoadingWindows.contains(target.rawValue) else { return }
+
+        recentFormLoadingWindows.insert(target.rawValue)
+        recentFormError = nil
+        do {
+            let rows = try await provider.fetchRecentForm(
+                season: selectedSeason,
+                windowDays: target.rawValue
+            )
+            // A two-way player has a row per side; the leaderboard keys by
+            // player, so keep whichever side has the larger sample.
+            var byPlayer: [Int: RecentForm] = [:]
+            for row in rows {
+                if let existing = byPlayer[row.playerId],
+                   existing.plateAppearances >= row.plateAppearances { continue }
+                byPlayer[row.playerId] = row
+            }
+            recentFormByWindow[target.rawValue] = byPlayer
+        } catch {
+            recentFormError = "Couldn't load recent form. Pull to refresh."
+        }
+        recentFormLoadingWindows.remove(target.rawValue)
+    }
+
     /// Unique players for an arbitrary season, not just the selected one.
     /// Drill-down leaderboards opened from a player profile need the season
     /// that profile is showing, which can differ from `selectedSeason`.

@@ -6,6 +6,7 @@ protocol StatcastProviding: Sendable {
     func fetchCurrentPlayers() async throws -> [Player]
     func fetchGameLogs(playerId: Int, season: Int) async throws -> [PlayerGameLog]
     func fetchTeamGameLogs(team: String, season: Int, sinceDate: Date) async throws -> [PlayerGameLog]
+    func fetchRecentForm(season: Int, windowDays: Int) async throws -> [RecentForm]
 }
 
 struct StatcastAPI: StatcastProviding {
@@ -96,6 +97,44 @@ struct StatcastAPI: StatcastProviding {
         return all
     }
 
+    /// Every player's rolling window for one length — the whole league in a
+    /// single small fetch (~440 KB), which is what makes ranking by recent form
+    /// viable at all. Aggregating the raw game logs client-side would be ~2.4 MB
+    /// and a multi-second wait before anything could be sorted.
+    func fetchRecentForm(season: Int, windowDays: Int) async throws -> [RecentForm] {
+        var all: [RecentForm] = []
+        let pageSize = 1000
+        var offset = 0
+        while true {
+            let endpoint = baseURL
+                .appending(path: "rest/v1/player_recent_form")
+                .appending(queryItems: [
+                    URLQueryItem(name: "select", value: "*"),
+                    URLQueryItem(name: "season", value: "eq.\(season)"),
+                    URLQueryItem(name: "window_days", value: "eq.\(windowDays)"),
+                    URLQueryItem(name: "order", value: "player_id.asc"),
+                    URLQueryItem(name: "limit", value: String(pageSize)),
+                    URLQueryItem(name: "offset", value: String(offset)),
+                ])
+            var request = URLRequest(url: endpoint, cachePolicy: .reloadIgnoringLocalCacheData)
+            request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+            request.setValue(apiKey, forHTTPHeaderField: "apikey")
+            request.setValue("application/json", forHTTPHeaderField: "Accept")
+
+            let (data, response) = try await URLSession.shared.data(for: request)
+            guard let httpResponse = response as? HTTPURLResponse,
+                  200..<300 ~= httpResponse.statusCode || httpResponse.statusCode == 206 else {
+                throw URLError(.badServerResponse)
+            }
+
+            let rows = try JSONDecoder.statScout.decode([Lenient<RecentForm>].self, from: data)
+            all.append(contentsOf: rows.compactMap(\.value))
+            if rows.count < pageSize { break }
+            offset += pageSize
+        }
+        return all
+    }
+
     private func fetchPlayers(seasonFilter: String) async throws -> [Player] {
         var all: [Player] = []
         let pageSize = 1000
@@ -170,6 +209,10 @@ struct PreviewStatcastAPI: StatcastProviding {
     }
 
     func fetchTeamGameLogs(team: String, season: Int, sinceDate: Date) async throws -> [PlayerGameLog] {
+        []
+    }
+
+    func fetchRecentForm(season: Int, windowDays: Int) async throws -> [RecentForm] {
         []
     }
 }
