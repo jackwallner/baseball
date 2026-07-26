@@ -50,8 +50,22 @@ def test_build_metrics_with_values_uses_actual_value_when_available():
     ev = [m for m in metrics if m["label"] == "EV"]
     assert len(ev) == 1
     assert ev[0]["value"] == "94.5 mph"
-    assert ev[0]["actual_value"] == "94.5 mph"
-    assert ev[0]["display_value"] == "94.5 mph · 92nd"
+    assert ev[0]["percentile"] == 92
+
+
+def test_metrics_omit_the_duplicate_value_fields():
+    """actual_value duplicated value and display_value was derivable from it.
+
+    The app never read either — Metric decodes id/label/value/percentile/
+    category — and together they were ~16% of every cold-launch payload.
+    """
+    row = pd.Series({"player_id": 1, "player_name": "Test", "exit_velocity": 92})
+    store = MagicMock(spec=ingest.ActualValueStore)
+    store.get_value.return_value = "94.5 mph"
+    metrics = ingest.build_metrics_with_values(row, "batter", ingest.BATTER_METRICS, 1, store)
+    for metric in metrics:
+        assert "actual_value" not in metric
+        assert "display_value" not in metric
 
 
 def test_merge_player_row_maps_team(sample_batter_row):
@@ -225,8 +239,9 @@ def test_add_calculated_rates_assigns_true_percentiles():
     # No hardcoded zeros — all should be > 0.
     for m in list(by_pid_k.values()) + list(by_pid_bb.values()):
         assert m["percentile"] > 0
-        assert "display_value" in m
-        assert any(suf in m["display_value"] for suf in ("st", "nd", "rd", "th"))
+        # display_value is no longer stored — see
+        # test_metrics_omit_the_duplicate_value_fields.
+        assert "display_value" not in m
 
 
 def test_ordinal_suffix():

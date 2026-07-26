@@ -589,14 +589,16 @@ def build_metrics_with_values(
         if not actual_value:
             continue
 
+        # `actual_value` duplicated `value` verbatim and `display_value` was
+        # "value · Nth", derivable from the two fields beside it. Together they
+        # were ~16% of every cold-launch payload for data the app never reads —
+        # Metric decodes id/label/value/percentile/category only.
         metric = {
             "id": f"{player_type}-{player_id}-{key}",
             "label": label,
             "value": actual_value,
             "percentile": percentile,
             "category": category,
-            "actual_value": actual_value,
-            "display_value": format_percentile(actual_value, percentile),
         }
 
         metrics.append(metric)
@@ -912,22 +914,19 @@ def _add_calculated_rates(players: dict[int, dict], qualified_pids: set[int]) ->
             if "K%" in existing_metrics:
                 metric = existing_metrics["K%"]
                 metric["value"] = k_value
-                metric["actual_value"] = k_value
+                metric.pop("actual_value", None)
+                metric.pop("display_value", None)
                 pct = metric.get("percentile") or calc_k_pct
                 if pct:
                     metric["percentile"] = pct
-                    metric["display_value"] = format_percentile(k_value, pct)
             else:
                 metric = {
                     "id": f"{prefix}-{pid}-k_percent",
                     "label": "K%",
                     "value": k_value,
-                    "actual_value": k_value,
                     "percentile": calc_k_pct,
                     "category": category,
                 }
-                if calc_k_pct:
-                    metric["display_value"] = format_percentile(k_value, calc_k_pct)
                 player["metrics"].append(metric)
 
         if r["bb_rate"] is not None:
@@ -937,22 +936,19 @@ def _add_calculated_rates(players: dict[int, dict], qualified_pids: set[int]) ->
             if "BB%" in existing_metrics:
                 metric = existing_metrics["BB%"]
                 metric["value"] = bb_value
-                metric["actual_value"] = bb_value
+                metric.pop("actual_value", None)
+                metric.pop("display_value", None)
                 pct = metric.get("percentile") or calc_bb_pct
                 if pct:
                     metric["percentile"] = pct
-                    metric["display_value"] = format_percentile(bb_value, pct)
             else:
                 metric = {
                     "id": f"{prefix}-{pid}-bb_percent",
                     "label": "BB%",
                     "value": bb_value,
-                    "actual_value": bb_value,
                     "percentile": calc_bb_pct,
                     "category": category,
                 }
-                if calc_bb_pct:
-                    metric["display_value"] = format_percentile(bb_value, calc_bb_pct)
                 player["metrics"].append(metric)
 
 
