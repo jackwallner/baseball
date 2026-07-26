@@ -838,10 +838,80 @@ struct PlayerProfileView: View {
         recentLoading = false
     }
 
+    /// Traditional stats where a lower number is the better outcome, so the
+    /// percentile has to be inverted before it's drawn.
+    ///
+    /// This has to be per-side: the same label means opposite things. A
+    /// batter's HR, R, H and BB are all good; a pitcher's are runs and homers
+    /// surrendered. A batter's SO is bad, a pitcher's is the whole point.
+    private static func lowerIsBetterStandard(isPitcher: Bool) -> Set<String> {
+        isPitcher
+            ? ["ERA", "WHIP", "L", "H", "R", "ER", "HR", "BB", "BB/9",
+               // On a pitcher's line these are what hitters did against them.
+               "AVG", "OBP", "SLG", "OPS"]
+            : ["SO", "CS"]
+    }
+
+    /// Counting stats. Ranking these is honest but playing-time driven — a
+    /// bench bat's 2 HR isn't a talent signal — so they're grouped separately
+    /// from the rate stats and captioned as volume.
+    private static let countingStats: Set<String> = [
+        "HR", "R", "RBI", "H", "2B", "3B", "BB", "SO", "SB", "CS", "PA", "AB",
+        "W", "L", "SV", "IP", "ER", "QS", "G", "GS", "BF",
+    ]
+
+    /// Percentile rank for a traditional stat against the league.
+    ///
+    /// Savant publishes percentiles for its Statcast metrics but not for the
+    /// traditional line, so these are computed here — a player's position in
+    /// the distribution of every same-type player who has the stat. Returns nil
+    /// below a usable pool size rather than drawing a bar off five samples.
+    private func standardStatPercentile(label: String, value: Double) -> Int? {
+        let key = label.uppercased()
+        let isPitcherPool = isPitcher
+        let values: [Double] = allPlayers.compactMap { other in
+            let otherIsPitcher = other.playerType?.lowercased() == "pitcher"
+            guard otherIsPitcher == isPitcherPool else { return nil }
+            guard let stat = other.standardStats?.first(where: { $0.label.uppercased() == key })
+            else { return nil }
+            return DashboardViewModel.rawNumeric(stat.value)
+        }
+        guard values.count >= 20 else { return nil }
+
+        // Midpoint rank, so a cluster of identical values lands mid-band
+        // instead of all sharing the top of it.
+        let below = values.reduce(0) { $0 + ($1 < value ? 1 : 0) }
+        let equal = values.reduce(0) { $0 + ($1 == value ? 1 : 0) }
+        let raw = (Double(below) + Double(equal) / 2) / Double(values.count) * 100
+        let oriented = Self.lowerIsBetterStandard(isPitcher: isPitcher).contains(key) ? 100 - raw : raw
+        return max(1, min(100, Int(oriented.rounded())))
+    }
+
+    /// Standard stats rendered as the same `Metric` the percentile card uses,
+    /// so both tabs read on one ruler. Stats with too small a league pool keep
+    /// their value but get no bar.
+    private func standardMetrics(counting: Bool) -> [Metric] {
+        (displayedPlayer.standardStats ?? [])
+            .filter { Self.countingStats.contains($0.label.uppercased()) == counting }
+            .map { stat in
+                let pct = DashboardViewModel.rawNumeric(stat.value)
+                    .flatMap { standardStatPercentile(label: stat.label, value: $0) }
+                return Metric(
+                    id: "std-\(stat.label)",
+                    label: stat.label.uppercased(),
+                    value: stat.value,
+                    percentile: pct ?? 0,
+                    category: isPitcher ? .pitching : .hitting
+                )
+            }
+    }
+
     private var standardStatsGridCard: some View {
         VStack(spacing: 0) {
+            // The season already appears in the picker on the right; printing
+            // it in the title too was saying it twice.
             SavantSectionBar(
-                title: "STANDARD STATS · \(seasonLabel)",
+                title: "STANDARD STATS",
                 trailing: AnyView(seasonMenu)
             )
 
@@ -853,36 +923,17 @@ struct PlayerProfileView: View {
                 )
                 .padding(.vertical, 24)
             } else {
-                let stats = displayedPlayer.standardStats ?? []
-                LazyVGrid(
-                    columns: [
-                        GridItem(.flexible(), spacing: 1),
-                        GridItem(.flexible(), spacing: 1),
-                        GridItem(.flexible(), spacing: 1)
-                    ],
-                    spacing: 1
-                ) {
-                    ForEach(stats) { stat in
-                        VStack(spacing: 4) {
-                            Text(stat.label.uppercased())
-                                .font(SavantType.micro)
-                                .tracking(0.4)
-                                .foregroundStyle(SavantPalette.inkTertiary)
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.7)
-                            Text(stat.value)
-                                .font(SavantType.statMed)
-                                .foregroundStyle(SavantPalette.ink)
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.7)
-                                .monospacedDigit()
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 10)
-                        .background(SavantPalette.surface)
-                    }
+                let rates = standardMetrics(counting: false)
+                let counts = standardMetrics(counting: true)
+
+                if !rates.isEmpty {
+                    SavantSubSectionBar(title: "RATE")
+                    standardRows(rates)
                 }
-                .background(SavantPalette.divider)
+                if !counts.isEmpty {
+                    SavantSubSectionBar(title: "VOLUME")
+                    standardRows(counts, startingIndex: rates.count)
+                }
             }
         }
         .background(SavantPalette.surface)
@@ -891,6 +942,19 @@ struct PlayerProfileView: View {
             RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
                 .stroke(SavantPalette.hairline, lineWidth: 0.5)
         )
+    }
+
+    private func standardRows(_ metrics: [Metric], startingIndex: Int = 0) -> some View {
+        ForEach(Array(metrics.enumerated()), id: \.element.id) { offset, metric in
+            MetricBar(metric: metric)
+                .padding(.horizontal, SavantGeo.padCard)
+                .padding(.vertical, 12)
+                .background((startingIndex + offset) % 2 == 0 ? SavantPalette.surface : SavantPalette.surfaceAlt)
+                .overlay(
+                    Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline),
+                    alignment: .bottom
+                )
+        }
     }
 
 }
