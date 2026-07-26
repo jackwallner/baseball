@@ -64,14 +64,11 @@ struct RecentFormCard: View {
 
     private func rebuildCurves() {
         guard store.isPro else { return }
-        // Pitchers' season exit velocity is labeled "Avg EV Against", not "EV".
-        let evLabel = isPitcher ? "Avg EV Against" : "EV"
-        var labels = ["xwOBA", "Barrel%", "Hard-Hit%", evLabel, "K%", "BB%"]
-        if !isPitcher { labels.append("Max EV") }
         curves = LeaguePercentileCurves(
             players: leaguePlayers,
             playerType: player.playerType ?? (isPitcher ? "pitcher" : "batter"),
-            labels: labels
+            labels: Array(Set(Self.recentSpecs(isPitcher: isPitcher).map(\.seasonLabel))),
+            category: isPitcher ? .pitching : .hitting
         )
     }
 
@@ -282,25 +279,7 @@ struct RecentFormCard: View {
     /// curve so we never draw a bar we can't place.
     private func recentMetricRows(window w: RecentFormWindow) -> [Metric] {
         let category: MetricCategory = isPitcher ? .pitching : .hitting
-        let specs: [(key: String, label: String, seasonLabel: String, format: String)] = isPitcher
-            ? [
-                ("opp_xwoba",       "xwOBA",       "xwOBA",     "%.3f"),
-                ("k_pct",           "K%",          "K%",        "%.1f%%"),
-                ("bb_pct",          "BB%",         "BB%",       "%.1f%%"),
-                ("opp_hardhit_pct", "Hard-Hit%",   "Hard-Hit%", "%.1f%%"),
-                ("opp_barrel_pct",  "Barrel%",     "Barrel%",   "%.1f%%"),
-                ("opp_ev_avg",      "EV",          "Avg EV Against", "%.1f mph"),
-            ]
-            : [
-                ("xwoba",       "xwOBA",     "xwOBA",     "%.3f"),
-                ("barrel_pct",  "Barrel%",   "Barrel%",   "%.1f%%"),
-                ("hardhit_pct", "Hard-Hit%", "Hard-Hit%", "%.1f%%"),
-                ("ev_avg",      "EV",        "EV",        "%.1f mph"),
-                ("k_pct",       "K%",        "K%",        "%.1f%%"),
-                ("bb_pct",      "BB%",       "BB%",       "%.1f%%"),
-            ]
-
-        return specs.compactMap { spec -> Metric? in
+        return Self.recentSpecs(isPitcher: isPitcher).compactMap { spec -> Metric? in
             guard let v = w.metrics[spec.key],
                   let pct = curves?.curve(for: spec.seasonLabel)?.percentile(for: v) else { return nil }
             return Metric(
@@ -311,6 +290,41 @@ struct RecentFormCard: View {
                 category: category
             )
         }
+    }
+
+    /// Game-log key → season label whose league curve places the recent value.
+    /// Mirrors PlayerProfileView.recentSpecs; only metrics Savant publishes a
+    /// season percentile for can be placed on the ruler.
+    static func recentSpecs(isPitcher: Bool) -> [(key: String, label: String, seasonLabel: String, format: String)] {
+        isPitcher
+            ? [
+                ("opp_xwoba", "xwOBA", "xwOBA", "%.3f"),
+                ("opp_xba", "xBA", "xBA", "%.3f"),
+                ("opp_xslg", "xSLG", "xSLG", "%.3f"),
+                ("k_pct", "K%", "K%", "%.1f%%"),
+                ("bb_pct", "BB%", "BB%", "%.1f%%"),
+                ("opp_hardhit_pct", "Hard-Hit%", "Hard-Hit%", "%.1f%%"),
+                ("opp_barrel_pct", "Barrel%", "Barrel%", "%.1f%%"),
+                ("opp_ev_avg", "Avg EV Against", "Avg EV Against", "%.1f mph"),
+                ("opp_ev_max", "Max EV Against", "Max EV Against", "%.1f mph"),
+                ("fb_velo_avg", "Fastball Velo", "Fastball Velo", "%.1f mph"),
+                ("fb_spin_avg", "Fastball Spin", "Fastball Spin", "%.0f rpm"),
+            ]
+            : [
+                ("xwoba", "xwOBA", "xwOBA", "%.3f"),
+                ("xba", "xBA", "xBA", "%.3f"),
+                ("xslg", "xSLG", "xSLG", "%.3f"),
+                ("xiso", "xISO", "xISO", "%.3f"),
+                ("barrel_pct", "Barrel%", "Barrel%", "%.1f%%"),
+                ("ev_avg", "EV", "EV", "%.1f mph"),
+                ("ev_max", "Max EV", "Max EV", "%.1f mph"),
+                ("k_pct", "K%", "K%", "%.1f%%"),
+                ("bb_pct", "BB%", "BB%", "%.1f%%"),
+                ("whiff_pct", "Whiff%", "Whiff%", "%.1f%%"),
+                ("chase_pct", "Chase%", "Chase%", "%.1f%%"),
+                ("bat_speed", "Bat Speed", "Bat Speed", "%.1f mph"),
+                ("swing_length", "Swing Length", "Swing Length", "%.2f ft"),
+            ]
     }
 
     private func load() async {
