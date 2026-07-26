@@ -17,6 +17,9 @@ struct DashboardView: View {
                         if isSearching || !viewModel.searchText.isEmpty {
                             searchRow
                         }
+                        if viewModel.showingRecent {
+                            recentWindowRow
+                        }
                     }
                     leaderboardSection
                     if !viewModel.players.isEmpty {
@@ -218,8 +221,82 @@ struct DashboardView: View {
             .accessibilityLabel("Sorted by \(viewModel.currentSortMetric ?? viewModel.sortLabel), \(viewModel.sortDescending ? "highest first" : "lowest first")")
             .accessibilityHint("Tap to flip sort direction")
             Spacer(minLength: 0)
+            recentToggle
             searchToggle
             filtersMenu
+        }
+        .padding(.horizontal, 12)
+        .padding(.top, 8)
+    }
+
+    /// Flips the leaderboard from season totals to a rolling window, and (when
+    /// active) exposes the window length. Reads the pre-aggregated
+    /// player_recent_form table, so switching is a single small fetch rather
+    /// than an on-device aggregation of the whole league's game logs.
+    ///
+    /// StatScout+ only: a free tap pitches the trial instead of loading, since
+    /// "who's hot right now" is the thing the subscription is actually for.
+    private var recentToggle: some View {
+        Button {
+            if store.isPro {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    viewModel.showingRecent.toggle()
+                }
+                if viewModel.showingRecent {
+                    Task { await viewModel.loadRecentFormIfNeeded() }
+                }
+            } else {
+                paywallTrigger = .recentForm
+            }
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        } label: {
+            HStack(spacing: 4) {
+                Image(systemName: "flame.fill")
+                    .font(.system(size: 11, weight: .semibold))
+                Text(viewModel.showingRecent ? viewModel.recentWindow.shortLabel : "Recent")
+                    .font(SavantType.micro)
+                    .tracking(0.4)
+                if !store.isPro {
+                    Image(systemName: "crown.fill")
+                        .font(.system(size: 8, weight: .bold))
+                }
+            }
+            .foregroundStyle(viewModel.showingRecent ? .white : SavantPalette.inkSecondary)
+            .padding(.horizontal, 10)
+            .frame(height: 30)
+            .background(viewModel.showingRecent ? SavantPalette.savantRed : SavantPalette.surface)
+            .clipShape(Capsule())
+            .overlay(Capsule().stroke(viewModel.showingRecent ? Color.clear : SavantPalette.hairline, lineWidth: 0.5))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Recent form")
+        .accessibilityValue(viewModel.showingRecent ? viewModel.recentWindow.label : "off")
+    }
+
+    /// Window lengths, shown only while Recent is on — a picker for a mode
+    /// you're not in is just noise in the header.
+    private var recentWindowRow: some View {
+        HStack(spacing: 6) {
+            ForEach(RecentWindow.allCases) { window in
+                Button {
+                    viewModel.recentWindow = window
+                    Task { await viewModel.loadRecentFormIfNeeded() }
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                } label: {
+                    Text(window.label)
+                        .font(SavantType.smallBold)
+                        .foregroundStyle(viewModel.recentWindow == window ? .white : SavantPalette.inkSecondary)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 28)
+                        .background(viewModel.recentWindow == window ? SavantPalette.savantRed : SavantPalette.surface)
+                        .clipShape(Capsule())
+                        .overlay(Capsule().stroke(SavantPalette.hairline, lineWidth: 0.5))
+                }
+                .buttonStyle(.plain)
+            }
+            if viewModel.isRecentFormLoading {
+                ProgressView().scaleEffect(0.6).frame(width: 20)
+            }
         }
         .padding(.horizontal, 12)
         .padding(.top, 8)
@@ -320,7 +397,9 @@ struct DashboardView: View {
                                 rank: index + 1,
                                 player: player,
                                 metricLabel: sortMetric.label,
-                                metricCategory: sortMetric.category
+                                metricCategory: sortMetric.category,
+                                trendDelta: trendDelta(for: player, metric: sortMetric.label),
+                                trendLocked: !store.isPro
                             )
                         }
                         .buttonStyle(.plain)
@@ -337,6 +416,41 @@ struct DashboardView: View {
         .padding(.horizontal, 12)
         .padding(.top, 8)
         .padding(.bottom, 12)
+    }
+
+    /// Recent-vs-prior change in the displayed metric for one row.
+    ///
+    /// Free users get a value too — blurred by `TrendArrow` — so the column
+    /// reads as "there is information here" rather than as an empty gutter.
+    /// Nothing is shown at all until a window is loaded, which only happens
+    /// once Recent has been switched on.
+    private func trendDelta(for player: Player, metric label: String?) -> Double? {
+        guard let label, let form = viewModel.recentForm(for: player.playerId) else { return nil }
+        return form.delta[Self.recentKey(for: label, isPitcher: player.playerType?.lowercased() == "pitcher")]
+    }
+
+    /// Season metric label → the rollup's key for it. Pitcher rows read the
+    /// opponent-facing variants.
+    private static func recentKey(for label: String, isPitcher: Bool) -> String {
+        switch label {
+        case "xwOBA": return isPitcher ? "opp_xwoba" : "xwoba"
+        case "xBA": return isPitcher ? "opp_xba" : "xba"
+        case "xSLG": return isPitcher ? "opp_xslg" : "xslg"
+        case "xISO": return "xiso"
+        case "Barrel%": return isPitcher ? "opp_barrel_pct" : "barrel_pct"
+        case "Hard-Hit%": return isPitcher ? "opp_hardhit_pct" : "hardhit_pct"
+        case "EV", "Avg EV Against": return isPitcher ? "opp_ev_avg" : "ev_avg"
+        case "Max EV", "Max EV Against": return isPitcher ? "opp_ev_max" : "ev_max"
+        case "K%": return "k_pct"
+        case "BB%": return "bb_pct"
+        case "Whiff%": return "whiff_pct"
+        case "Chase%": return "chase_pct"
+        case "Bat Speed": return "bat_speed"
+        case "Swing Length": return "swing_length"
+        case "Fastball Velo": return "fb_velo_avg"
+        case "Fastball Spin": return "fb_spin_avg"
+        default: return label.lowercased()
+        }
     }
 
     private var loadingCard: some View {

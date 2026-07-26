@@ -469,11 +469,61 @@ struct LeaderboardTableHeader: View {
     }
 }
 
+/// Recent-vs-prior change for one metric, drawn as an arrow and a magnitude.
+///
+/// StatScout+ only. Free users see it blurred rather than absent: the shape of
+/// the information is visible — this player moved, and by roughly how much —
+/// without the number itself, which is a more honest pitch than a padlock.
+struct TrendArrow: View {
+    let delta: Double
+    /// Percent-style metrics move in whole numbers, rate stats in thousandths.
+    var decimals: Int = 3
+    var isLocked: Bool = false
+
+    /// Below this a delta is noise, and an arrow would imply a signal.
+    private var isFlat: Bool { abs(delta) < (decimals == 3 ? 0.005 : 0.5) }
+
+    private var tint: Color {
+        if isFlat { return SavantPalette.inkTertiary }
+        return delta > 0 ? SavantPalette.pctlHot : SavantPalette.pctlCold
+    }
+
+    private var text: String {
+        if isFlat { return "—" }
+        let magnitude = abs(delta)
+        return decimals == 3
+            ? String(format: "%.3f", magnitude).replacingOccurrences(of: "0.", with: ".")
+            : String(format: "%.0f", magnitude)
+    }
+
+    var body: some View {
+        HStack(spacing: 2) {
+            if !isFlat {
+                Image(systemName: delta > 0 ? "arrow.up" : "arrow.down")
+                    .font(.system(size: 8, weight: .bold))
+            }
+            Text(text)
+                .font(SavantType.micro)
+                .monospacedDigit()
+        }
+        .foregroundStyle(tint)
+        .blur(radius: isLocked ? 4 : 0)
+        .accessibilityLabel(
+            isLocked
+                ? "Recent trend, StatScout+ required"
+                : (isFlat ? "No recent change" : "\(delta > 0 ? "Up" : "Down") \(text) recently")
+        )
+    }
+}
+
 struct LeaderboardTableRow: View {
     let rank: Int
     let player: Player
     var metricLabel: String? = nil
     var metricCategory: MetricCategory? = nil
+    /// Recent-vs-prior change in the displayed metric, when a window is loaded.
+    var trendDelta: Double? = nil
+    var trendLocked: Bool = false
 
     private var displayMetric: Metric? {
         guard let label = metricLabel else { return nil }
@@ -538,8 +588,15 @@ struct LeaderboardTableRow: View {
                 // from their overall percentile would mislabel a different number
                 // as this column's stat. Show a muted "—" instead.
                 if displayMetric != nil {
-                    PercentileBarMini(percentile: displayPercentile)
-                        .frame(width: 36)
+                    // The mini bar and the trend column both compete for the
+                    // same edge of the row, and the trend is the more
+                    // informative of the two — the value's colour already
+                    // carries percentile. Drop the bar when a trend is present
+                    // rather than squeezing the player name.
+                    if trendDelta == nil {
+                        PercentileBarMini(percentile: displayPercentile)
+                            .frame(width: 36)
+                    }
                     Text(displayValueText)
                         .font(SavantType.statSmall)
                         .foregroundStyle(SavantPalette.color(forPercentile: displayPercentile))
@@ -555,7 +612,17 @@ struct LeaderboardTableRow: View {
                         .monospacedDigit()
                 }
             }
-            .frame(width: 92, alignment: .trailing)
+            .frame(width: trendDelta == nil ? 92 : 56, alignment: .trailing)
+
+            if let trendDelta {
+                TrendArrow(
+                    delta: trendDelta,
+                    // Rate stats move in thousandths, percentages in points.
+                    decimals: (metricLabel?.hasSuffix("%") ?? false) ? 0 : 3,
+                    isLocked: trendLocked
+                )
+                .frame(width: 46, alignment: .trailing)
+            }
         }
         .frame(height: SavantGeo.rowHeight)
         .padding(.horizontal, SavantGeo.padInline)
