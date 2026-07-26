@@ -72,6 +72,11 @@ OUT_OF_ZONE = frozenset({11, 12, 13, 14})
 SWEETSPOT_LA_MIN = 8.0
 SWEETSPOT_LA_MAX = 32.0
 
+# Savant reports pitchers' velocity and spin as *fastball* figures. Averaging
+# every pitch instead would drag a starter's number down by their changeup and
+# curveball, so the app couldn't place it on Savant's Fastball Velo scale.
+FASTBALL_PITCH_TYPES = frozenset({"FF", "SI", "FC"})
+
 
 def _resolve_season() -> int:
     now = datetime.now(UTC)
@@ -193,7 +198,16 @@ def _pitch_aggregates(
                 "game_date": df["game_date"],
                 **{c: df[c] for c in shape_cols},
             })
+            # Extension is a delivery trait, so it averages over everything;
+            # velo and spin are reported as fastball-only to match Savant.
             shape_means = shape.groupby(keys, dropna=True)[shape_cols].mean()
+            if "pitch_type" in df.columns:
+                fastballs = shape[df["pitch_type"].isin(FASTBALL_PITCH_TYPES).to_numpy()]
+                if not fastballs.empty:
+                    fb_cols = [c for c in ("release_speed", "release_spin_rate") if c in shape_cols]
+                    fb_means = fastballs.groupby(keys, dropna=True)[fb_cols].mean()
+                    fb_means.columns = [f"fb_{c}" for c in fb_means.columns]
+                    shape_means = shape_means.join(fb_means, how="left")
 
     merged = counts.join(swing_means, how="left").join(shape_means, how="left")
     return {key: row.to_dict() for key, row in merged.iterrows()}
@@ -391,6 +405,8 @@ def _aggregate_pitchers(df: pd.DataFrame) -> list[dict]:
             "velo_avg": _round(pitches.get("release_speed"), 1),
             "spin_avg": _round(pitches.get("release_spin_rate"), 0),
             "extension_avg": _round(pitches.get("release_extension"), 2),
+            "fb_velo_avg": _round(pitches.get("fb_release_speed"), 1),
+            "fb_spin_avg": _round(pitches.get("fb_release_spin_rate"), 0),
             # See the batter aggregator — denominators for exact window recompute.
             "_pitches": int(pitches.get("pitches") or 0),
             "_swings": swings,

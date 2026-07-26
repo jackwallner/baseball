@@ -38,6 +38,7 @@ def _pitch(**overrides):
         "release_speed": None,
         "release_spin_rate": None,
         "release_extension": None,
+        "pitch_type": "FF",
     }
     row.update(overrides)
     return row
@@ -192,6 +193,23 @@ def test_sweetspot_uses_launch_angle_band():
     metrics = _aggregate_batters(frame)[0]["metrics"]
     assert metrics["sweetspot_pct"] == pytest.approx(50.0)
     assert metrics["la_avg"] == pytest.approx(26.5)
+
+
+def test_fastball_velo_excludes_offspeed():
+    """Savant reports velo as a fastball figure; a changeup must not drag it."""
+    frame = _frame([
+        {
+            "description": "hit_into_play", "events": "field_out", "pitch_type": "FF",
+            "launch_speed": 95.0, "release_speed": 97.0, "release_spin_rate": 2400.0,
+            "estimated_woba_using_speedangle": 0.2, "woba_denom": 1,
+        },
+        {"description": "ball", "pitch_type": "CH", "release_speed": 85.0, "release_spin_rate": 1600.0},
+    ])
+    metrics = _aggregate_pitchers(frame)[0]["metrics"]
+    assert metrics["fb_velo_avg"] == pytest.approx(97.0)
+    assert metrics["fb_spin_avg"] == pytest.approx(2400.0)
+    # The all-pitch average still exists and is genuinely lower.
+    assert metrics["velo_avg"] == pytest.approx(91.0)
 
 
 def test_pitcher_row_carries_pitch_shape_and_batted_ball_mix():
