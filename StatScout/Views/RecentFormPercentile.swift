@@ -47,8 +47,13 @@ struct LeaguePercentileCurves {
     /// players whose metric has both a parseable raw value and a percentile
     /// contribute points — blank-value metrics simply don't anchor the curve,
     /// which is fine as long as enough players do.
+    /// - Parameter category: which side of the ball the curve describes. A
+    ///   two-way player carries an xwOBA under *both* Hitting and Pitching, and
+    ///   matching on label alone picked whichever came first — so Ohtani could
+    ///   anchor the batter curve with his pitching xwOBA, bending the ruler
+    ///   every recent bar is measured against.
     @MainActor
-    init(players: [Player], playerType: String, labels: [String]) {
+    init(players: [Player], playerType: String, labels: [String], category: MetricCategory? = nil) {
         // Two-way players anchor both pools (they hit and pitch), mirroring
         // Player.matchesPlayerType so curve populations match the leaderboards.
         let pool = players.filter {
@@ -61,7 +66,10 @@ struct LeaguePercentileCurves {
         for label in labels {
             var pts: [(Double, Double)] = []
             for player in pool {
-                guard let m = player.metrics.first(where: { $0.label == label }),
+                let match = player.metrics.first {
+                    $0.label == label && (category == nil || $0.category == category)
+                }
+                guard let m = match,
                       let v = DashboardViewModel.rawNumeric(m.value) else { continue }
                 pts.append((v, Double(m.percentile)))
             }

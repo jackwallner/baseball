@@ -654,7 +654,10 @@ struct PlayerProfileView: View {
     }
 
     private func displayedMetrics(in metrics: [Metric]) -> [Metric] {
-        guard effectiveFormDisplayMode == .recent, store.isPro else { return metrics }
+        // Applies to Both as well as Recent. It used to be Recent-only, so in
+        // Both a metric with window data but no season row simply vanished
+        // rather than showing its recent bar alone.
+        guard effectiveFormDisplayMode != .season, store.isPro else { return metrics }
         // Recent mode: show every season bar — metrics with window data render the
         // recent value, the rest fall back to the season bar (handled in
         // `percentileMetricRow`). Additionally inject a stub for any game-log spec
@@ -677,24 +680,43 @@ struct PlayerProfileView: View {
         return metrics + stubs
     }
 
+    /// Game-log metric key → the season metric whose league curve places it.
+    ///
+    /// Every entry needs a season counterpart: the recent bar is drawn on the
+    /// league's season percentile ruler, so a metric Savant doesn't publish
+    /// season percentiles for has nothing to be placed against. That's why
+    /// batter Hard-Hit% / Sweet-Spot% / LA and pitcher Whiff% / Chase% are
+    /// absent here even though the game logs now carry them — Savant only
+    /// publishes those percentiles for the other side of the ball.
     private var recentSpecs: [(key: String, label: String, seasonLabel: String, format: String)] {
         isPitcher
             ? [
                 ("opp_xwoba", "xwOBA", "xwOBA", "%.3f"),
+                ("opp_xba", "xBA", "xBA", "%.3f"),
+                ("opp_xslg", "xSLG", "xSLG", "%.3f"),
                 ("k_pct", "K%", "K%", "%.1f%%"),
                 ("bb_pct", "BB%", "BB%", "%.1f%%"),
                 ("opp_hardhit_pct", "Hard-Hit%", "Hard-Hit%", "%.1f%%"),
                 ("opp_barrel_pct", "Barrel%", "Barrel%", "%.1f%%"),
-                ("opp_ev_avg", "EV", "Avg EV Against", "%.1f mph"),
+                ("opp_ev_avg", "Avg EV Against", "Avg EV Against", "%.1f mph"),
+                ("opp_ev_max", "Max EV Against", "Max EV Against", "%.1f mph"),
+                ("fb_velo_avg", "Fastball Velo", "Fastball Velo", "%.1f mph"),
+                ("fb_spin_avg", "Fastball Spin", "Fastball Spin", "%.0f rpm"),
             ]
             : [
                 ("xwoba", "xwOBA", "xwOBA", "%.3f"),
+                ("xba", "xBA", "xBA", "%.3f"),
+                ("xslg", "xSLG", "xSLG", "%.3f"),
+                ("xiso", "xISO", "xISO", "%.3f"),
                 ("barrel_pct", "Barrel%", "Barrel%", "%.1f%%"),
-                ("hardhit_pct", "Hard-Hit%", "Hard-Hit%", "%.1f%%"),
                 ("ev_avg", "EV", "EV", "%.1f mph"),
                 ("ev_max", "Max EV", "Max EV", "%.1f mph"),
                 ("k_pct", "K%", "K%", "%.1f%%"),
                 ("bb_pct", "BB%", "BB%", "%.1f%%"),
+                ("whiff_pct", "Whiff%", "Whiff%", "%.1f%%"),
+                ("chase_pct", "Chase%", "Chase%", "%.1f%%"),
+                ("bat_speed", "Bat Speed", "Bat Speed", "%.1f mph"),
+                ("swing_length", "Swing Length", "Swing Length", "%.2f ft"),
             ]
     }
 
@@ -742,21 +764,36 @@ struct PlayerProfileView: View {
                 .buttonStyle(.plain)
             }
         case .both:
-            NavigationLink(value: MetricRoute(label: metric.label, category: metric.category)) {
-                DualMetricBar(
-                    season: metric,
-                    recent: recentMetric,
-                    recentCaption: "Last \(recentWindowDays)d"
-                )
-                .padding(.horizontal, SavantGeo.padCard)
-                .padding(.vertical, 12)
-                .background(rowBackground)
-                .overlay(
-                    Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline),
-                    alignment: .bottom
-                )
+            if metric.id.hasPrefix("recent-stub-") {
+                // Recent-only metric — there's no season row to pair it with, so
+                // pairing it with the empty stub would draw a season bar at 0.
+                if let recentMetric {
+                    MetricBar(metric: recentMetric)
+                        .padding(.horizontal, SavantGeo.padCard)
+                        .padding(.vertical, 12)
+                        .background(rowBackground)
+                        .overlay(
+                            Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline),
+                            alignment: .bottom
+                        )
+                }
+            } else {
+                NavigationLink(value: MetricRoute(label: metric.label, category: metric.category)) {
+                    DualMetricBar(
+                        season: metric,
+                        recent: recentMetric,
+                        recentCaption: "Last \(recentWindowDays)d"
+                    )
+                    .padding(.horizontal, SavantGeo.padCard)
+                    .padding(.vertical, 12)
+                    .background(rowBackground)
+                    .overlay(
+                        Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline),
+                        alignment: .bottom
+                    )
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
         }
     }
 
@@ -774,15 +811,14 @@ struct PlayerProfileView: View {
         )
     }
 
+    /// Build one curve per season label the recent specs reference, so the two
+    /// stay in step automatically instead of via a hand-kept parallel list.
     private func rebuildRecentCurves() {
-        // Pitchers' season exit velocity is labeled "Avg EV Against", not "EV".
-        let evLabel = isPitcher ? "Avg EV Against" : "EV"
-        var labels = ["xwOBA", "Barrel%", "Hard-Hit%", evLabel, "K%", "BB%"]
-        if !isPitcher { labels.append("Max EV") }
         recentCurves = LeaguePercentileCurves(
             players: allPlayers,
             playerType: player.playerType ?? (isPitcher ? "pitcher" : "batter"),
-            labels: labels
+            labels: Array(Set(recentSpecs.map(\.seasonLabel))),
+            category: isPitcher ? .pitching : .hitting
         )
     }
 
