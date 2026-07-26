@@ -277,29 +277,19 @@ struct DashboardView: View {
     /// you're not in is just noise in the header.
     private var recentWindowRow: some View {
         HStack(spacing: 6) {
-            ForEach(RecentWindow.allCases) { window in
-                Button {
-                    viewModel.recentWindow = window
-                    Task { await viewModel.loadRecentFormIfNeeded() }
-                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                } label: {
-                    Text(window.label)
-                        .font(SavantType.smallBold)
-                        .foregroundStyle(viewModel.recentWindow == window ? .white : SavantPalette.inkSecondary)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 28)
-                        .background(viewModel.recentWindow == window ? SavantPalette.savantRed : SavantPalette.surface)
-                        .clipShape(Capsule())
-                        .overlay(Capsule().stroke(SavantPalette.hairline, lineWidth: 0.5))
-                }
-                .buttonStyle(.plain)
-            }
+            SavantSegmented(
+                segments: RecentWindow.allCases.map { .init(value: $0, label: $0.label) },
+                selection: $viewModel.recentWindow
+            )
             if viewModel.isRecentFormLoading {
                 ProgressView().scaleEffect(0.6).frame(width: 20)
             }
         }
         .padding(.horizontal, 12)
         .padding(.top, 8)
+        .onChange(of: viewModel.recentWindow) { _, _ in
+            Task { await viewModel.loadRecentFormIfNeeded() }
+        }
     }
 
     // Magnifier that expands the inline search row. When a query is active it

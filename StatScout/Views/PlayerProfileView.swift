@@ -121,6 +121,11 @@ struct PlayerProfileView: View {
                 case .yearCompare:
                     yearCompareContent
                 }
+
+                // Lets the last metric row clear the floating tab bar — the
+                // profile was missing the spacer Dashboard and TeamView have,
+                // so its bottom row sat under the glass.
+                Color.clear.frame(height: 88)
             }
         }
         .scrollBounceBehavior(.basedOnSize)
@@ -525,25 +530,17 @@ struct PlayerProfileView: View {
         .accessibilityValue(seasonLabel)
     }
 
+    /// Season / Recent / Both. Shown to everyone: a free user needs to see that
+    /// Recent exists before there's anything to want. Locked segments carry a
+    /// crown and pitch on tap instead of switching.
     private var formModePicker: some View {
-        HStack(spacing: 6) {
-            ForEach(FormDisplayMode.allCases, id: \.self) { mode in
-                Button {
-                    formDisplayMode = mode
-                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                } label: {
-                    Text(mode.rawValue)
-                        .font(SavantType.smallBold)
-                        .foregroundStyle(formDisplayMode == mode ? .white : SavantPalette.inkSecondary)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 30)
-                        .background(formDisplayMode == mode ? SavantPalette.savantRed : SavantPalette.surface)
-                        .clipShape(Capsule())
-                        .overlay(Capsule().stroke(SavantPalette.hairline, lineWidth: 0.5))
-                }
-                .buttonStyle(.plain)
-            }
-        }
+        SavantSegmented(
+            segments: FormDisplayMode.allCases.map {
+                .init(value: $0, label: $0.rawValue, isLocked: !store.isPro && $0 != .season)
+            },
+            selection: $formDisplayMode,
+            onLockedTap: { _ in trialPitchTrigger = .recentForm }
+        )
         .padding(.horizontal, SavantGeo.padInline)
         .padding(.vertical, 10)
         .background(SavantPalette.surfaceAlt)
@@ -569,7 +566,7 @@ struct PlayerProfileView: View {
             // Recent mode only makes sense for the live season — the 7/15/30-day
             // window is anchored to today, so on a historical season it would
             // always read "No games in the last N days".
-            if store.isPro, isCurrentSeasonActive {
+            if isCurrentSeasonActive {
                 formModePicker
             }
 
@@ -660,24 +657,13 @@ struct PlayerProfileView: View {
     }
 
     private var recentWindowPicker: some View {
-        HStack(spacing: 6) {
-            ForEach(RecentFormWindow.windows, id: \.days) { w in
-                Button {
-                    recentWindowDays = w.days
-                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                } label: {
-                    Text(w.label)
-                        .font(SavantType.smallBold)
-                        .foregroundStyle(recentWindowDays == w.days ? .white : SavantPalette.inkSecondary)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 28)
-                        .background(recentWindowDays == w.days ? SavantPalette.savantRed : SavantPalette.surface)
-                        .clipShape(Capsule())
-                        .overlay(Capsule().stroke(SavantPalette.hairline, lineWidth: 0.5))
-                }
-                .buttonStyle(.plain)
-            }
-        }
+        SavantSegmented(
+            segments: RecentWindow.allCases.map { .init(value: $0, label: $0.label) },
+            selection: Binding(
+                get: { RecentWindow(rawValue: recentWindowDays) ?? .fortnight },
+                set: { recentWindowDays = $0.rawValue }
+            )
+        )
         .padding(.horizontal, SavantGeo.padInline)
         .padding(.bottom, 8)
         .background(SavantPalette.surfaceAlt)
@@ -979,9 +965,9 @@ struct PlayerProfileView: View {
 
             // Recent only means something on the live season — the window is
             // anchored to today, so on a past season it would always be empty.
-            if store.isPro, isCurrentSeasonActive {
+            if isCurrentSeasonActive {
                 standardModePicker
-                if standardMode != .season {
+                if effectiveStandardMode != .season {
                     standardWindowPicker
                 }
             }
@@ -1020,55 +1006,32 @@ struct PlayerProfileView: View {
     }
 
     private var standardModePicker: some View {
-        HStack(spacing: 6) {
-            ForEach(FormDisplayMode.allCases, id: \.self) { mode in
-                Button {
-                    standardMode = mode
-                    if mode != .season {
-                        Task { await loadRecentForm?(standardWindow) }
-                    }
-                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                } label: {
-                    Text(mode.rawValue)
-                        .font(SavantType.smallBold)
-                        .foregroundStyle(standardMode == mode ? .white : SavantPalette.inkSecondary)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 30)
-                        .background(standardMode == mode ? SavantPalette.savantRed : SavantPalette.surface)
-                        .clipShape(Capsule())
-                        .overlay(Capsule().stroke(SavantPalette.hairline, lineWidth: 0.5))
-                }
-                .buttonStyle(.plain)
-            }
-        }
+        SavantSegmented(
+            segments: FormDisplayMode.allCases.map {
+                .init(value: $0, label: $0.rawValue, isLocked: !store.isPro && $0 != .season)
+            },
+            selection: $standardMode,
+            onLockedTap: { _ in trialPitchTrigger = .recentForm }
+        )
         .padding(.horizontal, SavantGeo.padInline)
         .padding(.vertical, 10)
         .background(SavantPalette.surfaceAlt)
+        .onChange(of: standardMode) { _, mode in
+            if mode != .season { Task { await loadRecentForm?(standardWindow) } }
+        }
     }
 
     private var standardWindowPicker: some View {
-        HStack(spacing: 6) {
-            ForEach(RecentWindow.allCases) { window in
-                Button {
-                    standardWindow = window
-                    Task { await loadRecentForm?(window) }
-                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                } label: {
-                    Text(window.label)
-                        .font(SavantType.smallBold)
-                        .foregroundStyle(standardWindow == window ? .white : SavantPalette.inkSecondary)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 28)
-                        .background(standardWindow == window ? SavantPalette.savantRed : SavantPalette.surface)
-                        .clipShape(Capsule())
-                        .overlay(Capsule().stroke(SavantPalette.hairline, lineWidth: 0.5))
-                }
-                .buttonStyle(.plain)
-            }
-        }
+        SavantSegmented(
+            segments: RecentWindow.allCases.map { .init(value: $0, label: $0.label) },
+            selection: $standardWindow
+        )
         .padding(.horizontal, SavantGeo.padInline)
         .padding(.bottom, 8)
         .background(SavantPalette.surfaceAlt)
+        .onChange(of: standardWindow) { _, window in
+            Task { await loadRecentForm?(window) }
+        }
     }
 
     @ViewBuilder

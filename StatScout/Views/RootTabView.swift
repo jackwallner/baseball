@@ -132,13 +132,14 @@ struct RootTabView: View {
     }
 
     private enum Tab: Int, CaseIterable, Identifiable {
-        case stats, teams, compare
+        case stats, trends, teams, compare
 
         var id: Int { rawValue }
 
         var title: String {
             switch self {
             case .stats: return "Stats"
+            case .trends: return "Trends"
             case .teams: return "Teams"
             case .compare: return "Compare"
             }
@@ -147,6 +148,7 @@ struct RootTabView: View {
         var icon: String {
             switch self {
             case .stats: return "chart.bar.fill"
+            case .trends: return "flame.fill"
             case .teams: return "shield.lefthalf.filled"
             case .compare: return "arrow.left.arrow.right"
             }
@@ -157,6 +159,7 @@ struct RootTabView: View {
     private func tabContent(_ tab: Tab) -> some View {
         switch tab {
         case .stats: statsTab
+        case .trends: trendsTab
         case .teams: teamsTab
         case .compare: compareTab
         }
@@ -188,6 +191,17 @@ struct RootTabView: View {
         NavigationStack {
             StatsView(viewModel: viewModel)
                 .navigationTitle("Stats")
+                .navigationBarTitleDisplayMode(.inline)
+                .modifier(SavantNavBar())
+                .modifier(HomeTabToolbar(lastUpdated: viewModel.lastUpdated))
+                .modifier(StandardDestinations(viewModel: viewModel))
+        }
+    }
+
+    private var trendsTab: some View {
+        NavigationStack {
+            HotColdView(viewModel: viewModel)
+                .navigationTitle("Trends")
                 .navigationBarTitleDisplayMode(.inline)
                 .modifier(SavantNavBar())
                 .modifier(HomeTabToolbar(lastUpdated: viewModel.lastUpdated))
@@ -241,7 +255,7 @@ private struct TabBarButton: View {
                     .fontWeight(.semibold)
             }
             .foregroundStyle(isSelected ? SavantPalette.savantRed : SavantPalette.inkSecondary)
-            .frame(width: 84, height: 44)
+            .frame(width: 70, height: 44)
             .background(
                 isSelected ? SavantPalette.savantRed.opacity(0.12) : .clear,
                 in: Capsule()

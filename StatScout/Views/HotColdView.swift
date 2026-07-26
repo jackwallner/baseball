@@ -84,51 +84,21 @@ struct HotColdView: View {
 
     private var header: some View {
         VStack(spacing: 8) {
-            HStack(spacing: 8) {
-                ForEach([false, true], id: \.self) { cold in
-                    Button {
-                        withAnimation(.easeInOut(duration: 0.2)) { showingCold = cold }
-                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                    } label: {
-                        HStack(spacing: 5) {
-                            Image(systemName: cold ? "snowflake" : "flame.fill")
-                                .font(.system(size: 12, weight: .semibold))
-                            Text(cold ? "Cooling off" : "Heating up")
-                                .font(SavantType.smallBold)
-                        }
-                        .foregroundStyle(showingCold == cold ? .white : SavantPalette.inkSecondary)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 34)
-                        .background(
-                            showingCold == cold
-                                ? (cold ? SavantPalette.pctlCold : SavantPalette.pctlHot)
-                                : SavantPalette.surface
-                        )
-                        .clipShape(Capsule())
-                        .overlay(Capsule().stroke(SavantPalette.hairline, lineWidth: 0.5))
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
+            // Same control as every other inline picker; only the selected fill
+            // differs, because here the choice itself encodes hot vs cold.
+            SavantSegmented(
+                segments: [
+                    .init(value: false, label: "Heating up", systemImage: "flame.fill"),
+                    .init(value: true, label: "Cooling off", systemImage: "snowflake"),
+                ],
+                selection: $showingCold,
+                selectedFill: { $0 ? SavantPalette.pctlCold : SavantPalette.pctlHot }
+            )
 
-            HStack(spacing: 6) {
-                ForEach(RecentWindow.allCases) { window in
-                    Button {
-                        viewModel.recentWindow = window
-                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                    } label: {
-                        Text(window.label)
-                            .font(SavantType.smallBold)
-                            .foregroundStyle(viewModel.recentWindow == window ? .white : SavantPalette.inkSecondary)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 28)
-                            .background(viewModel.recentWindow == window ? SavantPalette.savantRed : SavantPalette.surface)
-                            .clipShape(Capsule())
-                            .overlay(Capsule().stroke(SavantPalette.hairline, lineWidth: 0.5))
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
+            SavantSegmented(
+                segments: RecentWindow.allCases.map { .init(value: $0, label: $0.label) },
+                selection: $viewModel.recentWindow
+            )
 
             if let asOf = viewModel.recentFormAsOf {
                 Text("Through \(asOf.formatted(.dateTime.month(.abbreviated).day()))")
