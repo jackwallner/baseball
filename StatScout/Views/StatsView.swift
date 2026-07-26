@@ -20,6 +20,7 @@ struct StatsView: View {
 
     @State private var mode: Mode = .leaders
     @State private var paywallTrigger: PaywallTrigger?
+    @State private var showingSeasonPicker = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -88,33 +89,8 @@ struct StatsView: View {
     // Compact season selector for the leading toolbar slot. Sits on the navy
     // nav bar, so it reads as a red pill with the year only.
     private var seasonMenu: some View {
-        Menu {
-            if viewModel.isHistoricalLoading {
-                Label("Loading past seasons…", systemImage: "hourglass")
-            }
-            // Every season is listed, locked ones included. Tapping a locked
-            // year pitches that specific year rather than "unlock more".
-            ForEach(viewModel.availableSeasons, id: \.self) { season in
-                let isLocked = viewModel.isSeasonLocked(season)
-                Button {
-                    if isLocked {
-                        // Explicit tap — always answer it; the gate only caps
-                        // automatic pop-ups.
-                        paywallTrigger = .lockedSeason(season)
-                    } else {
-                        viewModel.selectedSeason = season
-                    }
-                } label: {
-                    HStack {
-                        Text(String(season))
-                        if isLocked {
-                            Image(systemName: "crown.fill")
-                                .font(.system(size: 10))
-                                .foregroundStyle(SavantPalette.inkTertiary)
-                        }
-                    }
-                }
-            }
+        Button {
+            showingSeasonPicker = true
         } label: {
             HStack(spacing: 5) {
                 Image(systemName: "calendar")
@@ -125,12 +101,32 @@ struct StatsView: View {
                     .font(.system(size: 9, weight: .bold))
             }
             .foregroundStyle(.white)
+            // Without this the toolbar squeezes the label and the year itself
+            // is the first thing to get clipped, leaving a bare calendar icon.
+            .fixedSize()
             .padding(.horizontal, 10)
             .padding(.vertical, 5)
             .background(SavantPalette.savantRed)
             .clipShape(Capsule())
         }
-        .menuOrder(.fixed)
+        .buttonStyle(.plain)
+        // Anchored to the pill, so it drops from the control you tapped rather
+        // than sliding up from the bottom of the screen.
+        .popover(isPresented: $showingSeasonPicker, arrowEdge: .bottom) {
+            SeasonPickerPopover(
+                seasons: viewModel.availableSeasons,
+                selected: viewModel.selectedSeason,
+                isLocked: { viewModel.isSeasonLocked($0) }
+            ) { season in
+                if viewModel.isSeasonLocked(season) {
+                    // Explicit tap on a locked year — always answer it; the
+                    // gate only caps automatic pop-ups.
+                    paywallTrigger = .lockedSeason(season)
+                } else {
+                    viewModel.selectedSeason = season
+                }
+            }
+        }
         .accessibilityLabel("Season")
         .accessibilityValue(String(viewModel.selectedSeason))
         .accessibilityHint("Choose which season's stats to view")

@@ -464,13 +464,11 @@ struct PlayerProfileView: View {
                                 selectedPercentileSeason = season
                             }
                         } label: {
-                            HStack {
+                            // See StatsView — an HStack row stretches the menu.
+                            if isLocked {
+                                Label(String(season), systemImage: "crown.fill")
+                            } else {
                                 Text(String(season))
-                                if isLocked {
-                                    Image(systemName: "crown.fill")
-                                        .font(.system(size: 10))
-                                        .foregroundStyle(Color.yellow)
-                                }
                             }
                         }
                     }

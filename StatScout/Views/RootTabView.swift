@@ -17,7 +17,6 @@ struct RootTabView: View {
     @StateObject private var reviewPromptCoordinator = ReviewPromptCoordinator.shared
     @State private var viewModel: DashboardViewModel
     @State private var selection = 0
-    @State private var showingAbout = false
     @State private var showReviewPrompt = false
     @State private var reviewPromptInitialStep: ReviewPromptSheet.Step = .enjoyment
     @State private var reviewPromptShownThisSession = false
@@ -33,31 +32,7 @@ struct RootTabView: View {
     var body: some View {
         tabView
             .tint(SavantPalette.savantRed)
-            .sheet(isPresented: $showingAbout) {
-            NavigationStack {
-                AboutView(
-                    lastUpdated: viewModel.lastUpdated,
-                    onRequestReview: {
-                        showingAbout = false
-                        Task { @MainActor in
-                            try? await Task.sleep(nanoseconds: 400_000_000)
-                            ReviewPromptCoordinator.shared.requestEnjoymentPrompt()
-                        }
-                    }
-                )
-                    .navigationTitle("Settings")
-                    .navigationBarTitleDisplayMode(.inline)
-                    .modifier(SavantNavBar())
-                    .toolbar {
-                        ToolbarItem(placement: .topBarTrailing) {
-                            Button("Done") { showingAbout = false }
-                                .tint(.white)
-                        }
-                    }
-            }
-            .presentationDragIndicator(.visible)
-        }
-        .sheet(isPresented: $showReviewPrompt, onDismiss: {
+            .sheet(isPresented: $showReviewPrompt, onDismiss: {
             ReviewPromptTracker.markShown()
             if pendingNativeReviewAfterDismiss {
                 pendingNativeReviewAfterDismiss = false
@@ -85,14 +60,12 @@ struct RootTabView: View {
     private func scheduleReviewPromptAfterPositiveMoment() {
         guard ReviewPromptTracker.shouldShowAfterPositiveMoment(hasCompletedOnboarding: hasCompletedOnboarding),
               !reviewPromptShownThisSession,
-              !showingAbout,
               !showReviewPrompt
         else { return }
 
         Task { @MainActor in
             try? await Task.sleep(nanoseconds: 3_500_000_000)
-            guard !showingAbout,
-                  !showReviewPrompt,
+            guard !showReviewPrompt,
                   ReviewPromptTracker.shouldShowAfterPositiveMoment(hasCompletedOnboarding: hasCompletedOnboarding)
             else { return }
             ReviewPromptTracker.consumePendingPositiveMoment()
@@ -201,7 +174,7 @@ struct RootTabView: View {
                 .navigationTitle("Stats")
                 .navigationBarTitleDisplayMode(.inline)
                 .modifier(SavantNavBar())
-                .modifier(HomeTabToolbar(showingSettings: $showingAbout))
+                .modifier(HomeTabToolbar(lastUpdated: viewModel.lastUpdated))
                 .modifier(StandardDestinations(viewModel: viewModel))
         }
     }
@@ -212,7 +185,7 @@ struct RootTabView: View {
                 .navigationTitle("Teams")
                 .navigationBarTitleDisplayMode(.inline)
                 .modifier(SavantNavBar())
-                .modifier(HomeTabToolbar(showingSettings: $showingAbout))
+                .modifier(HomeTabToolbar(lastUpdated: viewModel.lastUpdated))
                 .modifier(StandardDestinations(viewModel: viewModel))
         }
     }
@@ -226,7 +199,7 @@ struct RootTabView: View {
                 .navigationTitle("Compare")
                 .navigationBarTitleDisplayMode(.inline)
                 .modifier(SavantNavBar())
-                .modifier(HomeTabToolbar(showingSettings: $showingAbout))
+                .modifier(HomeTabToolbar(lastUpdated: viewModel.lastUpdated))
         }
     }
 
@@ -284,7 +257,10 @@ private struct SavantNavBar: ViewModifier {
 /// isn't an anchor.
 private struct HomeTabToolbar: ViewModifier {
     @EnvironmentObject private var store: StoreService
-    @Binding var showingSettings: Bool
+    let lastUpdated: Date?
+    /// Owned per tab, not shared. All three tabs stay alive in the ZStack, so a
+    /// single shared flag would push Settings onto all three stacks at once.
+    @State private var showingSettings = false
     @State private var paywallTrigger: PaywallTrigger?
 
     /// Yellow crown + short action verb on a filled pill. The old version was
@@ -322,23 +298,48 @@ private struct HomeTabToolbar: ViewModifier {
         .accessibilityLabel("\(ctaLabel) — unlock all features")
     }
 
+    /// Outline cog, no filled circle behind it. The Liquid Glass container
+    /// gave it a pale blue disc that made a secondary control louder than the
+    /// content it sits above.
     private var settingsButton: some View {
         Button {
             showingSettings = true
             UIImpactFeedbackGenerator(style: .light).impactOccurred()
         } label: {
-            Image(systemName: "gearshape.fill")
-                .font(.system(size: 15, weight: .semibold))
-                .foregroundStyle(.white)
+            Image(systemName: "gearshape")
+                .font(.system(size: 16, weight: .regular))
+                .foregroundStyle(.white.opacity(0.85))
         }
         .accessibilityLabel("Settings")
     }
 
     func body(content: Content) -> some View {
         content
+            // A push rather than a bottom sheet: Settings is a place in the
+            // app, not a modal interruption over what you were reading.
+            .navigationDestination(isPresented: $showingSettings) {
+                AboutView(
+                    lastUpdated: lastUpdated,
+                    onRequestReview: {
+                        showingSettings = false
+                        Task { @MainActor in
+                            try? await Task.sleep(nanoseconds: 400_000_000)
+                            ReviewPromptCoordinator.shared.requestEnjoymentPrompt()
+                        }
+                    }
+                )
+                .navigationTitle("Settings")
+                .navigationBarTitleDisplayMode(.inline)
+                .modifier(SavantNavBar())
+            }
             .toolbar {
                 // Declared before the CTA so the gear sits to its left.
-                ToolbarItem(placement: .topBarTrailing) { settingsButton }
+                if #available(iOS 26.0, *) {
+                    ToolbarItem(placement: .topBarTrailing) { settingsButton }
+                        .sharedBackgroundVisibility(.hidden)
+                } else {
+                    ToolbarItem(placement: .topBarTrailing) { settingsButton }
+                }
                 if !store.isPro {
                     // The yellow pill is its own capsule; suppress the iOS 26
                     // Liquid Glass container so it doesn't read as a double-pill.

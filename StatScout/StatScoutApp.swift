@@ -330,14 +330,15 @@ struct OnboardingCards: View {
                     .background(SavantPalette.savantRed)
                     .clipShape(RoundedRectangle(cornerRadius: 14))
             } else {
-                // Borderless free-tier exit: still legible and tappable (App
-                // Review needs the free path visible) but no box, so it reads as
-                // a quiet "skip" next to the prominent red trial button.
+                // Borderless free-tier exit: SAME text as the boxed 1.3.0 version
+                // (bodyBold, ink) — just no box. Keeps it legible/compliant (the
+                // free path must stay clearly visible) while the red trial button
+                // is the prominent action.
                 Text("Get Started")
-                    .font(SavantType.body)
-                    .foregroundStyle(SavantPalette.inkTertiary)
+                    .font(SavantType.bodyBold)
+                    .foregroundStyle(SavantPalette.ink)
                     .frame(maxWidth: .infinity)
-                    .frame(height: 44)
+                    .frame(height: 52)
             }
         }
         .buttonStyle(.plain)
