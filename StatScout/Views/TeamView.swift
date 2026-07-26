@@ -351,28 +351,12 @@ struct TeamView: View {
     /// it's the primary question asked of a team page, and it decides what the
     /// whole list means.
     private var sidePicker: some View {
-        HStack(spacing: 8) {
-            ForEach(RosterSide.allCases) { side in
-                let isSelected = rosterSide == side
-                Button {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        rosterSide = side
-                        selectedCategory = side.categories[0]
-                    }
-                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                } label: {
-                    Text(side.rawValue)
-                        .font(SavantType.smallBold)
-                        .foregroundStyle(isSelected ? .white : SavantPalette.inkSecondary)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 34)
-                        .background(isSelected ? SavantPalette.savantRed : SavantPalette.surface)
-                        .clipShape(Capsule())
-                        .overlay(Capsule().stroke(isSelected ? Color.clear : SavantPalette.hairline, lineWidth: 0.5))
-                }
-                .buttonStyle(.plain)
-                .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : [.isButton])
-            }
+        SavantSegmented(
+            segments: RosterSide.allCases.map { .init(value: $0, label: $0.rawValue) },
+            selection: $rosterSide
+        )
+        .onChange(of: rosterSide) { _, side in
+            selectedCategory = side.categories[0]
         }
     }
 

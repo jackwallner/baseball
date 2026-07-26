@@ -120,52 +120,20 @@ struct TeamRankingsCard: View {
     // MARK: - Pickers
 
     private var sidePicker: some View {
-        HStack(spacing: 0) {
-            ForEach(Side.allCases) { s in
-                Button {
-                    side = s
-                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                } label: {
-                    Text(s.label)
-                        .font(SavantType.smallBold)
-                        .foregroundStyle(side == s ? SavantPalette.ink : SavantPalette.inkSecondary)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 8)
-                        .overlay(
-                            Rectangle()
-                                .fill(side == s ? SavantPalette.savantRed : Color.clear)
-                                .frame(height: 2)
-                                .padding(.top, 32),
-                            alignment: .bottom
-                        )
-                }
-                .buttonStyle(.plain)
-            }
-        }
+        SavantSegmented(
+            segments: Side.allCases.map { .init(value: $0, label: $0.label) },
+            selection: $side
+        )
     }
 
     private var modePicker: some View {
-        HStack(spacing: 6) {
-            ForEach(Mode.allCases) { m in
-                Button {
-                    mode = m
-                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                } label: {
-                    Text(m.rawValue)
-                        .font(SavantType.micro)
-                        .tracking(0.3)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(mode == m ? .white : SavantPalette.inkSecondary)
-                        .padding(.horizontal, 9)
-                        .frame(height: 26)
-                        .background(mode == m ? SavantPalette.savantRed : SavantPalette.surface)
-                        .clipShape(Capsule())
-                        .overlay(Capsule().stroke(SavantPalette.hairline, lineWidth: 0.5))
-                }
-                .buttonStyle(.plain)
-            }
-        }
-        .fixedSize()
+        SavantSegmented(
+            segments: Mode.allCases.map {
+                .init(value: $0, label: $0.rawValue, isLocked: !store.isPro && $0 != .season)
+            },
+            selection: $mode,
+            onLockedTap: { _ in onUpgradeTap() }
+        )
     }
 
     /// Season and recent bars paired on one row, the same DualMetricBar the
@@ -230,31 +198,17 @@ struct TeamRankingsCard: View {
     }
 
     private var windowPicker: some View {
-        HStack(spacing: 6) {
-            ForEach(RecentFormWindow.windows, id: \.days) { w in
-                Button {
-                    windowDays = w.days
-                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                } label: {
-                    Text(w.label)
-                        .font(SavantType.smallBold)
-                        .foregroundStyle(windowDays == w.days ? .white : SavantPalette.inkSecondary)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 28)
-                        .background(windowDays == w.days ? SavantPalette.savantRed : SavantPalette.surface)
-                        .clipShape(Capsule())
-                        .overlay(Capsule().stroke(SavantPalette.hairline, lineWidth: 0.5))
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("\(w.label) days")
-            }
-        }
+        SavantSegmented(
+            segments: RecentWindow.allCases.map { .init(value: $0, label: $0.label) },
+            selection: Binding(
+                get: { RecentWindow(rawValue: windowDays) ?? .fortnight },
+                set: { windowDays = $0.rawValue }
+            )
+        )
         .padding(.horizontal, SavantGeo.padInline)
         .padding(.bottom, 8)
         .background(SavantPalette.surfaceAlt)
     }
-
-    // MARK: - Season
 
     @ViewBuilder
     private var seasonBars: some View {

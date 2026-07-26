@@ -15,7 +15,6 @@ struct StatsView: View {
         case leaders = "Leaders"
         case boxScore = "Box Score"
         case bestWorst = "Best/Worst"
-        case hotCold = "Hot / Cold"
         var id: String { rawValue }
     }
 
@@ -32,8 +31,6 @@ struct StatsView: View {
                 StandardStatsLeadersView(players: viewModel.qualifiedSeasonPlayers)
             case .bestWorst:
                 MetricLeadersView(metrics: viewModel.allMetrics)
-            case .hotCold:
-                HotColdView(viewModel: viewModel)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
