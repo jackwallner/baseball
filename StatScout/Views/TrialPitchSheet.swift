@@ -29,20 +29,20 @@ struct TrialPitchSheet: View {
         case .playerScouting, .recentForm, .upgrade, .onboarding, .activation:
             return [
                 Benefit(icon: "flame.fill",
-                        title: "Recent form",
-                        detail: "Last 7 / 15 / 30 day splits on any player or team. Season vs. recent on one screen."),
+                        title: "The Trends board",
+                        detail: "Every hitter and pitcher in the league ranked by how far they've moved, not just where they sit. Pick the stat, pick the window."),
+                Benefit(icon: "chart.bar.fill",
+                        title: "Recent form everywhere",
+                        detail: "Last 7 / 15 / 30 day splits on any player, team or leaderboard. Season vs. recent on one screen."),
                 Benefit(icon: "person.2.fill",
                         title: "Head-to-head matchups",
                         detail: "Stack any two players across every Statcast percentile: xwOBA, Barrel%, Sprint Speed, and more."),
-                Benefit(icon: "arrow.left.arrow.right.circle.fill",
-                        title: "Year-over-year trends",
-                        detail: "Compare any two seasons and see which metrics moved, not just this year's snapshot."),
-                Benefit(icon: "calendar.badge.clock",
-                        title: "Every past season",
-                        detail: "Browse back to 2015 with full percentile history, not locked to the current year."),
                 Benefit(icon: "shield.lefthalf.filled",
                         title: "Full team scouting",
-                        detail: "Every player on every roster, tap any team stat to sort the whole squad.")
+                        detail: "Advanced and standard stats for every club, plus a roster you can rank by any metric over any window."),
+                Benefit(icon: "calendar.badge.clock",
+                        title: "Every past season",
+                        detail: "Browse back to 2015 with full percentile history and year-over-year trends, not locked to the current year.")
             ]
         case .lockedSeason(let year):
             return [
@@ -66,7 +66,10 @@ struct TrialPitchSheet: View {
                         detail: "Compare a player's percentile rankings across any two seasons."),
                 Benefit(icon: "person.2.fill",
                         title: "Head-to-head matchups",
-                        detail: "Stack any two players across every Statcast metric.")
+                        detail: "Stack any two players across every Statcast metric."),
+                Benefit(icon: "flame.fill",
+                        title: "Recent form and the Trends board",
+                        detail: "Last 7 / 15 / 30 days on any player or team, and the whole league ranked by who's moving.")
             ]
         case .playerComparison, .teamView, .winback:
             return [
@@ -75,7 +78,10 @@ struct TrialPitchSheet: View {
                         detail: "Stack any two players across every Statcast metric."),
                 Benefit(icon: "shield.lefthalf.filled",
                         title: "Full team scouting",
-                        detail: "See every player on every roster, not just qualified starters."),
+                        detail: "Advanced and standard stats for every club, and a roster you can rank by any metric — season or last 7 / 15 / 30 days."),
+                Benefit(icon: "flame.fill",
+                        title: "The Trends board",
+                        detail: "The whole league ranked by who's heating up and cooling off right now."),
                 Benefit(icon: "arrow.left.arrow.right.circle.fill",
                         title: "Year-over-year trends",
                         detail: "Compare any two seasons when you want the longer arc.")

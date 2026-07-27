@@ -173,21 +173,12 @@ struct DashboardView: View {
                 }
             }
         } label: {
-            HStack(spacing: 4) {
-                Image(systemName: "line.3.horizontal.decrease.circle")
-                    .font(.system(size: 11, weight: .semibold))
-                Text("Filters")
-                    .font(SavantType.micro)
-                    .tracking(0.4)
-                Image(systemName: "chevron.down")
-                    .font(.system(size: 9, weight: .bold))
-            }
-            .foregroundStyle(SavantPalette.inkSecondary)
-            .padding(.horizontal, 10)
-            .frame(height: 30)
-            .background(SavantPalette.surface)
-            .clipShape(Capsule())
-            .overlay(Capsule().stroke(SavantPalette.hairline, lineWidth: 0.5))
+            SavantChip(
+                title: "Filters",
+                systemImage: "line.3.horizontal.decrease.circle",
+                trailing: .chevron,
+                isActive: viewModel.qualifierLevel != .qualified
+            )
         }
         .menuOrder(.fixed)
         .accessibilityLabel("Filters")
@@ -203,19 +194,10 @@ struct DashboardView: View {
                 viewModel.toggleSortDirection()
                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
             } label: {
-                HStack(spacing: 6) {
-                    Text(viewModel.currentSortMetric ?? viewModel.sortLabel)
-                        .font(SavantType.smallBold)
-                        .foregroundStyle(SavantPalette.ink)
-                    Image(systemName: viewModel.sortDescending ? "arrow.down" : "arrow.up")
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundStyle(SavantPalette.savantRed)
-                }
-                .padding(.horizontal, 12)
-                .frame(height: 30)
-                .background(SavantPalette.surface)
-                .clipShape(Capsule())
-                .overlay(Capsule().stroke(SavantPalette.hairline, lineWidth: 0.5))
+                SavantChip(
+                    title: viewModel.currentSortMetric ?? viewModel.sortLabel,
+                    trailing: .sortArrow(descending: viewModel.sortDescending)
+                )
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Sorted by \(viewModel.currentSortMetric ?? viewModel.sortLabel), \(viewModel.sortDescending ? "highest first" : "lowest first")")
@@ -250,26 +232,14 @@ struct DashboardView: View {
             }
             UIImpactFeedbackGenerator(style: .light).impactOccurred()
         } label: {
-            HStack(spacing: 4) {
-                Image(systemName: "flame.fill")
-                    .font(.system(size: 11, weight: .semibold))
+            SavantChip(
                 // "Last 15", not "15d" — the same wording the window picker
                 // right below it and every other screen uses.
-                Text(viewModel.showingRecent ? viewModel.recentWindow.label : "Recent")
-                    .font(SavantType.micro)
-                    .tracking(0.4)
-                    .fixedSize()
-                if !store.isPro {
-                    Image(systemName: "crown.fill")
-                        .font(.system(size: 8, weight: .bold))
-                }
-            }
-            .foregroundStyle(viewModel.showingRecent ? .white : SavantPalette.inkSecondary)
-            .padding(.horizontal, 10)
-            .frame(height: 30)
-            .background(viewModel.showingRecent ? SavantPalette.savantRed : SavantPalette.surface)
-            .clipShape(Capsule())
-            .overlay(Capsule().stroke(viewModel.showingRecent ? Color.clear : SavantPalette.hairline, lineWidth: 0.5))
+                title: viewModel.showingRecent ? viewModel.recentWindow.label : "Recent",
+                systemImage: "flame.fill",
+                isActive: viewModel.showingRecent,
+                isLocked: !store.isPro
+            )
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Recent form")
@@ -303,13 +273,7 @@ struct DashboardView: View {
             if !isSearching { viewModel.searchText = "" }
             UIImpactFeedbackGenerator(style: .light).impactOccurred()
         } label: {
-            Image(systemName: "magnifyingglass")
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundStyle(isActiveSearch ? .white : SavantPalette.inkSecondary)
-                .frame(width: 30, height: 30)
-                .background(isActiveSearch ? SavantPalette.savantRed : SavantPalette.surface)
-                .clipShape(Capsule())
-                .overlay(Capsule().stroke(isActiveSearch ? Color.clear : SavantPalette.hairline, lineWidth: 0.5))
+            SavantChip(systemImage: "magnifyingglass", isActive: isActiveSearch)
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Search")
@@ -392,6 +356,7 @@ struct DashboardView: View {
                                 metricLabel: sortMetric.label,
                                 metricCategory: sortMetric.category,
                                 trendDelta: trendDelta(for: player, metric: sortMetric.label),
+                                trendDecimals: sortMetric.label.map { RecentMetricKey.decimals(for: $0) } ?? 3,
                                 trendLocked: !store.isPro
                             )
                         }
@@ -419,31 +384,11 @@ struct DashboardView: View {
     /// once Recent has been switched on.
     private func trendDelta(for player: Player, metric label: String?) -> Double? {
         guard let label, let form = viewModel.recentForm(for: player.playerId) else { return nil }
-        return form.delta[Self.recentKey(for: label, isPitcher: player.playerType?.lowercased() == "pitcher")]
-    }
-
-    /// Season metric label → the rollup's key for it. Pitcher rows read the
-    /// opponent-facing variants.
-    private static func recentKey(for label: String, isPitcher: Bool) -> String {
-        switch label {
-        case "xwOBA": return isPitcher ? "opp_xwoba" : "xwoba"
-        case "xBA": return isPitcher ? "opp_xba" : "xba"
-        case "xSLG": return isPitcher ? "opp_xslg" : "xslg"
-        case "xISO": return "xiso"
-        case "Barrel%": return isPitcher ? "opp_barrel_pct" : "barrel_pct"
-        case "Hard-Hit%": return isPitcher ? "opp_hardhit_pct" : "hardhit_pct"
-        case "EV", "Avg EV Against": return isPitcher ? "opp_ev_avg" : "ev_avg"
-        case "Max EV", "Max EV Against": return isPitcher ? "opp_ev_max" : "ev_max"
-        case "K%": return "k_pct"
-        case "BB%": return "bb_pct"
-        case "Whiff%": return "whiff_pct"
-        case "Chase%": return "chase_pct"
-        case "Bat Speed": return "bat_speed"
-        case "Swing Length": return "swing_length"
-        case "Fastball Velo": return "fb_velo_avg"
-        case "Fastball Spin": return "fb_spin_avg"
-        default: return label.lowercased()
-        }
+        let key = RecentMetricKey.key(
+            for: label,
+            isPitcher: player.playerType?.lowercased() == "pitcher"
+        )
+        return form.delta[key]
     }
 
     private var loadingCard: some View {

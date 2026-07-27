@@ -166,6 +166,19 @@ struct PlayerComparisonView: View {
             Text("\(player.team) · \(player.displayPosition)")
                 .font(SavantType.micro)
                 .foregroundStyle(SavantPalette.inkTertiary)
+            // The season is load-bearing now that the two sides can come from
+            // different years — without it a cross-year comparison silently
+            // reads as this season's numbers.
+            if let season = player.season {
+                Text(String(season))
+                    .font(SavantType.micro)
+                    .tracking(0.4)
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(SavantPalette.savantNavy)
+                    .clipShape(Capsule())
+            }
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)

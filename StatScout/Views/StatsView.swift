@@ -11,9 +11,13 @@ struct StatsView: View {
     let viewModel: DashboardViewModel
     @EnvironmentObject private var store: StoreService
 
+    /// Advanced / Standard is the same split the player and team pages use —
+    /// Statcast's expected stats against the box score. Naming them "Leaders"
+    /// and "Box Score" here made the two leaderboards look like different kinds
+    /// of thing when they're the same list read in two vocabularies.
     private enum Mode: String, CaseIterable, Identifiable {
-        case leaders = "Leaders"
-        case boxScore = "Box Score"
+        case leaders = "Advanced"
+        case boxScore = "Standard"
         case bestWorst = "Best/Worst"
         var id: String { rawValue }
     }
@@ -55,7 +59,7 @@ struct StatsView: View {
         }
     }
 
-    // Nav-title dropdown that swaps between Leaders / Box Score / Best-Worst.
+    // Nav-title dropdown that swaps between Advanced / Standard / Best-Worst.
     // Replaces the old full-width segmented tab row.
     private var modeMenu: some View {
         Menu {

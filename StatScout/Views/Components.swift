@@ -271,89 +271,6 @@ struct CategoryFilter: View {
     }
 }
 
-// MARK: - Qualifier Picker
-
-struct QualifierPicker: View {
-    @Binding var selection: DashboardViewModel.QualifierLevel
-
-    var body: some View {
-        VStack(spacing: 4) {
-            HStack(spacing: 0) {
-                ForEach(DashboardViewModel.QualifierLevel.allCases) { level in
-                    Button {
-                        selection = level
-                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                    } label: {
-                        Text(level.rawValue)
-                            .font(SavantType.micro)
-                            .tracking(0.4)
-                            .foregroundStyle(selection == level ? .white : SavantPalette.inkSecondary)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 28)
-                            .background(selection == level ? SavantPalette.savantRed : Color.clear)
-                            .clipShape(Capsule())
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-            .padding(2)
-            .background(SavantPalette.surface)
-            .clipShape(Capsule())
-            .overlay(Capsule().stroke(SavantPalette.hairline, lineWidth: 0.5))
-
-            // Threshold caption — keeps "All" and "Min Sample" from reading as
-            // synonyms by spelling out what the active level actually filters.
-            Text(selection.description)
-                .font(SavantType.micro)
-                .tracking(0.3)
-                .foregroundStyle(SavantPalette.inkTertiary)
-        }
-    }
-}
-
-/// Compact menu variant of `QualifierPicker`. The segmented picker takes a
-/// whole row (plus a caption); this collapses into a chip that fits beside the
-/// category tabs. Use when vertical space matters more than at-a-glance state.
-struct QualifierMenu: View {
-    @Binding var selection: DashboardViewModel.QualifierLevel
-
-    var body: some View {
-        Menu {
-            ForEach(DashboardViewModel.QualifierLevel.allCases) { level in
-                Button {
-                    selection = level
-                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                } label: {
-                    if level == selection {
-                        Label("\(level.rawValue) · \(level.description)", systemImage: "checkmark")
-                    } else {
-                        Text("\(level.rawValue) · \(level.description)")
-                    }
-                }
-            }
-        } label: {
-            HStack(spacing: 4) {
-                Image(systemName: "line.3.horizontal.decrease.circle")
-                    .font(.system(size: 11, weight: .semibold))
-                Text(selection.rawValue)
-                    .font(SavantType.micro)
-                    .tracking(0.4)
-                Image(systemName: "chevron.down")
-                    .font(.system(size: 9, weight: .bold))
-            }
-            .foregroundStyle(SavantPalette.inkSecondary)
-            .padding(.horizontal, 10)
-            .frame(height: 30)
-            .background(SavantPalette.surface)
-            .clipShape(Capsule())
-            .overlay(Capsule().stroke(SavantPalette.hairline, lineWidth: 0.5))
-        }
-        .menuOrder(.fixed)
-        .accessibilityLabel("Qualifier")
-        .accessibilityValue("\(selection.rawValue), \(selection.description)")
-    }
-}
-
 // MARK: - Section Header (legacy, minimal use)
 
 struct SectionHeader: View {
@@ -530,7 +447,13 @@ struct LeaderboardTableRow: View {
     var metricCategory: MetricCategory? = nil
     /// Recent-vs-prior change in the displayed metric, when a window is loaded.
     var trendDelta: Double? = nil
+    var trendDecimals: Int = 3
     var trendLocked: Bool = false
+    /// The rolling-window value, shown in place of the season number when the
+    /// list is ranking by recent form. Uncoloured: the season percentile is the
+    /// wrong ruler for a fortnight's number, and there is no window curve to
+    /// place it on.
+    var valueOverride: String? = nil
 
     private var displayMetric: Metric? {
         guard let label = metricLabel else { return nil }
@@ -551,10 +474,17 @@ struct LeaderboardTableRow: View {
     // already conveys percentile visually; numeric percentile in this column
     // duplicates that signal and reads as "the stat value" at a glance.
     private var displayValueText: String {
+        if let valueOverride { return valueOverride }
         if let metric = displayMetric, !metric.value.isEmpty {
             return metric.value
         }
         return "—"
+    }
+
+    /// A window value has no percentile behind it, so it stays ink rather than
+    /// borrowing the season bar's colour and implying a rank it doesn't have.
+    private var displayValueColor: Color {
+        valueOverride == nil ? SavantPalette.color(forPercentile: displayPercentile) : SavantPalette.ink
     }
 
     var body: some View {
@@ -594,19 +524,21 @@ struct LeaderboardTableRow: View {
                 // A player without the sorted metric gets no bar — drawing one
                 // from their overall percentile would mislabel a different number
                 // as this column's stat. Show a muted "—" instead.
-                if displayMetric != nil {
+                if displayMetric != nil || valueOverride != nil {
                     // The mini bar and the trend column both compete for the
                     // same edge of the row, and the trend is the more
                     // informative of the two — the value's colour already
                     // carries percentile. Drop the bar when a trend is present
-                    // rather than squeezing the player name.
-                    if trendDelta == nil {
+                    // rather than squeezing the player name. A window value
+                    // drops it too: the season percentile bar beside a
+                    // fortnight's number reads as that number's rank.
+                    if trendDelta == nil, valueOverride == nil {
                         PercentileBarMini(percentile: displayPercentile)
                             .frame(width: 36)
                     }
                     Text(displayValueText)
                         .font(SavantType.statSmall)
-                        .foregroundStyle(SavantPalette.color(forPercentile: displayPercentile))
+                        .foregroundStyle(displayValueColor)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
                         .frame(width: 48, alignment: .trailing)
@@ -624,8 +556,7 @@ struct LeaderboardTableRow: View {
             if let trendDelta {
                 TrendArrow(
                     delta: trendDelta,
-                    // Rate stats move in thousandths, percentages in points.
-                    decimals: (metricLabel?.hasSuffix("%") ?? false) ? 0 : 3,
+                    decimals: trendDecimals,
                     isLocked: trendLocked
                 )
                 .frame(width: 46, alignment: .trailing)

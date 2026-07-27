@@ -98,6 +98,64 @@ struct RecentForm: Codable, Hashable, Sendable, Identifiable {
     }
 }
 
+/// Season metric label ↔ the rolling rollup's column for it, plus the one
+/// formatter for a window value.
+///
+/// The leaderboard, the team roster and the team cards all need to ask "what
+/// is this player's xwOBA over the last 15 days"; each had grown its own
+/// private copy of the mapping, which is how a metric ends up trending on one
+/// screen and blank on the next.
+enum RecentMetricKey {
+    /// Pitcher rows read the opponent-facing variants — a pitcher's xwOBA is
+    /// what hitters managed against him.
+    static func key(for label: String, isPitcher: Bool) -> String {
+        switch label {
+        case "xwOBA": return isPitcher ? "opp_xwoba" : "xwoba"
+        case "xBA": return isPitcher ? "opp_xba" : "xba"
+        case "xSLG": return isPitcher ? "opp_xslg" : "xslg"
+        case "xISO": return "xiso"
+        case "Barrel%": return isPitcher ? "opp_barrel_pct" : "barrel_pct"
+        case "Hard-Hit%": return isPitcher ? "opp_hardhit_pct" : "hardhit_pct"
+        case "Sweet-Spot%": return "sweetspot_pct"
+        case "EV", "Avg EV Against": return isPitcher ? "opp_ev_avg" : "ev_avg"
+        case "Max EV", "Max EV Against": return isPitcher ? "opp_ev_max" : "ev_max"
+        case "K%": return "k_pct"
+        case "BB%": return "bb_pct"
+        case "Whiff%": return "whiff_pct"
+        case "Chase%": return "chase_pct"
+        case "Bat Speed": return "bat_speed"
+        case "Swing Length": return "swing_length"
+        case "Fastball Velo": return "fb_velo_avg"
+        case "Fastball Spin": return "fb_spin_avg"
+        default: return label.lowercased()
+        }
+    }
+
+    /// How many decimals the metric's delta moves in. Rate stats are thousandths,
+    /// percentages and speeds are tenths, spin is whole rpm.
+    static func decimals(for label: String) -> Int {
+        if label.hasSuffix("Spin") { return 0 }
+        if label.hasSuffix("%") { return 1 }
+        if label.contains("EV") || label.contains("Velo") || label == "Bat Speed" { return 1 }
+        return 3
+    }
+
+    /// Matches the player page's conventions — Savant writes rate stats without
+    /// the leading zero, and a speed carries its unit.
+    static func format(_ value: Double, label: String) -> String {
+        if label.hasSuffix("%") { return String(format: "%.1f%%", value) }
+        if label.hasSuffix("Spin") { return String(format: "%.0f", value) }
+        if label == "Swing Length" { return String(format: "%.2f", value) }
+        if label.contains("EV") || label.contains("Velo") || label == "Bat Speed" {
+            return String(format: "%.1f", value)
+        }
+        if value < 10 {
+            return String(format: "%.3f", value).replacingOccurrences(of: "0.", with: ".")
+        }
+        return String(format: "%.1f", value)
+    }
+}
+
 /// Which rolling window is on screen. Mirrors `RecentFormWindow.windows` so the
 /// per-player card and the league leaderboard offer the same choices.
 enum RecentWindow: Int, CaseIterable, Identifiable, Sendable {

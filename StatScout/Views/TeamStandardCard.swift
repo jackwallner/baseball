@@ -72,12 +72,12 @@ struct TeamStandardCard: View {
         VStack(spacing: 0) {
             SavantSectionBar(title: "TEAM STANDARD STATS")
 
-            HStack(spacing: 8) {
+            SavantPickerRow {
                 SavantSegmented(
                     segments: TeamRankingsCard.Side.allCases.map { .init(value: $0, label: $0.label) },
                     selection: $side
                 )
-                Spacer(minLength: 8)
+                .segmentCount(TeamRankingsCard.Side.allCases.count)
                 SavantSegmented(
                     segments: [
                         .init(value: false, label: "Season"),
@@ -86,6 +86,7 @@ struct TeamStandardCard: View {
                     selection: $showingRecent,
                     onLockedTap: { _ in onUpgradeTap() }
                 )
+                .segmentCount(2)
             }
             .padding(.horizontal, SavantGeo.padInline)
             .padding(.vertical, 8)
@@ -306,10 +307,7 @@ struct TeamStandardCard: View {
     /// window actually reports rather than a padlock. It tracks the window
     /// picker, because a preview that ignores the control above it looks broken.
     private var teaser: some View {
-        let rows: [(String, Double, Double)] = [
-            ("AVG", 0.251, 0.288), ("OBP", 0.318, 0.354),
-            ("SLG", 0.408, 0.470), ("OPS", 0.726, 0.824),
-        ]
+        let rows = teaserRows
         return VStack(spacing: 0) {
             SavantSubSectionBar(title: "RATE · LAST \(windowDays) DAYS")
             ForEach(Array(rows.enumerated()), id: \.element.0) { index, row in
@@ -330,7 +328,7 @@ struct TeamStandardCard: View {
                 .background(index % 2 == 0 ? SavantPalette.surface : SavantPalette.surfaceAlt)
             }
             SavantSubSectionBar(title: "TOTALS · LAST \(windowDays) DAYS")
-            ForEach(Array([("AB", 512), ("H", 147), ("HR", 21), ("BB", 48)].enumerated()), id: \.element.0) { index, row in
+            ForEach(Array(teaserTotals.enumerated()), id: \.element.0) { index, row in
                 HStack {
                     Text(row.0)
                         .font(SavantType.bodyBold)
@@ -346,6 +344,41 @@ struct TeamStandardCard: View {
                 .background(index % 2 == 0 ? SavantPalette.surface : SavantPalette.surfaceAlt)
             }
         }
+    }
+
+    /// Season line → an invented window, per side and per window length. Built
+    /// from *this* team's real season rates so the preview is the club the user
+    /// is looking at, and so moving the Hitting/Pitching or 7/15/30 pickers
+    /// visibly redraws it. Only the window column is fictional, and it stays
+    /// behind the blur.
+    private var teaserRows: [(String, Double, Double)] {
+        let seasonLine = teamLine(for: players)
+        let labels = rateLabels.filter { seasonLine[$0] != nil }
+        let fallback: [(String, Double)] = side == .pitching
+            ? [("ERA", 4.05), ("WHIP", 1.28), ("K/9", 8.6), ("BB/9", 3.1)]
+            : [("AVG", 0.251), ("OBP", 0.318), ("SLG", 0.408), ("OPS", 0.726)]
+        let base: [(String, Double)] = labels.isEmpty
+            ? fallback
+            : labels.prefix(4).map { ($0, seasonLine[$0] ?? 0) }
+
+        return base.map { label, season in
+            let seed = Self.stableSeed("\(label)-\(side.rawValue)-\(windowDays)-\(team)")
+            // ±12% of the season figure — the size of a real fortnight's swing.
+            let swing = season * Double(seed % 25 - 12) / 100
+            return (label, season, season + swing)
+        }
+    }
+
+    private var teaserTotals: [(String, Int)] {
+        let scale = Double(windowDays) / 15
+        return [("AB", 512), ("H", 147), ("HR", 21), ("BB", 48)].map { label, value in
+            (label, Int((Double(value) * scale).rounded()))
+        }
+    }
+
+    /// Deterministic across launches, unlike `hashValue`.
+    private static func stableSeed(_ text: String) -> Int {
+        abs(text.unicodeScalars.reduce(7) { ($0 &* 31 &+ Int($1.value)) % 100_003 })
     }
 
     // MARK: - Aggregation

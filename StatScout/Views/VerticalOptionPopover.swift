@@ -176,28 +176,20 @@ struct SavantNavPill: View {
 }
 
 /// In-content variant: same control, but sitting on a card rather than the navy
-/// bar, so it's a quiet outlined capsule instead of a red one.
+/// bar, so it's a quiet outlined capsule instead of a red one. It's a
+/// `SavantChip` with a chevron, so it can't drift from the sort / search /
+/// Filters chips it shares a row with.
 struct SavantInlinePill: View {
     let systemImage: String?
     let title: String
+    var isLocked: Bool = false
 
     var body: some View {
-        HStack(spacing: 4) {
-            if let systemImage {
-                Image(systemName: systemImage)
-                    .font(.system(size: 10, weight: .semibold))
-            }
-            Text(title)
-                .font(SavantType.smallBold)
-            Image(systemName: "chevron.down")
-                .font(.system(size: 8, weight: .bold))
-        }
-        .foregroundStyle(SavantPalette.inkSecondary)
-        .fixedSize()
-        .frame(height: 32)
-        .padding(.horizontal, 12)
-        .background(SavantPalette.surface)
-        .clipShape(Capsule())
-        .overlay(Capsule().stroke(SavantPalette.hairline, lineWidth: 0.5))
+        SavantChip(
+            title: title,
+            systemImage: systemImage,
+            trailing: .chevron,
+            isLocked: isLocked
+        )
     }
 }

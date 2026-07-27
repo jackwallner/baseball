@@ -71,17 +71,17 @@ enum PaywallTrigger: Identifiable, Hashable {
         case .playerComparison:
             return "Stack any two players head-to-head across every Statcast metric: xwOBA, Barrel%, Sprint Speed, and more."
         case .onboarding:
-            return "Recent form, head-to-head matchups, and every season back to 2015. The full Statcast picture on every player."
+            return "The Trends board, recent form, head-to-head matchups, and every season back to 2015. The full Statcast picture on every player."
         case .activation:
-            return "Recent form, head-to-head matchups, and every season back to 2015. The full Statcast picture on every player."
+            return "The Trends board, recent form, head-to-head matchups, and every season back to 2015. The full Statcast picture on every player."
         case .upgrade:
-            return "Recent form, head-to-head matchups, and every season back to 2015. The full Statcast picture on every player."
+            return "The Trends board, recent form, head-to-head matchups, and every season back to 2015. The full Statcast picture on every player."
         case .pastSeasonsLoad:
             return "Load historical data to explore past seasons, year-over-year trends, and more."
         case .teamView:
-            return "Every player on every roster, not just qualified starters, plus side-by-side comparisons for every squad."
+            return "Advanced and standard stats for every club, a roster you can rank by any metric over any window, and side-by-side comparisons for every squad."
         case .winback:
-            return "Your StatScout+ access has lapsed. Pick it back up to get recent form, head-to-head matchups, and every past season."
+            return "Your StatScout+ access has lapsed. Pick it back up to get the Trends board, recent form, head-to-head matchups, and every past season."
         case .playerScouting:
             return "Last 7 / 15 / 30 day form, head-to-head matchups, every roster. The full picture, not just season totals."
         case .recentForm:
@@ -107,10 +107,15 @@ enum PaywallTrigger: Identifiable, Hashable {
         }
     }
 
+    /// What the subscription actually opens, kept in step with the app. The
+    /// Trends board and the team Advanced / Standard windows shipped after this
+    /// list was written and went unmentioned, so the pitch was selling less
+    /// than the product does.
     private static let proFeatures: [(icon: String, title: String)] = [
-        ("flame.fill", "Catch hot streaks: last 7 / 15 / 30 day form"),
+        ("flame.fill", "The Trends board: who's heating up and cooling off, league-wide"),
+        ("chart.bar.fill", "Last 7 / 15 / 30 day form on any player, team or leaderboard"),
         ("person.2.fill", "Head-to-head: any two players, every metric"),
-        ("shield.lefthalf.filled", "Every player on every roster, not just qualifiers"),
+        ("shield.lefthalf.filled", "Team scouting: advanced and standard, season or recent"),
         ("calendar.badge.clock", "Every season back to 2015 + year-over-year trends")
     ]
 

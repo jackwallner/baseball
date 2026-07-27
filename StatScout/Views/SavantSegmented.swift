@@ -1,5 +1,13 @@
 import SwiftUI
 
+enum SavantControl {
+    /// One height for every inline control in the app — segmented groups,
+    /// chips, and the popover pills. Previously 26, 28, 30, 32, 34 and 44 were
+    /// all in use for controls at the same level, which is what made a row of
+    /// filters read as a pile of unrelated buttons.
+    static let height: CGFloat = 32
+}
+
 /// The single inline-options control for the whole app.
 ///
 /// Same-level choices were being drawn four different ways — large filled
@@ -16,6 +24,8 @@ import SwiftUI
 ///    Last 7 / 15 / 30 windows, Heating / Cooling): this control. One height,
 ///    one shape, everywhere. Past four options it hands over to
 ///    `VerticalOptionPopover` — seasons and the Trends metric list.
+/// 4. **Standalone controls** (the sort chip, search, Filters, the pickers that
+///    open a popover): `SavantChip`, same height and type as a segment.
 ///
 /// The wording is shared too: a rolling window is always "Last 15", never
 /// "15d" on one screen and "Last 15" on the next.
@@ -43,9 +53,7 @@ struct SavantSegmented<Value: Hashable>: View {
     /// active control uses; Trends overrides it to encode hot vs cold.
     var selectedFill: (Value) -> Color = { _ in SavantPalette.savantRed }
 
-    /// One height for every instance. Previously 26, 28, 30, 34 and 44 were all
-    /// in use for controls at the same level.
-    private let height: CGFloat = 32
+    private let height: CGFloat = SavantControl.height
 
     var body: some View {
         HStack(spacing: 6) {
@@ -66,6 +74,8 @@ struct SavantSegmented<Value: Hashable>: View {
                         }
                         Text(segment.label)
                             .font(SavantType.smallBold)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
                         if segment.isLocked {
                             Image(systemName: "crown.fill")
                                 .font(.system(size: 9, weight: .bold))
@@ -85,6 +95,130 @@ struct SavantSegmented<Value: Hashable>: View {
                 .accessibilityLabel(segment.isLocked ? "\(segment.label), requires StatScout+" : segment.label)
                 .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : [.isButton])
             }
+        }
+    }
+}
+
+/// The single standalone-control shape: an outlined capsule that fills with
+/// Savant red while it's doing something.
+///
+/// Everything that isn't a segmented group is this — the sort chip, the search
+/// toggle, the Filters menu, the season and metric pickers. They were each
+/// hand-drawn before, and drifted: 30pt tall here and 32 there, `micro` type on
+/// one and `smallBold` on the next, so a single row of filters read as three
+/// unrelated buttons.
+///
+/// It renders a label only; the caller wraps it in whatever it needs to be
+/// (`Button`, `Menu`, a popover anchor).
+struct SavantChip: View {
+    enum Trailing {
+        case none
+        /// A chooser — opens a menu or a popover.
+        case chevron
+        /// A sort control — tapping flips the arrow.
+        case sortArrow(descending: Bool)
+    }
+
+    var title: String? = nil
+    var systemImage: String? = nil
+    var trailing: Trailing = .none
+    /// Filled state: the control is currently changing what's on screen.
+    var isActive: Bool = false
+    /// Draws the StatScout+ crown. The caller still owns what a tap does.
+    var isLocked: Bool = false
+
+    private var glyphColor: Color {
+        isActive ? .white : SavantPalette.inkSecondary
+    }
+
+    var body: some View {
+        HStack(spacing: 5) {
+            if let systemImage {
+                Image(systemName: systemImage)
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(glyphColor)
+            }
+            if let title {
+                Text(title)
+                    .font(SavantType.smallBold)
+                    .foregroundStyle(isActive ? .white : SavantPalette.ink)
+                    .lineLimit(1)
+            }
+            if isLocked {
+                Image(systemName: "crown.fill")
+                    .font(.system(size: 9, weight: .bold))
+                    .foregroundStyle(Color.yellow)
+            }
+            switch trailing {
+            case .none:
+                EmptyView()
+            case .chevron:
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 9, weight: .bold))
+                    .foregroundStyle(glyphColor)
+            case .sortArrow(let descending):
+                Image(systemName: descending ? "arrow.down" : "arrow.up")
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundStyle(isActive ? .white : SavantPalette.savantRed)
+            }
+        }
+        .fixedSize()
+        .padding(.horizontal, title == nil ? 0 : 12)
+        // An icon-only chip stays a circle rather than collapsing to a sliver.
+        .frame(width: title == nil ? SavantControl.height : nil,
+               height: SavantControl.height)
+        .background(isActive ? SavantPalette.savantRed : SavantPalette.surface)
+        .clipShape(Capsule())
+        .overlay(
+            Capsule().stroke(isActive ? Color.clear : SavantPalette.hairline, lineWidth: 0.5)
+        )
+    }
+}
+
+/// Which of a row's width a control is entitled to. Set by `segmentCount`.
+private struct SegmentCountKey: LayoutValueKey {
+    static let defaultValue: Int = 1
+}
+
+extension View {
+    /// Tells `SavantPickerRow` how many segments this control holds.
+    func segmentCount(_ count: Int) -> some View {
+        layoutValue(key: SegmentCountKey.self, value: count)
+    }
+}
+
+/// Two picker groups on one row, each given width in proportion to how many
+/// segments it holds — so every capsule in the row comes out the same width.
+///
+/// A plain `HStack` splits the row evenly between the *groups*, which is what
+/// made "Season / Recent / Both" sit cramped beside "Hitting / Pitching":
+/// three labels squeezed into the width two were given, and worse once the
+/// free-tier crowns appeared on two of them.
+struct SavantPickerRow: Layout {
+    var spacing: CGFloat = 8
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let width = proposal.replacingUnspecifiedDimensions().width
+        let height = subviews
+            .map { $0.sizeThatFits(.unspecified).height }
+            .max() ?? SavantControl.height
+        return CGSize(width: width, height: max(height, SavantControl.height))
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        guard !subviews.isEmpty else { return }
+        let counts = subviews.map { max(1, $0[SegmentCountKey.self]) }
+        let total = CGFloat(counts.reduce(0, +))
+        let available = bounds.width - spacing * CGFloat(subviews.count - 1)
+        var x = bounds.minX
+        for (index, subview) in subviews.enumerated() {
+            let width = available * CGFloat(counts[index]) / total
+            subview.place(
+                at: CGPoint(x: x, y: bounds.midY),
+                anchor: .leading,
+                proposal: ProposedViewSize(width: width, height: bounds.height)
+            )
+            x += width + spacing
         }
     }
 }

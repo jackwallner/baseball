@@ -6,7 +6,11 @@ import SwiftUI
 /// page, which is fine for the one guy you just looked up and useless for
 /// building a list of ten. This is the manager: search the league, tap to
 /// follow, done. Free — following is what makes the app feel like yours, and
-/// what's paid is the payoff on the Trends board.
+/// what's paid is the payoff.
+///
+/// Opened from the Compare tab, which owns the followed list. It used to hang
+/// off the Trends board, which left Trends doing two jobs and put the personal
+/// list on a tab that's otherwise entirely league-wide.
 struct FollowPlayersSheet: View {
     @Bindable var viewModel: DashboardViewModel
     /// Which side the Trends board is showing, so the sheet opens on the list

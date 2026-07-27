@@ -282,4 +282,9 @@ struct MockProvider: StatcastProviding, @unchecked Sendable {
         if let error { throw error }
         return []
     }
+
+    func fetchRecentForm(season: Int, windowDays: Int) async throws -> [RecentForm] {
+        if let error { throw error }
+        return []
+    }
 }
