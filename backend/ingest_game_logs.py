@@ -229,6 +229,13 @@ def _pitch_aggregates(
                     fb_cols = [c for c in ("release_speed", "release_spin_rate") if c in shape_cols]
                     fb_means = fastballs.groupby(keys, dropna=True)[fb_cols].mean()
                     fb_means.columns = [f"fb_{c}" for c in fb_means.columns]
+                    # Fastball count is the denominator the rollup needs to
+                    # combine these across a window; without it fastball velo
+                    # and spin drop out of recent form entirely.
+                    if "release_speed" in fb_cols:
+                        fb_means["fb_pitches"] = (
+                            fastballs.groupby(keys, dropna=True)["release_speed"].count()
+                        )
                     shape_means = shape_means.join(fb_means, how="left")
 
     merged = counts.join(swing_means, how="left").join(shape_means, how="left")
@@ -473,6 +480,7 @@ def _aggregate_pitchers(df: pd.DataFrame) -> list[dict]:
             "fb_spin_avg": _round(pitches.get("fb_release_spin_rate"), 0),
             # See the batter aggregator — denominators for exact window recompute.
             "_pitches": int(pitches.get("pitches") or 0),
+            "_fb_pitches": int(pitches.get("fb_pitches") or 0),
             "_swings": swings,
             "_oz_pitches": oz_pitches,
             "_bbe": bbe_count,
