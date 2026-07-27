@@ -4,7 +4,7 @@ import Foundation
 ///
 /// Mirrors Baseball Savant's rolling leaderboard shape: the current window,
 /// the equal-length window immediately before it, and the change between them.
-/// The delta is the interesting column — a .380 xwOBA means more when you can
+/// The delta is the interesting column, a .380 xwOBA means more when you can
 /// see it was .250 a fortnight ago.
 struct RecentForm: Codable, Hashable, Sendable, Identifiable {
     let playerId: Int
@@ -106,7 +106,7 @@ struct RecentForm: Codable, Hashable, Sendable, Identifiable {
 /// private copy of the mapping, which is how a metric ends up trending on one
 /// screen and blank on the next.
 enum RecentMetricKey {
-    /// Pitcher rows read the opponent-facing variants — a pitcher's xwOBA is
+    /// Pitcher rows read the opponent-facing variants, a pitcher's xwOBA is
     /// what hitters managed against him.
     static func key(for label: String, isPitcher: Bool) -> String {
         switch label {
@@ -140,7 +140,7 @@ enum RecentMetricKey {
         return 3
     }
 
-    /// Matches the player page's conventions — Savant writes rate stats without
+    /// Matches the player page's conventions, Savant writes rate stats without
     /// the leading zero, and a speed carries its unit.
     static func format(_ value: Double, label: String) -> String {
         if label.hasSuffix("%") { return String(format: "%.1f%%", value) }

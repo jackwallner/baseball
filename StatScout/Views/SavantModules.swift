@@ -145,27 +145,33 @@ struct SavantTabs: View {
     @Binding var selected: String
 
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 0) {
-                ForEach(tabs, id: \.self) { tab in
-                    Button(action: {
-                        selected = tab
-                        let generator = UIImpactFeedbackGenerator(style: .light)
-                        generator.impactOccurred()
-                    }) {
-                        VStack(spacing: 0) {
-                            Text(tab.uppercased())
-                                .font(SavantType.smallBold)
-                                .tracking(0.5)
-                                .foregroundStyle(selected == tab ? SavantPalette.ink : SavantPalette.inkTertiary)
-                                .padding(.vertical, 12)
-                                .padding(.horizontal, 14)
-                            Rectangle()
-                                .fill(selected == tab ? SavantPalette.savantRed : Color.clear)
-                                .frame(height: 2)
-                        }
+        // Equal shares of the full width rather than left-packed with a dead
+        // gap on the right: four peers of the same kind, so they get the same
+        // space, and the underline reads as a real tab rather than a mark under
+        // a word. The labels shrink slightly before they'd ever truncate.
+        HStack(spacing: 0) {
+            ForEach(tabs, id: \.self) { tab in
+                Button(action: {
+                    selected = tab
+                    let generator = UIImpactFeedbackGenerator(style: .light)
+                    generator.impactOccurred()
+                }) {
+                    VStack(spacing: 0) {
+                        Text(tab.uppercased())
+                            .font(SavantType.smallBold)
+                            .tracking(0.5)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.75)
+                            .foregroundStyle(selected == tab ? SavantPalette.ink : SavantPalette.inkTertiary)
+                            .padding(.vertical, 12)
+                            .padding(.horizontal, 6)
+                            .frame(maxWidth: .infinity)
+                        Rectangle()
+                            .fill(selected == tab ? SavantPalette.savantRed : Color.clear)
+                            .frame(height: 2)
                     }
                 }
+                .buttonStyle(.plain)
             }
         }
         .background(SavantPalette.surface)

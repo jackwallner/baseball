@@ -269,7 +269,7 @@ struct OnboardingCards: View {
             // --- Fixed 24pt footer slot BELOW the button, identical every page.
             // On the last page it carries Restore (or the loading state); on the
             // others it is empty. Its constant height is what keeps the button's
-            // bottom edge — and therefore its Y — pinned across pages.
+            // bottom edge, and therefore its Y, pinned across pages.
             Group {
                 if isLastPage, !dataReady {
                     HStack(spacing: 8) {
@@ -285,7 +285,7 @@ struct OnboardingCards: View {
                 } else if isLastPage && !store.isPro {
                     Button {
                         // Surface the outcome through the same trialError line the
-                        // purchase CTA uses — a restore that silently does nothing
+                        // purchase CTA uses, a restore that silently does nothing
                         // reads as a dead button. Success flips isPro, which
                         // finishes onboarding via onChange.
                         isRestoring = true
@@ -314,7 +314,7 @@ struct OnboardingCards: View {
     }
 
     /// "Get Started" dismisses onboarding into the free tier. `prominent` is the
-    /// solo state (Pro users, where it's the only — and primary — action, a
+    /// solo state (Pro users, where it's the only, and primary, action, a
     /// filled button); otherwise it's a de-emphasized, borderless text link that
     /// sits above the red trial CTA so it never competes for the tap.
     private func getStartedButton(prominent: Bool) -> some View {
@@ -331,7 +331,7 @@ struct OnboardingCards: View {
                     .clipShape(RoundedRectangle(cornerRadius: 14))
             } else {
                 // Borderless free-tier exit: SAME text as the boxed 1.3.0 version
-                // (bodyBold, ink) — just no box. Keeps it legible/compliant (the
+                // (bodyBold, ink), just no box. Keeps it legible/compliant (the
                 // free path must stay clearly visible) while the red trial button
                 // is the prominent action.
                 Text("Get Started")
@@ -344,8 +344,8 @@ struct OnboardingCards: View {
         .buttonStyle(.plain)
     }
 
-    // One-tap conversion: buy the yearly plan in place — trial when eligible,
-    // straight purchase otherwise — never a second paywall. PaywallView is only
+    // One-tap conversion: buy the yearly plan in place, trial when eligible,
+    // straight purchase otherwise, never a second paywall. PaywallView is only
     // the emergency fallback when products didn't load. Success flips
     // store.isPro, which finishes onboarding via the onChange handler.
     private func buyYearly() {
@@ -363,7 +363,7 @@ struct OnboardingCards: View {
                     break
                 case .pending:
                     // Ask-to-Buy / deferred payment: onboarding stays up because
-                    // isPro hasn't flipped — explain instead of appearing dead.
+                    // isPro hasn't flipped, explain instead of appearing dead.
                     trialError = "Purchase pending approval. StatScout+ unlocks automatically once it's approved."
                 case .cancelled:
                     trialError = "Purchase cancelled. Tap again to continue."
@@ -382,7 +382,7 @@ struct OnboardingCards: View {
             bullets: [
                 BulletItem(text: "Every qualified player ranked", icon: "checkmark.circle.fill", color: SavantPalette.savantRed),
                 BulletItem(text: "xwOBA, Barrel%, Sprint Speed, and more", icon: "checkmark.circle.fill", color: SavantPalette.savantRed),
-                BulletItem(text: "Updated daily — fresh data, always", icon: "checkmark.circle.fill", color: SavantPalette.savantRed)
+                BulletItem(text: "Updated daily, always fresh", icon: "checkmark.circle.fill", color: SavantPalette.savantRed)
             ]
         ),
         OnboardingPage(
@@ -390,15 +390,15 @@ struct OnboardingCards: View {
             title: "Find Insights\nFast",
             description: "Three tabs cover every angle of the game. See what's happening across the league in seconds.",
             bullets: [
-                BulletItem(text: "Stats — sort the league, leaders, best & worst", icon: "checkmark.circle.fill", color: SavantPalette.savantRed),
-                BulletItem(text: "Teams — browse any roster, see who's hot", icon: "checkmark.circle.fill", color: SavantPalette.savantRed),
-                BulletItem(text: "Compare — stack two players head-to-head", icon: "checkmark.circle.fill", color: SavantPalette.savantRed)
+                BulletItem(text: "Stats: sort the league, leaders, best & worst", icon: "checkmark.circle.fill", color: SavantPalette.savantRed),
+                BulletItem(text: "Teams: browse any roster, see who's hot", icon: "checkmark.circle.fill", color: SavantPalette.savantRed),
+                BulletItem(text: "Compare: stack two players head-to-head", icon: "checkmark.circle.fill", color: SavantPalette.savantRed)
             ]
         ),
         OnboardingPage(
             icon: "crown.fill",
             title: "Go Deeper\nwith StatScout+",
-            description: "Recent form, every roster player, head-to-head matchups, and seasons back to 2015 — the full scouting toolkit.",
+            description: "Recent form, every roster player, head-to-head matchups, and seasons back to 2015. The full scouting toolkit.",
             bullets: [
                 BulletItem(text: "Last 7 / 15 / 30 day form on any player or team", icon: "flame.fill", color: SavantPalette.savantRed),
                 BulletItem(text: "Head-to-head comparisons across every metric", icon: "person.2.fill", color: SavantPalette.savantRed),

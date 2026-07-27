@@ -1,9 +1,16 @@
 import SwiftUI
 
-/// Native, Apple-Health-"Vitals"-style trial pitch. A focused, friendly
-/// pre-paywall: hero glyph, headline, feature bullets, one prominent CTA,
-/// and the trial fine print. The CTA hands off to the native `PaywallView`
-/// for the actual transaction.
+/// The app's one contextual offer: a compact, native half-sheet that names what
+/// the user just reached for, makes three promises, and buys the yearly plan in
+/// place.
+///
+/// It used to be a scrolling page: an 84pt hero circle, a headline, a subtitle,
+/// and five benefit rows of two-line prose. On a phone that meant the pitch and
+/// the button were never on screen together, so the sheet opened showing a
+/// benefit list with its argument cut off mid-sentence and its CTA below the
+/// fold. Everything here is now sized to land inside one detent on the smallest
+/// supported phone: an inline glyph instead of a hero badge, three one-line
+/// benefits instead of five paragraphs, and the CTA always visible.
 struct TrialPitchSheet: View {
     @EnvironmentObject private var store: StoreService
     @Environment(\.dismiss) private var dismiss
@@ -17,91 +24,92 @@ struct TrialPitchSheet: View {
         let detail: String
     }
 
-    // Bullets are context-aware. For `.playerScouting` (the player-page
-    // first-tap pitch) we lead with current-season value — Recent Form,
-    // head-to-head, full-roster scouting. Triggers that explicitly opened a
-    // history feature still get the time-shaped pitch.
+    /// Three, never more, and each one line.
+    ///
+    /// Context-aware: `.playerScouting` (the player-page first-tap pitch) leads
+    /// with current-season value, triggers that opened a history feature get the
+    /// time-shaped pitch. The fourth and fifth bullets the list used to carry
+    /// were the ones nobody scrolled to.
     private var benefits: [Benefit] {
         switch trigger {
         case .playerScouting, .recentForm, .upgrade, .onboarding, .activation:
             return [
                 Benefit(icon: "flame.fill",
                         title: "The Trends board",
-                        detail: "Every hitter and pitcher in the league ranked by how far they've moved, not just where they sit. Pick the stat, pick the window."),
+                        detail: "The whole league ranked by who's moving, right now."),
                 Benefit(icon: "chart.bar.fill",
                         title: "Recent form everywhere",
-                        detail: "Last 7 / 15 / 30 day splits on any player, team or leaderboard. Season vs. recent on one screen."),
+                        detail: "Last 7 / 15 / 30 days on any player, team or board."),
                 Benefit(icon: "person.2.fill",
                         title: "Head-to-head matchups",
-                        detail: "Stack any two players across every Statcast percentile: xwOBA, Barrel%, Sprint Speed, and more."),
-                Benefit(icon: "shield.lefthalf.filled",
-                        title: "Full team scouting",
-                        detail: "Advanced and standard stats for every club, plus a roster you can rank by any metric over any window."),
-                Benefit(icon: "calendar.badge.clock",
-                        title: "Every past season",
-                        detail: "Browse back to 2015 with full percentile history and year-over-year trends, not locked to the current year.")
+                        detail: "Stack any two players across every percentile.")
             ]
         case .lockedSeason(let year):
             return [
                 Benefit(icon: "calendar.badge.clock",
                         title: "The \(year) season",
-                        detail: "Every player's \(year) percentile rankings, plus every other season back to 2015."),
+                        detail: "Every percentile ranking, plus every year back to 2015."),
                 Benefit(icon: "arrow.left.arrow.right.circle.fill",
                         title: "Year-over-year trends",
-                        detail: "Put \(year) side by side with any other season and see what moved."),
-                Benefit(icon: "person.2.fill",
-                        title: "Head-to-head matchups",
-                        detail: "Stack any two players across every Statcast metric.")
+                        detail: "Put \(year) beside any other season and see what moved."),
+                Benefit(icon: "flame.fill",
+                        title: "The Trends board",
+                        detail: "The whole league ranked by who's moving, right now.")
             ]
         case .pastSeason, .pastSeasonsLoad, .yearCompare:
             return [
                 Benefit(icon: "calendar.badge.clock",
                         title: "Every past season",
-                        detail: "Back to 2015. See how the numbers held up year by year."),
+                        detail: "Back to 2015, with full percentile history."),
                 Benefit(icon: "arrow.left.arrow.right.circle.fill",
                         title: "Year-over-year trends",
-                        detail: "Compare a player's percentile rankings across any two seasons."),
-                Benefit(icon: "person.2.fill",
-                        title: "Head-to-head matchups",
-                        detail: "Stack any two players across every Statcast metric."),
+                        detail: "Compare any two seasons side by side."),
                 Benefit(icon: "flame.fill",
-                        title: "Recent form and the Trends board",
-                        detail: "Last 7 / 15 / 30 days on any player or team, and the whole league ranked by who's moving.")
+                        title: "The Trends board",
+                        detail: "The whole league ranked by who's moving, right now.")
             ]
         case .playerComparison, .teamView, .winback:
             return [
                 Benefit(icon: "person.2.fill",
                         title: "Head-to-head matchups",
-                        detail: "Stack any two players across every Statcast metric."),
+                        detail: "Stack any two players across every percentile."),
                 Benefit(icon: "shield.lefthalf.filled",
                         title: "Full team scouting",
-                        detail: "Advanced and standard stats for every club, and a roster you can rank by any metric — season or last 7 / 15 / 30 days."),
+                        detail: "Every club's roster, ranked by any metric."),
                 Benefit(icon: "flame.fill",
                         title: "The Trends board",
-                        detail: "The whole league ranked by who's heating up and cooling off right now."),
-                Benefit(icon: "arrow.left.arrow.right.circle.fill",
-                        title: "Year-over-year trends",
-                        detail: "Compare any two seasons when you want the longer arc.")
+                        detail: "The whole league ranked by who's moving, right now.")
             ]
         }
     }
 
     var body: some View {
         VStack(spacing: 0) {
+            // The ScrollView is a safety net for Dynamic Type and the smallest
+            // devices, not the layout: at default sizes nothing here scrolls.
             ScrollView {
-                VStack(spacing: 22) {
+                VStack(spacing: 14) {
                     hero
                     benefitList
                 }
-                .padding(.horizontal, 24)
-                .padding(.top, 32)
-                .padding(.bottom, 16)
+                .padding(.horizontal, 20)
+                .padding(.top, 18)
+                .padding(.bottom, 10)
             }
             .scrollBounceBehavior(.basedOnSize)
 
             footer
         }
         .background(SavantPalette.canvas.ignoresSafeArea())
+        // A fixed height rather than a fraction, because what has to fit is a
+        // fixed amount of content: hero, three benefits, CTA and the auto-renew
+        // disclosure. A fraction that looked right on a 6.3" phone clipped the
+        // third benefit on a 4.7" one. This is about half the screen on a
+        // current phone, which is the size this pitch has always been, and
+        // two-thirds on the smallest, where it needs to be. Drags up to full
+        // height for large accessibility text.
+        .presentationDetents([.height(460), .large])
+        .presentationDragIndicator(.visible)
         // Tick the session cap on the *pitch* sheet too, not just the full
         // PaywallView. Otherwise PaywallGate.shouldPresent(.playerScouting)
         // stays true forever for sheets that never reach PaywallView, and the
@@ -115,52 +123,54 @@ struct TrialPitchSheet: View {
         }
     }
 
+    /// Glyph, headline and one line of argument, on three tight lines. The 84pt
+    /// badge this replaced cost more vertical space than two whole benefits.
     private var hero: some View {
-        VStack(spacing: 14) {
-            ZStack {
-                Circle()
-                    .fill(SavantPalette.savantRed.opacity(0.12))
-                    .frame(width: 84, height: 84)
+        VStack(spacing: 6) {
+            HStack(spacing: 10) {
                 Image(systemName: trigger.icon)
-                    .font(.system(size: 36, weight: .semibold))
+                    .font(.system(size: 22, weight: .semibold))
                     .foregroundStyle(SavantPalette.savantRed)
+                Text(trigger.title)
+                    .font(SavantType.statLarge)
+                    .foregroundStyle(SavantPalette.ink)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.8)
             }
 
-            Text(trigger.title)
-                .font(SavantType.statLarge)
-                .foregroundStyle(SavantPalette.ink)
-                .multilineTextAlignment(.center)
-
             Text(trigger.subtitle)
-                .font(SavantType.body)
+                .font(SavantType.small)
                 .foregroundStyle(SavantPalette.inkSecondary)
                 .multilineTextAlignment(.center)
+                .lineLimit(3)
                 .fixedSize(horizontal: false, vertical: true)
         }
+        .frame(maxWidth: .infinity)
     }
 
     private var benefitList: some View {
         VStack(spacing: 0) {
             ForEach(Array(benefits.enumerated()), id: \.element.id) { index, benefit in
-                HStack(spacing: 14) {
+                HStack(spacing: 12) {
                     Image(systemName: benefit.icon)
-                        .font(.system(size: 18, weight: .semibold))
+                        .font(.system(size: 16, weight: .semibold))
                         .foregroundStyle(SavantPalette.savantRed)
-                        .frame(width: 30)
+                        .frame(width: 24)
 
-                    VStack(alignment: .leading, spacing: 2) {
+                    VStack(alignment: .leading, spacing: 1) {
                         Text(benefit.title)
                             .font(SavantType.bodyBold)
                             .foregroundStyle(SavantPalette.ink)
                         Text(benefit.detail)
                             .font(SavantType.small)
                             .foregroundStyle(SavantPalette.inkSecondary)
+                            .lineLimit(2)
                             .fixedSize(horizontal: false, vertical: true)
                     }
 
                     Spacer(minLength: 0)
                 }
-                .padding(.vertical, 14)
+                .padding(.vertical, 9)
 
                 if index < benefits.count - 1 {
                     Rectangle()
@@ -169,7 +179,7 @@ struct TrialPitchSheet: View {
                 }
             }
         }
-        .padding(.horizontal, 16)
+        .padding(.horizontal, 14)
         .background(SavantPalette.surface)
         .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
         .overlay(
@@ -179,28 +189,26 @@ struct TrialPitchSheet: View {
     }
 
     private var footer: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: 8) {
             // Same control as every other pitch in the app: it buys the yearly
-            // plan in place — trial when eligible, paid otherwise — and carries
+            // plan in place (trial when eligible, paid otherwise) and carries
             // its own auto-renew disclosure and "See all plans" escape hatch.
             PlusDirectCTA(trigger: trigger)
 
-            HStack(spacing: 12) {
+            // Legal links and the way out share a row, because three stacked
+            // secondary lines under a button is three lines of nothing.
+            HStack(spacing: 14) {
                 Link("Terms", destination: StatScoutLegal.termsURL)
                 Link("Privacy", destination: StatScoutLegal.privacyURL)
+                Button("Maybe later") { dismiss() }
             }
             .font(SavantType.micro)
             .tracking(0.3)
-            .foregroundStyle(SavantPalette.inkTertiary)
-
-            Button("Maybe later") { dismiss() }
-                .font(SavantType.small)
-                .foregroundStyle(SavantPalette.inkSecondary)
-                .padding(.top, 2)
+            .foregroundStyle(SavantPalette.inkSecondary)
         }
-        .padding(.horizontal, 24)
-        .padding(.top, 14)
-        .padding(.bottom, 12)
+        .padding(.horizontal, 20)
+        .padding(.top, 12)
+        .padding(.bottom, 10)
         .background(
             SavantPalette.surface
                 .overlay(

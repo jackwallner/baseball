@@ -9,7 +9,7 @@ struct MetricRoute: Hashable {
     let label: String
     let category: MetricCategory
     /// Which season's leaderboard to open. The player profile has its own
-    /// season selector, so a route from a 2024 profile has to carry 2024 —
+    /// season selector, so a route from a 2024 profile has to carry 2024,
     /// otherwise tapping K% there opened the current-season leaderboard.
     var season: Int? = nil
 }
@@ -108,13 +108,13 @@ struct RootTabView: View {
     ///
     /// On iOS 26 a `TabView` always draws its own Liquid Glass "platter" behind
     /// the items, and `.toolbarBackground(.hidden, for: .tabBar)` is a no-op
-    /// against it — which is what made the bar read as a gray box sitting on
+    /// against it, which is what made the bar read as a gray box sitting on
     /// the canvas. Owning the bar outright means there is no system background
     /// to fight: the capsule below is the only chrome drawn.
     ///
     /// Each tab stays alive and toggles visibility (matching Vitals' MainTabView)
     /// so navigation stacks and scroll positions survive switching. The inactive
-    /// tabs are hidden from VoiceOver as well as from sight — at `opacity(0)`
+    /// tabs are hidden from VoiceOver as well as from sight, at `opacity(0)`
     /// they'd otherwise still be reachable via the rotor.
     private var tabView: some View {
         ZStack(alignment: .bottom) {
@@ -280,7 +280,7 @@ private struct SavantNavBar: ViewModifier {
 /// Trailing toolbar group shared by the three home tabs: a settings gear, then
 /// the upgrade CTA when the user isn't subscribed.
 ///
-/// The gear is the only entry point to Settings that isn't buried — it used to
+/// The gear is the only entry point to Settings that isn't buried, it used to
 /// live only in a link under the bottom of the leaderboard, which nobody
 /// scrolls to. Trailing rather than leading because Stats already owns the
 /// leading slot with its season pill, and a control that moves between tabs
@@ -295,7 +295,7 @@ private struct HomeTabToolbar: ViewModifier {
 
     /// Yellow crown + short action verb on a filled pill. The old version was
     /// a bare yellow "Pro" label that read as a status badge rather than a
-    /// button — tap-through rates were correspondingly weak. The verb makes
+    /// button, tap-through rates were correspondingly weak. The verb makes
     /// the CTA unambiguous, and the trial-aware label appears when an intro
     /// offer is available.
     private var ctaLabel: String {
@@ -325,7 +325,7 @@ private struct HomeTabToolbar: ViewModifier {
             .background(Color.yellow)
             .clipShape(Capsule())
         }
-        .accessibilityLabel("\(ctaLabel) — unlock all features")
+        .accessibilityLabel("\(ctaLabel), unlock all features")
     }
 
     /// Outline cog, no filled circle behind it. The Liquid Glass container
@@ -381,15 +381,18 @@ private struct HomeTabToolbar: ViewModifier {
                     }
                 }
             }
+            // The toolbar CTA pitches; it doesn't hand over a price list. Same
+            // sheet as every other in-app offer, so "Try Free" leads to the
+            // trial in one more tap rather than to a plan comparison.
             .sheet(item: $paywallTrigger) { trigger in
-                PaywallView(trigger: trigger)
+                TrialPitchSheet(trigger: trigger)
             }
     }
 }
 
 /// Just the player-profile route. Split out of `StandardDestinations` so the
-/// Compare tab — which owns its own comparison routes and so can't take the
-/// whole bundle — can still push a player page. Following a player is free, and
+/// Compare tab, which owns its own comparison routes and so can't take the
+/// whole bundle, can still push a player page. Following a player is free, and
 /// a followed name that can't be tapped through to its own numbers is a dead
 /// row on the one screen the user curated themselves.
 struct PlayerProfileDestination: ViewModifier {

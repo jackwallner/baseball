@@ -97,7 +97,7 @@ struct StatcastAPI: StatcastProviding {
         return all
     }
 
-    /// Every player's rolling window for one length — the whole league in a
+    /// Every player's rolling window for one length, the whole league in a
     /// single small fetch (~440 KB), which is what makes ranking by recent form
     /// viable at all. Aggregating the raw game logs client-side would be ~2.4 MB
     /// and a multi-second wait before anything could be sorted.
@@ -166,7 +166,7 @@ struct StatcastAPI: StatcastProviding {
             let rows = try JSONDecoder.statScout.decode([Lenient<Player>].self, from: data)
             let page = rows.compactMap(\.value)
             // A non-empty page that decodes to zero players means the schema
-            // changed under us — surface it instead of silently going blank.
+            // changed under us, surface it instead of silently going blank.
             if !rows.isEmpty && page.isEmpty {
                 throw DecodingError.dataCorrupted(
                     .init(codingPath: [], debugDescription: "All player rows failed to decode")
@@ -180,7 +180,7 @@ struct StatcastAPI: StatcastProviding {
     }
 }
 
-/// Decodes an element if possible, otherwise yields nil instead of throwing —
+/// Decodes an element if possible, otherwise yields nil instead of throwing,
 /// so one malformed row can't fail the entire page.
 private struct Lenient<T: Decodable>: Decodable {
     let value: T?

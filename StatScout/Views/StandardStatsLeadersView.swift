@@ -27,7 +27,7 @@ struct StandardStatsLeadersView: View {
         _selectedStat = State(initialValue: initialStat)
     }
 
-    /// Stats where lower is the better outcome — sort defaults to ascending so the
+    /// Stats where lower is the better outcome, sort defaults to ascending so the
     /// leader (lowest ERA, fewest losses, etc.) sits at the top.
     private static let lowerIsBetter: Set<String> = ["ERA", "WHIP", "BB/9", "L"]
 
@@ -63,7 +63,7 @@ struct StandardStatsLeadersView: View {
         // Pitchers carry batter-shaped standardStats (HR allowed, etc.) and a few
         // position players have appeared in mop-up pitching, so a permissive `!=`
         // filter leaks both directions. Whitelist by role, AND require a Savant
-        // percentile in the matching category — that's Savant's qualification
+        // percentile in the matching category, that's Savant's qualification
         // signal. Without it the AVG board fills with 1-metric, sub-sample
         // players (e.g. .366 on 42 AB whose only metric is Sprint Speed) ranked
         // above real regulars. `qualifiedSeasonPlayers` can't catch this: ingest
@@ -102,7 +102,7 @@ struct StandardStatsLeadersView: View {
     private func statDisplay(for player: Player) -> String {
         guard let stats = player.standardStats,
               let stat = stats.first(where: { $0.label == selectedStat }) else {
-            return "—"
+            return "-"
         }
         return stat.value
     }

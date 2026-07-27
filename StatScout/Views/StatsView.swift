@@ -1,38 +1,81 @@
 import SwiftUI
 
-/// Single home for every league-wide stat view. Folds the old Leaders,
-/// Box Score, and StatScout-Best/Worst tabs into one place. The mode lives in
-/// the nav-bar title as a dropdown (Weather-app style) and the season selector
-/// sits in the leading toolbar slot, so both apply across every mode and the
-/// scroll content keeps its full height. Each mode's heavy data is only built
-/// when its branch is selected (the `switch` doesn't instantiate the others),
-/// which preserves the lazy-load behavior the old per-tab guards had.
+/// Advanced / Standard is the same split the player and team pages use,
+/// Statcast's expected stats against the box score. Naming them "Leaders" and
+/// "Box Score" made the two leaderboards look like different kinds of thing
+/// when they're the same list read in two vocabularies.
+enum StatsMode: String, CaseIterable, Identifiable {
+    case leaders = "Advanced"
+    case boxScore = "Standard"
+    case bestWorst = "Best/Worst"
+    var id: String { rawValue }
+}
+
+/// The Advanced / Standard chooser, as a chip.
+///
+/// It spent a while in the nav bar, first as bare text (which read as a title,
+/// so nobody tapped it) and then as a pill, which iOS dropped: that bar already
+/// carries the season, the settings gear and the upgrade CTA, and an overfull
+/// toolbar answers by folding items away. Down here it sits with the other
+/// controls that change what the board shows, at the same size and shape as
+/// them, and it can't be dropped.
+struct StatsModeMenu: View {
+    @Binding var mode: StatsMode
+
+    var body: some View {
+        Menu {
+            ForEach(StatsMode.allCases) { option in
+                Button {
+                    mode = option
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                } label: {
+                    if option == mode {
+                        Label(option.rawValue, systemImage: "checkmark")
+                    } else {
+                        Text(option.rawValue)
+                    }
+                }
+            }
+        } label: {
+            SavantChip(
+                title: mode.rawValue,
+                systemImage: "chart.bar.doc.horizontal",
+                trailing: .chevron,
+                isActive: true
+            )
+        }
+        .menuOrder(.fixed)
+        .accessibilityLabel("View")
+        .accessibilityValue(mode.rawValue)
+    }
+}
+
+/// Single home for every league-wide stat view. Folds the old Leaders, Box
+/// Score, and StatScout-Best/Worst tabs into one place. The season selector
+/// sits in the leading toolbar slot and the mode chooser rides in the board's
+/// own control row, so both apply across every mode and the scroll content
+/// keeps its full height. Each mode's heavy data is only built when its branch
+/// is selected (the `switch` doesn't instantiate the others), which preserves
+/// the lazy-load behavior the old per-tab guards had.
 struct StatsView: View {
     let viewModel: DashboardViewModel
     @EnvironmentObject private var store: StoreService
 
-    /// Advanced / Standard is the same split the player and team pages use —
-    /// Statcast's expected stats against the box score. Naming them "Leaders"
-    /// and "Box Score" here made the two leaderboards look like different kinds
-    /// of thing when they're the same list read in two vocabularies.
-    private enum Mode: String, CaseIterable, Identifiable {
-        case leaders = "Advanced"
-        case boxScore = "Standard"
-        case bestWorst = "Best/Worst"
-        var id: String { rawValue }
-    }
-
-    @State private var mode: Mode = .leaders
+    @State private var mode: StatsMode = .leaders
     @State private var paywallTrigger: PaywallTrigger?
 
     var body: some View {
         VStack(spacing: 0) {
             switch mode {
             case .leaders:
-                DashboardView(viewModel: viewModel)
+                // The advanced board hosts the chip in its own control row, so
+                // it costs no vertical space on the screen people live on.
+                DashboardView(viewModel: viewModel, statsMode: $mode)
             case .boxScore:
+                modeRow
                 StandardStatsLeadersView(players: viewModel.qualifiedSeasonPlayers)
             case .bestWorst:
+                modeRow
                 MetricLeadersView(metrics: viewModel.allMetrics)
             }
         }
@@ -48,7 +91,6 @@ struct StatsView: View {
             } else {
                 ToolbarItem(placement: .topBarLeading) { seasonMenu }
             }
-            ToolbarItem(placement: .principal) { modeMenu }
         }
         // Contextual past-season pitches route through the low-friction
         // TrialPitchSheet (its CTA starts the yearly trial directly), not the
@@ -58,36 +100,14 @@ struct StatsView: View {
         }
     }
 
-    // Nav-title dropdown that swaps between Advanced / Standard / Best-Worst.
-    // Replaces the old full-width segmented tab row.
-    private var modeMenu: some View {
-        Menu {
-            ForEach(Mode.allCases) { option in
-                Button {
-                    mode = option
-                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                } label: {
-                    if option == mode {
-                        Label(option.rawValue, systemImage: "checkmark")
-                    } else {
-                        Text(option.rawValue)
-                    }
-                }
-            }
-        } label: {
-            HStack(spacing: 4) {
-                Text(mode.rawValue)
-                    .font(SavantType.bodyBold)
-                    .foregroundStyle(.white)
-                Image(systemName: "chevron.down")
-                    .font(.system(size: 11, weight: .bold))
-                    .foregroundStyle(.white.opacity(0.85))
-            }
+    /// Standalone row for the two modes that have no control row of their own.
+    private var modeRow: some View {
+        HStack(spacing: 8) {
+            StatsModeMenu(mode: $mode)
+            Spacer(minLength: 0)
         }
-        .menuOrder(.fixed)
-        .savantMenuAppearance()
-        .accessibilityLabel("View")
-        .accessibilityValue(mode.rawValue)
+        .padding(.horizontal, 12)
+        .padding(.top, 8)
     }
 
     // Compact season selector for the leading toolbar slot. Sits on the navy
@@ -99,7 +119,7 @@ struct StatsView: View {
             isLocked: { viewModel.isSeasonLocked($0) },
             onSelect: { season in
                 if viewModel.isSeasonLocked(season) {
-                    // Explicit tap on a locked year — always answer it; the
+                    // Explicit tap on a locked year, always answer it; the
                     // gate only caps automatic pop-ups.
                     paywallTrigger = .lockedSeason(season)
                 } else {
@@ -107,7 +127,10 @@ struct StatsView: View {
                 }
             }
         ) {
-            SavantNavPill(systemImage: "calendar", title: String(viewModel.selectedSeason))
+            // No calendar glyph here: this bar also carries the title, the gear
+            // and the upgrade CTA, and on a 375pt phone the glyph is what
+            // pushes "Stats" into an ellipsis.
+            SavantNavPill(title: String(viewModel.selectedSeason))
         }
         .accessibilityHint("Choose which season's stats to view")
     }

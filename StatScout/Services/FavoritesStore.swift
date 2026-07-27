@@ -3,7 +3,7 @@ import Observation
 
 /// Favorited players and team, persisted in `UserDefaults`.
 ///
-/// Deliberately free — favoriting is what makes the app feel like yours, and
+/// Deliberately free, favoriting is what makes the app feel like yours, and
 /// gating it would suppress the very signal the Hot/Cold tab and the review
 /// funnel read from. What's paid is the *payoff*: recent-form deltas and alerts
 /// on the players you follow.

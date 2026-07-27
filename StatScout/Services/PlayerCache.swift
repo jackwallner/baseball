@@ -99,7 +99,7 @@ struct TwoTierPlayerCache: PlayerCaching {
             try? FileManager.default.removeItem(at: legacyHistorical.fileURL)
             return players
         }
-        // 3. Legacy on-disk JSON cache from older builds — migrate forward.
+        // 3. Legacy on-disk JSON cache from older builds, migrate forward.
         if let players = try? legacyHistorical.loadPlayers(), !players.isEmpty {
             try? historical.savePlayers(players)
             try? FileManager.default.removeItem(at: legacyHistorical.fileURL)

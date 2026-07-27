@@ -1,7 +1,7 @@
 import Foundation
 
 extension Notification.Name {
-    /// Posted after a satisfaction moment — host may present the enjoyment funnel after a short delay.
+    /// Posted after a satisfaction moment, host may present the enjoyment funnel after a short delay.
     static let statscoutPositiveMomentForReview = Notification.Name("com.jackwallner.baseball.positiveMomentForReview")
 }
 
@@ -143,7 +143,7 @@ enum ReviewPromptTracker {
     }
 
     /// True after "Maybe later" until the next hard `markShown` or outcome.
-    /// Callers must NOT call `markShown()` on sheet dismiss while this is set —
+    /// Callers must NOT call `markShown()` on sheet dismiss while this is set,
     /// that clears the flag and reinstates the full cooldown, which is exactly
     /// the leak this exists to close.
     static var isSoftDeferred: Bool {
@@ -168,7 +168,7 @@ enum ReviewPromptTracker {
         guard passivePromptAllowed(now: now) else { return false }
         guard appLaunchCount >= minimumLaunchCount else { return false }
         guard positiveMomentCount >= minimumPositiveMoments else { return false }
-        // Came back on separate days — the strongest signal available that
+        // Came back on separate days, the strongest signal available that
         // someone actually values the app rather than having poked it once.
         guard distinctUseDays >= minimumDistinctUseDays else { return false }
         guard let first = firstAppOpenDate else { return false }

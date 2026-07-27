@@ -177,7 +177,7 @@ extension Player {
         let type = playerType?.lowercased()
         switch category {
         case .hitting:
-            // Pitchers carry batter-shaped fields in their feed (HR allowed, etc.) —
+            // Pitchers carry batter-shaped fields in their feed (HR allowed, etc.),
             // a strict whitelist keeps them off the hitting board even when those
             // fields are present. nil falls through to "include" so we don't drop
             // legitimate batters who lost their role label upstream.

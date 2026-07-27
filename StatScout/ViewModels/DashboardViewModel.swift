@@ -27,7 +27,7 @@ final class DashboardViewModel {
         didSet {
             guard oldValue != selectedSeason else { return }
             // Past seasons live in the bundled historical cache, which loads
-            // lazily. Pull it in on demand so picking a year just works —
+            // lazily. Pull it in on demand so picking a year just works,
             // Pro users used to have to tap a separate "Load past seasons"
             // row first, which read as a bug more than a feature.
             if selectedSeason < StatScoutSeason.current, isPro, !hasLoadedHistorical, !isHistoricalLoading {
@@ -96,7 +96,7 @@ final class DashboardViewModel {
     }
 
     /// Reset direction to "best first" for the active metric. Triggered by
-    /// category changes and by picking a new sort metric — but only when the
+    /// category changes and by picking a new sort metric, but only when the
     /// user hasn't manually pinned a direction in this session.
     private func applyDefaultSortDirection() {
         userToggledDirection = false
@@ -167,7 +167,7 @@ final class DashboardViewModel {
         return "Updated \(formatter.string(from: lastUpdated))"
     }
 
-    /// Fetch per-game logs for a single player. Powers the Recent Form card —
+    /// Fetch per-game logs for a single player. Powers the Recent Form card,
     /// the VM is just a passthrough so the card can stay UI-only and we don't
     /// have to thread the provider through every PlayerProfileView caller.
     func fetchGameLogs(playerId: Int, season: Int) async throws -> [PlayerGameLog] {
@@ -192,7 +192,7 @@ final class DashboardViewModel {
     }
     #endif
 
-    /// Every season the app can show, newest first — a fixed range, not a
+    /// Every season the app can show, newest first, a fixed range, not a
     /// reflection of what's currently loaded.
     ///
     /// This used to derive from `playerHistories`, which only holds the current
@@ -227,7 +227,7 @@ final class DashboardViewModel {
     var recentWindow: RecentWindow = .fortnight
 
     /// True while the leaderboard is showing recent form rather than season
-    /// totals. Pro-gated at the call site — free users get a blurred teaser.
+    /// totals. Pro-gated at the call site, free users get a blurred teaser.
     var showingRecent = false
 
     func recentForm(for playerId: Int, window: RecentWindow? = nil) -> RecentForm? {
@@ -245,7 +245,7 @@ final class DashboardViewModel {
 
     func loadRecentFormIfNeeded(window: RecentWindow? = nil) async {
         let target = window ?? recentWindow
-        // Season changed under us — the cache describes a different year.
+        // Season changed under us, the cache describes a different year.
         if recentFormSeason != selectedSeason {
             recentFormByWindow.removeAll()
             recentFormSeason = selectedSeason
@@ -372,13 +372,27 @@ final class DashboardViewModel {
         }
     }
 
+    /// Clubs the current search names, so "mariners" can open Seattle's page
+    /// instead of only filtering the board down to Seattle's players. Empty
+    /// unless something is typed.
+    var searchedTeams: [String] {
+        guard !searchText.trimmingCharacters(in: .whitespaces).isEmpty else { return [] }
+        let present = Set(seasonPlayers.map { normalizedTeamAbbreviation($0.team) })
+        return present
+            .filter { teamMatchesQuery($0, query: searchText) }
+            .sorted { teamDisplayName($0) < teamDisplayName($1) }
+    }
+
     var filteredPlayers: [Player] {
         let applyPosition = positionFilterApplies && positionFilter != .all
         return seasonPlayers.filter { player in
+            // Team search covers the nickname as well as the abbreviation and
+            // the city: the field says "players or teams", and typing "Yankees"
+            // or "Red Sox" used to return nothing because the only team strings
+            // it compared were "NYY" and "New York (AL)".
             let matchesSearch = searchText.isEmpty
                 || player.name.localizedCaseInsensitiveContains(searchText)
-                || player.team.localizedCaseInsensitiveContains(searchText)
-                || teamFullName(player.team).localizedCaseInsensitiveContains(searchText)
+                || teamMatchesQuery(player.team, query: searchText)
             let matchesCategory = selectedCategory == nil || player.metrics.contains { $0.category == selectedCategory }
             let matchesType = player.matchesPlayerType(for: selectedCategory)
             let qualifies = isQualified(player, for: selectedCategory)
@@ -467,7 +481,7 @@ final class DashboardViewModel {
     private static let paLabels: Set<String> = ["PA", "AB"]
     private static let ipLabels: Set<String> = ["IP"]
 
-    // Sort by the raw stat value, not the percentile — percentile-sorting
+    // Sort by the raw stat value, not the percentile, percentile-sorting
     // produced ties (two players at 95) and made the "PCTL" header look
     // disconnected from the xwOBA values shown per row. Players missing the
     // exact metric are partitioned to the end so blank-value rows never
@@ -527,7 +541,7 @@ final class DashboardViewModel {
         }
     }
 
-    /// Default sort direction for a metric — descending (highest first) unless
+    /// Default sort direction for a metric, descending (highest first) unless
     /// the metric reads better when lower. Used to keep "best player first" as
     /// the initial ordering even after switching to raw-value sorting.
     static func defaultSortDescending(label: String?, category: MetricCategory?) -> Bool {
@@ -573,7 +587,7 @@ final class DashboardViewModel {
         case .hitting:
             return ["xwOBA", "xSLG", "xBA"]
         case .pitching:
-            // xwOBA against parallels the hitter xwOBA — it folds in K/BB and contact quality,
+            // xwOBA against parallels the hitter xwOBA, it folds in K/BB and contact quality,
             // so it's the right primary rank. xERA has a 25 PA minimum, so it stays out.
             return ["xwOBA", "K%", "Barrel%", "Whiff%", "Chase%"]
         case .fielding:
@@ -596,7 +610,7 @@ final class DashboardViewModel {
     func players(forTeam team: String) -> [Player] {
         // Sort by raw xwOBA value to match the leaderboard convention.
         // Pitchers (where lower xwOBA is better) sort to the bottom, then by
-        // ascending xwOBA — gives a sane "best hitters first, best pitchers
+        // ascending xwOBA, gives a sane "best hitters first, best pitchers
         // last" team roster ordering.
         let normalized = normalizedTeamAbbreviation(team)
         return seasonPlayers.filter { normalizedTeamAbbreviation($0.team) == normalized }
@@ -644,14 +658,14 @@ final class DashboardViewModel {
             // value; rawNumeric("") collapsed them all to 0, every player tied,
             // and the sort returned the same player (e.g. Ohtani) for both
             // ends with empty cells. Percentile is Savant's normalized
-            // goodness — already direction-correct (it inverts for pitchers),
+            // goodness, already direction-correct (it inverts for pitchers),
             // so highest = best, lowest = worst with no per-metric polarity
             // table needed.
             let byPercentile = data.values.sorted { $0.percentile < $1.percentile }
             guard let best = byPercentile.last else { return nil }
             let worst = byPercentile.first
             // Single qualifier (or every qualifier tied): the same player can't
-            // be both Best and Worst — drop the duplicate so the row reads
+            // be both Best and Worst, drop the duplicate so the row reads
             // "Best: X / Only qualifier" instead of "X is also the worst".
             let dedupedWorst = (worst?.player.id == best.player.id) ? nil : worst
             return (
@@ -724,7 +738,7 @@ final class DashboardViewModel {
             try? cache?.savePlayers(current)
 
         } catch is DecodingError {
-            errorMessage = "Data format changed — app may need an update."
+            errorMessage = "Data format changed. The app may need an update."
             lastFetchFailed = true
         } catch _ as URLError {
             errorMessage = players.isEmpty ? "Can't reach data feed. Check your connection." : "Showing saved data. Pull to refresh when your connection improves."

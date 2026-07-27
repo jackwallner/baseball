@@ -6,7 +6,7 @@ import Foundation
 /// (raw season value, season percentile) pair, sort by value, and interpolate.
 ///
 /// This lets the Recent Form card draw a recent-window bar on the *same ruler*
-/// as the player's season bar — so a hot 15-day stretch reads as "playing like
+/// as the player's season bar, so a hot 15-day stretch reads as "playing like
 /// a 92" against the league norm, in context of the player's season line.
 struct LeaguePercentileCurve {
     /// (value, percentile) points sorted ascending by value.
@@ -45,11 +45,11 @@ struct LeaguePercentileCurves {
 
     /// Build curves from the league pool filtered to one player type. Only
     /// players whose metric has both a parseable raw value and a percentile
-    /// contribute points — blank-value metrics simply don't anchor the curve,
+    /// contribute points, blank-value metrics simply don't anchor the curve,
     /// which is fine as long as enough players do.
     /// - Parameter category: which side of the ball the curve describes. A
     ///   two-way player carries an xwOBA under *both* Hitting and Pitching, and
-    ///   matching on label alone picked whichever came first — so Ohtani could
+    ///   matching on label alone picked whichever came first, so Ohtani could
     ///   anchor the batter curve with his pitching xwOBA, bending the ruler
     ///   every recent bar is measured against.
     @MainActor

@@ -19,7 +19,7 @@ enum PaywallTrigger: Identifiable, Hashable {
     case winback
     /// Soft, half-sheet trial pitch shown on a free user's first player open.
     /// Distinct from the old `.activation` full-PaywallView popup (removed for
-    /// being too intrusive) — this routes through TrialPitchSheet, which is
+    /// being too intrusive), this routes through TrialPitchSheet, which is
     /// native/intentional, dismissible with "Maybe later", and gated by
     /// PaywallGate so it caps at 2 per session.
     case playerScouting
@@ -226,7 +226,7 @@ struct PaywallView: View {
 
     // Bold navy hero: the entry-point icon over a faint percentile-bar motif,
     // a "Pro" eyebrow, the benefit headline, and the emotional subtitle. Sells
-    // the upgrade before any pricing — pricing/feature density comes below.
+    // the upgrade before any pricing, pricing/feature density comes below.
     private var heroHeader: some View {
         ZStack {
             LinearGradient(
@@ -297,7 +297,7 @@ struct PaywallView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    // Reassurance + real credibility — Statcast/Savant is the source of truth
+    // Reassurance + real credibility, Statcast/Savant is the source of truth
     // for these percentiles, which is the actual moat. No fabricated ratings
     // or user counts.
     private var trustRow: some View {
@@ -481,7 +481,7 @@ struct PaywallView: View {
                     break
                 case .pending:
                     // Ask-to-Buy / deferred payment: nothing is unlocked yet and
-                    // no error occurred — tell the user instead of going silent.
+                    // no error occurred, tell the user instead of going silent.
                     restoreMessage = "Purchase pending approval. StatScout+ unlocks automatically once it's approved."
                 case .cancelled:
                     errorMessage = "Purchase cancelled. Tap again to continue."
@@ -512,7 +512,7 @@ struct PaywallView: View {
     }
 }
 
-/// Faint percentile-bar motif behind the hero — ties the paywall to the
+/// Faint percentile-bar motif behind the hero, ties the paywall to the
 /// app's Statcast leaderboard visual language without competing with the copy.
 private struct PaywallBarBackdrop: View {
     private let percentiles: [Int] = [94, 81, 67, 52, 38, 88, 73, 60, 45, 83, 70]
@@ -534,7 +534,7 @@ private struct PaywallPlanCard: View {
     let isSelected: Bool
     let showsTrialBadge: Bool
     let isMostPopular: Bool
-    /// Integer savings vs. 12× monthly (yearly only) — drives the SAVE X% chip.
+    /// Integer savings vs. 12× monthly (yearly only), drives the SAVE X% chip.
     let savingsPercent: Int?
     /// Per-month breakdown for an annual plan, e.g. "$2.50".
     let perMonthLabel: String?

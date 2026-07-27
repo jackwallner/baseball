@@ -3,14 +3,14 @@ import SwiftUI
 /// League-wide recent form, ranked by change rather than by level.
 ///
 /// Modelled on Baseball Savant's rolling leaderboard, which reports THEN / NOW
-/// / delta instead of a bare current-window number — the delta is the story. A
+/// / delta instead of a bare current-window number, the delta is the story. A
 /// .380 xwOBA is interesting; a .380 that was .250 a fortnight ago is a player
 /// you want to know about right now, and that's the thing season totals can't
 /// tell you.
 ///
 /// Colour is Savant's red-to-blue percentile gradient, which the app already
 /// matches. The flame / snowflake accent is reserved for the direction control
-/// rather than applied to every row — Savant uses no emoji at all, and marking
+/// rather than applied to every row, Savant uses no emoji at all, and marking
 /// everything marks nothing. (Those are SF Symbols: 🔥/🧊 render as
 /// missing-glyph boxes here, and `flame.fill` / `snowflake` are what
 /// PercentileInfoSheet already uses for this exact meaning.)
@@ -26,7 +26,16 @@ struct HotColdView: View {
     @State private var favorites = FavoritesStore.shared
     @State private var showingCold = false
     @State private var side: TrendSide = .batting
+    @State private var statMode: TrendStatMode = .advanced
     @State private var metric: TrendMetric = TrendMetric.batting[0]
+
+    /// The metrics the picker offers, narrowed by the Advanced / Standard
+    /// switch. Every other board in the app splits its stats this way (the
+    /// player page, the team page, the Stats tab), and Trends was the one place
+    /// where the two vocabularies were mixed into a single long menu.
+    private var metricOptions: [TrendMetric] {
+        statMode == .advanced ? TrendMetric.statcast(for: side) : TrendMetric.standard(for: side)
+    }
 
     private var forms: [RecentForm] {
         Array(viewModel.recentFormByWindow[viewModel.recentWindow.rawValue]?.values ?? [:].values)
@@ -41,7 +50,7 @@ struct HotColdView: View {
     }
 
     /// Ranked by improvement, hot first or cold first. Small samples are
-    /// excluded outright — a 3-PA week produces enormous deltas that would
+    /// excluded outright, a 3-PA week produces enormous deltas that would
     /// crowd out every real riser.
     private var ranked: [RecentForm] {
         forms
@@ -58,7 +67,7 @@ struct HotColdView: View {
     ///
     /// The locked board deliberately does *not* scroll. It used to sit in the
     /// same `ScrollView` as the Pro board, which meant its height was whatever
-    /// twelve invented rows happened to add up to — short of the viewport on a
+    /// twelve invented rows happened to add up to, short of the viewport on a
     /// big phone, so the card stopped mid-screen with canvas grey under it and
     /// the unlock panel floating in the middle of nothing. There is also
     /// nothing below the fold to scroll *to* when the rows are a teaser. Laying
@@ -84,7 +93,7 @@ struct HotColdView: View {
         .background(SavantPalette.canvas)
         // Keyed on entitlement as well as the window. `isPro` starts false and
         // only flips once RevenueCat answers, which on a real device is often
-        // after this view is already on screen — with the window alone as the
+        // after this view is already on screen, with the window alone as the
         // id, that first task had already returned at the guard and nothing
         // ever re-ran it. The board then sat empty forever: not loading, no
         // error, just a bare header. Switching windows was the only way to get
@@ -97,23 +106,43 @@ struct HotColdView: View {
         .task(id: "\(viewModel.recentWindow.rawValue)-\(store.isPro)") {
             await viewModel.loadRecentFormIfNeeded()
         }
-        .onChange(of: side) { _, newSide in
+        .onChange(of: side) { _, _ in
             // Keys don't carry across sides, so land on that side's headline
             // metric rather than an empty board.
-            metric = TrendMetric.list(for: newSide)[0]
+            metric = metricOptions[0]
+        }
+        .onChange(of: statMode) { _, _ in
+            metric = metricOptions[0]
         }
     }
 
     private var header: some View {
         VStack(spacing: 8) {
-            // Side and stat on one row, then direction, then the window —
-            // matching the team card's ordering so the two read the same.
-            HStack(spacing: 8) {
+            // Which side of the ball, and which vocabulary. Both narrow the
+            // stat list below them, so they sit above it.
+            SavantPickerRow(spacing: 8) {
                 SavantSegmented(
                     segments: TrendSide.allCases.map { .init(value: $0, label: $0.label) },
                     selection: $side
                 )
+                .segmentCount(TrendSide.allCases.count)
+
+                SavantSegmented(
+                    segments: TrendStatMode.allCases.map { .init(value: $0, label: $0.label) },
+                    selection: $statMode
+                )
+                .segmentCount(TrendStatMode.allCases.count)
+            }
+
+            HStack(spacing: 8) {
                 metricPicker
+                Spacer(minLength: 0)
+                if let asOf = viewModel.recentFormAsOf {
+                    Text("Through \(asOf.formatted(.dateTime.month(.abbreviated).day()))")
+                        .font(SavantType.micro)
+                        .tracking(0.3)
+                        .foregroundStyle(SavantPalette.inkTertiary)
+                }
             }
 
             // Same control as every other inline picker; only the selected fill
@@ -131,32 +160,18 @@ struct HotColdView: View {
                 segments: RecentWindow.allCases.map { .init(value: $0, label: $0.label) },
                 selection: $viewModel.recentWindow
             )
-
-            if let asOf = viewModel.recentFormAsOf {
-                Text("Through \(asOf.formatted(.dateTime.month(.abbreviated).day()))")
-                    .font(SavantType.micro)
-                    .tracking(0.3)
-                    .foregroundStyle(SavantPalette.inkTertiary)
-            }
         }
         .padding(.horizontal, 12)
         .padding(.top, 12)
     }
 
-    /// Thirteen metrics per side is far past what a segmented row can hold, so
-    /// this is the app's other picker shape: the same plain `Menu` the season
-    /// selector and every sort control use.
+    /// Thirteen Statcast metrics per side is far past what a segmented row can
+    /// hold, so this is the app's other picker shape: the same plain `Menu` the
+    /// season selector and every sort control use. The Advanced / Standard
+    /// switch above decides which family it lists.
     private var metricPicker: some View {
         Menu {
-            // Sections rather than inline captions: the two groups answer
-            // different questions (what the contact deserved vs what happened),
-            // and a menu section is how the platform says that.
-            Section("Statcast") {
-                metricButtons(TrendMetric.statcast(for: side))
-            }
-            Section("Standard") {
-                metricButtons(TrendMetric.standard(for: side))
-            }
+            metricButtons(metricOptions)
         } label: {
             SavantInlinePill(systemImage: "chart.bar.fill", title: metric.label)
         }
@@ -212,8 +227,8 @@ struct HotColdView: View {
     /// Free users get the real number one, then the wall.
     ///
     /// A gate that shows nobody is easy to walk away from. Showing the actual
-    /// hottest hitter in the league — his name, his THEN → NOW, tappable
-    /// through to his page — makes the board demonstrably real, and makes the
+    /// hottest hitter in the league, his name, his THEN → NOW, tappable
+    /// through to his page, makes the board demonstrably real, and makes the
     /// blurred ranks below it a thing you can't see rather than a thing that
     /// might not exist. Everything under row one stays invented: blur is not a
     /// security boundary, so the rows behind it were never real numbers.
@@ -226,7 +241,7 @@ struct HotColdView: View {
             // The rows are drawn as an overlay on an empty flexible spacer, not
             // stacked directly. A VStack of eighteen rows has an ideal height
             // of ~800pt and `frame(maxHeight:)` doesn't shrink a child below
-            // its ideal — so laying them out inline made the card taller than
+            // its ideal, so laying them out inline made the card taller than
             // the screen and shoved the whole page up, taking the pickers off
             // the top and the unlock panel off the bottom. `Color.clear` has no
             // ideal height of its own, so it takes exactly the space left over;
@@ -245,7 +260,7 @@ struct HotColdView: View {
                 .clipped()
                 .overlay(alignment: .bottom) {
                     BlurGateUnlock(
-                        headline: "See the full board — every hitter and pitcher ranked by how far they've moved",
+                        headline: "See the full board: every hitter and pitcher ranked by how far they've moved",
                         trigger: .recentForm
                     )
                 }
@@ -260,7 +275,7 @@ struct HotColdView: View {
         .padding(.top, 12)
         // Sits just clear of the floating tab bar. Measured from the safe area,
         // not the screen edge, so this is the pill's height above the inset
-        // plus a hair — the page doesn't scroll, so unlike every other screen
+        // plus a hair, the page doesn't scroll, so unlike every other screen
         // there's nothing to gain from running underneath it.
         .padding(.bottom, 46)
     }
@@ -331,7 +346,7 @@ struct HotColdView: View {
 
             PlayerHeadshot(
                 team: player?.team ?? form.team ?? "",
-                initials: player?.initials ?? "—",
+                initials: player?.initials ?? "-",
                 size: 34
             )
 
@@ -427,7 +442,7 @@ struct HotColdView: View {
         let games: Int
     }
 
-    /// Enough plausible rows to overflow the tallest phone behind the gate —
+    /// Enough plausible rows to overflow the tallest phone behind the gate,
     /// the container clips them, so too many costs nothing and too few leaves
     /// the dead grey void that made this screen read as broken.
     ///
@@ -472,7 +487,7 @@ struct HotColdView: View {
         let base: Double = metric.decimals >= 3 ? 0.290 : (metric.unit == " mph" ? 90 : 24)
         let swing: Double = metric.decimals >= 3 ? 0.130 : (metric.unit == " mph" ? 3.5 : 9)
         // Cooling off inverts the movement, and a lower-is-better metric
-        // inverts it again — heating up on Chase% means the number falls.
+        // inverts it again, heating up on Chase% means the number falls.
         let improving = !showingCold
         let sign: Double = (improving != metric.lowerIsBetter) ? 1 : -1
 

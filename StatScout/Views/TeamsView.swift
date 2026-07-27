@@ -35,7 +35,7 @@ struct TeamsView: View {
     ]
 
     /// Six divisions of five, in standings order. Grouping this way is what
-    /// lets all thirty teams fit one screen without scrolling — and it's how
+    /// lets all thirty teams fit one screen without scrolling, and it's how
     /// people already hold the league in their heads, so it reads faster than
     /// an alphabetical wall even before the space saving.
     static let divisions: [(name: String, teams: [String])] = [
@@ -52,7 +52,7 @@ struct TeamsView: View {
             teamFullName($0).localizedCaseInsensitiveContains(searchText) ||
             $0.localizedCaseInsensitiveContains(searchText)
         }
-        // Plain alphabetical by full team name — the old score-based ordering was
+        // Plain alphabetical by full team name, the old score-based ordering was
         // confusing and the score itself was a mislabeled percentile. The
         // favorite is lifted into its own pinned section above the grid.
         return teams.sorted { teamFullName($0).localizedCompare(teamFullName($1)) == .orderedAscending }
@@ -84,7 +84,7 @@ struct TeamsView: View {
                     allTeamsSection
                 }
                 // Scroll-under spacer so the last grid row isn't trapped behind
-                // the floating tab bar — matches the Dashboard pattern.
+                // the floating tab bar, matches the Dashboard pattern.
                 Color.clear.frame(height: 88)
             }
             .padding(.top, 12)
@@ -93,7 +93,7 @@ struct TeamsView: View {
         .background(SavantPalette.canvas.ignoresSafeArea())
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            // Red pill draws its own capsule — see StatsView.
+            // Red pill draws its own capsule, see StatsView.
             if #available(iOS 26.0, *) {
                 ToolbarItem(placement: .topBarLeading) { seasonMenu }
                     .sharedBackgroundVisibility(.hidden)
@@ -156,7 +156,7 @@ struct TeamsView: View {
         .redacted(reason: .placeholder)
     }
 
-    // Nav-bar season selector — matches the Stats tab: a compact red pill with
+    // Nav-bar season selector, matches the Stats tab: a compact red pill with
     // calendar + year, sitting on the navy bar. Replaces the old in-content
     // season header card so Teams and Stats read the same.
     private var seasonMenu: some View {
@@ -278,12 +278,12 @@ struct TeamsView: View {
     }
 
     /// One team: the color disk with its abbreviation, a favorite star when
-    /// set, and a long-press to toggle it. No full team name — at five across
+    /// set, and a long-press to toggle it. No full team name, at five across
     /// there isn't room, and the cap colors plus abbreviation are how people
     /// recognise a club anyway.
     private func teamDot(_ abbr: String) -> some View {
         NavigationLink(value: TeamDestination(abbr: abbr)) {
-            // The disk already carries the abbreviation, so no caption beneath —
+            // The disk already carries the abbreviation, so no caption beneath,
             // it printed the same three letters twice and ate the vertical room
             // the six division rows need.
             VStack(spacing: 4) {
@@ -319,7 +319,7 @@ struct TeamsView: View {
     }
 }
 
-/// Team color disk with the abbreviation centered — the compact unit the
+/// Team color disk with the abbreviation centered, the compact unit the
 /// division grid is built from.
 private struct TeamAbbrDisk: View {
     let abbr: String
@@ -410,7 +410,7 @@ struct TeamGridTile: View {
 // MARK: - Favorite Team Card
 
 /// Full-width "hero" row for the pinned favorite team. Reads as a featured item
-/// distinct from the grid below — tap anywhere to open the team, tap the star to
+/// distinct from the grid below, tap anywhere to open the team, tap the star to
 /// unpin. This is what makes Favorite do something visible: your team is always
 /// one tap away at the top of the list.
 struct FavoriteTeamCard: View {
