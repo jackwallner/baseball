@@ -23,38 +23,62 @@ struct HotColdView: View {
     @State private var favorites = FavoritesStore.shared
     @State private var paywallTrigger: PaywallTrigger?
     @State private var showingCold = false
+    @State private var side: TrendSide = .batting
+    @State private var metric: TrendMetric = TrendMetric.batting[0]
+    @State private var showingMetricPicker = false
+    @State private var showingFollowSheet = false
 
     /// Deltas beyond this earn a flame or snowflake — but only in "Your
     /// players". On the ranked board every visible row is a large move by
     /// construction, so an icon there marks everything and therefore nothing;
     /// the arrow and its colour already carry direction. In a mixed personal
     /// list it's the one place the icon distinguishes anything.
-    private static let outlierDelta = 0.040
-
-    private var metricKey: String { "xwoba" }
+    ///
+    /// Scaled to the metric, since a 0.040 move in xwOBA and a 0.040 move in
+    /// Whiff% are not remotely the same event.
+    private var outlierDelta: Double {
+        metric.decimals >= 3 ? 0.040 : 4.0
+    }
 
     private var forms: [RecentForm] {
         Array(viewModel.recentFormByWindow[viewModel.recentWindow.rawValue]?.values ?? [:].values)
     }
 
-    /// Ranked by delta, hot first or cold first. Small samples are excluded
-    /// outright here — a 3-PA week produces enormous deltas that would crowd
-    /// out every real riser.
-    private var ranked: [RecentForm] {
-        let usable = forms.filter {
-            !$0.isSmallSample
-                && $0.delta[metricKey] != nil
-                && $0.playerType != "pitcher"
-        }
-        return usable.sorted {
-            let a = $0.delta[metricKey] ?? 0
-            let b = $1.delta[metricKey] ?? 0
-            return showingCold ? a < b : a > b
-        }
+    /// How much better this player got. Falling numbers are the improvement for
+    /// a chase rate or anything a pitcher gives up, so the board ranks on this
+    /// rather than on the raw delta.
+    private func improvement(_ form: RecentForm) -> Double? {
+        guard let delta = form.delta[metric.key] else { return nil }
+        return metric.lowerIsBetter ? -delta : delta
     }
 
-    private var favoriteForms: [RecentForm] {
-        favorites.playerIds.compactMap { viewModel.recentForm(for: $0) }
+    /// Ranked by improvement, hot first or cold first. Small samples are
+    /// excluded outright — a 3-PA week produces enormous deltas that would
+    /// crowd out every real riser.
+    private var ranked: [RecentForm] {
+        forms
+            .filter { !$0.isSmallSample && $0.playerType == side.playerType && improvement($0) != nil }
+            .sorted {
+                let a = improvement($0) ?? 0
+                let b = improvement($1) ?? 0
+                return showingCold ? a < b : a > b
+            }
+    }
+
+    /// Followed players on the side currently being shown, paired with their
+    /// window if they have one. A followed pitcher has no xwOBA of his own, so
+    /// the side filter isn't cosmetic.
+    ///
+    /// Membership comes from the roster rather than from the recent-form table:
+    /// a player on the IL has no rows in the window, and dropping him would
+    /// silently shorten a list the user curated by hand.
+    private var followedOnSide: [(player: Player, form: RecentForm?)] {
+        let roster = viewModel.players(forSeason: viewModel.selectedSeason)
+        return favorites.playerIds.compactMap { id in
+            guard let player = roster.first(where: { $0.playerId == id }),
+                  (player.playerType ?? "batter") == side.playerType else { return nil }
+            return (player, viewModel.recentForm(for: id))
+        }
     }
 
     var body: some View {
@@ -77,13 +101,26 @@ struct HotColdView: View {
             guard store.isPro else { return }
             await viewModel.loadRecentFormIfNeeded()
         }
+        .onChange(of: side) { _, newSide in
+            // Keys don't carry across sides, so land on that side's headline
+            // metric rather than an empty board.
+            metric = TrendMetric.list(for: newSide)[0]
+        }
         .sheet(item: $paywallTrigger) { trigger in
             TrialPitchSheet(trigger: trigger)
+        }
+        .sheet(isPresented: $showingFollowSheet) {
+            FollowPlayersSheet(viewModel: viewModel, side: side)
         }
     }
 
     private var header: some View {
         VStack(spacing: 8) {
+            SavantSegmented(
+                segments: TrendSide.allCases.map { .init(value: $0, label: $0.label) },
+                selection: $side
+            )
+
             // Same control as every other inline picker; only the selected fill
             // differs, because here the choice itself encodes hot vs cold.
             SavantSegmented(
@@ -95,10 +132,13 @@ struct HotColdView: View {
                 selectedFill: { $0 ? SavantPalette.pctlCold : SavantPalette.pctlHot }
             )
 
-            SavantSegmented(
-                segments: RecentWindow.allCases.map { .init(value: $0, label: $0.label) },
-                selection: $viewModel.recentWindow
-            )
+            HStack(spacing: 8) {
+                metricPicker
+                SavantSegmented(
+                    segments: RecentWindow.allCases.map { .init(value: $0, label: $0.shortLabel) },
+                    selection: $viewModel.recentWindow
+                )
+            }
 
             if let asOf = viewModel.recentFormAsOf {
                 Text("Through \(asOf.formatted(.dateTime.month(.abbreviated).day()))")
@@ -109,6 +149,32 @@ struct HotColdView: View {
         }
         .padding(.horizontal, 12)
         .padding(.top, 12)
+    }
+
+    /// Thirteen metrics per side is far past what a segmented row can hold, so
+    /// this is the app's other picker shape: the same vertical popover the
+    /// season selector uses.
+    private var metricPicker: some View {
+        Button {
+            showingMetricPicker = true
+        } label: {
+            SavantInlinePill(systemImage: "chart.bar.fill", title: metric.label)
+        }
+        .buttonStyle(.plain)
+        .popover(isPresented: $showingMetricPicker, arrowEdge: .top) {
+            VerticalOptionPopover(
+                options: TrendMetric.list(for: side).map { .init(value: $0.key, label: $0.label) },
+                selected: metric.key,
+                onSelect: { key in
+                    if let match = TrendMetric.list(for: side).first(where: { $0.key == key }) {
+                        metric = match
+                    }
+                },
+                width: 210
+            )
+        }
+        .accessibilityLabel("Metric")
+        .accessibilityValue(metric.label)
     }
 
     @ViewBuilder
@@ -125,14 +191,119 @@ struct HotColdView: View {
             }
             .padding(.vertical, 32)
         } else {
-            if !favoriteForms.isEmpty {
-                section(title: "YOUR PLAYERS", forms: favoriteForms, ranked: false)
-            }
+            yourPlayersSection
             section(
                 title: showingCold ? "COLDEST IN THE LEAGUE" : "HOTTEST IN THE LEAGUE",
                 forms: Array(ranked.prefix(50)),
                 ranked: true
             )
+        }
+    }
+
+    /// Always present, even empty. It's the only place in the app that explains
+    /// what following a player buys you, and an empty section with a button is
+    /// a better prompt than no section at all.
+    private var yourPlayersSection: some View {
+        VStack(spacing: 0) {
+            SavantSectionBar(
+                title: "YOUR PLAYERS",
+                trailing: AnyView(
+                    Button {
+                        showingFollowSheet = true
+                    } label: {
+                        Label(favorites.playerIds.isEmpty ? "Add" : "Edit", systemImage: "star")
+                            .font(SavantType.micro)
+                            .tracking(0.3)
+                            .foregroundStyle(SavantPalette.savantRed)
+                    }
+                    .buttonStyle(.plain)
+                )
+            )
+
+            if followedOnSide.isEmpty {
+                VStack(spacing: 8) {
+                    Text(followEmptyMessage)
+                        .font(SavantType.small)
+                        .foregroundStyle(SavantPalette.inkSecondary)
+                        .multilineTextAlignment(.center)
+                    Button {
+                        showingFollowSheet = true
+                    } label: {
+                        Text("Follow players")
+                            .font(SavantType.smallBold)
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 16)
+                            .frame(height: 32)
+                            .background(SavantPalette.savantRed)
+                            .clipShape(Capsule())
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(.vertical, 18)
+                .padding(.horizontal, 20)
+                .frame(maxWidth: .infinity)
+            } else {
+                ForEach(Array(followedOnSide.enumerated()), id: \.element.player.playerId) { index, entry in
+                    if let form = entry.form {
+                        row(form: form, rank: nil, index: index)
+                    } else {
+                        noDataRow(player: entry.player, index: index)
+                    }
+                }
+            }
+        }
+        .background(SavantPalette.surface)
+        .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
+        .overlay(
+            RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
+                .stroke(SavantPalette.hairline, lineWidth: 0.5)
+        )
+        .padding(.horizontal, 12)
+        .padding(.top, 12)
+    }
+
+    private var followEmptyMessage: String {
+        favorites.playerIds.isEmpty
+            ? "Follow players and their last \(viewModel.recentWindow.rawValue) days show up here first."
+            : "None of the players you follow are \(side == .batting ? "hitters" : "pitchers")."
+    }
+
+    /// A followed player with nothing in the window — injured, called up, or
+    /// simply idle. Listed rather than dropped, so the section always matches
+    /// the list the user built.
+    private func noDataRow(player: Player, index: Int) -> some View {
+        HStack(spacing: 10) {
+            PlayerHeadshot(team: player.team, initials: player.initials, size: 34)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(player.name)
+                    .font(SavantType.bodyBold)
+                    .foregroundStyle(SavantPalette.ink)
+                    .lineLimit(1)
+                Text("No games in the last \(viewModel.recentWindow.rawValue) days")
+                    .font(SavantType.micro)
+                    .tracking(0.2)
+                    .foregroundStyle(SavantPalette.inkTertiary)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, SavantGeo.padInline)
+        .frame(height: SavantGeo.rowHeight)
+        .background(index % 2 == 0 ? SavantPalette.surface : SavantPalette.surfaceAlt)
+        .overlay(
+            Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline),
+            alignment: .bottom
+        )
+        .contentShape(Rectangle())
+        .overlay {
+            NavigationLink(value: player) { Color.clear }
+                .buttonStyle(.plain)
+        }
+        .contextMenu {
+            Button {
+                favorites.toggleFavorite(playerId: player.playerId)
+            } label: {
+                Label("Unfollow", systemImage: "star.slash")
+            }
         }
     }
 
@@ -174,9 +345,10 @@ struct HotColdView: View {
     @ViewBuilder
     private func row(form: RecentForm, rank: Int?, index: Int) -> some View {
         let player = viewModel.players(forSeason: form.season).first { $0.playerId == form.playerId }
-        let delta = form.delta[metricKey] ?? 0
-        let now = form.metrics[metricKey]
-        let then = form.priorMetrics[metricKey]
+        let delta = form.delta[metric.key] ?? 0
+        let now = form.metrics[metric.key]
+        let then = form.priorMetrics[metric.key]
+        let gain = metric.lowerIsBetter ? -delta : delta
 
         HStack(spacing: 10) {
             if let rank {
@@ -199,15 +371,15 @@ struct HotColdView: View {
                         .font(SavantType.bodyBold)
                         .foregroundStyle(SavantPalette.ink)
                         .lineLimit(1)
-                    if rank == nil, abs(delta) >= Self.outlierDelta {
-                        Image(systemName: delta > 0 ? "flame.fill" : "snowflake")
+                    if rank == nil, abs(delta) >= outlierDelta {
+                        Image(systemName: gain > 0 ? "flame.fill" : "snowflake")
                             .font(.system(size: 10, weight: .semibold))
-                            .foregroundStyle(delta > 0 ? SavantPalette.pctlHot : SavantPalette.pctlCold)
+                            .foregroundStyle(gain > 0 ? SavantPalette.pctlHot : SavantPalette.pctlCold)
                     }
                 }
                 // THEN → NOW, the framing Savant's rolling leaderboard uses.
                 if let then, let now {
-                    Text("\(fmt(then)) → \(fmt(now)) xwOBA · \(form.games)G")
+                    Text("\(metric.format(then)) → \(metric.format(now)) · \(form.games)G")
                         .font(SavantType.micro)
                         .tracking(0.2)
                         .foregroundStyle(SavantPalette.inkTertiary)
@@ -216,8 +388,8 @@ struct HotColdView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
-            TrendArrow(delta: delta, decimals: 3)
-                .frame(width: 52, alignment: .trailing)
+            TrendArrow(delta: delta, decimals: metric.decimals, lowerIsBetter: metric.lowerIsBetter)
+                .frame(width: 56, alignment: .trailing)
         }
         .padding(.horizontal, SavantGeo.padInline)
         .frame(height: SavantGeo.rowHeight)
@@ -233,10 +405,16 @@ struct HotColdView: View {
                     .buttonStyle(.plain)
             }
         }
-    }
-
-    private func fmt(_ value: Double) -> String {
-        String(format: "%.3f", value).replacingOccurrences(of: "0.", with: ".")
+        // Following straight off the board, so a name you spot here can be
+        // pinned without a round trip through the player page.
+        .contextMenu {
+            Button {
+                favorites.toggleFavorite(playerId: form.playerId)
+            } label: {
+                let following = favorites.isFavorite(playerId: form.playerId)
+                Label(following ? "Unfollow" : "Follow", systemImage: following ? "star.slash" : "star")
+            }
+        }
     }
 
     /// Illustrative board for the blurred gate. Static on purpose: a locked
@@ -280,7 +458,7 @@ struct HotColdView: View {
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     TrendArrow(delta: row.now - row.then, decimals: 3)
-                        .frame(width: 52, alignment: .trailing)
+                        .frame(width: 56, alignment: .trailing)
                 }
                 .padding(.horizontal, SavantGeo.padInline)
                 .frame(height: SavantGeo.rowHeight)
@@ -295,5 +473,9 @@ struct HotColdView: View {
         )
         .padding(.horizontal, 12)
         .padding(.top, 12)
+    }
+
+    private func fmt(_ value: Double) -> String {
+        String(format: "%.3f", value).replacingOccurrences(of: "0.", with: ".")
     }
 }
