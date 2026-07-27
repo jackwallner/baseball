@@ -60,6 +60,19 @@ enum PurchaseState {
     case pending
 }
 
+/// Result of a one-tap CTA that transacts the yearly plan in place.
+///
+/// `.needsPlanPicker` is the only case that may open `PaywallView`: it means
+/// the offering never loaded, so there is nothing to buy and the plan picker's
+/// retry/empty state is the honest answer. Every other case is handled inline.
+enum DirectPurchaseOutcome: Equatable {
+    case unlocked
+    case pending
+    case cancelled
+    case failed(String)
+    case needsPlanPicker
+}
+
 enum StoreServiceError: LocalizedError {
     case purchasesUnavailableInSimulator
 
@@ -430,6 +443,33 @@ final class StoreService: NSObject, ObservableObject {
             return .purchased
         } else {
             return .pending
+        }
+    }
+
+    /// The single conversion path behind every pitch in the app.
+    ///
+    /// A CTA that names an offer ("Start 7-day free trial") has to *be* that
+    /// offer: the next thing the user sees is Apple's confirm sheet, never a
+    /// second pitch asking them to agree again. Surfaces that used to hand off
+    /// to `PaywallView` call this instead; the plan picker is now reachable
+    /// only from a deliberate "See all plans" link, or as the fallback when the
+    /// offering failed to load and there is genuinely nothing to buy.
+    func purchaseYearlyDirect() async -> DirectPurchaseOutcome {
+        if yearlyPackage == nil, currentOffering == nil {
+            await fetchProducts()
+        }
+        guard let yearly = yearlyPackage else { return .needsPlanPicker }
+        do {
+            switch try await purchase(yearly) {
+            case .purchased:
+                return .unlocked
+            case .pending:
+                return .pending
+            case .cancelled:
+                return .cancelled
+            }
+        } catch {
+            return .failed(lastError ?? "Couldn't complete the purchase. Please try again.")
         }
     }
 

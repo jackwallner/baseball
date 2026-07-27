@@ -686,6 +686,7 @@ struct TeamView: View {
             }
         }
         .menuOrder(.fixed)
+        .savantMenuAppearance()
         .accessibilityLabel("Team")
         .accessibilityValue(teamFullName(team))
         .accessibilityHint("Switch to another team")

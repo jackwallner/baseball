@@ -199,9 +199,7 @@ struct TeamStandardCard: View {
                     .allowsHitTesting(false)
                 BlurGateUnlock(
                     headline: "See every team's last 7 / 15 / 30 days",
-                    cta: store.paywallBlurCTA,
-                    subtext: store.paywallBlurSubtext,
-                    action: onUpgradeTap
+                    trigger: .teamView
                 )
             }
         } else if loading {

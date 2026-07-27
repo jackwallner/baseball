@@ -574,11 +574,18 @@ struct LeaderboardTableRow: View {
 /// bottom over a gradient that fades the blurred preview into the card surface,
 /// so the teaser stays visible as the hook instead of being buried under an
 /// opaque panel. Used by RecentFormCard, TeamRankingsCard, and YearComparePreview.
+///
+/// The CTA transacts. It used to open `TrialPitchSheet`, which showed the same
+/// offer a second time under a second button — so a user who had already said
+/// yes to "Start 7-day free trial" had to say it again before Apple's confirm
+/// sheet ever appeared. The button says what it does and then does it; the plan
+/// picker stays reachable behind a quiet "See all plans" link for anyone who
+/// actually wants to weigh monthly against lifetime.
 struct BlurGateUnlock: View {
     let headline: String
-    let cta: String
-    var subtext: String? = nil
-    let action: () -> Void
+    /// Entry point this gate represents — drives the impression id and the
+    /// copy on the plan picker, if the user asks for it.
+    let trigger: PaywallTrigger
 
     var body: some View {
         VStack(spacing: 8) {
@@ -588,28 +595,7 @@ struct BlurGateUnlock: View {
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
 
-            Button(action: action) {
-                HStack(spacing: 6) {
-                    Image(systemName: "crown.fill")
-                        .font(.system(size: 11))
-                    Text(cta)
-                        .font(SavantType.bodyBold)
-                }
-                .foregroundStyle(.white)
-                .padding(.horizontal, 22)
-                .frame(height: 42)
-                .background(SavantPalette.savantRed)
-                .clipShape(Capsule())
-            }
-            .buttonStyle(.plain)
-
-            if let subtext {
-                Text(subtext)
-                    .font(SavantType.micro)
-                    .tracking(0.3)
-                    .foregroundStyle(SavantPalette.inkTertiary)
-                    .multilineTextAlignment(.center)
-            }
+            PlusDirectCTA(trigger: trigger, style: .capsule)
         }
         .padding(.horizontal, 20)
         .padding(.top, 52)
@@ -622,6 +608,142 @@ struct BlurGateUnlock: View {
                 endPoint: .bottom
             )
         )
+    }
+}
+
+// MARK: - One-tap StatScout+ CTA
+
+/// The app's only in-place conversion control, and the reason there is no
+/// pitch-then-pitch path left.
+///
+/// Every surface that names an offer — the blurred gates, the player-page
+/// upsell card, the trial sheet's footer — used to hand off to another screen
+/// that showed the same offer under another button. This one transacts: tap it
+/// and the next thing on screen is Apple's confirm sheet. The plan picker is
+/// still there for anyone who wants to weigh monthly against lifetime, but it's
+/// a quiet text link rather than a toll gate, and it's also where a failed
+/// product load lands because that's the only screen that can retry.
+struct PlusDirectCTA: View {
+    enum Style {
+        /// Compact pill, for the bottom of a blurred teaser.
+        case capsule
+        /// Full-width bar, for a card or sheet footer.
+        case bar
+    }
+
+    @EnvironmentObject private var store: StoreService
+
+    let trigger: PaywallTrigger
+    var style: Style = .bar
+    /// Hidden where the surrounding screen already offers plan choice.
+    var showsAllPlansLink: Bool = true
+
+    @State private var isPurchasing = false
+    @State private var statusMessage: String?
+    @State private var showingPlans = false
+
+    var body: some View {
+        VStack(spacing: 8) {
+            Button(action: buy) {
+                label
+            }
+            .buttonStyle(.plain)
+            .disabled(isPurchasing)
+            .accessibilityLabel(store.paywallBlurCTA)
+
+            // Full auto-renew terms sit beside the purchase point, because this
+            // button *is* the purchase point now (Apple 3.1.2).
+            if let disclosure = store.yearlyCTADisclosureText ?? store.paywallBlurSubtext {
+                Text(disclosure)
+                    .font(SavantType.micro)
+                    .tracking(0.3)
+                    .foregroundStyle(SavantPalette.inkTertiary)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            if let statusMessage {
+                Text(statusMessage)
+                    .font(SavantType.micro)
+                    .foregroundStyle(SavantPalette.savantRed)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            if showsAllPlansLink {
+                Button("See all plans") { showingPlans = true }
+                    .font(SavantType.micro)
+                    .tracking(0.3)
+                    .foregroundStyle(SavantPalette.inkSecondary)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .task {
+            store.trackPaywallImpression(id: trigger.paywallImpressionId, oncePerSession: true)
+            if store.currentOffering == nil { await store.fetchProducts() }
+        }
+        .sheet(isPresented: $showingPlans) {
+            PaywallView(trigger: trigger)
+        }
+    }
+
+    @ViewBuilder
+    private var label: some View {
+        switch style {
+        case .capsule:
+            HStack(spacing: 6) {
+                if isPurchasing {
+                    ProgressView().tint(.white)
+                } else {
+                    Image(systemName: "crown.fill")
+                        .font(.system(size: 11))
+                    Text(store.paywallBlurCTA)
+                        .font(SavantType.bodyBold)
+                }
+            }
+            .foregroundStyle(.white)
+            .padding(.horizontal, 22)
+            .frame(height: 42)
+            .background(SavantPalette.savantRed)
+            .clipShape(Capsule())
+        case .bar:
+            ZStack {
+                Text(store.paywallBlurCTA)
+                    .font(SavantType.bodyBold)
+                    .opacity(isPurchasing ? 0 : 1)
+                if isPurchasing {
+                    ProgressView().tint(.white)
+                }
+            }
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity)
+            .frame(height: 50)
+            .background(SavantPalette.savantRed)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+        }
+    }
+
+    private func buy() {
+        statusMessage = nil
+        isPurchasing = true
+        Task { @MainActor in
+            defer { isPurchasing = false }
+            switch await store.purchaseYearlyDirect() {
+            case .unlocked:
+                break
+            case .pending:
+                // Ask-to-Buy / deferred payment: not unlocked, not an error.
+                statusMessage = "Purchase pending approval. StatScout+ unlocks automatically once it's approved."
+            case .cancelled:
+                statusMessage = "Purchase cancelled. Tap again to continue."
+            case .failed(let message):
+                statusMessage = message
+            case .needsPlanPicker:
+                // Nothing loaded to buy — the picker's retry/empty state is the
+                // only surface that can say so and recover.
+                showingPlans = true
+            }
+        }
     }
 }
 

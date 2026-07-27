@@ -24,7 +24,6 @@ struct HotColdView: View {
     @EnvironmentObject private var store: StoreService
     @Bindable var viewModel: DashboardViewModel
     @State private var favorites = FavoritesStore.shared
-    @State private var paywallTrigger: PaywallTrigger?
     @State private var showingCold = false
     @State private var side: TrendSide = .batting
     @State private var metric: TrendMetric = TrendMetric.batting[0]
@@ -54,21 +53,34 @@ struct HotColdView: View {
             }
     }
 
+    /// Free users get the header and a full-height locked board; Pro users get
+    /// a scrolling one.
+    ///
+    /// The locked board deliberately does *not* scroll. It used to sit in the
+    /// same `ScrollView` as the Pro board, which meant its height was whatever
+    /// twelve invented rows happened to add up to — short of the viewport on a
+    /// big phone, so the card stopped mid-screen with canvas grey under it and
+    /// the unlock panel floating in the middle of nothing. There is also
+    /// nothing below the fold to scroll *to* when the rows are a teaser. Laying
+    /// it out as a fixed page that fills the space is both simpler and what it
+    /// always should have looked like.
     var body: some View {
-        ScrollView {
-            LazyVStack(spacing: 0) {
-                header
+        VStack(spacing: 0) {
+            header
 
-                if store.isPro {
-                    proContent
-                } else {
-                    lockedContent
+            if store.isPro {
+                ScrollView {
+                    LazyVStack(spacing: 0) {
+                        proContent
+                        Color.clear.frame(height: 88)
+                    }
                 }
-
-                Color.clear.frame(height: 88)
+                .scrollBounceBehavior(.basedOnSize)
+            } else {
+                lockedContent
             }
         }
-        .scrollBounceBehavior(.basedOnSize)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(SavantPalette.canvas)
         // Keyed on entitlement as well as the window. `isPro` starts false and
         // only flips once RevenueCat answers, which on a real device is often
@@ -77,17 +89,18 @@ struct HotColdView: View {
         // ever re-ran it. The board then sat empty forever: not loading, no
         // error, just a bare header. Switching windows was the only way to get
         // data, which is exactly how it looked in TestFlight.
+        //
+        // Free users load it too now: the top row of the locked board is the
+        // real league leader, and a fabricated one would be a lie in the one
+        // place we're asking to be trusted. It's a single request against the
+        // pre-aggregated rollup table, the same one Pro reads.
         .task(id: "\(viewModel.recentWindow.rawValue)-\(store.isPro)") {
-            guard store.isPro else { return }
             await viewModel.loadRecentFormIfNeeded()
         }
         .onChange(of: side) { _, newSide in
             // Keys don't carry across sides, so land on that side's headline
             // metric rather than an empty board.
             metric = TrendMetric.list(for: newSide)[0]
-        }
-        .sheet(item: $paywallTrigger) { trigger in
-            TrialPitchSheet(trigger: trigger)
         }
     }
 
@@ -192,30 +205,95 @@ struct HotColdView: View {
             }
             .padding(.vertical, 32)
         } else {
-            section(
-                title: showingCold ? "COLDEST IN THE LEAGUE" : "HOTTEST IN THE LEAGUE",
-                forms: Array(ranked.prefix(50)),
-                ranked: true
+            section(title: boardTitle, forms: Array(ranked.prefix(50)), ranked: true)
+        }
+    }
+
+    /// Free users get the real number one, then the wall.
+    ///
+    /// A gate that shows nobody is easy to walk away from. Showing the actual
+    /// hottest hitter in the league — his name, his THEN → NOW, tappable
+    /// through to his page — makes the board demonstrably real, and makes the
+    /// blurred ranks below it a thing you can't see rather than a thing that
+    /// might not exist. Everything under row one stays invented: blur is not a
+    /// security boundary, so the rows behind it were never real numbers.
+    private var lockedContent: some View {
+        VStack(spacing: 0) {
+            SavantSectionBar(title: boardTitle)
+
+            leaderRow
+
+            // The rows are drawn as an overlay on an empty flexible spacer, not
+            // stacked directly. A VStack of eighteen rows has an ideal height
+            // of ~800pt and `frame(maxHeight:)` doesn't shrink a child below
+            // its ideal — so laying them out inline made the card taller than
+            // the screen and shoved the whole page up, taking the pickers off
+            // the top and the unlock panel off the bottom. `Color.clear` has no
+            // ideal height of its own, so it takes exactly the space left over;
+            // the overlay fills it and the excess is clipped.
+            Color.clear
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .overlay(alignment: .top) {
+                    VStack(spacing: 0) {
+                        ForEach(Array(teaserRows.dropFirst().enumerated()), id: \.offset) { index, teaser in
+                            teaserRow(teaser, index: index + 1)
+                        }
+                    }
+                    .blur(radius: 8)
+                    .allowsHitTesting(false)
+                }
+                .clipped()
+                .overlay(alignment: .bottom) {
+                    BlurGateUnlock(
+                        headline: "See the full board — every hitter and pitcher ranked by how far they've moved",
+                        trigger: .recentForm
+                    )
+                }
+        }
+        .background(SavantPalette.surface)
+        .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
+        .overlay(
+            RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
+                .stroke(SavantPalette.hairline, lineWidth: 0.5)
+        )
+        .padding(.horizontal, 12)
+        .padding(.top, 12)
+        // Sits just clear of the floating tab bar. Measured from the safe area,
+        // not the screen edge, so this is the pill's height above the inset
+        // plus a hair — the page doesn't scroll, so unlike every other screen
+        // there's nothing to gain from running underneath it.
+        .padding(.bottom, 46)
+    }
+
+    /// Row one of the locked board: the genuine leader once the rollup lands,
+    /// and a placeholder of the same height until then so the card doesn't
+    /// resize under the gate as data arrives.
+    @ViewBuilder
+    private var leaderRow: some View {
+        if let leader = ranked.first {
+            row(form: leader, rank: 1, index: 0)
+        } else {
+            HStack(spacing: 10) {
+                if viewModel.isRecentFormLoading {
+                    ProgressView().scaleEffect(0.7)
+                }
+                Text(viewModel.isRecentFormLoading ? "Loading the board…" : "No movement to rank yet")
+                    .font(SavantType.small)
+                    .foregroundStyle(SavantPalette.inkTertiary)
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, SavantGeo.padInline)
+            .frame(height: SavantGeo.rowHeight)
+            .background(SavantPalette.surface)
+            .overlay(
+                Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline),
+                alignment: .bottom
             )
         }
     }
 
-    /// Free users get the real header and a blurred board beneath it. The point
-    /// is to show the shape of what's behind the wall — names, movement, a
-    /// ranking — rather than a padlock that communicates nothing.
-    private var lockedContent: some View {
-        ZStack(alignment: .bottom) {
-            teaserBoard
-                .blur(radius: 8)
-                .disabled(true)
-                .allowsHitTesting(false)
-            BlurGateUnlock(
-                headline: "See who's heating up and cooling off across the league",
-                cta: store.paywallBlurCTA,
-                subtext: store.paywallBlurSubtext,
-                action: { paywallTrigger = .recentForm }
-            )
-        }
+    private var boardTitle: String {
+        showingCold ? "COLDEST IN THE LEAGUE" : "HOTTEST IN THE LEAGUE"
     }
 
     private func section(title: String, forms: [RecentForm], ranked: Bool) -> some View {
@@ -309,61 +387,49 @@ struct HotColdView: View {
         }
     }
 
-    /// Illustrative board for the blurred gate.
-    ///
-    /// Invented numbers, not real ones: a locked screen shouldn't spend the
-    /// user's data on a fetch they can't read, and blur is not a security
-    /// boundary — real values behind 8pt of blur are still real values.
-    ///
-    /// It does follow the pickers, though. A preview frozen on hitters' xwOBA
-    /// while the header says "Pitching · Cooling off · K%" makes the controls
-    /// look broken, which is the opposite of what a teaser is for. The shape is
-    /// generated from the selected metric's own scale and direction.
-    private var teaserBoard: some View {
-        let ranked = teaserRows
-        return VStack(spacing: 0) {
-            SavantSectionBar(title: showingCold ? "COLDEST IN THE LEAGUE" : "HOTTEST IN THE LEAGUE")
-            ForEach(Array(ranked.enumerated()), id: \.offset) { index, row in
-                HStack(spacing: 10) {
-                    Text("\(index + 1)")
-                        .font(SavantType.statSmall)
-                        .foregroundStyle(SavantPalette.inkSecondary)
-                        .frame(width: 26, alignment: .leading)
-                    PlayerHeadshot(team: row.team, initials: row.initials, size: 34)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(row.name)
-                            .font(SavantType.bodyBold)
-                            .foregroundStyle(SavantPalette.ink)
-                        Text("\(metric.format(row.then)) → \(metric.format(row.now)) · \(row.games)G")
-                            .font(SavantType.micro)
-                            .foregroundStyle(SavantPalette.inkTertiary)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    TrendArrow(
-                        delta: row.now - row.then,
-                        decimals: metric.decimals,
-                        lowerIsBetter: metric.lowerIsBetter
-                    )
-                    .frame(width: 56, alignment: .trailing)
-                }
-                .padding(.horizontal, SavantGeo.padInline)
-                .frame(height: SavantGeo.rowHeight)
-                .background(index % 2 == 0 ? SavantPalette.surface : SavantPalette.surfaceAlt)
+    /// One row of the invented board behind the gate. Same geometry as the real
+    /// `row`, so the blur reads as the board continuing rather than as a
+    /// different component.
+    private func teaserRow(_ teaser: TeaserRow, index: Int) -> some View {
+        HStack(spacing: 10) {
+            Text("\(index + 1)")
+                .font(SavantType.statSmall)
+                .foregroundStyle(SavantPalette.inkSecondary)
+                .frame(width: 26, alignment: .leading)
+            PlayerHeadshot(team: teaser.team, initials: teaser.initials, size: 34)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(teaser.name)
+                    .font(SavantType.bodyBold)
+                    .foregroundStyle(SavantPalette.ink)
+                Text("\(metric.format(teaser.then)) → \(metric.format(teaser.now)) · \(teaser.games)G")
+                    .font(SavantType.micro)
+                    .foregroundStyle(SavantPalette.inkTertiary)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            TrendArrow(
+                delta: teaser.now - teaser.then,
+                decimals: metric.decimals,
+                lowerIsBetter: metric.lowerIsBetter
+            )
+            .frame(width: 56, alignment: .trailing)
         }
-        .background(SavantPalette.surface)
-        .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
-        .overlay(
-            RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
-                .stroke(SavantPalette.hairline, lineWidth: 0.5)
-        )
-        .padding(.horizontal, 12)
-        .padding(.top, 12)
+        .padding(.horizontal, SavantGeo.padInline)
+        .frame(height: SavantGeo.rowHeight)
+        .background(index % 2 == 0 ? SavantPalette.surface : SavantPalette.surfaceAlt)
     }
 
-    /// Twelve plausible rows for the current metric. Enough to fill the
-    /// viewport behind the gate — six left a dead grey void under the unlock
-    /// panel, which read as a broken screen rather than as a paywall.
+    struct TeaserRow {
+        let name: String
+        let team: String
+        let initials: String
+        let then: Double
+        let now: Double
+        let games: Int
+    }
+
+    /// Enough plausible rows to overflow the tallest phone behind the gate —
+    /// the container clips them, so too many costs nothing and too few leaves
+    /// the dead grey void that made this screen read as broken.
     ///
     /// The faces are real players from the selected side's roster (season data
     /// is free, so nothing is being given away), picked and ordered by a seed
@@ -371,16 +437,17 @@ struct HotColdView: View {
     /// the board visibly redraw when a picker moves: with a fixed cast the
     /// twelve team colours stayed in exactly the same order no matter what the
     /// controls said, which gives the game away immediately.
-    private var teaserRows: [(name: String, team: String, initials: String, then: Double, now: Double, games: Int)] {
+    private var teaserRows: [TeaserRow] {
+        let count = 18
         let seedSuffix = "\(metric.key)-\(showingCold)-\(viewModel.recentWindow.rawValue)"
         let roster = viewModel.players(forSeason: viewModel.selectedSeason)
             .filter { ($0.playerType ?? "batter") == side.playerType }
         let names: [(String, String, String)]
-        if roster.count >= 12 {
+        if roster.count >= count {
             names = roster
                 .map { ($0, Self.stableSeed("\($0.playerId)-\(seedSuffix)")) }
                 .sorted { $0.1 < $1.1 }
-                .prefix(12)
+                .prefix(count)
                 .map { ($0.0.name, $0.0.team, $0.0.initials) }
         } else {
             // Pre-load, or a season with no roster yet.
@@ -391,6 +458,9 @@ struct HotColdView: View {
                 ("Player Seven", "PHI", "PS"), ("Player Eight", "BAL", "PE"),
                 ("Player Nine", "CHC", "PN"), ("Player Ten", "TEX", "PT"),
                 ("Player Eleven", "MIL", "PE"), ("Player Twelve", "SD", "PT"),
+                ("Player Thirteen", "TOR", "PT"), ("Player Fourteen", "ARI", "PF"),
+                ("Player Fifteen", "MIN", "PF"), ("Player Sixteen", "CLE", "PS"),
+                ("Player Seventeen", "STL", "PS"), ("Player Eighteen", "DET", "PE"),
             ]
             names = placeholders
                 .map { ($0, Self.stableSeed("\($0.0)-\(seedSuffix)")) }
@@ -407,10 +477,17 @@ struct HotColdView: View {
         let sign: Double = (improving != metric.lowerIsBetter) ? 1 : -1
 
         return names.enumerated().map { index, who in
-            let decay = 1.0 - Double(index) * 0.055
+            let decay = max(0.15, 1.0 - Double(index) * 0.045)
             let move = swing * decay
             let then = base - sign * move / 2
-            return (who.0, who.1, who.2, then, then + sign * move, 14 - index % 5)
+            return TeaserRow(
+                name: who.0,
+                team: who.1,
+                initials: who.2,
+                then: then,
+                now: then + sign * move,
+                games: 14 - index % 5
+            )
         }
     }
 

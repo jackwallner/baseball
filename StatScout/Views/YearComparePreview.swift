@@ -3,9 +3,7 @@ import SwiftUI
 /// A visually rich preview of the Year Comparison feature, shown to free users.
 /// Uses mock data that mimics the real YearComparisonView layout with a blur overlay + CTA.
 struct YearComparePreview: View {
-    @EnvironmentObject private var store: StoreService
     let playerName: String
-    let onUnlock: () -> Void
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -16,9 +14,7 @@ struct YearComparePreview: View {
 
             BlurGateUnlock(
                 headline: "See how \(playerName) evolved season to season",
-                cta: store.paywallBlurCTA,
-                subtext: store.paywallBlurSubtext,
-                action: onUnlock
+                trigger: .yearCompare
             )
         }
         .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
@@ -215,6 +211,6 @@ struct YearComparePreview: View {
 }
 
 #Preview {
-    YearComparePreview(playerName: "Shohei Ohtani", onUnlock: {})
+    YearComparePreview(playerName: "Shohei Ohtani")
         .environmentObject(StoreService.shared)
 }

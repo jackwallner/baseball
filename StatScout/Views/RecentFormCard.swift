@@ -13,7 +13,6 @@ struct RecentFormCard: View {
     /// at curve-build time.
     let leaguePlayers: [Player]
     let fetchGameLogs: ((Int, Int) async throws -> [PlayerGameLog])?
-    let onUpgradeTap: () -> Void
 
     @State private var logs: [PlayerGameLog] = []
     @State private var loading = false
@@ -147,9 +146,7 @@ struct RecentFormCard: View {
                     .allowsHitTesting(false)
                 BlurGateUnlock(
                     headline: "See last 7 / 15 / 30 day form for any player",
-                    cta: store.paywallBlurCTA,
-                    subtext: store.paywallBlurSubtext,
-                    action: onUpgradeTap
+                    trigger: .recentForm
                 )
             }
         }

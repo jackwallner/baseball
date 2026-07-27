@@ -108,9 +108,7 @@ struct CompareView: View {
                         // than this screen's own floating panel.
                         BlurGateUnlock(
                             headline: "Stack any two players, or any player against his own past seasons",
-                            cta: store.paywallBlurCTA,
-                            subtext: store.paywallBlurSubtext,
-                            action: { showingTrial = true }
+                            trigger: .playerComparison
                         )
                         .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
                     }
@@ -175,6 +173,10 @@ struct CompareView: View {
         .sheet(isPresented: $showingTrial) {
             TrialPitchSheet(trigger: .playerComparison)
         }
+        // Just the player route, not the whole StandardDestinations bundle —
+        // this file declares its own ComparisonRoute destination, and two
+        // registrations for one type is a runtime conflict.
+        .modifier(PlayerProfileDestination(viewModel: viewModel))
         .navigationDestination(item: $comparisonRoute) { route in
             PlayerComparisonView(playerA: route.playerA, playerB: route.playerB)
                 .modifier(SavantNavBarPublic())
@@ -231,7 +233,9 @@ struct CompareView: View {
                 ForEach(Array(followedPlayers.enumerated()), id: \.element.playerId) { index, player in
                     followedRow(player: player, index: index)
                 }
-                Text("Tap a player to load them into a slot below.")
+                Text(store.isPro
+                     ? "Tap a player to load them into a slot below."
+                     : "Tap a player to see their stats. Head-to-head needs StatScout+.")
                     .font(SavantType.micro)
                     .tracking(0.3)
                     .foregroundStyle(SavantPalette.inkTertiary)
@@ -248,56 +252,36 @@ struct CompareView: View {
         )
     }
 
+    /// A followed player, and what tapping him does.
+    ///
+    /// For Pro that's "load into a comparison slot". For everyone else it's
+    /// "open his page" — his own stats are free, so a free tap used to throw up
+    /// the comparison pitch and give the user nothing, on a list they built
+    /// themselves. Head-to-head is what's paid; a player's own numbers never
+    /// were. The pitch is still one row further down, on the blurred cards that
+    /// actually need it.
+    @ViewBuilder
     private func followedRow(player: Player, index: Int) -> some View {
         let inSlot = playerA?.playerId == player.playerId || playerB?.playerId == player.playerId
-        return Button {
+
+        Group {
             if store.isPro {
-                loadIntoSlot(player)
+                Button {
+                    loadIntoSlot(player)
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                } label: {
+                    followedRowLabel(player: player, index: index, inSlot: inSlot)
+                }
+                .buttonStyle(.plain)
+                .accessibilityHint("Loads \(player.name) into a comparison slot")
             } else {
-                // The row's whole purpose here is comparison, so a free tap
-                // answers with the comparison pitch rather than doing nothing.
-                showingTrial = true
-            }
-            UIImpactFeedbackGenerator(style: .light).impactOccurred()
-        } label: {
-            HStack(spacing: 10) {
-                PlayerHeadshot(team: player.team, initials: player.initials, size: 34)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(player.name)
-                        .font(SavantType.bodyBold)
-                        .foregroundStyle(SavantPalette.ink)
-                        .lineLimit(1)
-                    Text("\(displayTeamAbbr(player.team)) · \(player.displayPosition)")
-                        .font(SavantType.micro)
-                        .tracking(0.3)
-                        .foregroundStyle(SavantPalette.inkTertiary)
+                NavigationLink(value: player) {
+                    followedRowLabel(player: player, index: index, inSlot: inSlot)
                 }
-                Spacer(minLength: 0)
-                if inSlot {
-                    Text("IN SLOT")
-                        .font(SavantType.micro)
-                        .tracking(0.4)
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(SavantPalette.savantRed)
-                        .clipShape(Capsule())
-                } else {
-                    Image(systemName: "plus.circle")
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundStyle(SavantPalette.inkTertiary)
-                }
+                .buttonStyle(.plain)
+                .accessibilityHint("Opens \(player.name)'s stats")
             }
-            .padding(.horizontal, SavantGeo.padInline)
-            .frame(height: SavantGeo.rowHeight)
-            .background(index % 2 == 0 ? SavantPalette.surface : SavantPalette.surfaceAlt)
-            .overlay(
-                Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline),
-                alignment: .bottom
-            )
-            .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
         .contextMenu {
             Button(role: .destructive) {
                 favorites.toggleFavorite(playerId: player.playerId)
@@ -305,7 +289,47 @@ struct CompareView: View {
                 Label("Unfollow", systemImage: "star.slash")
             }
         }
-        .accessibilityHint("Loads \(player.name) into a comparison slot")
+    }
+
+    private func followedRowLabel(player: Player, index: Int, inSlot: Bool) -> some View {
+        HStack(spacing: 10) {
+            PlayerHeadshot(team: player.team, initials: player.initials, size: 34)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(player.name)
+                    .font(SavantType.bodyBold)
+                    .foregroundStyle(SavantPalette.ink)
+                    .lineLimit(1)
+                Text("\(displayTeamAbbr(player.team)) · \(player.displayPosition)")
+                    .font(SavantType.micro)
+                    .tracking(0.3)
+                    .foregroundStyle(SavantPalette.inkTertiary)
+            }
+            Spacer(minLength: 0)
+            if inSlot {
+                Text("IN SLOT")
+                    .font(SavantType.micro)
+                    .tracking(0.4)
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(SavantPalette.savantRed)
+                    .clipShape(Capsule())
+            } else {
+                // The glyph states the outcome: a slot to fill for Pro, a page
+                // to open for everyone else.
+                Image(systemName: store.isPro ? "plus.circle" : "chevron.right")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(SavantPalette.inkTertiary)
+            }
+        }
+        .padding(.horizontal, SavantGeo.padInline)
+        .frame(height: SavantGeo.rowHeight)
+        .background(index % 2 == 0 ? SavantPalette.surface : SavantPalette.surfaceAlt)
+        .overlay(
+            Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline),
+            alignment: .bottom
+        )
+        .contentShape(Rectangle())
     }
 
     /// Fills the first empty slot, then replaces the older of the two, so

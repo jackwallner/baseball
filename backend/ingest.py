@@ -76,6 +76,12 @@ FIELDING_METRICS = [
     ("arm_strength", "Arm Strength", "Fielding"),
 ]
 
+# Metrics whose value can't be resolved at metric-build time because it depends
+# on standard stats that are fetched later. They survive the "no value, no
+# metric" filter with an empty value and are resolved (or dropped) by a
+# post-pass — see _add_expected_obp.
+DEFERRED_VALUE_KEYS = {"xobp"}
+
 PITCHER_METRICS = [
     ("xera", "xERA", "Pitching"),
     ("xwoba", "xwOBA", "Pitching"),
@@ -399,6 +405,12 @@ class ActualValueStore:
             self._data["batter_agg"] = {}
             self._data["pitcher_agg"] = {}
 
+    def expected_stat(self, player_id: int, column: str, player_type: str) -> Optional[float]:
+        """Raw column off Savant's expected-stats export (est_ba / est_slg / est_woba)."""
+        source = "pitcher_expected" if player_type == "pitcher" else "batter_expected"
+        value = (self._data.get(source, {}).get(player_id) or {}).get(column)
+        return float(value) if value is not None and pd.notna(value) else None
+
     def get_value(self, player_id: int, metric_key: str, player_type: str) -> Optional[str]:
         """Get formatted actual value for a metric."""
         value = None
@@ -526,18 +538,28 @@ class ActualValueStore:
                         unit = "%"
 
             elif metric_key == "xiso":
-                # Only from aggregated data (not available in pybaseball directly)
-                if player_id in self._data.get("batter_agg", {}):
-                    v = self._data["batter_agg"][player_id].get("xiso")
-                    if pd.notna(v):
-                        value = f"{v:.3f}"
+                # xSLG - xBA, both PA-denominated, straight off Savant's
+                # expected-stats export.
+                #
+                # This used to come from the local aggregator, which averages
+                # estimated_slg/ba over *batted balls* — that's xSLGCON and
+                # xBACON, and their difference isn't xISO. Judge came out at
+                # .497 next to an xSLG of .600 and an xBA of .270; no hitter in
+                # the game has an xISO near .500. The percentile beside it was
+                # Savant's real one, so the row disagreed with itself.
+                src = self._data["batter_expected"] if player_type == "batter" else self._data["pitcher_expected"]
+                if player_id in src:
+                    slg = src[player_id].get("est_slg")
+                    ba = src[player_id].get("est_ba")
+                    if pd.notna(slg) and pd.notna(ba):
+                        value = f"{float(slg) - float(ba):.3f}"
 
             elif metric_key == "xobp":
-                # Only from aggregated data (not available in pybaseball directly)
-                if player_id in self._data.get("batter_agg", {}):
-                    v = self._data["batter_agg"][player_id].get("xobp")
-                    if pd.notna(v):
-                        value = f"{v:.3f}"
+                # Deferred: xOBP needs walk and plate-appearance counts, which
+                # aren't attached until the standard-stats pass runs. Filled in
+                # by _add_expected_obp(); metrics still empty after that are
+                # dropped there.
+                pass
 
             elif metric_key == "fb_spin":
                 if player_id in self._data.get("pitcher_agg", {}):
@@ -585,9 +607,15 @@ def build_metrics_with_values(
 
         actual_value = value_store.get_value(player_id, key, player_type)
 
-        # Skip metrics without actual values to prevent empty value issues
+        # Skip metrics without actual values to prevent empty value issues.
+        # DEFERRED_VALUE_KEYS are the exception: their value depends on data
+        # that isn't fetched until later in build_snapshot_rows, so they ride
+        # through with a placeholder and a post-pass either fills them or
+        # removes them.
         if not actual_value:
-            continue
+            if key not in DEFERRED_VALUE_KEYS:
+                continue
+            actual_value = ""
 
         # `actual_value` duplicated `value` verbatim and `display_value` was
         # "value · Nth", derivable from the two fields beside it. Together they
@@ -797,6 +825,90 @@ def _rank_percentiles(values: dict[int, float], lower_better: bool) -> dict[int,
     series = pd.Series(values, dtype=float)
     ranks = series.rank(method="average", ascending=not lower_better, pct=True)
     return {int(pid): max(1, min(100, int(round(pct * 100)))) for pid, pct in ranks.items()}
+
+
+def _std_stat(player: dict, *labels: str) -> Optional[float]:
+    """First of ``labels`` present in the player's standard stats, as a float."""
+    by_label = {s["label"].upper(): s["value"] for s in player.get("standard_stats", [])}
+    for label in labels:
+        raw = by_label.get(label.upper())
+        if raw in (None, ""):
+            continue
+        try:
+            return float(str(raw).strip())
+        except (TypeError, ValueError):
+            continue
+    return None
+
+
+def _add_expected_obp(players: dict[int, dict], value_store: "ActualValueStore") -> None:
+    """Fill in the deferred xOBP value, or drop the metric.
+
+    xOBP is the one metric on the player page with no column of its own
+    anywhere upstream: Savant publishes an xOBP *percentile* but its
+    expected-stats export stops at xBA / xSLG / xwOBA. What shipped instead was
+    the local aggregator's ``xobp``, which is literally ``xwoba`` averaged over
+    batted balls — xwOBACON. That put James Wood at .580 and Owen Caissie at
+    .475, and Caissie's real xOBP percentile is 8. The board sorted by a number
+    that disagreed with the bar printed next to it, which is what a user
+    noticed.
+
+    Reconstruct it the standard way instead, from expected hits plus walks over
+    plate appearances::
+
+        xOBP = (xBA x AB + BB) / PA
+
+    That lands within a few points of each hitter's real OBP and, more to the
+    point, moves with Savant's percentile instead of against it. HBP and
+    sacrifice flies are not in the standard-stats payload, so this runs a touch
+    low (roughly .008) against a textbook OBP — an understatement of a known
+    size, which is worth far more than a number off by .200 in an unknown
+    direction. Pitchers use batters-faced as the denominator and BF - BB as the
+    at-bat stand-in.
+
+    Anything still without a value afterwards loses the metric, matching the
+    "no value, no metric" rule the rest of the build follows.
+    """
+    filled = 0
+    dropped = 0
+
+    for pid, player in players.items():
+        metrics = player.get("metrics", [])
+        targets = [m for m in metrics if m["label"] == "xOBP" and not m.get("value")]
+        if not targets:
+            continue
+
+        for metric in targets:
+            is_pitching = metric.get("category") == "Pitching"
+            xba = value_store.expected_stat(
+                pid, "est_ba", "pitcher" if is_pitching else "batter"
+            )
+
+            if is_pitching:
+                denom = _std_stat(player, "BF")
+                walks = _std_stat(player, "BB")
+                at_bats = (denom - walks) if (denom is not None and walks is not None) else None
+            else:
+                denom = _std_stat(player, "PA")
+                walks = _std_stat(player, "BB")
+                at_bats = _std_stat(player, "AB")
+
+            usable = (
+                xba is not None
+                and denom
+                and denom > 0
+                and walks is not None
+                and at_bats is not None
+                and at_bats >= 0
+            )
+            if usable:
+                metric["value"] = f"{(xba * at_bats + walks) / denom:.3f}"
+                filled += 1
+            else:
+                metrics.remove(metric)
+                dropped += 1
+
+    logger.info("xOBP: filled %d, dropped %d for missing inputs", filled, dropped)
 
 
 def _add_calculated_rates(players: dict[int, dict], qualified_pids: set[int]) -> None:
@@ -1056,6 +1168,9 @@ def build_snapshot_rows(season: int) -> list[dict]:
 
     logger.info("Attached standard stats to %d players", with_std)
 
+    # Both of these need the standard stats above, so they run here rather than
+    # at metric-build time.
+    _add_expected_obp(players, value_store)
     _add_calculated_rates(players, qualified_pids)
 
     # A player with no percentile metrics has no Savant percentile panel and

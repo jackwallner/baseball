@@ -85,6 +85,7 @@ struct StatsView: View {
             }
         }
         .menuOrder(.fixed)
+        .savantMenuAppearance()
         .accessibilityLabel("View")
         .accessibilityValue(mode.rawValue)
     }

@@ -387,7 +387,12 @@ private struct HomeTabToolbar: ViewModifier {
     }
 }
 
-private struct StandardDestinations: ViewModifier {
+/// Just the player-profile route. Split out of `StandardDestinations` so the
+/// Compare tab — which owns its own comparison routes and so can't take the
+/// whole bundle — can still push a player page. Following a player is free, and
+/// a followed name that can't be tapped through to its own numbers is a dead
+/// row on the one screen the user curated themselves.
+struct PlayerProfileDestination: ViewModifier {
     let viewModel: DashboardViewModel
 
     func body(content: Content) -> some View {
@@ -414,8 +419,17 @@ private struct StandardDestinations: ViewModifier {
                         await viewModel.loadRecentFormIfNeeded(window: window)
                     }
                 )
-                    .modifier(SavantNavBar())
+                    .modifier(SavantNavBarPublic())
             }
+    }
+}
+
+private struct StandardDestinations: ViewModifier {
+    let viewModel: DashboardViewModel
+
+    func body(content: Content) -> some View {
+        content
+            .modifier(PlayerProfileDestination(viewModel: viewModel))
             .navigationDestination(for: TeamDestination.self) { dest in
                 TeamView(
                     team: dest.abbr,

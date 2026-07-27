@@ -284,8 +284,97 @@ final class DashboardViewModel {
         return all.filter { seen.insert($0.playerId).inserted }
     }
 
+    /// Position filter for the hitter / fielder / runner boards.
+    ///
+    /// "Who are the best hitters" and "who are the best-hitting catchers" are
+    /// different questions, and the second is the one a fan comparing his own
+    /// team's holes actually asks. Groups sit above the individual spots so the
+    /// common ask (infield, outfield) is one tap rather than four.
+    enum PositionFilter: String, CaseIterable, Identifiable {
+        case all
+        case infield
+        case outfield
+        case catcher = "C"
+        case firstBase = "1B"
+        case secondBase = "2B"
+        case thirdBase = "3B"
+        case shortstop = "SS"
+        case leftField = "LF"
+        case centerField = "CF"
+        case rightField = "RF"
+        case designatedHitter = "DH"
+
+        var id: String { rawValue }
+
+        /// Short form for the chip; the menu row spells it out.
+        var chipLabel: String {
+            switch self {
+            case .all: return "Pos"
+            case .infield: return "IF"
+            case .outfield: return "OF"
+            default: return rawValue
+            }
+        }
+
+        var label: String {
+            switch self {
+            case .all: return "All positions"
+            case .infield: return "Infield"
+            case .outfield: return "Outfield"
+            case .catcher: return "Catcher"
+            case .firstBase: return "First base"
+            case .secondBase: return "Second base"
+            case .thirdBase: return "Third base"
+            case .shortstop: return "Shortstop"
+            case .leftField: return "Left field"
+            case .centerField: return "Center field"
+            case .rightField: return "Right field"
+            case .designatedHitter: return "Designated hitter"
+            }
+        }
+
+        /// Position codes this filter accepts. "OF" appears in the outfield set
+        /// because a handful of snapshots carry the generic code rather than a
+        /// corner.
+        var positionCodes: Set<String> {
+            switch self {
+            case .all: return []
+            case .infield: return ["1B", "2B", "3B", "SS"]
+            case .outfield: return ["LF", "CF", "RF", "OF"]
+            default: return [rawValue]
+            }
+        }
+
+        func matches(_ player: Player) -> Bool {
+            guard self != .all else { return true }
+            return positionCodes.contains(
+                player.displayPosition.trimmingCharacters(in: .whitespaces).uppercased()
+            )
+        }
+    }
+
+    var positionFilter: PositionFilter = .all
+
+    /// Pitching boards are every-player-is-P, so the control would offer a
+    /// single option; it's hidden there and the filter is skipped.
+    var positionFilterApplies: Bool { selectedCategory != .pitching }
+
+    /// Only the filters that would leave something on the board, so the menu
+    /// can't hand the user an empty list.
+    var availablePositionFilters: [PositionFilter] {
+        let present = Set(
+            seasonPlayers
+                .filter { $0.matchesPlayerType(for: selectedCategory) }
+                .map { $0.displayPosition.trimmingCharacters(in: .whitespaces).uppercased() }
+        )
+        return PositionFilter.allCases.filter { filter in
+            filter == .all || !filter.positionCodes.isDisjoint(with: present)
+        }
+    }
+
     var filteredPlayers: [Player] {
-        seasonPlayers.filter { player in
+        let applyPosition = positionFilterApplies && positionFilter != .all
+        return seasonPlayers.filter { player in
             let matchesSearch = searchText.isEmpty
                 || player.name.localizedCaseInsensitiveContains(searchText)
                 || player.team.localizedCaseInsensitiveContains(searchText)
@@ -293,7 +382,8 @@ final class DashboardViewModel {
             let matchesCategory = selectedCategory == nil || player.metrics.contains { $0.category == selectedCategory }
             let matchesType = player.matchesPlayerType(for: selectedCategory)
             let qualifies = isQualified(player, for: selectedCategory)
-            return matchesSearch && matchesCategory && matchesType && qualifies
+            let matchesPosition = !applyPosition || positionFilter.matches(player)
+            return matchesSearch && matchesCategory && matchesType && qualifies && matchesPosition
         }
     }
 
