@@ -26,6 +26,7 @@ struct TeamView: View {
 
     enum TeamTab: String, CaseIterable {
         case percentiles = "Percentiles"
+        case standard = "Standard"
         case roster = "Roster"
     }
 
@@ -165,6 +166,8 @@ struct TeamView: View {
                 switch selectedTab {
                 case .percentiles:
                     percentilesContent
+                case .standard:
+                    standardContent
                 case .roster:
                     rosterContent
                 }
@@ -222,7 +225,11 @@ struct TeamView: View {
                     UIImpactFeedbackGenerator(style: .light).impactOccurred()
                 } label: {
                     Text(tab.rawValue)
-                        .font(SavantType.bodyBold)
+                        // Three tabs where there were two, so the label has to
+                        // give a little rather than truncate on a small phone.
+                        .font(SavantType.smallBold)
+                        .minimumScaleFactor(0.85)
+                        .lineLimit(1)
                         .foregroundStyle(isSelected ? .white : SavantPalette.ink)
                         .frame(maxWidth: .infinity)
                         .frame(height: 44)
@@ -249,6 +256,19 @@ struct TeamView: View {
                 }
             )
         }
+        .padding(.horizontal, 12)
+        .padding(.top, 12)
+    }
+
+    private var standardContent: some View {
+        TeamStandardCard(
+            team: team,
+            season: displaySeason,
+            players: players,
+            leaguePlayers: leaguePlayers,
+            fetchTeamGameLogs: fetchTeamGameLogs,
+            onUpgradeTap: { showingTrial = true }
+        )
         .padding(.horizontal, 12)
         .padding(.top, 12)
     }
