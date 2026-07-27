@@ -62,17 +62,17 @@ struct TeamRankingsCard: View {
     var body: some View {
         VStack(spacing: 0) {
             SavantSectionBar(
-                title: "TEAM PERCENTILE RANKINGS",
+                title: "TEAM ADVANCED STATS",
                 trailing: store.isPro ? nil : AnyView(proBadge)
             )
 
-            // Side and mode share one row. They used to be stacked, which with
-            // the identity strip, the tab selector and the window picker put
-            // the first actual stat past halfway down the screen.
-            HStack(spacing: 8) {
-                sidePicker
-                Spacer(minLength: 8)
-                modePicker
+            // Side and mode share one row, split in proportion to how many
+            // options each holds — an even split squeezed "Season / Recent /
+            // Both" into two capsules' worth of width, and the free tier's
+            // crowns made it worse.
+            SavantPickerRow {
+                sidePicker.segmentCount(Side.allCases.count)
+                modePicker.segmentCount(Mode.allCases.count)
             }
             .padding(.horizontal, SavantGeo.padInline)
             .padding(.vertical, 8)
@@ -342,29 +342,22 @@ struct TeamRankingsCard: View {
         }
     }
 
-    /// Static, non-fetching preview for free users — illustrative team bars in
-    /// the recent-form layout. No game logs are fetched (no network/battery cost)
-    /// and no real team data is shown, so the blur can't be read through to leak
-    /// the actual recent numbers.
+    /// Non-fetching preview for free users — this team's own season bars,
+    /// nudged, in the recent-form layout. No game logs are fetched (no
+    /// network/battery cost) and the actual window numbers stay behind the
+    /// wall; what's shown is the shape of the answer, for this club, on the
+    /// side and window the pickers are set to.
+    ///
+    /// The nudge is the point. A preview frozen while the controls above it
+    /// move reads as a broken screen rather than as a paywall, and that was the
+    /// tell here: every window drew the same four bars in the same order.
     private var recentTeaser: some View {
-        let sample: [Metric] = side == .batting
-            ? [
-                Metric(id: "tt_xwoba",   label: "xwOBA",     value: "0.342",    percentile: 84, category: .hitting),
-                Metric(id: "tt_barrel",  label: "Barrel%",   value: "9.8%",     percentile: 77, category: .hitting),
-                Metric(id: "tt_hardhit", label: "Hard-Hit%", value: "43.5%",    percentile: 71, category: .hitting),
-                Metric(id: "tt_ev",      label: "EV",        value: "90.1 mph", percentile: 66, category: .hitting),
-            ]
-            : [
-                Metric(id: "tt_xwoba", label: "xwOBA",     value: "0.298", percentile: 81, category: .pitching),
-                Metric(id: "tt_k",     label: "K%",        value: "25.1%", percentile: 76, category: .pitching),
-                Metric(id: "tt_bb",    label: "BB%",       value: "7.2%",  percentile: 70, category: .pitching),
-                Metric(id: "tt_hh",    label: "Hard-Hit%", value: "36.4%", percentile: 73, category: .pitching),
-            ]
+        let sample = teaserRows
         return VStack(spacing: 0) {
             HStack(spacing: 12) {
-                summaryStat(label: "G", value: "14")
-                summaryStat(label: side == .pitching ? "BF" : "PA", value: "521")
-                if side == .batting { summaryStat(label: "BBE", value: "318") }
+                summaryStat(label: "G", value: "\(max(4, windowDays * 6 / 7))")
+                summaryStat(label: side == .pitching ? "BF" : "PA", value: "\(windowDays * 35)")
+                if side == .batting { summaryStat(label: "BBE", value: "\(windowDays * 21)") }
                 Spacer(minLength: 0)
             }
             .padding(SavantGeo.padInline)
@@ -383,6 +376,50 @@ struct TeamRankingsCard: View {
                 }
             }
         }
+    }
+
+    /// The bars behind the blur: this team's season aggregate for the selected
+    /// side, each percentile shifted by a fixed amount derived from the metric,
+    /// the side and the window — so switching any picker visibly re-draws the
+    /// board, and two teams never show the same preview.
+    private var teaserRows: [Metric] {
+        let rows = aggregateSeasonRows()
+        guard !rows.isEmpty else { return fallbackTeaserRows }
+        return rows.prefix(6).map { row in
+            let seed = Self.stableSeed("\(row.label)-\(side.rawValue)-\(windowDays)-\(team)")
+            let shift = seed % 31 - 15
+            return Metric(
+                id: "teaser-\(row.id)",
+                label: row.label,
+                value: row.value,
+                percentile: max(3, min(97, row.percentile + shift)),
+                category: row.category
+            )
+        }
+    }
+
+    /// For a roster too thin to aggregate — a preview still has to draw
+    /// something, and an empty card under an unlock button pitches nothing.
+    private var fallbackTeaserRows: [Metric] {
+        let labels: [(String, String)] = side == .batting
+            ? [("xwOBA", ".342"), ("Barrel%", "9.8%"), ("Hard-Hit%", "43.5%"), ("EV", "90.1")]
+            : [("xwOBA", ".298"), ("K%", "25.1%"), ("BB%", "7.2%"), ("Hard-Hit%", "36.4%")]
+        return labels.map { label, value in
+            let seed = Self.stableSeed("\(label)-\(side.rawValue)-\(windowDays)-\(team)")
+            return Metric(
+                id: "teaser-fallback-\(label)",
+                label: label,
+                value: value,
+                percentile: 30 + seed % 60,
+                category: side.category
+            )
+        }
+    }
+
+    /// Swift's `hashValue` is seeded per process, so it can't be used where the
+    /// same input has to produce the same layout every launch.
+    private static func stableSeed(_ text: String) -> Int {
+        abs(text.unicodeScalars.reduce(7) { ($0 &* 31 &+ Int($1.value)) % 100_003 })
     }
 
     @ViewBuilder

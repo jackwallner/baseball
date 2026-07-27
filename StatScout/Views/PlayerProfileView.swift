@@ -44,8 +44,8 @@ struct PlayerProfileView: View {
     }
 
     enum PlayerStatTab: String, CaseIterable {
-        case statcast = "Percentiles"
-        case standard = "Standard Stats"
+        case statcast = "Advanced"
+        case standard = "Standard"
         case yearCompare = "Year Compare"
     }
 
@@ -549,7 +549,7 @@ struct PlayerProfileView: View {
     private var percentileRankingsCard: some View {
         VStack(spacing: 0) {
             SavantSectionBar(
-                title: "PERCENTILE RANKINGS",
+                title: "ADVANCED STATS",
                 trailing: AnyView(
                     HStack(spacing: 4) {
                         seasonMenu

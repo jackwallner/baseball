@@ -8,11 +8,18 @@ struct YearCompareRoute: Hashable {
     let playerName: String
 }
 
-/// Dedicated "Compare" tab. The comparison flows already live inside the
-/// player profile (Year Compare tab + the compare toolbar button); this tab
-/// doesn't replace those — it's a discoverable promo surface that puts both
-/// head-to-head and year-over-year one tap away, and blurs behind a trial
+/// Dedicated "Compare" tab, and the home of the players you follow.
+///
+/// The comparison flows also live inside the player profile (Year Compare tab +
+/// the compare toolbar button); this tab doesn't replace those — it puts both
+/// head-to-head and year-over-year one tap away, and blurs them behind a trial
 /// pitch for non-Pro users.
+///
+/// Following used to be managed from the Trends board, which made Trends do two
+/// jobs — a league leaderboard and a personal list — and left the tab you'd
+/// look for your own players in with no mention of them. The list lives here
+/// now, above the comparison cards it feeds, and stays free: following is what
+/// makes the app feel like yours, and what's paid is the payoff.
 struct CompareView: View {
     @EnvironmentObject private var store: StoreService
     let viewModel: DashboardViewModel
@@ -28,52 +35,136 @@ struct CompareView: View {
     @State private var comparisonRoute: ComparisonRoute?
     @State private var yearRoute: YearCompareRoute?
     @State private var showingTrial = false
+    @State private var showingFollowSheet = false
+    @State private var favorites = FavoritesStore.shared
+    // Each slot carries its own season, so a comparison can cross years —
+    // 2025 Raleigh against 2026 Dingler. Nil means "whatever season the app is
+    // currently on", resolved lazily so a season change elsewhere doesn't
+    // silently pin these to a stale year.
+    @State private var seasonA: Int?
+    @State private var seasonB: Int?
+    @State private var showingSeasonPickerA = false
+    @State private var showingSeasonPickerB = false
 
-    private var players: [Player] {
-        viewModel.seasonPlayers.sorted { $0.name < $1.name }
+    private var activeSeasonA: Int { seasonA ?? viewModel.selectedSeason }
+    private var activeSeasonB: Int { seasonB ?? viewModel.selectedSeason }
+
+    private func players(forSeason season: Int) -> [Player] {
+        viewModel.players(forSeason: season).sorted { $0.name < $1.name }
+    }
+
+    /// The slot's player as he was in the slot's season. A player picked in one
+    /// year and then moved to another resolves through his own history rather
+    /// than carrying the wrong season's numbers into the comparison.
+    private func resolved(_ player: Player?, season: Int) -> Player? {
+        guard let player else { return nil }
+        if player.season == season { return player }
+        return viewModel.playerHistories[player.playerId]?.first { $0.season == season }
+    }
+
+    private var resolvedA: Player? { resolved(playerA, season: activeSeasonA) }
+    private var resolvedB: Player? { resolved(playerB, season: activeSeasonB) }
+
+    /// Why the Compare button is off, when a slot is filled but unusable.
+    private var slotWarning: String? {
+        if viewModel.isHistoricalLoading, resolvedA == nil || resolvedB == nil {
+            return "Loading past seasons…"
+        }
+        if let playerA, resolvedA == nil {
+            return "No \(activeSeasonA) data for \(playerA.name)."
+        }
+        if let playerB, resolvedB == nil {
+            return "No \(activeSeasonB) data for \(playerB.name)."
+        }
+        return nil
+    }
+
+    /// The followed players that exist in the selected season, in the order
+    /// they were followed.
+    private var followedPlayers: [Player] {
+        let roster = viewModel.players(forSeason: viewModel.selectedSeason)
+        return favorites.playerIds.compactMap { id in
+            roster.first { $0.playerId == id }
+        }
     }
 
     var body: some View {
         ScrollView {
             VStack(spacing: 12) {
-                intro
-                playerVsPlayerCard
-                yearOverYearCard
+                yourPlayersCard
+
+                // Only the comparison cards blur. Following is free, so putting
+                // the whole page behind the gate would have hidden the one
+                // thing a free user can actually do here.
+                ZStack(alignment: .bottom) {
+                    VStack(spacing: 12) {
+                        playerVsPlayerCard
+                        yearOverYearCard
+                    }
+                    .blur(radius: store.isPro ? 0 : 5)
+                    .disabled(!store.isPro)
+                    .allowsHitTesting(store.isPro)
+
+                    if !store.isPro {
+                        // The same gate every other locked module uses, rather
+                        // than this screen's own floating panel.
+                        BlurGateUnlock(
+                            headline: "Stack any two players, or any player against his own past seasons",
+                            cta: store.paywallBlurCTA,
+                            subtext: store.paywallBlurSubtext,
+                            action: { showingTrial = true }
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
+                    }
+                }
             }
             .padding(.horizontal, 12)
             .padding(.top, 12)
             .padding(.bottom, 16)
-            .blur(radius: store.isPro ? 0 : 5)
-            .disabled(!store.isPro)
             // Scroll-under spacer so content can pass behind the floating tab
             // bar — matches the Dashboard / Teams pattern.
             Color.clear.frame(height: 88)
         }
         .scrollBounceBehavior(.basedOnSize)
         .background(SavantPalette.canvas.ignoresSafeArea())
-        // Bottom-anchored unlock so the blurred Compare cards stay visible as a
-        // teaser above the gate, instead of being fully covered by the box.
-        .overlay(alignment: .bottom) {
-            if !store.isPro {
-                lockedOverlay
-                    .padding(.bottom, 100)
-            }
-        }
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $showingFollowSheet) {
+            FollowPlayersSheet(viewModel: viewModel)
+        }
         .onAppear {
             if store.isPro, !viewModel.hasLoadedHistorical, !viewModel.isHistoricalLoading {
                 Task { await viewModel.loadHistoricalIfNeeded() }
             }
         }
+        // Past seasons only exist once the history load has run, and a slot
+        // pinned to 2025 is useless without it.
+        .task(id: "\(activeSeasonA)-\(activeSeasonB)") {
+            guard store.isPro,
+                  activeSeasonA != viewModel.selectedSeason || activeSeasonB != viewModel.selectedSeason
+            else { return }
+            await viewModel.loadHistoricalIfNeeded()
+        }
         .sheet(item: $picker) { target in
-            // Hide the other slot's pick so a player can't be compared to themselves.
-            ComparePlayerPicker(players: players.filter { candidate in
+            // Each slot picks from its own season's roster, and the other
+            // slot's pick is hidden so a player can't be compared to himself.
+            let season: Int = {
                 switch target {
-                case .playerA: return candidate.playerId != playerB?.playerId
-                case .playerB: return candidate.playerId != playerA?.playerId
-                case .yearPlayer: return true
+                case .playerA: return activeSeasonA
+                case .playerB: return activeSeasonB
+                case .yearPlayer: return viewModel.selectedSeason
                 }
-            }) { selected in
+            }()
+            ComparePlayerPicker(
+                players: players(forSeason: season).filter { candidate in
+                    switch target {
+                    case .playerA: return candidate.playerId != playerB?.playerId
+                    case .playerB: return candidate.playerId != playerA?.playerId
+                    case .yearPlayer: return true
+                    }
+                },
+                season: season,
+                isLoading: viewModel.isHistoricalLoading
+            ) { selected in
                 switch target {
                 case .playerA: playerA = selected
                 case .playerB: playerB = selected
@@ -96,19 +187,140 @@ struct CompareView: View {
         }
     }
 
-    private var intro: some View {
-        VStack(spacing: 6) {
-            Text("Compare")
-                .font(SavantType.statLarge)
-                .foregroundStyle(SavantPalette.ink)
-            Text("Stack two players head-to-head, or track one player across seasons.")
-                .font(SavantType.small)
-                .foregroundStyle(SavantPalette.inkSecondary)
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
+    /// The followed list. Free, and the first thing on the tab: it's the only
+    /// personal state the app holds, and it feeds the slots below it.
+    private var yourPlayersCard: some View {
+        VStack(spacing: 0) {
+            SavantSectionBar(
+                title: "YOUR PLAYERS",
+                trailing: AnyView(
+                    Button {
+                        showingFollowSheet = true
+                    } label: {
+                        Label(favorites.playerIds.isEmpty ? "Add" : "Edit", systemImage: "star")
+                            .font(SavantType.micro)
+                            .tracking(0.3)
+                            .foregroundStyle(SavantPalette.savantRed)
+                    }
+                    .buttonStyle(.plain)
+                )
+            )
+
+            if followedPlayers.isEmpty {
+                VStack(spacing: 8) {
+                    Text("Follow players to keep them one tap from a comparison, and to spot them on the Trends board.")
+                        .font(SavantType.small)
+                        .foregroundStyle(SavantPalette.inkSecondary)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Button {
+                        showingFollowSheet = true
+                    } label: {
+                        Text("Follow players")
+                            .font(SavantType.smallBold)
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 16)
+                            .frame(height: SavantControl.height)
+                            .background(SavantPalette.savantRed)
+                            .clipShape(Capsule())
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(.vertical, 18)
+                .padding(.horizontal, 20)
+                .frame(maxWidth: .infinity)
+            } else {
+                ForEach(Array(followedPlayers.enumerated()), id: \.element.playerId) { index, player in
+                    followedRow(player: player, index: index)
+                }
+                Text("Tap a player to load them into a slot below.")
+                    .font(SavantType.micro)
+                    .tracking(0.3)
+                    .foregroundStyle(SavantPalette.inkTertiary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, SavantGeo.padCard)
+                    .padding(.vertical, 10)
+            }
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 8)
+        .background(SavantPalette.surface)
+        .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
+        .overlay(
+            RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
+                .stroke(SavantPalette.hairline, lineWidth: 0.5)
+        )
+    }
+
+    private func followedRow(player: Player, index: Int) -> some View {
+        let inSlot = playerA?.playerId == player.playerId || playerB?.playerId == player.playerId
+        return Button {
+            if store.isPro {
+                loadIntoSlot(player)
+            } else {
+                // The row's whole purpose here is comparison, so a free tap
+                // answers with the comparison pitch rather than doing nothing.
+                showingTrial = true
+            }
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        } label: {
+            HStack(spacing: 10) {
+                PlayerHeadshot(team: player.team, initials: player.initials, size: 34)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(player.name)
+                        .font(SavantType.bodyBold)
+                        .foregroundStyle(SavantPalette.ink)
+                        .lineLimit(1)
+                    Text("\(displayTeamAbbr(player.team)) · \(player.displayPosition)")
+                        .font(SavantType.micro)
+                        .tracking(0.3)
+                        .foregroundStyle(SavantPalette.inkTertiary)
+                }
+                Spacer(minLength: 0)
+                if inSlot {
+                    Text("IN SLOT")
+                        .font(SavantType.micro)
+                        .tracking(0.4)
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(SavantPalette.savantRed)
+                        .clipShape(Capsule())
+                } else {
+                    Image(systemName: "plus.circle")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(SavantPalette.inkTertiary)
+                }
+            }
+            .padding(.horizontal, SavantGeo.padInline)
+            .frame(height: SavantGeo.rowHeight)
+            .background(index % 2 == 0 ? SavantPalette.surface : SavantPalette.surfaceAlt)
+            .overlay(
+                Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline),
+                alignment: .bottom
+            )
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .contextMenu {
+            Button(role: .destructive) {
+                favorites.toggleFavorite(playerId: player.playerId)
+            } label: {
+                Label("Unfollow", systemImage: "star.slash")
+            }
+        }
+        .accessibilityHint("Loads \(player.name) into a comparison slot")
+    }
+
+    /// Fills the first empty slot, then replaces the older of the two, so
+    /// tapping down a list keeps swapping the challenger against a held player
+    /// rather than clearing both.
+    private func loadIntoSlot(_ player: Player) {
+        if playerA == nil || playerA?.playerId == player.playerId {
+            playerA = player
+        } else if playerB == nil || playerB?.playerId == player.playerId {
+            playerB = player
+        } else {
+            playerB = player
+        }
     }
 
     private var playerVsPlayerCard: some View {
@@ -116,16 +328,40 @@ struct CompareView: View {
             SavantSectionBar(title: "PLAYER VS PLAYER")
 
             VStack(spacing: 12) {
-                HStack(spacing: 10) {
-                    playerSlot(player: playerA, placeholder: "Player A") { picker = .playerA }
+                HStack(alignment: .top, spacing: 10) {
+                    slotColumn(
+                        player: playerA,
+                        placeholder: "Player A",
+                        season: activeSeasonA,
+                        showingPicker: $showingSeasonPickerA,
+                        onPickPlayer: { picker = .playerA },
+                        onPickSeason: { seasonA = $0 }
+                    )
                     Text("vs")
                         .font(SavantType.smallBold)
                         .foregroundStyle(SavantPalette.inkTertiary)
-                    playerSlot(player: playerB, placeholder: "Player B") { picker = .playerB }
+                        .padding(.top, 40)
+                    slotColumn(
+                        player: playerB,
+                        placeholder: "Player B",
+                        season: activeSeasonB,
+                        showingPicker: $showingSeasonPickerB,
+                        onPickPlayer: { picker = .playerB },
+                        onPickSeason: { seasonB = $0 }
+                    )
+                }
+
+                if let slotWarning {
+                    Text(slotWarning)
+                        .font(SavantType.micro)
+                        .tracking(0.3)
+                        .foregroundStyle(SavantPalette.inkTertiary)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity)
                 }
 
                 Button {
-                    if let a = playerA, let b = playerB {
+                    if let a = resolvedA, let b = resolvedB {
                         comparisonRoute = ComparisonRoute(playerA: a, playerB: b)
                     }
                 } label: {
@@ -134,13 +370,13 @@ struct CompareView: View {
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .frame(height: 46)
-                        .background(playerA != nil && playerB != nil
+                        .background(resolvedA != nil && resolvedB != nil
                                     ? SavantPalette.savantRed
                                     : SavantPalette.inkTertiary)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
                 .buttonStyle(.plain)
-                .disabled(playerA == nil || playerB == nil)
+                .disabled(resolvedA == nil || resolvedB == nil)
             }
             .padding(16)
         }
@@ -190,6 +426,45 @@ struct CompareView: View {
         )
     }
 
+    /// A slot: the player, and the season he's being taken from. The season
+    /// picker is the whole point of the pair — without it the tab could only
+    /// ever compare two players inside the same year.
+    private func slotColumn(
+        player: Player?,
+        placeholder: String,
+        season: Int,
+        showingPicker: Binding<Bool>,
+        onPickPlayer: @escaping () -> Void,
+        onPickSeason: @escaping (Int) -> Void
+    ) -> some View {
+        VStack(spacing: 6) {
+            playerSlot(player: player, placeholder: placeholder, action: onPickPlayer)
+
+            Button {
+                showingPicker.wrappedValue = true
+            } label: {
+                SavantInlinePill(systemImage: "calendar", title: String(season))
+            }
+            .buttonStyle(.plain)
+            .popover(isPresented: showingPicker, arrowEdge: .top) {
+                SeasonPickerPopover(
+                    seasons: viewModel.availableSeasons,
+                    selected: season,
+                    isLocked: { viewModel.isSeasonLocked($0) }
+                ) { picked in
+                    if viewModel.isSeasonLocked(picked) {
+                        showingTrial = true
+                    } else {
+                        onPickSeason(picked)
+                    }
+                }
+            }
+            .accessibilityLabel("Season for \(player?.name ?? placeholder)")
+            .accessibilityValue(String(season))
+        }
+        .frame(maxWidth: .infinity)
+    }
+
     private func playerSlot(player: Player?, placeholder: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             VStack(spacing: 6) {
@@ -222,77 +497,6 @@ struct CompareView: View {
         .buttonStyle(.plain)
     }
 
-    private var lockedOverlay: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "crown.fill")
-                .font(.system(size: 22))
-                .foregroundStyle(Color.yellow)
-            Text("Find the Edge")
-                .font(SavantType.cardTitle)
-                .foregroundStyle(SavantPalette.ink)
-            Text("Compare is a StatScout+ feature.")
-                .font(SavantType.small)
-                .foregroundStyle(SavantPalette.inkSecondary)
-                .multilineTextAlignment(.center)
-
-            VStack(alignment: .leading, spacing: 6) {
-                perkRow("person.2.fill", "Head-to-head comparisons across every metric")
-                perkRow("chart.line.uptrend.xyaxis", "Year-over-year trends for any player")
-                perkRow("calendar.badge.clock", "Every past season unlocked")
-                perkRow("arrow.down.circle.fill", "Available offline, even at the park")
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.vertical, 4)
-
-            Button {
-                showingTrial = true
-            } label: {
-                HStack(spacing: 6) {
-                    Text(store.paywallBlurCTA)
-                        .font(SavantType.bodyBold)
-                    Image(systemName: "arrow.right")
-                        .font(.system(size: 12, weight: .bold))
-                }
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .frame(height: 48)
-                .background(SavantPalette.savantRed)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-            }
-            .buttonStyle(.plain)
-            if let subtext = store.paywallBlurSubtext {
-                Text(subtext)
-                    .font(SavantType.micro)
-                    .tracking(0.3)
-                    .foregroundStyle(SavantPalette.inkTertiary)
-                    .multilineTextAlignment(.center)
-            }
-        }
-        .padding(20)
-        .background(
-            RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
-                .fill(SavantPalette.surface)
-                .shadow(color: .black.opacity(0.1), radius: 16, y: 6)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
-                .stroke(SavantPalette.hairline, lineWidth: 0.5)
-        )
-        .padding(.horizontal, 28)
-    }
-
-    private func perkRow(_ icon: String, _ text: String) -> some View {
-        HStack(spacing: 8) {
-            Image(systemName: icon)
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(SavantPalette.savantRed)
-                .frame(width: 16)
-            Text(text)
-                .font(SavantType.small)
-                .foregroundStyle(SavantPalette.inkSecondary)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-    }
 }
 
 /// Resolves a `YearCompareRoute` into the player's season history and renders
@@ -332,6 +536,9 @@ private struct YearCompareDestination: View {
 /// private to that file).
 private struct ComparePlayerPicker: View {
     let players: [Player]
+    /// Which season's roster this is, so an empty list can say why.
+    var season: Int? = nil
+    var isLoading: Bool = false
     var onSelect: (Player) -> Void
     @Environment(\.dismiss) private var dismiss
     @State private var searchText = ""
@@ -365,8 +572,26 @@ private struct ComparePlayerPicker: View {
                     .padding(.vertical, 4)
                 }
             }
+            // A past season's roster doesn't exist until the history load
+            // finishes; without this the sheet is a blank list with no reason
+            // given.
+            .overlay {
+                if filtered.isEmpty {
+                    ContentUnavailableView {
+                        Label(isLoading ? "Loading players…" : "No players", systemImage: "person.slash")
+                    } description: {
+                        if isLoading {
+                            Text("Pulling the \(season.map(String.init) ?? "") roster.")
+                        } else if !searchText.isEmpty {
+                            Text("Nobody matches “\(searchText)”.")
+                        } else if let season {
+                            Text("No player data for the \(String(season)) season.")
+                        }
+                    }
+                }
+            }
             .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search players")
-            .navigationTitle("Select Player")
+            .navigationTitle(season.map { "Select Player · \($0)" } ?? "Select Player")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
