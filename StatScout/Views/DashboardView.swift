@@ -253,9 +253,12 @@ struct DashboardView: View {
             HStack(spacing: 4) {
                 Image(systemName: "flame.fill")
                     .font(.system(size: 11, weight: .semibold))
-                Text(viewModel.showingRecent ? viewModel.recentWindow.shortLabel : "Recent")
+                // "Last 15", not "15d" — the same wording the window picker
+                // right below it and every other screen uses.
+                Text(viewModel.showingRecent ? viewModel.recentWindow.label : "Recent")
                     .font(SavantType.micro)
                     .tracking(0.4)
+                    .fixedSize()
                 if !store.isPro {
                     Image(systemName: "crown.fill")
                         .font(.system(size: 8, weight: .bold))

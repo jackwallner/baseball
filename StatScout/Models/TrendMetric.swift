@@ -24,6 +24,26 @@ struct TrendMetric: Identifiable, Hashable, Sendable {
         return (decimals == 3 ? text.replacingOccurrences(of: "0.", with: ".") : text) + unit
     }
 
+    /// The traditional line, which the rollup derives from summed counts rather
+    /// than by averaging per-game rates. Kept in its own group because it
+    /// answers a different question from the Statcast metrics: what actually
+    /// happened, not what the contact quality deserved.
+    static let battingStandard: [TrendMetric] = [
+        .init(key: "avg", label: "AVG", unit: "", decimals: 3, lowerIsBetter: false),
+        .init(key: "obp", label: "OBP", unit: "", decimals: 3, lowerIsBetter: false),
+        .init(key: "slg", label: "SLG", unit: "", decimals: 3, lowerIsBetter: false),
+        .init(key: "ops", label: "OPS", unit: "", decimals: 3, lowerIsBetter: false),
+    ]
+
+    /// Same four, read as what the pitcher allowed — so every one of them is
+    /// better going down.
+    static let pitchingStandard: [TrendMetric] = [
+        .init(key: "avg", label: "AVG Against", unit: "", decimals: 3, lowerIsBetter: true),
+        .init(key: "obp", label: "OBP Against", unit: "", decimals: 3, lowerIsBetter: true),
+        .init(key: "slg", label: "SLG Against", unit: "", decimals: 3, lowerIsBetter: true),
+        .init(key: "ops", label: "OPS Against", unit: "", decimals: 3, lowerIsBetter: true),
+    ]
+
     static let batting: [TrendMetric] = [
         .init(key: "xwoba", label: "xwOBA", unit: "", decimals: 3, lowerIsBetter: false),
         .init(key: "xba", label: "xBA", unit: "", decimals: 3, lowerIsBetter: false),
@@ -58,8 +78,16 @@ struct TrendMetric: Identifiable, Hashable, Sendable {
         .init(key: "gb_pct", label: "Ground-Ball%", unit: "%", decimals: 1, lowerIsBetter: false),
     ]
 
+    /// Statcast metrics first, then the traditional line, in one list — the
+    /// picker groups them with a divider rather than making the user pick a
+    /// mode before picking a stat.
     static func list(for side: TrendSide) -> [TrendMetric] {
-        side == .pitching ? pitching : batting
+        side == .pitching ? pitching + pitchingStandard : batting + battingStandard
+    }
+
+    /// Where the standard group starts, for the divider in the picker.
+    static func standardStartIndex(for side: TrendSide) -> Int {
+        side == .pitching ? pitching.count : batting.count
     }
 }
 
