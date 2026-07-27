@@ -479,21 +479,28 @@ struct TrendArrow: View {
     /// Percent-style metrics move in whole numbers, rate stats in thousandths.
     var decimals: Int = 3
     var isLocked: Bool = false
+    /// For metrics where down is the good direction — a hitter's Chase%, a
+    /// pitcher's opponent xwOBA. The arrow still points the way the number
+    /// actually moved; only the colour flips, so red always means "better".
+    var lowerIsBetter: Bool = false
 
-    /// Below this a delta is noise, and an arrow would imply a signal.
-    private var isFlat: Bool { abs(delta) < (decimals == 3 ? 0.005 : 0.5) }
+    /// Below half of the last displayed digit a delta is noise, and an arrow
+    /// would imply a signal: .005 for rate stats, 0.05 for a mph or percent
+    /// reported to a tenth, 0.5 for whole numbers.
+    private var isFlat: Bool { abs(delta) < 5 * pow(10, -Double(decimals + 1)) }
 
     private var tint: Color {
         if isFlat { return SavantPalette.inkTertiary }
-        return delta > 0 ? SavantPalette.pctlHot : SavantPalette.pctlCold
+        let improved = lowerIsBetter ? delta < 0 : delta > 0
+        return improved ? SavantPalette.pctlHot : SavantPalette.pctlCold
     }
 
     private var text: String {
         if isFlat { return "—" }
         let magnitude = abs(delta)
-        return decimals == 3
-            ? String(format: "%.3f", magnitude).replacingOccurrences(of: "0.", with: ".")
-            : String(format: "%.0f", magnitude)
+        let formatted = String(format: "%.\(decimals)f", magnitude)
+        // Rate stats are written Savant-style, without the leading zero.
+        return decimals == 3 ? formatted.replacingOccurrences(of: "0.", with: ".") : formatted
     }
 
     var body: some View {
