@@ -65,10 +65,13 @@ WEIGHTS: dict[str, str] = {
     "bat_speed": "_swings",
     "swing_length": "_swings",
     "chase_pct": "_oz_pitches",
-    # Pitch shape is per pitch thrown.
+    # Pitch shape is per pitch thrown, except the fastball-only pair Savant
+    # reports, which is per fastball.
     "velo_avg": "_pitches",
     "spin_avg": "_pitches",
     "extension_avg": "_pitches",
+    "fb_velo_avg": "_fb_pitches",
+    "fb_spin_avg": "_fb_pitches",
     # K and BB are per plate appearance / batter faced.
     "k_pct": "_pa",
     "bb_pct": "_pa",

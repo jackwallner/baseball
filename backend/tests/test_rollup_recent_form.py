@@ -65,6 +65,24 @@ def test_max_metrics_take_the_peak():
     assert _aggregate(logs)["ev_max"] == pytest.approx(112.1)
 
 
+def test_fastball_velo_survives_the_rollup():
+    """Regression: fastball velo and spin had no entry in WEIGHTS, so every
+    metric the rollup couldn't find a denominator for was silently dropped and
+    the pitcher's Recent view had a permanently empty Fastball Velo row.
+
+    Weighted by fastballs thrown, not total pitches: 20 fastballs at 95.0 and
+    5 at 91.0 is 94.2, whereas weighting by every pitch thrown would let a
+    heavy off-speed night distort a number that never involved those pitches.
+    """
+    logs = [
+        _log("2026-07-20", {"fb_velo_avg": 95.0, "_fb_pitches": 20, "_pitches": 90},
+             player_type="pitcher"),
+        _log("2026-07-15", {"fb_velo_avg": 91.0, "_fb_pitches": 5, "_pitches": 95},
+             player_type="pitcher"),
+    ]
+    assert _aggregate(logs)["fb_velo_avg"] == pytest.approx(94.2, abs=0.05)
+
+
 def test_xiso_derives_from_window_values():
     logs = [
         _log("2026-07-20", {"xba": 0.300, "xslg": 0.600, "_at_bats": 4}),
