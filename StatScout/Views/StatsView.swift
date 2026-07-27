@@ -24,7 +24,6 @@ struct StatsView: View {
 
     @State private var mode: Mode = .leaders
     @State private var paywallTrigger: PaywallTrigger?
-    @State private var showingSeasonPicker = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -93,20 +92,11 @@ struct StatsView: View {
     // Compact season selector for the leading toolbar slot. Sits on the navy
     // nav bar, so it reads as a red pill with the year only.
     private var seasonMenu: some View {
-        Button {
-            showingSeasonPicker = true
-        } label: {
-            SavantNavPill(systemImage: "calendar", title: String(viewModel.selectedSeason))
-        }
-        .buttonStyle(.plain)
-        // Anchored to the pill, so it drops from the control you tapped rather
-        // than sliding up from the bottom of the screen.
-        .popover(isPresented: $showingSeasonPicker, arrowEdge: .bottom) {
-            SeasonPickerPopover(
-                seasons: viewModel.availableSeasons,
-                selected: viewModel.selectedSeason,
-                isLocked: { viewModel.isSeasonLocked($0) }
-            ) { season in
+        SeasonMenu(
+            seasons: viewModel.availableSeasons,
+            selected: viewModel.selectedSeason,
+            isLocked: { viewModel.isSeasonLocked($0) },
+            onSelect: { season in
                 if viewModel.isSeasonLocked(season) {
                     // Explicit tap on a locked year — always answer it; the
                     // gate only caps automatic pop-ups.
@@ -115,9 +105,9 @@ struct StatsView: View {
                     viewModel.selectedSeason = season
                 }
             }
+        ) {
+            SavantNavPill(systemImage: "calendar", title: String(viewModel.selectedSeason))
         }
-        .accessibilityLabel("Season")
-        .accessibilityValue(String(viewModel.selectedSeason))
         .accessibilityHint("Choose which season's stats to view")
     }
 }

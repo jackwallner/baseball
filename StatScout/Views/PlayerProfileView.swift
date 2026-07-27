@@ -30,7 +30,6 @@ struct PlayerProfileView: View {
     @State private var recentLoading = false
     @State private var recentLoadError: String?
     @State private var recentCurves: LeaguePercentileCurves?
-    @State private var showingSeasonPicker = false
     @State private var standardMode: FormDisplayMode = .season
     @State private var standardWindow: RecentWindow = .fortnight
     @State private var favorites = FavoritesStore.shared
@@ -491,29 +490,11 @@ struct PlayerProfileView: View {
     // MARK: - Cards
 
     private var seasonMenu: some View {
-        Button {
-            showingSeasonPicker = true
-        } label: {
-            HStack(spacing: 4) {
-                Text(seasonLabel)
-                    .font(SavantType.micro)
-                    .tracking(0.5)
-                    .foregroundStyle(SavantPalette.inkSecondary)
-                Image(systemName: "chevron.down")
-                    .font(.system(size: 9, weight: .bold))
-                    .foregroundStyle(SavantPalette.inkSecondary)
-            }
-            .fixedSize()
-        }
-        .buttonStyle(.plain)
-        // Same compact popover the Stats and Teams tabs use, so every season
-        // control in the app behaves identically.
-        .popover(isPresented: $showingSeasonPicker, arrowEdge: .bottom) {
-            SeasonPickerPopover(
-                seasons: availablePercentileSeasons,
-                selected: activeSeason ?? StatScoutSeason.current,
-                isLocked: { $0 != StatScoutSeason.free && !store.isPro }
-            ) { season in
+        SeasonMenu(
+            seasons: availablePercentileSeasons,
+            selected: activeSeason ?? StatScoutSeason.current,
+            isLocked: { $0 != StatScoutSeason.free && !store.isPro },
+            onSelect: { season in
                 if season != StatScoutSeason.free && !store.isPro {
                     // Explicit tap on a locked season — always answer it.
                     // PaywallGate only caps automatic pop-ups.
@@ -525,8 +506,18 @@ struct PlayerProfileView: View {
                     }
                 }
             }
+        ) {
+            HStack(spacing: 4) {
+                Text(seasonLabel)
+                    .font(SavantType.micro)
+                    .tracking(0.5)
+                    .foregroundStyle(SavantPalette.inkSecondary)
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 9, weight: .bold))
+                    .foregroundStyle(SavantPalette.inkSecondary)
+            }
+            .fixedSize()
         }
-        .accessibilityLabel("Season")
         .accessibilityValue(seasonLabel)
     }
 

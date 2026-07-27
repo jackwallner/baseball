@@ -43,8 +43,6 @@ struct CompareView: View {
     // silently pin these to a stale year.
     @State private var seasonA: Int?
     @State private var seasonB: Int?
-    @State private var showingSeasonPickerA = false
-    @State private var showingSeasonPickerB = false
 
     private var activeSeasonA: Int { seasonA ?? viewModel.selectedSeason }
     private var activeSeasonB: Int { seasonB ?? viewModel.selectedSeason }
@@ -333,7 +331,6 @@ struct CompareView: View {
                         player: playerA,
                         placeholder: "Player A",
                         season: activeSeasonA,
-                        showingPicker: $showingSeasonPickerA,
                         onPickPlayer: { picker = .playerA },
                         onPickSeason: { seasonA = $0 }
                     )
@@ -345,7 +342,6 @@ struct CompareView: View {
                         player: playerB,
                         placeholder: "Player B",
                         season: activeSeasonB,
-                        showingPicker: $showingSeasonPickerB,
                         onPickPlayer: { picker = .playerB },
                         onPickSeason: { seasonB = $0 }
                     )
@@ -433,34 +429,27 @@ struct CompareView: View {
         player: Player?,
         placeholder: String,
         season: Int,
-        showingPicker: Binding<Bool>,
         onPickPlayer: @escaping () -> Void,
         onPickSeason: @escaping (Int) -> Void
     ) -> some View {
         VStack(spacing: 6) {
             playerSlot(player: player, placeholder: placeholder, action: onPickPlayer)
 
-            Button {
-                showingPicker.wrappedValue = true
-            } label: {
-                SavantInlinePill(systemImage: "calendar", title: String(season))
-            }
-            .buttonStyle(.plain)
-            .popover(isPresented: showingPicker, arrowEdge: .top) {
-                SeasonPickerPopover(
-                    seasons: viewModel.availableSeasons,
-                    selected: season,
-                    isLocked: { viewModel.isSeasonLocked($0) }
-                ) { picked in
+            SeasonMenu(
+                seasons: viewModel.availableSeasons,
+                selected: season,
+                isLocked: { viewModel.isSeasonLocked($0) },
+                onSelect: { picked in
                     if viewModel.isSeasonLocked(picked) {
                         showingTrial = true
                     } else {
                         onPickSeason(picked)
                     }
                 }
+            ) {
+                SavantInlinePill(systemImage: "calendar", title: String(season))
             }
             .accessibilityLabel("Season for \(player?.name ?? placeholder)")
-            .accessibilityValue(String(season))
         }
         .frame(maxWidth: .infinity)
     }
