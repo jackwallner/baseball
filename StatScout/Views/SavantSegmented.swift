@@ -13,8 +13,12 @@ import SwiftUI
 /// 2. **Metric category** (Hitting / Pitching / Fielding / Running):
 ///    `SavantTabs`, underlined text. Matches Savant's own leaderboard tabs.
 /// 3. **Inline options** (Season / Recent / Both, Hitters / Pitchers, the
-///    7/15/30 windows, Heating / Cooling): this control. One height, one shape,
-///    everywhere.
+///    Last 7 / 15 / 30 windows, Heating / Cooling): this control. One height,
+///    one shape, everywhere. Past four options it hands over to
+///    `VerticalOptionPopover` — seasons and the Trends metric list.
+///
+/// The wording is shared too: a rolling window is always "Last 15", never
+/// "15d" on one screen and "Last 15" on the next.
 ///
 /// Segments can be individually locked, which draws a crown and routes the tap
 /// to `onLockedTap` instead of selecting — that's how a free user can see that

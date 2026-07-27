@@ -15,6 +15,9 @@ struct VerticalOptionPopover<Value: Hashable>: View {
         let value: Value
         let label: String
         var isLocked: Bool = false
+        /// Caption drawn above this row, starting a group. Only set it on the
+        /// first option of each group.
+        var header: String? = nil
 
         var id: Value { value }
     }
@@ -45,12 +48,7 @@ struct VerticalOptionPopover<Value: Hashable>: View {
             ScrollView {
                 VStack(spacing: 0) {
                     ForEach(options) { option in
-                        row(for: option)
-                        if option.id != options.last?.id {
-                            Rectangle()
-                                .fill(SavantPalette.divider)
-                                .frame(height: SavantGeo.hairline)
-                        }
+                        entry(for: option)
                     }
                 }
             }
@@ -73,6 +71,28 @@ struct VerticalOptionPopover<Value: Hashable>: View {
         // Without this iPhone promotes a popover into a bottom sheet, which is
         // wrong for a control anchored in the top corner.
         .presentationCompactAdaptation(.popover)
+    }
+
+    @ViewBuilder
+    private func entry(for option: Option) -> some View {
+        VStack(spacing: 0) {
+            if let header = option.header {
+                Text(header)
+                    .font(SavantType.micro)
+                    .tracking(0.6)
+                    .foregroundStyle(SavantPalette.inkTertiary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 5)
+                    .background(SavantPalette.surfaceSunk)
+            }
+            row(for: option)
+            if option.id != options.last?.id {
+                Rectangle()
+                    .fill(SavantPalette.divider)
+                    .frame(height: SavantGeo.hairline)
+            }
+        }
     }
 
     /// Any lock in the list turns the trailing glyph into a lock state on every

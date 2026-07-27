@@ -116,10 +116,15 @@ struct HotColdView: View {
 
     private var header: some View {
         VStack(spacing: 8) {
-            SavantSegmented(
-                segments: TrendSide.allCases.map { .init(value: $0, label: $0.label) },
-                selection: $side
-            )
+            // Side and stat on one row, then direction, then the window —
+            // matching the team card's ordering so the two read the same.
+            HStack(spacing: 8) {
+                SavantSegmented(
+                    segments: TrendSide.allCases.map { .init(value: $0, label: $0.label) },
+                    selection: $side
+                )
+                metricPicker
+            }
 
             // Same control as every other inline picker; only the selected fill
             // differs, because here the choice itself encodes hot vs cold.
@@ -132,13 +137,10 @@ struct HotColdView: View {
                 selectedFill: { $0 ? SavantPalette.pctlCold : SavantPalette.pctlHot }
             )
 
-            HStack(spacing: 8) {
-                metricPicker
-                SavantSegmented(
-                    segments: RecentWindow.allCases.map { .init(value: $0, label: $0.shortLabel) },
-                    selection: $viewModel.recentWindow
-                )
-            }
+            SavantSegmented(
+                segments: RecentWindow.allCases.map { .init(value: $0, label: $0.label) },
+                selection: $viewModel.recentWindow
+            )
 
             if let asOf = viewModel.recentFormAsOf {
                 Text("Through \(asOf.formatted(.dateTime.month(.abbreviated).day()))")
@@ -162,11 +164,19 @@ struct HotColdView: View {
         }
         .buttonStyle(.plain)
         .popover(isPresented: $showingMetricPicker, arrowEdge: .top) {
+            let list = TrendMetric.list(for: side)
+            let standardStart = TrendMetric.standardStartIndex(for: side)
             VerticalOptionPopover(
-                options: TrendMetric.list(for: side).map { .init(value: $0.key, label: $0.label) },
+                options: list.enumerated().map { index, m in
+                    .init(
+                        value: m.key,
+                        label: m.label,
+                        header: index == 0 ? "STATCAST" : (index == standardStart ? "STANDARD" : nil)
+                    )
+                },
                 selected: metric.key,
                 onSelect: { key in
-                    if let match = TrendMetric.list(for: side).first(where: { $0.key == key }) {
+                    if let match = list.first(where: { $0.key == key }) {
                         metric = match
                     }
                 },
@@ -417,29 +427,21 @@ struct HotColdView: View {
         }
     }
 
-    /// Illustrative board for the blurred gate. Static on purpose: a locked
-    /// screen shouldn't spend the user's data on a fetch they can't read.
+    /// Illustrative board for the blurred gate.
+    ///
+    /// Invented numbers, not real ones: a locked screen shouldn't spend the
+    /// user's data on a fetch they can't read, and blur is not a security
+    /// boundary — real values behind 8pt of blur are still real values.
+    ///
+    /// It does follow the pickers, though. A preview frozen on hitters' xwOBA
+    /// while the header says "Pitching · Cooling off · K%" makes the controls
+    /// look broken, which is the opposite of what a teaser is for. The shape is
+    /// generated from the selected metric's own scale and direction.
     private var teaserBoard: some View {
-        // Enough rows to fill the viewport behind the gate. Six left a dead
-        // grey void under the unlock panel, which read as a broken screen
-        // rather than a paywall.
-        let rows: [(name: String, team: String, initials: String, then: Double, now: Double, games: Int)] = [
-            ("Riser One",    "HOU", "RO", 0.248, 0.421, 13),
-            ("Riser Two",    "ATL", "RT", 0.263, 0.418, 12),
-            ("Riser Three",  "NYY", "RH", 0.291, 0.402, 14),
-            ("Riser Four",   "LAD", "RF", 0.277, 0.381, 11),
-            ("Riser Five",   "SEA", "RV", 0.302, 0.375, 13),
-            ("Riser Six",    "KC",  "RS", 0.288, 0.361, 12),
-            ("Riser Seven",  "PHI", "RS", 0.271, 0.354, 10),
-            ("Riser Eight",  "BAL", "RE", 0.264, 0.347, 12),
-            ("Riser Nine",   "CHC", "RN", 0.259, 0.341, 11),
-            ("Riser Ten",    "TEX", "RT", 0.283, 0.338, 13),
-            ("Riser Eleven", "MIL", "RE", 0.276, 0.332, 12),
-            ("Riser Twelve", "SD",  "RT", 0.269, 0.327, 14),
-        ]
+        let ranked = teaserRows
         return VStack(spacing: 0) {
-            SavantSectionBar(title: "HOTTEST IN THE LEAGUE")
-            ForEach(Array(rows.enumerated()), id: \.offset) { index, row in
+            SavantSectionBar(title: showingCold ? "COLDEST IN THE LEAGUE" : "HOTTEST IN THE LEAGUE")
+            ForEach(Array(ranked.enumerated()), id: \.offset) { index, row in
                 HStack(spacing: 10) {
                     Text("\(index + 1)")
                         .font(SavantType.statSmall)
@@ -447,18 +449,20 @@ struct HotColdView: View {
                         .frame(width: 26, alignment: .leading)
                     PlayerHeadshot(team: row.team, initials: row.initials, size: 34)
                     VStack(alignment: .leading, spacing: 2) {
-                        HStack(spacing: 4) {
-                            Text(row.name)
-                                .font(SavantType.bodyBold)
-                                .foregroundStyle(SavantPalette.ink)
-                        }
-                        Text("\(fmt(row.then)) → \(fmt(row.now)) xwOBA · \(row.games)G")
+                        Text(row.name)
+                            .font(SavantType.bodyBold)
+                            .foregroundStyle(SavantPalette.ink)
+                        Text("\(metric.format(row.then)) → \(metric.format(row.now)) · \(row.games)G")
                             .font(SavantType.micro)
                             .foregroundStyle(SavantPalette.inkTertiary)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    TrendArrow(delta: row.now - row.then, decimals: 3)
-                        .frame(width: 56, alignment: .trailing)
+                    TrendArrow(
+                        delta: row.now - row.then,
+                        decimals: metric.decimals,
+                        lowerIsBetter: metric.lowerIsBetter
+                    )
+                    .frame(width: 56, alignment: .trailing)
                 }
                 .padding(.horizontal, SavantGeo.padInline)
                 .frame(height: SavantGeo.rowHeight)
@@ -475,7 +479,32 @@ struct HotColdView: View {
         .padding(.top, 12)
     }
 
-    private func fmt(_ value: Double) -> String {
-        String(format: "%.3f", value).replacingOccurrences(of: "0.", with: ".")
+    /// Twelve plausible rows for the current metric. Enough to fill the
+    /// viewport behind the gate — six left a dead grey void under the unlock
+    /// panel, which read as a broken screen rather than as a paywall.
+    private var teaserRows: [(name: String, team: String, initials: String, then: Double, now: Double, games: Int)] {
+        let names = [
+            ("Player One", "HOU", "PO"), ("Player Two", "ATL", "PT"),
+            ("Player Three", "NYY", "PT"), ("Player Four", "LAD", "PF"),
+            ("Player Five", "SEA", "PF"), ("Player Six", "KC", "PS"),
+            ("Player Seven", "PHI", "PS"), ("Player Eight", "BAL", "PE"),
+            ("Player Nine", "CHC", "PN"), ("Player Ten", "TEX", "PT"),
+            ("Player Eleven", "MIL", "PE"), ("Player Twelve", "SD", "PT"),
+        ]
+        // Centre and spread the invented values on the metric's own scale, so
+        // a rate stat reads .250→.400 and a percent reads 20%→32%.
+        let base: Double = metric.decimals >= 3 ? 0.290 : (metric.unit == " mph" ? 90 : 24)
+        let swing: Double = metric.decimals >= 3 ? 0.130 : (metric.unit == " mph" ? 3.5 : 9)
+        // Cooling off inverts the movement, and a lower-is-better metric
+        // inverts it again — heating up on Chase% means the number falls.
+        let improving = !showingCold
+        let sign: Double = (improving != metric.lowerIsBetter) ? 1 : -1
+
+        return names.enumerated().map { index, who in
+            let decay = 1.0 - Double(index) * 0.055
+            let move = swing * decay
+            let then = base - sign * move / 2
+            return (who.0, who.1, who.2, then, then + sign * move, 14 - index % 5)
+        }
     }
 }
