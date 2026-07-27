@@ -29,6 +29,7 @@
 		530DACB92F83D8B251DD53FA /* TrialPitchSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 227F1309E0C8906969049D9F /* TrialPitchSheet.swift */; };
 		53AAA361EDCCDA0BB2681CD8 /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28F7C1A7CADA7CA917C9B9BF /* Components.swift */; };
 		546D608E319D793C05C8EF0B /* DashboardViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5656B47DF4560469CCFA8564 /* DashboardViewModelTests.swift */; };
+		56EA8C43A6C48A00D0DE3E48 /* SavantSegmented.swift in Sources */ = {isa = PBXBuildFile; fileRef = 278BC9B90F41966E86B41E02 /* SavantSegmented.swift */; };
 		5822A593BDE52091991C50DC /* RobotoCondensed-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 915334798C251C448B0292EA /* RobotoCondensed-Medium.ttf */; };
 		5ADC10C15D1FF7D02AD7E9F4 /* MetricLeadersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91414B3D597831487B630032 /* MetricLeadersView.swift */; };
 		5DFBB77B4F475FDAA316A36E /* HotColdView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 700D5472E58D809AD7C969D6 /* HotColdView.swift */; };
@@ -97,6 +98,7 @@
 		1E4FF70B13A65617E39C4E75 /* DashboardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardViewModel.swift; sourceTree = "<group>"; };
 		1E6744289B66B875DB9A8AF1 /* RobotoCondensed-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "RobotoCondensed-Bold.ttf"; sourceTree = "<group>"; };
 		227F1309E0C8906969049D9F /* TrialPitchSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrialPitchSheet.swift; sourceTree = "<group>"; };
+		278BC9B90F41966E86B41E02 /* SavantSegmented.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavantSegmented.swift; sourceTree = "<group>"; };
 		28F7C1A7CADA7CA917C9B9BF /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
 		2BF12CF754F018EFD7BE7729 /* SampleData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleData.swift; sourceTree = "<group>"; };
 		32B545E98CC346F651DBE948 /* AppStoreReviewLinks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStoreReviewLinks.swift; sourceTree = "<group>"; };
@@ -326,6 +328,7 @@
 				8E9C629EF1C253BCEAF314EF /* RootTabView.swift */,
 				78899318EB8CD135C293FB83 /* SavantDesign.swift */,
 				9C04FC271035959EFD5300A2 /* SavantModules.swift */,
+				278BC9B90F41966E86B41E02 /* SavantSegmented.swift */,
 				9698B46EB6E054C336E52D36 /* SeasonPickerPopover.swift */,
 				147A7B626DB00162FDED79EA /* SettingsView.swift */,
 				F9CBAD749A639F5A5ADCF10B /* StandardStatsLeadersView.swift */,
@@ -526,6 +529,7 @@
 				F9CFA1F577A94864AB624B41 /* SampleData.swift in Sources */,
 				4DB98DE4F93CE7B69B0A99C8 /* SavantDesign.swift in Sources */,
 				FE17DDC74A43A910CD4A1CE8 /* SavantModules.swift in Sources */,
+				56EA8C43A6C48A00D0DE3E48 /* SavantSegmented.swift in Sources */,
 				9D78B390C6F27DE926D63591 /* SeasonPickerPopover.swift in Sources */,
 				189D1222312FEE374CFA4DEE /* SettingsView.swift in Sources */,
 				194BDDCA1D45B8E71852DF10 /* StandardStatsLeadersView.swift in Sources */,
@@ -575,7 +579,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = StatScout/StatScout.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CURRENT_PROJECT_VERSION = 136;
+				CURRENT_PROJECT_VERSION = 137;
 				DEVELOPMENT_TEAM = YXG4MP6W39;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = StatScout/Info.plist;
@@ -694,7 +698,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = StatScout/StatScout.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 136;
+				CURRENT_PROJECT_VERSION = 137;
 				DEVELOPMENT_TEAM = YXG4MP6W39;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = StatScout/Info.plist;
