@@ -21,7 +21,7 @@ struct PlayerProfileView: View {
     @State private var showingPlayerPicker = false
     @State private var comparisonRoute: ComparisonRoute?
     // Contextual trial pitches (compare, recent form, year compare, first-open)
-    // all route through the low-friction TrialPitchSheet — its CTA starts the
+    // all route through the low-friction TrialPitchSheet, its CTA starts the
     // yearly trial directly. PaywallView stays for the deliberate upsell card.
     @State private var trialPitchTrigger: PaywallTrigger?
     @State private var formDisplayMode: FormDisplayMode = .season
@@ -64,7 +64,7 @@ struct PlayerProfileView: View {
     }
 
     private var seasonLabel: String {
-        activeSeason.map(String.init) ?? "—"
+        activeSeason.map(String.init) ?? "-"
     }
 
     private var groupedMetrics: [(category: MetricCategory, metrics: [Metric])] {
@@ -121,7 +121,7 @@ struct PlayerProfileView: View {
                     yearCompareContent
                 }
 
-                // Lets the last metric row clear the floating tab bar — the
+                // Lets the last metric row clear the floating tab bar, the
                 // profile was missing the spacer Dashboard and TeamView have,
                 // so its bottom row sat under the glass.
                 Color.clear.frame(height: 88)
@@ -133,7 +133,7 @@ struct PlayerProfileView: View {
         // paywall blocking it), and a native half-sheet TrialPitchSheet
         // floats on top with a "Maybe later" dismiss. PaywallGate caps this
         // at 2 per session so repeat taps don't re-prompt. The old full-page
-        // .activation PaywallView was removed for being too intrusive — this
+        // .activation PaywallView was removed for being too intrusive, this
         // is the Vitals-style soft pitch that replaced it.
         .navigationTitle(player.name)
         .navigationBarTitleDisplayMode(.inline)
@@ -154,17 +154,17 @@ struct PlayerProfileView: View {
             PercentileInfoSheet()
         }
         .sheet(item: $paywallTrigger) { trigger in
-            PaywallView(trigger: trigger)
+            TrialPitchSheet(trigger: trigger)
         }
         .sheet(isPresented: $showingPlayerPicker) {
             PlayerPickerSheet(players: comparablePlayers) { selected in
                 comparisonRoute = ComparisonRoute(playerA: player, playerB: selected)
             }
         }
+        // Sizing and the drag indicator belong to the sheet itself now, so every
+        // entry point in the app presents an identically-shaped pitch.
         .sheet(item: $trialPitchTrigger) { trigger in
             TrialPitchSheet(trigger: trigger)
-                .presentationDetents([.medium, .large])
-                .presentationDragIndicator(.visible)
         }
         .navigationDestination(item: $comparisonRoute) { route in
             PlayerComparisonView(playerA: route.playerA, playerB: route.playerB)
@@ -173,14 +173,14 @@ struct PlayerProfileView: View {
             // Defer the first-impression pitch: a user verifying one stat from a
             // group chat shouldn't hit a subscription story before scrolling a
             // single row. Show it from the *second* profile open onward (Pro-only
-            // controls — Recent Form, past seasons, Compare — still pitch on tap).
+            // controls, Recent Form, past seasons, Compare, still pitch on tap).
             let opens = UserDefaults.standard.integer(forKey: profileOpenCountKey) + 1
             UserDefaults.standard.set(opens, forKey: profileOpenCountKey)
             if !store.isPro, opens >= 2, PaywallGate.shared.shouldPresent(.playerScouting) {
                 trialPitchTrigger = .playerScouting
             }
             // Engaged browsing, but only counted once the user has come back on
-            // separate days — see ReviewPromptTracker.minimumDistinctUseDays.
+            // separate days, see ReviewPromptTracker.minimumDistinctUseDays.
             // Opening three profiles in one sitting used to be enough, which is
             // browsing depth, not satisfaction.
             if opens >= 3 {
@@ -331,7 +331,7 @@ struct PlayerProfileView: View {
                 proPerk("chart.line.uptrend.xyaxis", "Year-over-year trends across every metric")
                 proPerk("person.2.fill", "Head-to-head comparisons vs any player")
                 proPerk("calendar.badge.clock", "Every past season, not just this one")
-                proPerk("arrow.down.circle.fill", "Saved offline — works on the road")
+                proPerk("arrow.down.circle.fill", "Saved offline, works on the road")
             }
 
             // Buys in place. This card's CTA used to open the plan picker,
@@ -474,7 +474,7 @@ struct PlayerProfileView: View {
             isLocked: { $0 != StatScoutSeason.free && !store.isPro },
             onSelect: { season in
                 if season != StatScoutSeason.free && !store.isPro {
-                    // Explicit tap on a locked season — always answer it.
+                    // Explicit tap on a locked season, always answer it.
                     // PaywallGate only caps automatic pop-ups.
                     trialPitchTrigger = .lockedSeason(season)
                 } else {
@@ -532,7 +532,7 @@ struct PlayerProfileView: View {
                 )
             )
 
-            // Recent mode only makes sense for the live season — the 7/15/30-day
+            // Recent mode only makes sense for the live season, the 7/15/30-day
             // window is anchored to today, so on a historical season it would
             // always read "No games in the last N days".
             if isCurrentSeasonActive {
@@ -611,7 +611,7 @@ struct PlayerProfileView: View {
         (activeSeason ?? StatScoutSeason.current) == StatScoutSeason.current
     }
 
-    /// The mode rows actually render in — forced back to `.season` on a
+    /// The mode rows actually render in, forced back to `.season` on a
     /// historical season so a user who toggled Recent/Both doesn't see stale
     /// current-season windows against past-season bars.
     private var effectiveFormDisplayMode: FormDisplayMode {
@@ -643,7 +643,7 @@ struct PlayerProfileView: View {
         // Both a metric with window data but no season row simply vanished
         // rather than showing its recent bar alone.
         guard effectiveFormDisplayMode != .season, store.isPro else { return metrics }
-        // Recent mode: show every season bar — metrics with window data render the
+        // Recent mode: show every season bar, metrics with window data render the
         // recent value, the rest fall back to the season bar (handled in
         // `percentileMetricRow`). Additionally inject a stub for any game-log spec
         // the season snapshot omits (Savant sometimes drops e.g. Hard-Hit%) so its
@@ -671,7 +671,7 @@ struct PlayerProfileView: View {
     /// league's season percentile ruler, so a metric Savant doesn't publish
     /// season percentiles for has nothing to be placed against. That's why
     /// batter Hard-Hit% / Sweet-Spot% / LA and pitcher Whiff% / Chase% are
-    /// absent here even though the game logs now carry them — Savant only
+    /// absent here even though the game logs now carry them, Savant only
     /// publishes those percentiles for the other side of the ball.
     private var recentSpecs: [(key: String, label: String, seasonLabel: String, format: String)] {
         isPitcher
@@ -734,7 +734,7 @@ struct PlayerProfileView: View {
                         alignment: .bottom
                     )
             } else if !metric.id.hasPrefix("recent-stub-") {
-                // No game-log data for this metric — fall back to the season bar
+                // No game-log data for this metric, fall back to the season bar
                 // so the recent view still shows every percentile bar.
                 NavigationLink(value: MetricRoute(label: metric.label, category: metric.category, season: activeSeason)) {
                     MetricBar(metric: metric)
@@ -750,7 +750,7 @@ struct PlayerProfileView: View {
             }
         case .both:
             if metric.id.hasPrefix("recent-stub-") {
-                // Recent-only metric — there's no season row to pair it with, so
+                // Recent-only metric, there's no season row to pair it with, so
                 // pairing it with the empty stub would draw a season bar at 0.
                 if let recentMetric {
                     MetricBar(metric: recentMetric)
@@ -815,7 +815,7 @@ struct PlayerProfileView: View {
         do {
             recentLogs = try await fetch(player.playerId, season)
         } catch {
-            // Distinguish "no games" from "fetch failed" — otherwise a network
+            // Distinguish "no games" from "fetch failed", otherwise a network
             // error renders as an honest-looking "No games in the last N days".
             recentLogs = []
             recentLoadError = "Couldn't load recent games. Check your connection and try again."
@@ -837,8 +837,8 @@ struct PlayerProfileView: View {
             : ["SO", "CS"]
     }
 
-    /// Counting stats. Ranking these is honest but playing-time driven — a
-    /// bench bat's 2 HR isn't a talent signal — so they're grouped separately
+    /// Counting stats. Ranking these is honest but playing-time driven, a
+    /// bench bat's 2 HR isn't a talent signal, so they're grouped separately
     /// from the rate stats and captioned as volume.
     private static let countingStats: Set<String> = [
         "HR", "R", "RBI", "H", "2B", "3B", "BB", "SO", "SB", "CS", "PA", "AB",
@@ -848,7 +848,7 @@ struct PlayerProfileView: View {
     /// Percentile rank for a traditional stat against the league.
     ///
     /// Savant publishes percentiles for its Statcast metrics but not for the
-    /// traditional line, so these are computed here — a player's position in
+    /// traditional line, so these are computed here, a player's position in
     /// the distribution of every same-type player who has the stat. Returns nil
     /// below a usable pool size rather than drawing a bar off five samples.
     private func standardStatPercentile(label: String, value: Double) -> Int? {
@@ -932,7 +932,7 @@ struct PlayerProfileView: View {
                 trailing: AnyView(seasonMenu)
             )
 
-            // Recent only means something on the live season — the window is
+            // Recent only means something on the live season, the window is
             // anchored to today, so on a past season it would always be empty.
             if isCurrentSeasonActive {
                 standardModePicker
@@ -1019,7 +1019,7 @@ struct PlayerProfileView: View {
                     case .season:
                         MetricBar(metric: metric)
                     case .recent:
-                        // No recent figure for this stat — fall back to season
+                        // No recent figure for this stat, fall back to season
                         // rather than dropping the row, matching the
                         // percentile card's behaviour.
                         MetricBar(metric: recent ?? metric)

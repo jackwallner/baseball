@@ -11,12 +11,12 @@ struct YearCompareRoute: Hashable {
 /// Dedicated "Compare" tab, and the home of the players you follow.
 ///
 /// The comparison flows also live inside the player profile (Year Compare tab +
-/// the compare toolbar button); this tab doesn't replace those — it puts both
+/// the compare toolbar button); this tab doesn't replace those, it puts both
 /// head-to-head and year-over-year one tap away, and blurs them behind a trial
 /// pitch for non-Pro users.
 ///
 /// Following used to be managed from the Trends board, which made Trends do two
-/// jobs — a league leaderboard and a personal list — and left the tab you'd
+/// jobs, a league leaderboard and a personal list, and left the tab you'd
 /// look for your own players in with no mention of them. The list lives here
 /// now, above the comparison cards it feeds, and stays free: following is what
 /// makes the app feel like yours, and what's paid is the payoff.
@@ -37,7 +37,7 @@ struct CompareView: View {
     @State private var showingTrial = false
     @State private var showingFollowSheet = false
     @State private var favorites = FavoritesStore.shared
-    // Each slot carries its own season, so a comparison can cross years —
+    // Each slot carries its own season, so a comparison can cross years,
     // 2025 Raleigh against 2026 Dingler. Nil means "whatever season the app is
     // currently on", resolved lazily so a season change elsewhere doesn't
     // silently pin these to a stale year.
@@ -118,7 +118,7 @@ struct CompareView: View {
             .padding(.top, 12)
             .padding(.bottom, 16)
             // Scroll-under spacer so content can pass behind the floating tab
-            // bar — matches the Dashboard / Teams pattern.
+            // bar, matches the Dashboard / Teams pattern.
             Color.clear.frame(height: 88)
         }
         .scrollBounceBehavior(.basedOnSize)
@@ -173,7 +173,7 @@ struct CompareView: View {
         .sheet(isPresented: $showingTrial) {
             TrialPitchSheet(trigger: .playerComparison)
         }
-        // Just the player route, not the whole StandardDestinations bundle —
+        // Just the player route, not the whole StandardDestinations bundle,
         // this file declares its own ComparisonRoute destination, and two
         // registrations for one type is a runtime conflict.
         .modifier(PlayerProfileDestination(viewModel: viewModel))
@@ -255,7 +255,7 @@ struct CompareView: View {
     /// A followed player, and what tapping him does.
     ///
     /// For Pro that's "load into a comparison slot". For everyone else it's
-    /// "open his page" — his own stats are free, so a free tap used to throw up
+    /// "open his page", his own stats are free, so a free tap used to throw up
     /// the comparison pitch and give the user nothing, on a list they built
     /// themselves. Head-to-head is what's paid; a player's own numbers never
     /// were. The pitch is still one row further down, on the blurred cards that
@@ -447,7 +447,7 @@ struct CompareView: View {
     }
 
     /// A slot: the player, and the season he's being taken from. The season
-    /// picker is the whole point of the pair — without it the tab could only
+    /// picker is the whole point of the pair, without it the tab could only
     /// ever compare two players inside the same year.
     private func slotColumn(
         player: Player?,

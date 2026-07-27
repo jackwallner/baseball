@@ -78,7 +78,7 @@ struct RecentFormWindow {
     let games: Int
     let plateAppearances: Int
     let battedBallEvents: Int
-    /// Mean-of-means weighted by PA — close enough to a real recompute for
+    /// Mean-of-means weighted by PA, close enough to a real recompute for
     /// rate stats like xwOBA. For per-game rate metrics (K%, BB%) this is a
     /// weighted average across games and is what users expect to see.
     let metrics: [String: Double]

@@ -5,7 +5,7 @@ import SwiftUI
 /// Following was previously only reachable from the star on a player's own
 /// page, which is fine for the one guy you just looked up and useless for
 /// building a list of ten. This is the manager: search the league, tap to
-/// follow, done. Free — following is what makes the app feel like yours, and
+/// follow, done. Free, following is what makes the app feel like yours, and
 /// what's paid is the payoff.
 ///
 /// Opened from the Compare tab, which owns the followed list. It used to hang
@@ -59,7 +59,7 @@ struct FollowPlayersSheet: View {
 
                     // Always present, even at zero. If this card appeared only
                     // once you'd followed someone, the browse list below would
-                    // jump down by its height on the first star you tapped —
+                    // jump down by its height on the first star you tapped,
                     // right under the finger about to tap the second one.
                     card {
                         SavantSectionBar(title: "FOLLOWING (\(followed.count))")

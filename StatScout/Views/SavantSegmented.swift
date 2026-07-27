@@ -1,7 +1,7 @@
 import SwiftUI
 
 enum SavantControl {
-    /// One height for every inline control in the app — segmented groups,
+    /// One height for every inline control in the app, segmented groups,
     /// chips, and the popover pills. Previously 26, 28, 30, 32, 34 and 44 were
     /// all in use for controls at the same level, which is what made a row of
     /// filters read as a pile of unrelated buttons.
@@ -10,8 +10,8 @@ enum SavantControl {
 
 /// The single inline-options control for the whole app.
 ///
-/// Same-level choices were being drawn four different ways — large filled
-/// rounded-rects, tall capsules, short capsules, and underlined text tabs — so
+/// Same-level choices were being drawn four different ways, large filled
+/// rounded-rects, tall capsules, short capsules, and underlined text tabs, so
 /// two pickers that mean the same kind of thing looked unrelated. The app now
 /// keeps exactly three tiers, and this is the third:
 ///
@@ -23,7 +23,7 @@ enum SavantControl {
 /// 3. **Inline options** (Season / Recent / Both, Hitters / Pitchers, the
 ///    Last 7 / 15 / 30 windows, Heating / Cooling): this control. One height,
 ///    one shape, everywhere. Past four options it hands over to
-///    `VerticalOptionPopover` — seasons and the Trends metric list.
+///    `VerticalOptionPopover`, seasons and the Trends metric list.
 /// 4. **Standalone controls** (the sort chip, search, Filters, the pickers that
 ///    open a popover): `SavantChip`, same height and type as a segment.
 ///
@@ -31,7 +31,7 @@ enum SavantControl {
 /// "15d" on one screen and "Last 15" on the next.
 ///
 /// Segments can be individually locked, which draws a crown and routes the tap
-/// to `onLockedTap` instead of selecting — that's how a free user can see that
+/// to `onLockedTap` instead of selecting, that's how a free user can see that
 /// Recent exists at all rather than the option being hidden entirely.
 struct SavantSegmented<Value: Hashable>: View {
     struct Segment: Identifiable {
@@ -102,7 +102,7 @@ struct SavantSegmented<Value: Hashable>: View {
 /// The single standalone-control shape: an outlined capsule that fills with
 /// Savant red while it's doing something.
 ///
-/// Everything that isn't a segmented group is this — the sort chip, the search
+/// Everything that isn't a segmented group is this, the sort chip, the search
 /// toggle, the Filters menu, the season and metric pickers. They were each
 /// hand-drawn before, and drifted: 30pt tall here and 32 there, `micro` type on
 /// one and `smallBold` on the next, so a single row of filters read as three
@@ -113,9 +113,9 @@ struct SavantSegmented<Value: Hashable>: View {
 struct SavantChip: View {
     enum Trailing {
         case none
-        /// A chooser — opens a menu or a popover.
+        /// A chooser, opens a menu or a popover.
         case chevron
-        /// A sort control — tapping flips the arrow.
+        /// A sort control, tapping flips the arrow.
         case sortArrow(descending: Bool)
     }
 
@@ -188,7 +188,7 @@ extension View {
 }
 
 /// Two picker groups on one row, each given width in proportion to how many
-/// segments it holds — so every capsule in the row comes out the same width.
+/// segments it holds, so every capsule in the row comes out the same width.
 ///
 /// A plain `HStack` splits the row evenly between the *groups*, which is what
 /// made "Season / Recent / Both" sit cramped beside "Hitting / Pitching":

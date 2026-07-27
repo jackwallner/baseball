@@ -30,9 +30,30 @@ enum SavantPalette {
         }
     }
 
+    /// Percentile colour for *text* on a light surface.
+    ///
+    /// The fill ramp passes through a pale grey at the 50th percentile, which is
+    /// right for a bar sitting on white and unreadable as type: an average
+    /// player's number came out the same value as the background. The endpoints
+    /// stay recognisably the same red and blue; only the middle is pulled down
+    /// to a dark neutral, so every value on the board clears contrast while the
+    /// hot/cold reading survives.
+    static func textColor(forPercentile p: Int) -> Color {
+        let t = max(0.0, min(1.0, Double(p) / 100.0))
+        if t < 0.5 {
+            return lerp(coldTextRGB, midTextRGB, t * 2.0)
+        } else {
+            return lerp(midTextRGB, hotTextRGB, (t - 0.5) * 2.0)
+        }
+    }
+
     private static let hotRGB: (Double, Double, Double) = (0.80, 0.15, 0.15)
     private static let midRGB: (Double, Double, Double) = (0.75, 0.75, 0.78)
     private static let coldRGB: (Double, Double, Double) = (0.15, 0.35, 0.70)
+
+    private static let hotTextRGB: (Double, Double, Double) = (0.72, 0.09, 0.12)
+    private static let midTextRGB: (Double, Double, Double) = (0.28, 0.28, 0.32)
+    private static let coldTextRGB: (Double, Double, Double) = (0.10, 0.28, 0.62)
 
     private static func lerp(_ a: (Double, Double, Double), _ b: (Double, Double, Double), _ t: Double) -> Color {
         let r = a.0 + (b.0 - a.0) * t
@@ -129,25 +150,35 @@ enum MLBTeamColor {
     static func color(_ abbr: String) -> Color { primary[normalizedTeamAbbreviation(abbr)] ?? SavantPalette.inkTertiary }
 }
 
+/// Every spelling the data (or a user) might use for a club, mapped to the
+/// abbreviation the app keys on. Hoisted out of `normalizedTeamAbbreviation` so
+/// search can read it backwards.
+private let teamAliases: [String: String] = [
+    "ARIZONA DIAMONDBACKS": "ARI", "AZ": "ARI", "ATLANTA BRAVES": "ATL", "BALTIMORE ORIOLES": "BAL",
+    "BOSTON RED SOX": "BOS", "CHICAGO CUBS": "CHC", "CHICAGO WHITE SOX": "CWS",
+    "CHW": "CWS", "CINCINNATI REDS": "CIN", "CLEVELAND GUARDIANS": "CLE",
+    "CLEVELAND INDIANS": "CLE", "COLORADO ROCKIES": "COL", "DETROIT TIGERS": "DET",
+    "HOUSTON ASTROS": "HOU", "KANSAS CITY ROYALS": "KC", "KCR": "KC",
+    "LOS ANGELES ANGELS": "LAA", "ANAHEIM ANGELS": "LAA", "LOS ANGELES DODGERS": "LAD",
+    "MIAMI MARLINS": "MIA", "MILWAUKEE BREWERS": "MIL", "MINNESOTA TWINS": "MIN",
+    "NEW YORK METS": "NYM", "NEW YORK YANKEES": "NYY", "ATHLETICS": "OAK",
+    "OAKLAND ATHLETICS": "OAK", "ATH": "OAK", "PHILADELPHIA PHILLIES": "PHI",
+    "PITTSBURGH PIRATES": "PIT", "SAN DIEGO PADRES": "SD", "SDP": "SD",
+    "SEATTLE MARINERS": "SEA", "SAN FRANCISCO GIANTS": "SF", "SFG": "SF",
+    "ST. LOUIS CARDINALS": "STL", "ST LOUIS CARDINALS": "STL", "TAMPA BAY RAYS": "TB",
+    "TBR": "TB", "TEXAS RANGERS": "TEX", "TORONTO BLUE JAYS": "TOR",
+    "WASHINGTON NATIONALS": "WSH", "WSN": "WSH"
+]
+
 func normalizedTeamAbbreviation(_ team: String) -> String {
     let key = team.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
-    let aliases: [String: String] = [
-        "ARIZONA DIAMONDBACKS": "ARI", "AZ": "ARI", "ATLANTA BRAVES": "ATL", "BALTIMORE ORIOLES": "BAL",
-        "BOSTON RED SOX": "BOS", "CHICAGO CUBS": "CHC", "CHICAGO WHITE SOX": "CWS",
-        "CHW": "CWS", "CINCINNATI REDS": "CIN", "CLEVELAND GUARDIANS": "CLE",
-        "CLEVELAND INDIANS": "CLE", "COLORADO ROCKIES": "COL", "DETROIT TIGERS": "DET",
-        "HOUSTON ASTROS": "HOU", "KANSAS CITY ROYALS": "KC", "KCR": "KC",
-        "LOS ANGELES ANGELS": "LAA", "ANAHEIM ANGELS": "LAA", "LOS ANGELES DODGERS": "LAD",
-        "MIAMI MARLINS": "MIA", "MILWAUKEE BREWERS": "MIL", "MINNESOTA TWINS": "MIN",
-        "NEW YORK METS": "NYM", "NEW YORK YANKEES": "NYY", "ATHLETICS": "OAK",
-        "OAKLAND ATHLETICS": "OAK", "ATH": "OAK", "PHILADELPHIA PHILLIES": "PHI",
-        "PITTSBURGH PIRATES": "PIT", "SAN DIEGO PADRES": "SD", "SDP": "SD",
-        "SEATTLE MARINERS": "SEA", "SAN FRANCISCO GIANTS": "SF", "SFG": "SF",
-        "ST. LOUIS CARDINALS": "STL", "ST LOUIS CARDINALS": "STL", "TAMPA BAY RAYS": "TB",
-        "TBR": "TB", "TEXAS RANGERS": "TEX", "TORONTO BLUE JAYS": "TOR",
-        "WASHINGTON NATIONALS": "WSH", "WSN": "WSH"
-    ]
-    return aliases[key] ?? key
+    return teamAliases[key] ?? key
+}
+
+/// Alias spellings that resolve to one club, for search.
+func teamAliasSpellings(_ abbr: String) -> [String] {
+    let normalized = normalizedTeamAbbreviation(abbr)
+    return teamAliases.compactMap { $0.value == normalized ? $0.key : nil }
 }
 
 func teamFullName(_ abbr: String) -> String {
@@ -165,6 +196,52 @@ func teamFullName(_ abbr: String) -> String {
     ]
     let normalized = normalizedTeamAbbreviation(abbr)
     return map[normalized] ?? abbr
+}
+
+/// The club nickname, which is what most people call a team and the one name
+/// the app had nowhere: `teamFullName` returns the city ("New York (AL)"), so
+/// searching "yankees", "dodgers" or "red sox" on the leaderboard matched
+/// nothing at all.
+func teamNickname(_ abbr: String) -> String {
+    let map: [String: String] = [
+        "ARI":"Diamondbacks","ATL":"Braves","BAL":"Orioles","BOS":"Red Sox",
+        "CHC":"Cubs","CWS":"White Sox","CIN":"Reds","CLE":"Guardians",
+        "COL":"Rockies","DET":"Tigers","HOU":"Astros","KC":"Royals",
+        "LAA":"Angels","LAD":"Dodgers","MIA":"Marlins","MIL":"Brewers",
+        "MIN":"Twins","NYM":"Mets","NYY":"Yankees","OAK":"Athletics",
+        "PHI":"Phillies","PIT":"Pirates","SD":"Padres","SEA":"Mariners",
+        "SF":"Giants","STL":"Cardinals","TB":"Rays","TEX":"Rangers",
+        "TOR":"Blue Jays","WSH":"Nationals"
+    ]
+    return map[normalizedTeamAbbreviation(abbr)] ?? abbr
+}
+
+/// City plus nickname, the way a team is named out loud.
+func teamDisplayName(_ abbr: String) -> String {
+    let normalized = normalizedTeamAbbreviation(abbr)
+    let city = teamFullName(normalized)
+        // The disambiguating league suffix is for a list of thirty clubs, not
+        // for a line that already ends in the nickname.
+        .replacingOccurrences(of: " (AL)", with: "")
+        .replacingOccurrences(of: " (NL)", with: "")
+    let nickname = teamNickname(normalized)
+    return nickname == normalized ? city : "\(city) \(nickname)"
+}
+
+/// Everything a user might type and mean one club.
+func teamSearchTerms(_ abbr: String) -> [String] {
+    let normalized = normalizedTeamAbbreviation(abbr)
+    var terms = [normalized, abbr, teamFullName(normalized), teamNickname(normalized), teamDisplayName(normalized)]
+    // The alias table is keyed the other way round, so pull in every spelling
+    // that resolves to this club: "CHW", "SFG", "Cleveland Indians", and so on.
+    terms.append(contentsOf: teamAliasSpellings(normalized))
+    return terms
+}
+
+func teamMatchesQuery(_ abbr: String, query: String) -> Bool {
+    let trimmed = query.trimmingCharacters(in: .whitespaces)
+    guard !trimmed.isEmpty else { return false }
+    return teamSearchTerms(abbr).contains { $0.localizedCaseInsensitiveContains(trimmed) }
 }
 
 struct StatScoutTheme {

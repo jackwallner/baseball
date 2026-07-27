@@ -171,7 +171,7 @@ struct MetricBar: View {
     }
 }
 
-/// Season + recent percentile bars stacked in one row — same Savant layout,
+/// Season + recent percentile bars stacked in one row, same Savant layout,
 /// with a compact recent track under the season bar when both are available.
 struct DualMetricBar: View {
     let season: Metric
@@ -388,15 +388,16 @@ struct LeaderboardTableHeader: View {
 
 /// Recent-vs-prior change for one metric, drawn as an arrow and a magnitude.
 ///
-/// StatScout+ only. Free users see it blurred rather than absent: the shape of
-/// the information is visible — this player moved, and by roughly how much —
-/// without the number itself, which is a more honest pitch than a padlock.
+/// Never blurred. Where the trend is a StatScout+ feature the column is simply
+/// absent for free users: a smeared number on the main leaderboard read as
+/// broken data rather than as a locked feature, and the board's job is to be
+/// trustworthy at a glance. The pitch lives on the controls that open the
+/// feature, not on top of the numbers.
 struct TrendArrow: View {
     let delta: Double
     /// Percent-style metrics move in whole numbers, rate stats in thousandths.
     var decimals: Int = 3
-    var isLocked: Bool = false
-    /// For metrics where down is the good direction — a hitter's Chase%, a
+    /// For metrics where down is the good direction, a hitter's Chase% or a
     /// pitcher's opponent xwOBA. The arrow still points the way the number
     /// actually moved; only the colour flips, so red always means "better".
     var lowerIsBetter: Bool = false
@@ -413,7 +414,7 @@ struct TrendArrow: View {
     }
 
     private var text: String {
-        if isFlat { return "—" }
+        if isFlat { return "0" }
         let magnitude = abs(delta)
         let formatted = String(format: "%.\(decimals)f", magnitude)
         // Rate stats are written Savant-style, without the leading zero.
@@ -431,11 +432,8 @@ struct TrendArrow: View {
                 .monospacedDigit()
         }
         .foregroundStyle(tint)
-        .blur(radius: isLocked ? 4 : 0)
         .accessibilityLabel(
-            isLocked
-                ? "Recent trend, StatScout+ required"
-                : (isFlat ? "No recent change" : "\(delta > 0 ? "Up" : "Down") \(text) recently")
+            isFlat ? "No recent change" : "\(delta > 0 ? "Up" : "Down") \(text) recently"
         )
     }
 }
@@ -448,7 +446,6 @@ struct LeaderboardTableRow: View {
     /// Recent-vs-prior change in the displayed metric, when a window is loaded.
     var trendDelta: Double? = nil
     var trendDecimals: Int = 3
-    var trendLocked: Bool = false
     /// The rolling-window value, shown in place of the season number when the
     /// list is ranking by recent form. Uncoloured: the season percentile is the
     /// wrong ruler for a fortnight's number, and there is no window curve to
@@ -470,7 +467,7 @@ struct LeaderboardTableRow: View {
         displayMetric?.percentile ?? 0
     }
 
-    // Raw stat value only — never the percentile. The colored bar to the left
+    // Raw stat value only, never the percentile. The colored bar to the left
     // already conveys percentile visually; numeric percentile in this column
     // duplicates that signal and reads as "the stat value" at a glance.
     private var displayValueText: String {
@@ -478,13 +475,13 @@ struct LeaderboardTableRow: View {
         if let metric = displayMetric, !metric.value.isEmpty {
             return metric.value
         }
-        return "—"
+        return "-"
     }
 
     /// A window value has no percentile behind it, so it stays ink rather than
     /// borrowing the season bar's colour and implying a rank it doesn't have.
     private var displayValueColor: Color {
-        valueOverride == nil ? SavantPalette.color(forPercentile: displayPercentile) : SavantPalette.ink
+        valueOverride == nil ? SavantPalette.textColor(forPercentile: displayPercentile) : SavantPalette.ink
     }
 
     var body: some View {
@@ -521,13 +518,13 @@ struct LeaderboardTableRow: View {
             .frame(width: 44, alignment: .leading)
 
             HStack(spacing: 8) {
-                // A player without the sorted metric gets no bar — drawing one
+                // A player without the sorted metric gets no bar, drawing one
                 // from their overall percentile would mislabel a different number
-                // as this column's stat. Show a muted "—" instead.
+                // as this column's stat. Show a muted "-" instead.
                 if displayMetric != nil || valueOverride != nil {
                     // The mini bar and the trend column both compete for the
                     // same edge of the row, and the trend is the more
-                    // informative of the two — the value's colour already
+                    // informative of the two, the value's colour already
                     // carries percentile. Drop the bar when a trend is present
                     // rather than squeezing the player name. A window value
                     // drops it too: the season percentile bar beside a
@@ -544,7 +541,7 @@ struct LeaderboardTableRow: View {
                         .frame(width: 48, alignment: .trailing)
                         .monospacedDigit()
                 } else {
-                    Text("—")
+                    Text("-")
                         .font(SavantType.statSmall)
                         .foregroundStyle(SavantPalette.inkTertiary)
                         .frame(maxWidth: .infinity, alignment: .trailing)
@@ -554,12 +551,8 @@ struct LeaderboardTableRow: View {
             .frame(width: trendDelta == nil ? 92 : 56, alignment: .trailing)
 
             if let trendDelta {
-                TrendArrow(
-                    delta: trendDelta,
-                    decimals: trendDecimals,
-                    isLocked: trendLocked
-                )
-                .frame(width: 46, alignment: .trailing)
+                TrendArrow(delta: trendDelta, decimals: trendDecimals)
+                    .frame(width: 46, alignment: .trailing)
             }
         }
         .frame(height: SavantGeo.rowHeight)
@@ -576,14 +569,14 @@ struct LeaderboardTableRow: View {
 /// opaque panel. Used by RecentFormCard, TeamRankingsCard, and YearComparePreview.
 ///
 /// The CTA transacts. It used to open `TrialPitchSheet`, which showed the same
-/// offer a second time under a second button — so a user who had already said
+/// offer a second time under a second button, so a user who had already said
 /// yes to "Start 7-day free trial" had to say it again before Apple's confirm
 /// sheet ever appeared. The button says what it does and then does it; the plan
 /// picker stays reachable behind a quiet "See all plans" link for anyone who
 /// actually wants to weigh monthly against lifetime.
 struct BlurGateUnlock: View {
     let headline: String
-    /// Entry point this gate represents — drives the impression id and the
+    /// Entry point this gate represents, drives the impression id and the
     /// copy on the plan picker, if the user asks for it.
     let trigger: PaywallTrigger
 
@@ -616,8 +609,8 @@ struct BlurGateUnlock: View {
 /// The app's only in-place conversion control, and the reason there is no
 /// pitch-then-pitch path left.
 ///
-/// Every surface that names an offer — the blurred gates, the player-page
-/// upsell card, the trial sheet's footer — used to hand off to another screen
+/// Every surface that names an offer, the blurred gates, the player-page
+/// upsell card, the trial sheet's footer, used to hand off to another screen
 /// that showed the same offer under another button. This one transacts: tap it
 /// and the next thing on screen is Apple's confirm sheet. The plan picker is
 /// still there for anyone who wants to weigh monthly against lifetime, but it's
@@ -739,7 +732,7 @@ struct PlusDirectCTA: View {
             case .failed(let message):
                 statusMessage = message
             case .needsPlanPicker:
-                // Nothing loaded to buy — the picker's retry/empty state is the
+                // Nothing loaded to buy, the picker's retry/empty state is the
                 // only surface that can say so and recover.
                 showingPlans = true
             }

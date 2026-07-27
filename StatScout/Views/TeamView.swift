@@ -11,7 +11,7 @@ struct TeamView: View {
     @State private var searchText = ""
     @State private var isSearching = false
     // Which percentile group the list ranks by, scoped to the active side.
-    // This no longer decides roster membership — it used to, which quietly hid
+    // This no longer decides roster membership, it used to, which quietly hid
     // most of the team: a Hitting filter dropped every pitcher and also every
     // position player Savant hasn't given hitting percentiles to, so a 40-man
     // roster rendered as ~10 rows with no hint that anyone was missing.
@@ -31,7 +31,7 @@ struct TeamView: View {
 
     /// "Advanced", not "Percentiles": the Standard tab draws percentile bars
     /// too, so naming one of them after the bars said nothing about what
-    /// separates them. What separates them is the vocabulary — Statcast's
+    /// separates them. What separates them is the vocabulary, Statcast's
     /// expected stats on one side, the box score on the other.
     enum TeamTab: String, CaseIterable {
         case advanced = "Advanced"
@@ -97,7 +97,7 @@ struct TeamView: View {
 
     /// Every metric this roster actually carries for the active category, in the
     /// same priority order the rest of the app uses. Feeds the Filters menu's
-    /// "Sort by" section — the Stats leaderboard has always let you choose the
+    /// "Sort by" section, the Stats leaderboard has always let you choose the
     /// column; the roster ranked on a metric it picked for you.
     private var availableSortLabels: [String] {
         guard let category = selectedCategory else { return [] }
@@ -159,7 +159,7 @@ struct TeamView: View {
     /// The window value for the ranked column, or an em dash for a player who
     /// hasn't played inside it.
     private func recentValueText(_ player: Player) -> String {
-        guard let label = sortMetric?.label, let value = recentValue(player) else { return "—" }
+        guard let label = sortMetric?.label, let value = recentValue(player) else { return "-" }
         return RecentMetricKey.format(value, label: label)
     }
 
@@ -187,7 +187,7 @@ struct TeamView: View {
         let byQualifier = bySide.filter { isQualified($0) }
         // Recent mode ranks on the rolling window instead of the season number.
         // Players with no games in the window keep their place on the roster but
-        // fall to the tail — a bench bat you're checking on shouldn't vanish
+        // fall to the tail, a bench bat you're checking on shouldn't vanish
         // because he hasn't started in a fortnight.
         if isRosterRecent, sortMetric != nil {
             let ranked = byQualifier.filter { recentValue($0) != nil }.sorted {
@@ -217,7 +217,7 @@ struct TeamView: View {
     }
 
     /// Roster-local qualifier. Mirrors DashboardViewModel.isQualified but reads
-    /// this view's own picker — the roster defaults to All so a bench bat or a
+    /// this view's own picker, the roster defaults to All so a bench bat or a
     /// September call-up still appears.
     private func isQualified(_ player: Player) -> Bool {
         switch qualifierLevel {
@@ -263,7 +263,7 @@ struct TeamView: View {
                 }
 
                 // Lets content scroll under the floating tab bar so the last
-                // rows aren't trapped behind it — matches Dashboard.
+                // rows aren't trapped behind it, matches Dashboard.
                 Color.clear.frame(height: 88)
             }
         }
@@ -274,7 +274,7 @@ struct TeamView: View {
         .toolbar {
             ToolbarItem(placement: .principal) { teamSwitcherMenu }
             if let viewModel {
-                // Red season pill draws its own capsule — see StatsView.
+                // Red season pill draws its own capsule, see StatsView.
                 if #available(iOS 26.0, *) {
                     ToolbarItem(placement: .topBarTrailing) { navSeasonMenu(viewModel: viewModel) }
                         .sharedBackgroundVisibility(.hidden)
@@ -294,7 +294,7 @@ struct TeamView: View {
         .onChange(of: displaySeason) { _, _ in
             applyDefaultDirectionIfMetricChanged()
         }
-        // Only fetches once per window per season — the view model caches, and
+        // Only fetches once per window per season, the view model caches, and
         // free users never reach recent mode at all.
         .task(id: "\(rosterMode.rawValue)-\(rosterWindow.rawValue)-\(displaySeason)-\(store.isPro)") {
             guard isRosterRecent else { return }
@@ -310,7 +310,7 @@ struct TeamView: View {
 
     // MARK: - Tabs
 
-    /// Mirrors the player profile's tab selector — equal-width red pills that
+    /// Mirrors the player profile's tab selector, equal-width red pills that
     /// swap the card content below. Two tabs: the team's percentile profile and
     /// its sortable roster.
     private var tabSelector: some View {
@@ -347,7 +347,7 @@ struct TeamView: View {
                 leaguePlayers: leaguePlayers,
                 fetchTeamGameLogs: fetchTeamGameLogs,
                 onUpgradeTap: {
-                    // Explicit tap — always answer it; the gate only caps
+                    // Explicit tap, always answer it; the gate only caps
                     // automatic pop-ups.
                     showingTrial = true
                 }
@@ -373,7 +373,7 @@ struct TeamView: View {
     private var rosterContent: some View {
         VStack(spacing: 0) {
             // Side and season/recent share a row, sized so all four capsules
-            // come out the same width — the same control pair the Advanced and
+            // come out the same width, the same control pair the Advanced and
             // Standard cards carry above.
             SavantPickerRow {
                 sidePicker.segmentCount(RosterSide.allCases.count)
@@ -419,7 +419,7 @@ struct TeamView: View {
     }
 
     private func applyDefaultDirectionIfMetricChanged() {
-        let key = sortMetric.map { "\($0.category.rawValue)|\($0.label)" } ?? "—"
+        let key = sortMetric.map { "\($0.category.rawValue)|\($0.label)" } ?? "-"
         guard key != lastDefaultedSortKey else { return }
         lastDefaultedSortKey = key
         sortDescending = DashboardViewModel.defaultSortDescending(
@@ -428,7 +428,7 @@ struct TeamView: View {
         )
     }
 
-    /// Mirrors the Stats tab's sort UI — left-side chip showing the active
+    /// Mirrors the Stats tab's sort UI, left-side chip showing the active
     /// metric (tap flips direction), and a magnifying-glass toggle on the right
     /// that expands an inline search row.
     private var sortControlsRow: some View {
@@ -467,7 +467,7 @@ struct TeamView: View {
         .padding(.top, 12)
     }
 
-    /// Hitters / Pitchers as a first-class control rather than a menu item —
+    /// Hitters / Pitchers as a first-class control rather than a menu item,
     /// it's the primary question asked of a team page, and it decides what the
     /// whole list means.
     private var sidePicker: some View {
@@ -661,7 +661,7 @@ struct TeamView: View {
         .padding(.vertical, 48)
     }
 
-    /// Team name in the nav title doubles as a switcher menu — tap to jump to
+    /// Team name in the nav title doubles as a switcher menu, tap to jump to
     /// any other team without popping back to the Teams list.
     private var teamSwitcherMenu: some View {
         Menu {

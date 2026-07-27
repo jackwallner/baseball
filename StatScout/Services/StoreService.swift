@@ -17,7 +17,7 @@ enum RevenueCatConfig {
 
 enum StatScoutSeason {
     /// The season the nightly pipeline is currently writing. Single source of
-    /// truth for the current/historical split — the API filters, the two-tier
+    /// truth for the current/historical split, the API filters, the two-tier
     /// cache partition, and the free-tier gate all read this, so the yearly
     /// rollover is a one-line change.
     static let current = 2026
@@ -30,7 +30,7 @@ enum StatScoutSeason {
 }
 
 enum StatScoutLegal {
-    /// Apple's standard EULA — required on the paywall unless a custom one is hosted.
+    /// Apple's standard EULA, required on the paywall unless a custom one is hosted.
     static let termsURL = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!
     static let privacyURL = URL(string: "https://jackwallner.github.io/baseball/privacy-policy.html")!
 }
@@ -160,7 +160,7 @@ extension Package {
         case .year:  monthsDecimal = Decimal(period.value) * Decimal(12)
         @unknown default: return nil
         }
-        // Only show /mo breakdown for periods that aren't already monthly —
+        // Only show /mo breakdown for periods that aren't already monthly,
         // showing "$4.99/mo" under a "$4.99/month" price is noise.
         guard monthsDecimal > 1 else { return nil }
         let perMonth = storeProduct.price / monthsDecimal
@@ -305,7 +305,7 @@ final class StoreService: NSObject, ObservableObject {
         return "Then \(yearly.priceLabel). Cancel anytime."
     }
 
-    /// The yearly package — the one-tap conversion target for every trial /
+    /// The yearly package, the one-tap conversion target for every trial /
     /// teaser pop-up (onboarding, TrialPitchSheet, blur CTAs). Those surfaces
     /// purchase this directly, trial or not; the full `PaywallView` is only the
     /// fallback when this is nil (products not loaded), or for deliberate
@@ -347,7 +347,7 @@ final class StoreService: NSObject, ObservableObject {
         return percent > 0 ? percent : nil
     }
 
-    /// Strike-through anchor price for the yearly card — "$4.99/mo" if a
+    /// Strike-through anchor price for the yearly card, "$4.99/mo" if a
     /// monthly package exists. Nil when there's nothing to anchor against.
     var monthlyAnchorPriceLabel: String? {
         monthlyPackage?.monthlyEquivalentAnchorLabel
@@ -517,7 +517,7 @@ final class StoreService: NSObject, ObservableObject {
         self.customerInfo = customerInfo
         let activeKeys = customerInfo.entitlements.active.keys.sorted().joined(separator: ", ")
         let allKeys = customerInfo.entitlements.all.keys.sorted().joined(separator: ", ")
-        logger.info("Applied customerInfo — active: [\(activeKeys, privacy: .public)] all: [\(allKeys, privacy: .public)]")
+        logger.info("Applied customerInfo, active: [\(activeKeys, privacy: .public)] all: [\(allKeys, privacy: .public)]")
         let hasActiveSubscription = customerInfo.hasProEntitlement
         if isPro != hasActiveSubscription {
             isPro = hasActiveSubscription

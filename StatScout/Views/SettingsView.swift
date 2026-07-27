@@ -28,7 +28,7 @@ struct AboutView: View {
         }
         .background(SavantPalette.canvas.ignoresSafeArea())
         .sheet(item: $paywallTrigger) { trigger in
-            PaywallView(trigger: trigger)
+            TrialPitchSheet(trigger: trigger)
         }
     }
 
@@ -125,12 +125,12 @@ struct AboutView: View {
     /// and saying so.
     ///
     /// This used to print a bare "9:39 AM", which is a time in no particular
-    /// place — someone in Denver reading a stamp their phone had already
+    /// place, someone in Denver reading a stamp their phone had already
     /// converted had no way to tell whether the data was three hours old or
     /// five. The zone is the whole point of a freshness line, and the relative
     /// gloss answers the question the stamp is standing in for.
     private var lastUpdatedText: String {
-        guard let lastUpdated else { return "—" }
+        guard let lastUpdated else { return "-" }
         let stamp = lastUpdated.formatted(
             .dateTime
                 .month(.abbreviated).day()
@@ -178,7 +178,7 @@ struct AboutView: View {
                 row(
                     icon: "star.fill",
                     title: "Rate or Send Feedback",
-                    subtitle: "Help StatScout grow — or tell us what to improve."
+                    subtitle: "Help StatScout grow, or tell us what to improve."
                 )
             }
             .buttonStyle(.plain)

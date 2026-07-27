@@ -167,7 +167,7 @@ struct PlayerComparisonView: View {
                 .font(SavantType.micro)
                 .foregroundStyle(SavantPalette.inkTertiary)
             // The season is load-bearing now that the two sides can come from
-            // different years — without it a cross-year comparison silently
+            // different years, without it a cross-year comparison silently
             // reads as this season's numbers.
             if let season = player.season {
                 Text(String(season))
@@ -251,7 +251,8 @@ struct PlayerComparisonView: View {
             if let m = metric {
                 let isWinner = (other.map { m.percentile > $0.percentile }) ?? false
                 let pctColor = SavantPalette.color(forPercentile: m.percentile)
-                // Raw value only — the colored bar conveys percentile. Tinting
+                let pctTextColor = SavantPalette.textColor(forPercentile: m.percentile)
+                // Raw value only, the colored bar conveys percentile. Tinting
                 // the value text by percentile keeps the "who's better" cue
                 // without doubling up the number.
                 VStack(spacing: 6) {
@@ -261,9 +262,9 @@ struct PlayerComparisonView: View {
                                 .font(.system(size: 10, weight: .bold))
                                 .foregroundStyle(Color.yellow)
                         }
-                        Text(m.value.isEmpty ? "—" : m.value)
+                        Text(m.value.isEmpty ? "-" : m.value)
                             .font(SavantType.statMed)
-                            .foregroundStyle(pctColor)
+                            .foregroundStyle(pctTextColor)
                             .lineLimit(1)
                             .minimumScaleFactor(0.7)
                     }
@@ -274,7 +275,7 @@ struct PlayerComparisonView: View {
                 }
                 .frame(maxWidth: .infinity)
             } else {
-                Text("—")
+                Text("-")
                     .font(SavantType.statSmall)
                     .foregroundStyle(SavantPalette.inkTertiary)
                     .frame(maxWidth: .infinity)

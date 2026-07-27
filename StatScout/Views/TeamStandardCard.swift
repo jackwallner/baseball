@@ -4,8 +4,8 @@ import SwiftUI
 /// 29 clubs.
 ///
 /// The percentile card next to it answers "how good is the contact quality";
-/// this answers "what actually happened". Both are Savant's own framing — its
-/// team pages carry a standard line alongside the Statcast one — and the app
+/// this answers "what actually happened". Both are Savant's own framing, its
+/// team pages carry a standard line alongside the Statcast one, and the app
 /// already does this on a player page, so a team not having it was the gap.
 ///
 /// The ruler here is the league's thirty teams, not its several hundred
@@ -361,7 +361,7 @@ struct TeamStandardCard: View {
 
         return base.map { label, season in
             let seed = Self.stableSeed("\(label)-\(side.rawValue)-\(windowDays)-\(team)")
-            // ±12% of the season figure — the size of a real fortnight's swing.
+            // ±12% of the season figure, the size of a real fortnight's swing.
             let swing = season * Double(seed % 25 - 12) / 100
             return (label, season, season + swing)
         }
@@ -417,7 +417,7 @@ struct TeamStandardCard: View {
         return totals
     }
 
-    /// The other twenty-nine, plus this one — the distribution a bar is drawn
+    /// The other twenty-nine, plus this one, the distribution a bar is drawn
     /// against.
     private func leagueLines() -> [[String: Double]] {
         Dictionary(grouping: leaguePlayers, by: \.team)
@@ -479,7 +479,7 @@ struct TeamStandardCard: View {
         return totals
     }
 
-    /// AVG / OBP / SLG / OPS rebuilt from the window's sums — the same identity
+    /// AVG / OBP / SLG / OPS rebuilt from the window's sums, the same identity
     /// the backend rollup uses, so the numbers agree with the Trends board.
     private func windowRates(_ totals: [String: Double]) -> [String: Double] {
         var out: [String: Double] = [:]

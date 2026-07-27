@@ -35,7 +35,7 @@ struct TrendMetric: Identifiable, Hashable, Sendable {
         .init(key: "ops", label: "OPS", unit: "", decimals: 3, lowerIsBetter: false),
     ]
 
-    /// Same four, read as what the pitcher allowed — so every one of them is
+    /// Same four, read as what the pitcher allowed, so every one of them is
     /// better going down.
     static let pitchingStandard: [TrendMetric] = [
         .init(key: "avg", label: "AVG Against", unit: "", decimals: 3, lowerIsBetter: true),
@@ -86,12 +86,24 @@ struct TrendMetric: Identifiable, Hashable, Sendable {
         side == .pitching ? pitchingStandard : battingStandard
     }
 
-    /// Statcast metrics first, then the traditional line, in one list — the
+    /// Statcast metrics first, then the traditional line, in one list, the
     /// picker groups them into sections rather than making the user pick a
     /// mode before picking a stat.
     static func list(for side: TrendSide) -> [TrendMetric] {
         statcast(for: side) + standard(for: side)
     }
+}
+
+/// Which vocabulary the Trends board is ranking in: the expected-stats line or
+/// the traditional one. The same split the Stats tab, the player page and the
+/// team page all use, so a user who has picked "Standard" once knows what it
+/// means everywhere.
+enum TrendStatMode: String, CaseIterable, Identifiable, Sendable {
+    case advanced
+    case standard
+
+    var id: String { rawValue }
+    var label: String { self == .advanced ? "Advanced" : "Standard" }
 }
 
 /// Which side of the ball the Trends board is ranking. Mixing them was never an

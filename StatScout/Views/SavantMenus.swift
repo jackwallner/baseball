@@ -56,7 +56,7 @@ extension View {
     /// Pins a `Menu` to the light popup the rest of the app draws.
     ///
     /// The navy nav bar is set up with `.toolbarColorScheme(.dark)`, which is
-    /// right for the bar's own title and glyphs — but a menu presented from a
+    /// right for the bar's own title and glyphs, but a menu presented from a
     /// toolbar item inherits that environment, so the season picker opened as a
     /// black panel while the identical Filters / sort / metric menus a row
     /// below it opened white. Same control, two looks, a tap apart. The pill
@@ -70,17 +70,21 @@ extension View {
 /// The tappable label for a nav-bar chooser on the navy bar.
 ///
 /// Every nav-bar chooser (season on Stats / Teams / a team page) drew its own
-/// copy of this, and they drifted — one was a `Menu`, the others popovers, and
+/// copy of this, and they drifted, one was a `Menu`, the others popovers, and
 /// the team page's had no `fixedSize()` so it clipped to a bare icon. One view
 /// now, so a change lands everywhere.
 struct SavantNavPill: View {
-    let systemImage: String
+    /// Optional: a bar that is tight on width can drop the glyph and keep the
+    /// label, which is the part that carries meaning.
+    var systemImage: String? = nil
     let title: String
 
     var body: some View {
         HStack(spacing: 5) {
-            Image(systemName: systemImage)
-                .font(.system(size: 11, weight: .semibold))
+            if let systemImage {
+                Image(systemName: systemImage)
+                    .font(.system(size: 11, weight: .semibold))
+            }
             Text(title)
                 .font(SavantType.smallBold)
             Image(systemName: "chevron.down")

@@ -306,7 +306,7 @@ struct YearComparisonView: View {
             HStack(spacing: 4) {
                 Text("\(percentile)")
                     .font(SavantType.bodyBold)
-                    .foregroundStyle(isFaded ? SavantPalette.inkTertiary : SavantPalette.color(forPercentile: percentile))
+                    .foregroundStyle(isFaded ? SavantPalette.inkTertiary : SavantPalette.textColor(forPercentile: percentile))
                 // Mini bar
                 RoundedRectangle(cornerRadius: 1)
                     .fill(SavantPalette.color(forPercentile: percentile))

@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Team "percentile rankings" card — the team-level analogue of the player
+/// Team "percentile rankings" card, the team-level analogue of the player
 /// profile's percentile card. Aggregates the roster into one synthetic
 /// "team-as-a-player" and renders its profile as percentile bars on the league
 /// ruler, with a Season / Recent toggle that mirrors the player page:
@@ -46,12 +46,12 @@ struct TeamRankingsCard: View {
         case season = "Season", recent = "Recent", both = "Both"
         var id: String { rawValue }
 
-        /// Whether this mode needs game logs — and therefore whether the
+        /// Whether this mode needs game logs, and therefore whether the
         /// window picker is worth showing.
         var usesRecent: Bool { self != .season }
     }
 
-    /// Smallest team-window PA we'll treat as trustworthy — below this we flag
+    /// Smallest team-window PA we'll treat as trustworthy, below this we flag
     /// the window as a small sample (rainouts, all-star break, late call-ups).
     private let smallSamplePAThreshold = 80
 
@@ -67,7 +67,7 @@ struct TeamRankingsCard: View {
             )
 
             // Side and mode share one row, split in proportion to how many
-            // options each holds — an even split squeezed "Season / Recent /
+            // options each holds, an even split squeezed "Season / Recent /
             // Both" into two capsules' worth of width, and the free tier's
             // crowns made it worse.
             SavantPickerRow {
@@ -137,12 +137,12 @@ struct TeamRankingsCard: View {
     }
 
     /// Season and recent bars paired on one row, the same DualMetricBar the
-    /// player page uses — so a team reads the way a player does.
+    /// player page uses, so a team reads the way a player does.
     private var bothSection: some View {
         let seasonRows = aggregateSeasonRows()
         // Deliberately NOT recentDisplayRows: that falls back to the season
         // aggregate when the window has no data for a metric, which is right
-        // for Recent (show the full slate) but a lie here — it would print the
+        // for Recent (show the full slate) but a lie here, it would print the
         // season number under a "Last 15d" label and imply nothing moved.
         let recentRows: [String: Metric] = {
             guard let w = recentWindow else { return [:] }
@@ -239,7 +239,7 @@ struct TeamRankingsCard: View {
         }
     }
 
-    /// One bar per roster metric — PA/IP-weighted mean placed on the league curve.
+    /// One bar per roster metric, PA/IP-weighted mean placed on the league curve.
     private func aggregateSeasonRows() -> [Metric] {
         // matchesPlayerType keeps two-way players in both pools (Ohtani hits AND pitches).
         let pool = players.filter { $0.matchesPlayerType(for: side.category) }
@@ -274,7 +274,7 @@ struct TeamRankingsCard: View {
         }
     }
 
-    /// Workload for weighting — PA for batters, IP for pitchers, read from the
+    /// Workload for weighting, PA for batters, IP for pitchers, read from the
     /// standard-stats block. nil falls back to equal weighting.
     private func workload(_ player: Player) -> Double? {
         let key = side == .pitching ? "IP" : "PA"
@@ -292,7 +292,7 @@ struct TeamRankingsCard: View {
         if label.contains("EV") || label.contains("Velo") || label == "Bat Speed" {
             return String(format: "%.1f mph", v)
         }
-        // Rate stats — xwOBA, xBA, xSLG, xISO and the traditional slash line.
+        // Rate stats, xwOBA, xBA, xSLG, xISO and the traditional slash line.
         if v < 10 { return String(format: "%.3f", v) }
         return String(format: "%.1f", v)
     }
@@ -302,7 +302,7 @@ struct TeamRankingsCard: View {
     /// Anchored to the last game in the data rather than to the clock. The
     /// pipeline runs overnight, so "now minus 15 days" against a feed that ends
     /// two days ago silently drops the oldest days of the window and shrinks
-    /// the sample — and it disagreed with the backend rollup, which anchors to
+    /// the sample, and it disagreed with the backend rollup, which anchors to
     /// the last game date. Start-of-day, so the hour you open the app doesn't
     /// decide whether the earliest game counts.
     private var sideLogs: [PlayerGameLog] {
@@ -340,7 +340,7 @@ struct TeamRankingsCard: View {
         }
     }
 
-    /// Non-fetching preview for free users — this team's own season bars,
+    /// Non-fetching preview for free users, this team's own season bars,
     /// nudged, in the recent-form layout. No game logs are fetched (no
     /// network/battery cost) and the actual window numbers stay behind the
     /// wall; what's shown is the shape of the answer, for this club, on the
@@ -378,7 +378,7 @@ struct TeamRankingsCard: View {
 
     /// The bars behind the blur: this team's season aggregate for the selected
     /// side, each percentile shifted by a fixed amount derived from the metric,
-    /// the side and the window — so switching any picker visibly re-draws the
+    /// the side and the window, so switching any picker visibly re-draws the
     /// board, and two teams never show the same preview.
     private var teaserRows: [Metric] {
         let rows = aggregateSeasonRows()
@@ -396,7 +396,7 @@ struct TeamRankingsCard: View {
         }
     }
 
-    /// For a roster too thin to aggregate — a preview still has to draw
+    /// For a roster too thin to aggregate, a preview still has to draw
     /// something, and an empty card under an unlock button pitches nothing.
     private var fallbackTeaserRows: [Metric] {
         let labels: [(String, String)] = side == .batting
@@ -542,7 +542,7 @@ struct TeamRankingsCard: View {
 
     /// Recent mode mirrors the season list: every season aggregate bar is shown.
     /// Metrics with game-log data in the window render the recent value (re-placed
-    /// on the league curve); the rest fall back to their season aggregate bar — so
+    /// on the league curve); the rest fall back to their season aggregate bar, so
     /// a team's Recent view shows the same full slate of stats as its Season view,
     /// not just the handful the per-game feed carries. Recent specs the season
     /// aggregate omits (Savant sometimes drops e.g. Hard-Hit%) are injected as
@@ -580,12 +580,12 @@ struct TeamRankingsCard: View {
     }
 
     private func load() async {
-        // Free users see a static teaser — never fetch real team game logs.
+        // Free users see a static teaser, never fetch real team game logs.
         guard store.isPro, let fetch = fetchTeamGameLogs else { return }
         loading = true
         loadError = nil
         do {
-            // 30 days back covers the largest window — 7/15 are derived
+            // 30 days back covers the largest window, 7/15 are derived
             // client-side. The extra week absorbs pipeline lag: the windows
             // anchor to the last game in the data, which can trail today.
             let since = Calendar.current.date(byAdding: .day, value: -37, to: .now) ?? .now
