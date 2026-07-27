@@ -52,10 +52,16 @@ final class DashboardViewModelTests: XCTestCase {
 
     @MainActor
     func testTeamFullNameReturnsCorrectFullName() {
-        // Test the teamFullName helper function directly
-        XCTAssertEqual(teamFullName("NYY"), "New York Yankees")
-        XCTAssertEqual(teamFullName("BOS"), "Boston Red Sox")
-        XCTAssertEqual(teamFullName("LAD"), "Los Angeles Dodgers")
+        // City-only naming (nickname dropped in the Savant-style UI), with the
+        // league in parens only where a city fields two clubs.
+        XCTAssertEqual(teamFullName("NYY"), "New York (AL)")
+        XCTAssertEqual(teamFullName("NYM"), "New York (NL)")
+        XCTAssertEqual(teamFullName("BOS"), "Boston")
+        XCTAssertEqual(teamFullName("LAD"), "Los Angeles (NL)")
+        XCTAssertEqual(teamFullName("LAA"), "Los Angeles (AL)")
+        // Aliases normalize before the lookup.
+        XCTAssertEqual(teamFullName("CHW"), "Chicago (AL)")
+        XCTAssertEqual(teamFullName("New York Yankees"), "New York (AL)")
         XCTAssertEqual(teamFullName("Unknown"), "Unknown")
     }
 
@@ -112,9 +118,11 @@ final class DashboardViewModelTests: XCTestCase {
 
     @MainActor
     func testSortLabelReflectsCategory() async {
-        // Players with xwOBA hitting metric
+        // Fixtures sit on the current season: past seasons are StatScout+ gated,
+        // so a non-Pro VM would never snap `selectedSeason` onto them and
+        // `seasonPlayers` (and everything downstream) would come back empty.
         let hitters = [
-            Player(playerId: 1, name: "A", team: "NYY", position: "RF", handedness: "R/R", imageURL: nil, updatedAt: Date(), season: 2025, playerType: "batter", source: "baseball_savant",
+            Player(playerId: 1, name: "A", team: "NYY", position: "RF", handedness: "R/R", imageURL: nil, updatedAt: Date(), season: StatScoutSeason.current, playerType: "batter", source: "baseball_savant",
                    metrics: [Metric(id: "m1", label: "xwOBA", value: ".400", percentile: 90, category: .hitting)], standardStats: [], games: [])
         ]
 
@@ -127,7 +135,7 @@ final class DashboardViewModelTests: XCTestCase {
 
         // Test with pitchers that have Barrel%
         let pitchers = [
-            Player(playerId: 2, name: "B", team: "NYY", position: "SP", handedness: "R/R", imageURL: nil, updatedAt: Date(), season: 2025, playerType: "pitcher", source: "baseball_savant",
+            Player(playerId: 2, name: "B", team: "NYY", position: "SP", handedness: "R/R", imageURL: nil, updatedAt: Date(), season: StatScoutSeason.current, playerType: "pitcher", source: "baseball_savant",
                    metrics: [Metric(id: "m1", label: "Barrel%", value: "5%", percentile: 85, category: .pitching)], standardStats: [], games: [])
         ]
         let vmPitching = DashboardViewModel(provider: MockProvider(players: pitchers))
@@ -153,10 +161,10 @@ final class DashboardViewModelTests: XCTestCase {
 
     @MainActor
     func testPitchingSortUsesAvailableMetrics() async {
-        // Pitcher with Barrel% but no xERA (common early in season)
+        // Pitcher with Barrel% but no xwOBA/K% (common early in season)
         let pitcher = Player(
             playerId: 1, name: "Test Pitcher", team: "NYY", position: "SP",
-            handedness: "R/R", imageURL: nil, updatedAt: Date(), season: 2025, playerType: "pitcher", source: "baseball_savant",
+            handedness: "R/R", imageURL: nil, updatedAt: Date(), season: StatScoutSeason.current, playerType: "pitcher", source: "baseball_savant",
             metrics: [
                 Metric(id: "m1", label: "Barrel%", value: "5.2%", percentile: 85, category: .pitching),
                 Metric(id: "m2", label: "Whiff%", value: "28%", percentile: 70, category: .pitching)
@@ -172,6 +180,7 @@ final class DashboardViewModelTests: XCTestCase {
         // Should find the pitcher in filtered list
         XCTAssertEqual(vm.filteredPlayers.count, 1)
         // Should sort by Barrel% since that's the first available priority metric
+        XCTAssertEqual(vm.currentSortMetric, "Barrel%")
         XCTAssertEqual(vm.leaderboard.first?.playerId, 1)
     }
 
@@ -219,15 +228,39 @@ final class DashboardViewModelTests: XCTestCase {
 
     @MainActor
     func testLoadSnapsSelectedSeasonToAvailableData() async {
-        let player2025 = Player(
-            playerId: 1, name: "Player 2025", team: "NYY", position: "RF", handedness: "R/R", imageURL: nil,
-            updatedAt: Date(), season: 2025, metrics: [], standardStats: [], games: []
+        let currentPlayer = Player(
+            playerId: 1, name: "Current", team: "NYY", position: "RF", handedness: "R/R", imageURL: nil,
+            updatedAt: Date(), season: StatScoutSeason.current, metrics: [], standardStats: [], games: []
         )
-        let vm = DashboardViewModel(provider: MockProvider(players: [player2025]))
-        // Default selectedSeason is the current year. If the data only has 2025, load should snap.
+        let vm = DashboardViewModel(provider: MockProvider(players: [currentPlayer]))
+        // Selected season has no data at all — load should snap onto the season that does.
         vm.selectedSeason = 2030
         await vm.load()
-        XCTAssertEqual(vm.selectedSeason, 2025)
+        XCTAssertEqual(vm.selectedSeason, StatScoutSeason.current)
+    }
+
+    @MainActor
+    func testLoadSnapsToPastSeasonOnlyWhenUnlocked() async {
+        let pastSeason = StatScoutSeason.current - 1
+        let pastPlayer = Player(
+            playerId: 1, name: "Past", team: "NYY", position: "RF", handedness: "R/R", imageURL: nil,
+            updatedAt: Date(), season: pastSeason, metrics: [], standardStats: [], games: []
+        )
+
+        // Pro: past seasons are unlocked, so load snaps onto the only season with data.
+        let proVM = DashboardViewModel(provider: MockProvider(players: [pastPlayer]))
+        proVM.applyProState(true)
+        proVM.selectedSeason = 2030
+        await proVM.load()
+        XCTAssertEqual(proVM.selectedSeason, pastSeason)
+
+        // Free: the only season with data is gated, so load must not silently
+        // drop the user onto locked past-season data.
+        let freeVM = DashboardViewModel(provider: MockProvider(players: [pastPlayer]))
+        freeVM.selectedSeason = 2030
+        await freeVM.load()
+        XCTAssertNotEqual(freeVM.selectedSeason, pastSeason)
+        XCTAssertTrue(freeVM.seasonPlayers.isEmpty)
     }
 
     @MainActor
