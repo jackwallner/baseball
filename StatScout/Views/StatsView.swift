@@ -92,22 +92,7 @@ struct StatsView: View {
         Button {
             showingSeasonPicker = true
         } label: {
-            HStack(spacing: 5) {
-                Image(systemName: "calendar")
-                    .font(.system(size: 11, weight: .semibold))
-                Text(String(viewModel.selectedSeason))
-                    .font(SavantType.smallBold)
-                Image(systemName: "chevron.down")
-                    .font(.system(size: 9, weight: .bold))
-            }
-            .foregroundStyle(.white)
-            // Without this the toolbar squeezes the label and the year itself
-            // is the first thing to get clipped, leaving a bare calendar icon.
-            .fixedSize()
-            .padding(.horizontal, 10)
-            .padding(.vertical, 5)
-            .background(SavantPalette.savantRed)
-            .clipShape(Capsule())
+            SavantNavPill(systemImage: "calendar", title: String(viewModel.selectedSeason))
         }
         .buttonStyle(.plain)
         // Anchored to the pill, so it drops from the control you tapped rather

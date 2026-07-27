@@ -282,11 +282,19 @@ struct TeamRankingsCard: View {
         return DashboardViewModel.rawNumeric(raw)
     }
 
+    /// Matches the player page's conventions. The old fallback of two decimals
+    /// printed a team's xBA as "0.25" next to a player's ".250", and bat speed
+    /// as "69.60" with a meaningless trailing zero and no unit.
     private func formattedValue(_ v: Double, label: String) -> String {
-        if label == "xwOBA" { return String(format: "%.3f", v) }
-        if label == "EV"     { return String(format: "%.1f mph", v) }
         if label.hasSuffix("%") { return String(format: "%.1f%%", v) }
-        return String(format: "%.2f", v)
+        if label.hasSuffix("Spin") { return String(format: "%.0f rpm", v) }
+        if label == "Swing Length" { return String(format: "%.2f ft", v) }
+        if label.contains("EV") || label.contains("Velo") || label == "Bat Speed" {
+            return String(format: "%.1f mph", v)
+        }
+        // Rate stats — xwOBA, xBA, xSLG, xISO and the traditional slash line.
+        if v < 10 { return String(format: "%.3f", v) }
+        return String(format: "%.1f", v)
     }
 
     // MARK: - Recent
