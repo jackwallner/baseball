@@ -2,7 +2,16 @@ name: Nightly Statcast Refresh
 
 on:
   schedule:
-    - cron: "0 9 * * *"
+    # 14:00 UTC — 10am ET, 7am PT.
+    #
+    # This used to run at 09:00 UTC (5am ET), which is before Baseball Savant
+    # publishes the previous night's games: every run fetched through "today"
+    # and came back with nothing newer than the day before yesterday, so the
+    # app permanently read "Through <two days ago>" no matter how often the
+    # pipeline succeeded. West-coast games finish around 06:00 UTC and Savant
+    # has them up well before 14:00, so this is the first hour that reliably
+    # closes the previous day.
+    - cron: "0 14 * * *"
   workflow_dispatch:
     inputs:
       full_game_log_reingest:
