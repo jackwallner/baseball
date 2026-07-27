@@ -20,6 +20,7 @@ struct TeamView: View {
     @State private var lastDefaultedSortKey: String? = nil
     @State private var showingTrial = false
     @State private var lockedSeasonTrigger: PaywallTrigger?
+    @State private var showingSeasonPicker = false
     @State private var rosterSide: RosterSide = .hitters
     @State private var qualifierLevel: DashboardViewModel.QualifierLevel = .all
 
@@ -541,41 +542,30 @@ struct TeamView: View {
         Self.allTeamAbbrs.sorted { teamFullName($0).localizedCompare(teamFullName($1)) == .orderedAscending }
     }
 
+    /// The same pill + vertical popover the Stats and Teams tabs use. This was
+    /// the one season control still built as a `Menu`, which is what made the
+    /// year selector feel inconsistent: a wide grey menu here, a narrow list
+    /// two taps away.
     private func navSeasonMenu(viewModel: DashboardViewModel) -> some View {
-        Menu {
-            ForEach(viewModel.availableSeasons, id: \.self) { season in
-                let isLocked = viewModel.isSeasonLocked(season)
-                Button {
-                    if isLocked {
-                        lockedSeasonTrigger = .lockedSeason(season)
-                    } else {
-                        viewModel.selectedSeason = season
-                    }
-                } label: {
-                    // See StatsView — an HStack row stretches the whole menu.
-                    if isLocked {
-                        Label(String(season), systemImage: "crown.fill")
-                    } else {
-                        Text(String(season))
-                    }
+        Button {
+            showingSeasonPicker = true
+        } label: {
+            SavantNavPill(systemImage: "calendar", title: String(viewModel.selectedSeason))
+        }
+        .buttonStyle(.plain)
+        .popover(isPresented: $showingSeasonPicker, arrowEdge: .bottom) {
+            SeasonPickerPopover(
+                seasons: viewModel.availableSeasons,
+                selected: viewModel.selectedSeason,
+                isLocked: { viewModel.isSeasonLocked($0) }
+            ) { season in
+                if viewModel.isSeasonLocked(season) {
+                    lockedSeasonTrigger = .lockedSeason(season)
+                } else {
+                    viewModel.selectedSeason = season
                 }
             }
-        } label: {
-            HStack(spacing: 5) {
-                Image(systemName: "calendar")
-                    .font(.system(size: 11, weight: .semibold))
-                Text(String(viewModel.selectedSeason))
-                    .font(SavantType.smallBold)
-                Image(systemName: "chevron.down")
-                    .font(.system(size: 9, weight: .bold))
-            }
-            .foregroundStyle(.white)
-            .padding(.horizontal, 10)
-            .padding(.vertical, 5)
-            .background(SavantPalette.savantRed)
-            .clipShape(Capsule())
         }
-        .menuOrder(.fixed)
         .accessibilityLabel("Season")
         .accessibilityValue(String(viewModel.selectedSeason))
     }
