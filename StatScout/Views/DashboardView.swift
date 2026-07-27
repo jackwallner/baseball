@@ -202,6 +202,9 @@ struct DashboardView: View {
             .buttonStyle(.plain)
             .accessibilityLabel("Sorted by \(viewModel.currentSortMetric ?? viewModel.sortLabel), \(viewModel.sortDescending ? "highest first" : "lowest first")")
             .accessibilityHint("Tap to flip sort direction")
+            if viewModel.positionFilterApplies {
+                positionMenu
+            }
             Spacer(minLength: 0)
             recentToggle
             searchToggle
@@ -209,6 +212,39 @@ struct DashboardView: View {
         }
         .padding(.horizontal, 12)
         .padding(.top, 8)
+    }
+
+    /// Narrows the board to one position, or to the infield / outfield as a
+    /// group. Sits beside the sort chip because it answers the same shape of
+    /// question — which slice of the league am I ranking — where the trailing
+    /// chips are modes and search.
+    ///
+    /// Hidden on the pitching board, where every player is a P.
+    private var positionMenu: some View {
+        Menu {
+            ForEach(viewModel.availablePositionFilters) { option in
+                Button {
+                    viewModel.positionFilter = option
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                } label: {
+                    if option == viewModel.positionFilter {
+                        Label(option.label, systemImage: "checkmark")
+                    } else {
+                        Text(option.label)
+                    }
+                }
+            }
+        } label: {
+            SavantChip(
+                title: viewModel.positionFilter.chipLabel,
+                systemImage: "figure.baseball",
+                trailing: .chevron,
+                isActive: viewModel.positionFilter != .all
+            )
+        }
+        .menuOrder(.fixed)
+        .accessibilityLabel("Position")
+        .accessibilityValue(viewModel.positionFilter.label)
     }
 
     /// Flips the leaderboard from season totals to a rolling window, and (when

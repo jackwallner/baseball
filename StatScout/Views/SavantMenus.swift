@@ -46,8 +46,24 @@ struct SeasonMenu<Trigger: View>: View {
         // Newest season first is the order the array already carries; without
         // this UIKit reverses it for menus that open upward.
         .menuOrder(.fixed)
+        .savantMenuAppearance()
         .accessibilityLabel("Season")
         .accessibilityValue(String(selected))
+    }
+}
+
+extension View {
+    /// Pins a `Menu` to the light popup the rest of the app draws.
+    ///
+    /// The navy nav bar is set up with `.toolbarColorScheme(.dark)`, which is
+    /// right for the bar's own title and glyphs — but a menu presented from a
+    /// toolbar item inherits that environment, so the season picker opened as a
+    /// black panel while the identical Filters / sort / metric menus a row
+    /// below it opened white. Same control, two looks, a tap apart. The pill
+    /// labels set their own colours explicitly, so forcing light here changes
+    /// nothing but the popup.
+    func savantMenuAppearance() -> some View {
+        environment(\.colorScheme, .light)
     }
 }
 

@@ -9,9 +9,6 @@ struct TrialPitchSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     let trigger: PaywallTrigger
-    @State private var showingPaywall = false
-    @State private var isPurchasing = false
-    @State private var purchaseError: String?
 
     private struct Benefit: Identifiable {
         let id = UUID()
@@ -110,15 +107,11 @@ struct TrialPitchSheet: View {
         // stays true forever for sheets that never reach PaywallView, and the
         // half-sheet would auto-present on every player open.
         .onAppear { PaywallGate.shared.markPresented(trigger) }
-        .task {
-            store.trackPaywallImpression(id: "statscout_trial_sheet")
-            if store.currentOffering == nil { await store.fetchProducts() }
-        }
+        // Impression and product-load both belong to the CTA now, which reports
+        // the trigger-specific id. Reporting a second, generic
+        // "statscout_trial_sheet" id from here double-counted every pitch.
         .onChange(of: store.isPro) { _, isPro in
             if isPro { dismiss() }
-        }
-        .sheet(isPresented: $showingPaywall) {
-            PaywallView(trigger: trigger)
         }
     }
 
@@ -187,44 +180,10 @@ struct TrialPitchSheet: View {
 
     private var footer: some View {
         VStack(spacing: 10) {
-            Button {
-                buyYearly()
-            } label: {
-                ZStack {
-                    Text(store.paywallBlurCTA)
-                        .opacity(isPurchasing ? 0 : 1)
-                    if isPurchasing {
-                        ProgressView().tint(.white)
-                    }
-                }
-                .font(SavantType.bodyBold)
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .frame(height: 50)
-                .background(SavantPalette.savantRed)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-            }
-            .buttonStyle(.plain)
-            .disabled(isPurchasing)
-
-            // Full auto-renew disclosure — this CTA buys the yearly plan
-            // directly (trial when eligible, paid otherwise), so the renewal
-            // terms must sit beside the purchase point (Apple 3.1.2).
-            if let disclosure = store.yearlyCTADisclosureText {
-                Text(disclosure)
-                    .font(SavantType.micro)
-                    .tracking(0.2)
-                    .foregroundStyle(SavantPalette.inkTertiary)
-                    .multilineTextAlignment(.center)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-
-            if let purchaseError {
-                Text(purchaseError)
-                    .font(SavantType.small)
-                    .foregroundStyle(SavantPalette.savantRed)
-                    .multilineTextAlignment(.center)
-            }
+            // Same control as every other pitch in the app: it buys the yearly
+            // plan in place — trial when eligible, paid otherwise — and carries
+            // its own auto-renew disclosure and "See all plans" escape hatch.
+            PlusDirectCTA(trigger: trigger)
 
             HStack(spacing: 12) {
                 Link("Terms", destination: StatScoutLegal.termsURL)
@@ -254,35 +213,6 @@ struct TrialPitchSheet: View {
         )
     }
 
-    // One-tap conversion: buy the yearly plan in place — trial when eligible,
-    // straight purchase otherwise — so this pop-up never hands off to a second
-    // paywall. PaywallView is only the emergency fallback when products didn't
-    // load. Success dismisses via onChange(isPro).
-    private func buyYearly() {
-        guard let yearly = store.yearlyPackage else {
-            showingPaywall = true
-            return
-        }
-        purchaseError = nil
-        isPurchasing = true
-        Task { @MainActor in
-            defer { isPurchasing = false }
-            do {
-                switch try await store.purchase(yearly) {
-                case .purchased:
-                    break
-                case .pending:
-                    // Ask-to-Buy / deferred payment: not unlocked yet, not an
-                    // error — the sheet stays up, so say what's happening.
-                    purchaseError = "Purchase pending approval. StatScout+ unlocks automatically once it's approved."
-                case .cancelled:
-                    purchaseError = "Purchase cancelled. Tap again to continue."
-                }
-            } catch {
-                purchaseError = store.lastError ?? "Couldn't complete the purchase. Please try again."
-            }
-        }
-    }
 }
 
 #if DEBUG

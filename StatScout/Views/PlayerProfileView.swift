@@ -298,8 +298,7 @@ struct PlayerProfileView: View {
                     player: player,
                     season: activeSeason ?? player.season ?? Calendar.current.component(.year, from: .now),
                     leaguePlayers: allPlayers,
-                    fetchGameLogs: fetchGameLogs,
-                    onUpgradeTap: { trialPitchTrigger = .recentForm }
+                    fetchGameLogs: fetchGameLogs
                 )
             }
 
@@ -335,30 +334,11 @@ struct PlayerProfileView: View {
                 proPerk("arrow.down.circle.fill", "Saved offline — works on the road")
             }
 
-            Button {
-                paywallTrigger = store.defaultUpgradeTrigger
-            } label: {
-                HStack(spacing: 6) {
-                    Text(store.paywallBlurCTA)
-                        .font(SavantType.bodyBold)
-                    Image(systemName: "arrow.right")
-                        .font(.system(size: 12, weight: .bold))
-                }
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .frame(height: 46)
-                .background(SavantPalette.savantRed)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-            }
-            .buttonStyle(.plain)
-
-            if let subtext = store.paywallBlurSubtext {
-                Text(subtext)
-                    .font(SavantType.micro)
-                    .tracking(0.3)
-                    .foregroundStyle(SavantPalette.inkTertiary)
-                    .frame(maxWidth: .infinity, alignment: .center)
-            }
+            // Buys in place. This card's CTA used to open the plan picker,
+            // which meant a user who tapped "Start 7-day free trial" was asked
+            // to choose a plan and press a second button before Apple's sheet
+            // appeared.
+            PlusDirectCTA(trigger: store.defaultUpgradeTrigger)
         }
         .padding(16)
         .background(SavantPalette.surface)
@@ -408,9 +388,7 @@ struct PlayerProfileView: View {
                 YearComparisonView(history: history)
             }
         } else {
-            YearComparePreview(playerName: player.name) {
-                trialPitchTrigger = .yearCompare
-            }
+            YearComparePreview(playerName: player.name)
         }
     }
 

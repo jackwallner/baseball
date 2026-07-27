@@ -1,4 +1,5 @@
 import os
+from types import SimpleNamespace
 from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 
@@ -327,3 +328,84 @@ def test_add_calculated_rates_preserves_native_percentile():
     ingest._add_calculated_rates({1: player}, {1})
     k = next(m for m in player["metrics"] if m["label"] == "K%")
     assert k["percentile"] == 42
+
+
+class TestExpectedOnBasePercentage:
+    """xOBP is reconstructed, not read — see _add_expected_obp.
+
+    Savant publishes an xOBP percentile but no xOBP column, and what used to
+    fill the gap was xwOBA averaged over batted balls (xwOBACON). That put
+    hitters at .580 and left the printed value disagreeing with the percentile
+    bar beside it, which is exactly what a user reported.
+    """
+
+    @staticmethod
+    def _player(metrics, standard):
+        return {
+            "metrics": metrics,
+            "standard_stats": [
+                {"id": f"std-{k}", "label": k, "value": v} for k, v in standard.items()
+            ],
+        }
+
+    def test_reconstructs_batter_xobp_from_expected_hits_and_walks(self):
+        # (.278 x 409 + 82) / 498 = .393 — Wood's real OBP that season was .396.
+        players = {
+            1: self._player(
+                [{"id": "batter-1-xobp", "label": "xOBP", "value": "", "percentile": 99,
+                  "category": "Hitting"}],
+                {"PA": "498", "AB": "409", "BB": "82"},
+            )
+        }
+        store = SimpleNamespace(expected_stat=lambda pid, col, kind: 0.278)
+
+        ingest._add_expected_obp(players, store)
+
+        assert players[1]["metrics"][0]["value"] == "0.393"
+
+    def test_pitcher_xobp_uses_batters_faced(self):
+        # (.240 x (600 - 50) + 50) / 600 = .303
+        players = {
+            2: self._player(
+                [{"id": "pitcher-2-xobp", "label": "xOBP", "value": "", "percentile": 70,
+                  "category": "Pitching"}],
+                {"BF": "600", "BB": "50"},
+            )
+        }
+        store = SimpleNamespace(expected_stat=lambda pid, col, kind: 0.240)
+
+        ingest._add_expected_obp(players, store)
+
+        assert players[2]["metrics"][0]["value"] == "0.303"
+
+    def test_drops_the_metric_when_inputs_are_missing(self):
+        # "No value, no metric" — a percentile with a blank cell beside it is
+        # the failure mode the rest of the build already refuses to ship.
+        players = {
+            3: self._player(
+                [{"id": "batter-3-xobp", "label": "xOBP", "value": "", "percentile": 55,
+                  "category": "Hitting"},
+                 {"id": "batter-3-xba", "label": "xBA", "value": "0.270", "percentile": 81,
+                  "category": "Hitting"}],
+                {"PA": "300"},
+            )
+        }
+        store = SimpleNamespace(expected_stat=lambda pid, col, kind: 0.270)
+
+        ingest._add_expected_obp(players, store)
+
+        assert [m["label"] for m in players[3]["metrics"]] == ["xBA"]
+
+    def test_leaves_an_already_valued_metric_alone(self):
+        players = {
+            4: self._player(
+                [{"id": "batter-4-xobp", "label": "xOBP", "value": "0.350", "percentile": 88,
+                  "category": "Hitting"}],
+                {"PA": "500", "AB": "450", "BB": "50"},
+            )
+        }
+        store = SimpleNamespace(expected_stat=lambda pid, col, kind: 0.999)
+
+        ingest._add_expected_obp(players, store)
+
+        assert players[4]["metrics"][0]["value"] == "0.350"

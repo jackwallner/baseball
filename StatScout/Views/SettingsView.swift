@@ -121,19 +121,40 @@ struct AboutView: View {
         )
     }
 
+    /// Timestamp of the last successful pipeline run, in the reader's own zone
+    /// and saying so.
+    ///
+    /// This used to print a bare "9:39 AM", which is a time in no particular
+    /// place — someone in Denver reading a stamp their phone had already
+    /// converted had no way to tell whether the data was three hours old or
+    /// five. The zone is the whole point of a freshness line, and the relative
+    /// gloss answers the question the stamp is standing in for.
+    private var lastUpdatedText: String {
+        guard let lastUpdated else { return "—" }
+        let stamp = lastUpdated.formatted(
+            .dateTime
+                .month(.abbreviated).day()
+                .hour().minute()
+                .timeZone(.specificName(.short))
+        )
+        let relative = RelativeDateTimeFormatter()
+        relative.unitsStyle = .full
+        return "\(stamp) (\(relative.localizedString(for: lastUpdated, relativeTo: .now)))"
+    }
+
     private var refreshCard: some View {
         VStack(spacing: 0) {
             SavantSectionBar(title: "DATA")
             row(
                 icon: "moon.stars.fill",
-                title: "Nightly Refresh",
-                subtitle: "Refreshed each night using publicly available pitch-tracking data."
+                title: "Overnight Refresh",
+                subtitle: "Rebuilt overnight from publicly available pitch-tracking data, once the previous night's games have published."
             )
             Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline)
             row(
                 icon: "clock.arrow.circlepath",
                 title: "Last Updated",
-                subtitle: lastUpdated.map { $0.formatted(date: .long, time: .shortened) } ?? "—"
+                subtitle: lastUpdatedText
             )
         }
         .background(SavantPalette.surface)

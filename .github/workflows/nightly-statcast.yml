@@ -2,15 +2,23 @@ name: Nightly Statcast Refresh
 
 on:
   schedule:
-    # 14:00 UTC — 10am ET, 7am PT.
+    # Two runs a night, both closing the same previous day.
     #
-    # This used to run at 09:00 UTC (5am ET), which is before Baseball Savant
-    # publishes the previous night's games: every run fetched through "today"
-    # and came back with nothing newer than the day before yesterday, so the
-    # app permanently read "Through <two days ago>" no matter how often the
-    # pipeline succeeded. West-coast games finish around 06:00 UTC and Savant
-    # has them up well before 14:00, so this is the first hour that reliably
-    # closes the previous day.
+    # 08:30 UTC — 4:30am ET / 1:30am PT. The overnight pass, and the one that
+    # decides what the app says when someone opens it at breakfast. West-coast
+    # games finish around 06:00 UTC, so this is roughly 2.5 hours after the
+    # last pitch of the night.
+    #
+    # 14:00 UTC — 10am ET / 7am PT. The backstop, and the reason the early run
+    # is safe to add. An earlier single run is exactly what this workflow used
+    # to have (09:00 UTC) and it broke the app: Savant hadn't published the
+    # previous night yet, every run came back with nothing newer than the day
+    # before, and the app permanently read "Through <two days ago>". Moving to
+    # 14:00 fixed that by waiting. Keeping 14:00 as a second run keeps the fix
+    # while letting the early pass win on the nights Savant is prompt — the
+    # ingest upserts on (id, season), so a re-run over the same day is a no-op
+    # and a re-run over a day the early pass missed picks it up.
+    - cron: "30 8 * * *"
     - cron: "0 14 * * *"
   workflow_dispatch:
     inputs:
