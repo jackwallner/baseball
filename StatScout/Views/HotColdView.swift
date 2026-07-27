@@ -28,7 +28,6 @@ struct HotColdView: View {
     @State private var showingCold = false
     @State private var side: TrendSide = .batting
     @State private var metric: TrendMetric = TrendMetric.batting[0]
-    @State private var showingMetricPicker = false
 
     private var forms: [RecentForm] {
         Array(viewModel.recentFormByWindow[viewModel.recentWindow.rawValue]?.values ?? [:].values)
@@ -71,7 +70,14 @@ struct HotColdView: View {
         }
         .scrollBounceBehavior(.basedOnSize)
         .background(SavantPalette.canvas)
-        .task(id: viewModel.recentWindow.rawValue) {
+        // Keyed on entitlement as well as the window. `isPro` starts false and
+        // only flips once RevenueCat answers, which on a real device is often
+        // after this view is already on screen — with the window alone as the
+        // id, that first task had already returned at the guard and nothing
+        // ever re-ran it. The board then sat empty forever: not loading, no
+        // error, just a bare header. Switching windows was the only way to get
+        // data, which is exactly how it looked in TestFlight.
+        .task(id: "\(viewModel.recentWindow.rawValue)-\(store.isPro)") {
             guard store.isPro else { return }
             await viewModel.loadRecentFormIfNeeded()
         }
@@ -125,37 +131,40 @@ struct HotColdView: View {
     }
 
     /// Thirteen metrics per side is far past what a segmented row can hold, so
-    /// this is the app's other picker shape: the same vertical popover the
-    /// season selector uses.
+    /// this is the app's other picker shape: the same plain `Menu` the season
+    /// selector and every sort control use.
     private var metricPicker: some View {
-        Button {
-            showingMetricPicker = true
+        Menu {
+            // Sections rather than inline captions: the two groups answer
+            // different questions (what the contact deserved vs what happened),
+            // and a menu section is how the platform says that.
+            Section("Statcast") {
+                metricButtons(TrendMetric.statcast(for: side))
+            }
+            Section("Standard") {
+                metricButtons(TrendMetric.standard(for: side))
+            }
         } label: {
             SavantInlinePill(systemImage: "chart.bar.fill", title: metric.label)
         }
-        .buttonStyle(.plain)
-        .popover(isPresented: $showingMetricPicker, arrowEdge: .top) {
-            let list = TrendMetric.list(for: side)
-            let standardStart = TrendMetric.standardStartIndex(for: side)
-            VerticalOptionPopover(
-                options: list.enumerated().map { index, m in
-                    .init(
-                        value: m.key,
-                        label: m.label,
-                        header: index == 0 ? "STATCAST" : (index == standardStart ? "STANDARD" : nil)
-                    )
-                },
-                selected: metric.key,
-                onSelect: { key in
-                    if let match = list.first(where: { $0.key == key }) {
-                        metric = match
-                    }
-                },
-                width: 210
-            )
-        }
+        .menuOrder(.fixed)
         .accessibilityLabel("Metric")
         .accessibilityValue(metric.label)
+    }
+
+    private func metricButtons(_ list: [TrendMetric]) -> some View {
+        ForEach(list) { option in
+            Button {
+                metric = option
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            } label: {
+                if option.key == metric.key {
+                    Label(option.label, systemImage: "checkmark")
+                } else {
+                    Text(option.label)
+                }
+            }
+        }
     }
 
     @ViewBuilder
@@ -169,6 +178,17 @@ struct HotColdView: View {
                 Label("Couldn't load recent form", systemImage: "exclamationmark.triangle")
             } description: {
                 Text(error)
+            }
+            .padding(.vertical, 32)
+        } else if ranked.isEmpty {
+            // A metric the pipeline hasn't produced a prior window for yet
+            // ranks nobody, and a bare header under a full set of controls
+            // reads as a broken screen. Name the reason and point at the
+            // metrics that do have movement.
+            ContentUnavailableView {
+                Label("No movement to rank yet", systemImage: "chart.line.flattrend.xyaxis")
+            } description: {
+                Text("\(metric.label) doesn't have enough of a prior window to compare against. Try another stat or a longer window.")
             }
             .padding(.vertical, 32)
         } else {

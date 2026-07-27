@@ -20,7 +20,6 @@ struct TeamView: View {
     @State private var lastDefaultedSortKey: String? = nil
     @State private var showingTrial = false
     @State private var trialTrigger: PaywallTrigger?
-    @State private var showingSeasonPicker = false
     @State private var rosterSide: RosterSide = .hitters
     @State private var qualifierLevel: DashboardViewModel.QualifierLevel = .all
     /// Whether the roster ranks on the season line or on a rolling window.
@@ -702,32 +701,22 @@ struct TeamView: View {
         Self.allTeamAbbrs.sorted { teamFullName($0).localizedCompare(teamFullName($1)) == .orderedAscending }
     }
 
-    /// The same pill + vertical popover the Stats and Teams tabs use. This was
-    /// the one season control still built as a `Menu`, which is what made the
-    /// year selector feel inconsistent: a wide grey menu here, a narrow list
-    /// two taps away.
+    /// The same pill + menu the Stats and Teams tabs use.
     private func navSeasonMenu(viewModel: DashboardViewModel) -> some View {
-        Button {
-            showingSeasonPicker = true
-        } label: {
-            SavantNavPill(systemImage: "calendar", title: String(viewModel.selectedSeason))
-        }
-        .buttonStyle(.plain)
-        .popover(isPresented: $showingSeasonPicker, arrowEdge: .bottom) {
-            SeasonPickerPopover(
-                seasons: viewModel.availableSeasons,
-                selected: viewModel.selectedSeason,
-                isLocked: { viewModel.isSeasonLocked($0) }
-            ) { season in
+        SeasonMenu(
+            seasons: viewModel.availableSeasons,
+            selected: viewModel.selectedSeason,
+            isLocked: { viewModel.isSeasonLocked($0) },
+            onSelect: { season in
                 if viewModel.isSeasonLocked(season) {
                     trialTrigger = .lockedSeason(season)
                 } else {
                     viewModel.selectedSeason = season
                 }
             }
+        ) {
+            SavantNavPill(systemImage: "calendar", title: String(viewModel.selectedSeason))
         }
-        .accessibilityLabel("Season")
-        .accessibilityValue(String(viewModel.selectedSeason))
     }
 
     private func priorityMetrics(for category: MetricCategory) -> [String] {

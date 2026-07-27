@@ -26,7 +26,6 @@ struct TeamsView: View {
     // Auto-enter the favorite team once per launch; popping back must not
     // re-push it, or the user can never reach the list.
     @State private var didAutoEnterFavorite = false
-    @State private var showingSeasonPicker = false
     @State private var lockedSeasonTrigger: PaywallTrigger?
 
     private static let allTeams: [String] = [
@@ -161,27 +160,20 @@ struct TeamsView: View {
     // calendar + year, sitting on the navy bar. Replaces the old in-content
     // season header card so Teams and Stats read the same.
     private var seasonMenu: some View {
-        Button {
-            showingSeasonPicker = true
-        } label: {
-            SavantNavPill(systemImage: "calendar", title: String(viewModel.selectedSeason))
-        }
-        .buttonStyle(.plain)
-        .popover(isPresented: $showingSeasonPicker, arrowEdge: .bottom) {
-            SeasonPickerPopover(
-                seasons: viewModel.availableSeasons,
-                selected: viewModel.selectedSeason,
-                isLocked: { viewModel.isSeasonLocked($0) }
-            ) { season in
+        SeasonMenu(
+            seasons: viewModel.availableSeasons,
+            selected: viewModel.selectedSeason,
+            isLocked: { viewModel.isSeasonLocked($0) },
+            onSelect: { season in
                 if viewModel.isSeasonLocked(season) {
                     lockedSeasonTrigger = .lockedSeason(season)
                 } else {
                     viewModel.selectedSeason = season
                 }
             }
+        ) {
+            SavantNavPill(systemImage: "calendar", title: String(viewModel.selectedSeason))
         }
-        .accessibilityLabel("Season")
-        .accessibilityValue(String(viewModel.selectedSeason))
     }
 
     /// Logo grid replaces the old single-column list of rows. Each tile is a

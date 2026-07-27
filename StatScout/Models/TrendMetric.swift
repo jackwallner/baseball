@@ -78,16 +78,19 @@ struct TrendMetric: Identifiable, Hashable, Sendable {
         .init(key: "gb_pct", label: "Ground-Ball%", unit: "%", decimals: 1, lowerIsBetter: false),
     ]
 
-    /// Statcast metrics first, then the traditional line, in one list — the
-    /// picker groups them with a divider rather than making the user pick a
-    /// mode before picking a stat.
-    static func list(for side: TrendSide) -> [TrendMetric] {
-        side == .pitching ? pitching + pitchingStandard : batting + battingStandard
+    static func statcast(for side: TrendSide) -> [TrendMetric] {
+        side == .pitching ? pitching : batting
     }
 
-    /// Where the standard group starts, for the divider in the picker.
-    static func standardStartIndex(for side: TrendSide) -> Int {
-        side == .pitching ? pitching.count : batting.count
+    static func standard(for side: TrendSide) -> [TrendMetric] {
+        side == .pitching ? pitchingStandard : battingStandard
+    }
+
+    /// Statcast metrics first, then the traditional line, in one list — the
+    /// picker groups them into sections rather than making the user pick a
+    /// mode before picking a stat.
+    static func list(for side: TrendSide) -> [TrendMetric] {
+        statcast(for: side) + standard(for: side)
     }
 }
 
