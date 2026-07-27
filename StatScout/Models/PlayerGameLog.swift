@@ -130,7 +130,10 @@ struct RecentFormWindow {
         return RecentFormWindow(
             label: label,
             days: days,
-            games: logs.count,
+            // Distinct dates, not rows. For one player the two are the same,
+            // but a team window holds one row per player per game, so counting
+            // rows reported a team as having played 78 games in a fortnight.
+            games: Set(logs.map(\.gameDate)).count,
             plateAppearances: pa,
             battedBallEvents: bbe,
             metrics: combined

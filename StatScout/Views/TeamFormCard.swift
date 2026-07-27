@@ -299,9 +299,22 @@ struct TeamRankingsCard: View {
 
     // MARK: - Recent
 
+    /// Anchored to the last game in the data rather than to the clock. The
+    /// pipeline runs overnight, so "now minus 15 days" against a feed that ends
+    /// two days ago silently drops the oldest days of the window and shrinks
+    /// the sample — and it disagreed with the backend rollup, which anchors to
+    /// the last game date. Start-of-day, so the hour you open the app doesn't
+    /// decide whether the earliest game counts.
     private var sideLogs: [PlayerGameLog] {
-        let cutoff = Calendar.current.date(byAdding: .day, value: -windowDays, to: .now) ?? .now
-        return logs.filter { $0.playerType == side.playerType && $0.gameDate >= cutoff }
+        let ofSide = logs.filter { $0.playerType == side.playerType }
+        guard let anchor = ofSide.map(\.gameDate).max() else { return [] }
+        let calendar = Calendar.current
+        let start = calendar.date(
+            byAdding: .day,
+            value: -(windowDays - 1),
+            to: calendar.startOfDay(for: anchor)
+        ) ?? anchor
+        return ofSide.filter { $0.gameDate >= start }
     }
 
     private var recentWindow: RecentFormWindow? {
@@ -537,8 +550,10 @@ struct TeamRankingsCard: View {
         loading = true
         loadError = nil
         do {
-            // 30 days back covers the largest window — 7/15 are derived client-side.
-            let since = Calendar.current.date(byAdding: .day, value: -30, to: .now) ?? .now
+            // 30 days back covers the largest window — 7/15 are derived
+            // client-side. The extra week absorbs pipeline lag: the windows
+            // anchor to the last game in the data, which can trail today.
+            let since = Calendar.current.date(byAdding: .day, value: -37, to: .now) ?? .now
             logs = try await fetch(team, season, since)
         } catch {
             loadError = "Couldn't load team form. Pull to refresh."
