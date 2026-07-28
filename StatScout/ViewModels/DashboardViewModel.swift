@@ -226,10 +226,6 @@ final class DashboardViewModel {
     /// The window the Stats leaderboard and trend arrows read from.
     var recentWindow: RecentWindow = .fortnight
 
-    /// True while the leaderboard is showing recent form rather than season
-    /// totals. Pro-gated at the call site, free users get a blurred teaser.
-    var showingRecent = false
-
     func recentForm(for playerId: Int, window: RecentWindow? = nil) -> RecentForm? {
         recentFormByWindow[(window ?? recentWindow).rawValue]?[playerId]
     }
