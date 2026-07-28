@@ -1,1 +1,5 @@
-Bug fixes and performance improvements across stats, compare, and team views.
+Újdonságok a StatScoutban:
+• A Trends 7, 15 és 30 nap alapján rangsorolja a javuló és visszaeső játékosokat.
+• Hasonlíts össze két játékost vagy szezont egymás mellett.
+• Rendezd minden klub haladó és hagyományos statisztikáit.
+• Pontosabb rangsorok, helyes kétirányú játékosadatok és jobb mezőnyjátékos-küszöbök.

@@ -1,1 +1,5 @@
-Bug fixes and performance improvements across stats, compare, and team views.
+StatScoutの新機能：
+• Trendsで直近7日、15日、30日の好調・不調選手をランキング。
+• 好きな2選手または2シーズンを並べて比較。
+• 全30球団のセイバーメトリクスと従来指標を並べ替え。
+• ランキング精度、二刀流選手の成績表示、守備の規定到達判定を改善。

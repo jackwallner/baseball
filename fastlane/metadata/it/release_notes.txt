@@ -1,1 +1,5 @@
-Bug fixes and performance improvements across stats, compare, and team views.
+Novità in StatScout:
+• Trends classifica chi sale o scende negli ultimi 7, 15 e 30 giorni.
+• Confronta due giocatori o stagioni fianco a fianco.
+• Ordina statistiche avanzate e tradizionali di ogni club.
+• Classifiche più precise, righe corrette per i giocatori two-way e migliori requisiti difensivi.

@@ -1,1 +1,5 @@
-Bug fixes and performance improvements across stats, compare, and team views.
+StatScout 新功能：
+• Trends 依最近 7、15 與 30 天的升溫或降溫幅度為球員排名。
+• 任意兩名球員或兩個賽季皆可並排比較。
+• 依進階或傳統數據排序全部 30 支球隊。
+• 排名更準確，二刀流球員數據列與守備資格判定也已改善。

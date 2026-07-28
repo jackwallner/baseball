@@ -1,1 +1,5 @@
-Bug fixes and performance improvements across stats, compare, and team views.
+Novo u StatScoutu:
+• Trends rangira tko napreduje ili pada tijekom 7, 15 i 30 dana.
+• Usporedite bilo koja dva igrača ili sezone.
+• Sortirajte napredne i tradicionalne statistike svakog kluba.
+• Preciznije ljestvice, ispravne linije dvosmjernih igrača i bolji kriteriji za obranu.

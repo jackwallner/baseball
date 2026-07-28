@@ -642,7 +642,7 @@ struct PlusDirectCTA: View {
             }
             .buttonStyle(.plain)
             .disabled(isPurchasing)
-            .accessibilityLabel(store.paywallBlurCTA)
+            .accessibilityLabel(store.directCTALabel(for: trigger))
 
             // Full auto-renew terms sit beside the purchase point, because this
             // button *is* the purchase point now (Apple 3.1.2).
@@ -690,7 +690,7 @@ struct PlusDirectCTA: View {
                 } else {
                     Image(systemName: "crown.fill")
                         .font(.system(size: 11))
-                    Text(store.paywallBlurCTA)
+                    Text(store.directCTALabel(for: trigger))
                         .font(SavantType.bodyBold)
                 }
             }
@@ -701,7 +701,7 @@ struct PlusDirectCTA: View {
             .clipShape(Capsule())
         case .bar:
             ZStack {
-                Text(store.paywallBlurCTA)
+                Text(store.directCTALabel(for: trigger))
                     .font(SavantType.bodyBold)
                     .opacity(isPurchasing ? 0 : 1)
                 if isPurchasing {

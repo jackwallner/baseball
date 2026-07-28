@@ -1,1 +1,5 @@
-Bug fixes and performance improvements across stats, compare, and team views.
+Nytt i StatScout:
+• Trends rangerer hvem som blir varmere eller kaldere over 7, 15 og 30 dager.
+• Sammenlign to spillere eller sesonger side ved side.
+• Sorter avansert og tradisjonell statistikk for alle klubber.
+• Mer presise rangeringer, riktige linjer for two-way-spillere og bedre fieldingkrav.

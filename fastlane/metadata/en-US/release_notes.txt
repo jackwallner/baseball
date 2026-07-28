@@ -1,1 +1,5 @@
-Bug fixes and performance improvements across stats, compare, and team views.
+New in StatScout:
+• Trends ranks who’s heating up or cooling off over 7, 15, and 30 days.
+• Compare any two players or seasons side by side.
+• Sort advanced and traditional stats across every club.
+• More accurate rankings, two-way player lines, and fielding qualifiers.
