@@ -1,1 +1,1 @@
-savant,beisbol,estadística,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs,fantasy,mètriques
+savant,beisbol,estadística,wrc,xwoba,oaa,jugador,sprint,velo,scout,strike,dfs,fantasy,mètriques

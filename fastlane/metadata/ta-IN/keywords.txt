@@ -1,1 +1,1 @@
-xwoba,oaa,wrc,wrcplus,barrel,exit,velocity,hitting,pitching,fielding,metrics,analytics,hardhit,xslg
+xwoba,oaa,wrc,wrcplus,velocity,hitting,pitching,fielding,metrics,analytics,புள்ளிவிவரம்,ஃபேண்டசி

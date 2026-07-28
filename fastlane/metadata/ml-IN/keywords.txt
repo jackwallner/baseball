@@ -1,1 +1,1 @@
-savant,ബേസ്ബോൾ,സ്ഥിതിവിവരം,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs,fantasy,റാങ്കിംഗ്
+savant,ബേസ്ബോൾ,സ്ഥിതിവിവരം,wrc,xwoba,oaa,കളിക്കാരൻ,sprint,velo,scout,strike,dfs,fantasy,റാങ്കിംഗ്
