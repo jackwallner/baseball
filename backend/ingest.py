@@ -5,6 +5,7 @@ This version fetches from multiple pybaseball endpoints to get actual stat value
 to display alongside percentiles (e.g., "95.4 mph · 100th percentile").
 """
 
+import io
 import logging
 import os
 import sys
@@ -210,6 +211,28 @@ def position_from_row(row: pd.Series) -> str:
     return ""
 
 
+SAVANT_LEADERBOARD_URL = "https://baseballsavant.mlb.com/leaderboard/{name}"
+
+
+def savant_leaderboard_csv(name: str, params: dict[str, Any]) -> pd.DataFrame:
+    """One of Savant's leaderboard CSV exports, as a DataFrame.
+
+    pybaseball wraps most of these, but not bat tracking or arm strength, and
+    those are the two metrics the app was showing a percentile for with no
+    number beside it. The export is the same endpoint the leaderboard page's
+    own "download csv" link uses.
+    """
+    query = {**params, "csv": "true"}
+    response = requests.get(
+        SAVANT_LEADERBOARD_URL.format(name=name),
+        params=query,
+        headers={"User-Agent": "statscout-ingest"},
+        timeout=60,
+    )
+    response.raise_for_status()
+    return pd.read_csv(io.StringIO(response.content.decode("utf-8-sig")))
+
+
 class ActualValueStore:
     """Pre-fetches and stores all actual values for efficient lookup."""
 
@@ -217,6 +240,27 @@ class ActualValueStore:
         self.season = season
         self._data: dict[str, dict[int, dict[str, Any]]] = {}
         self._prefetch_all()
+
+    def _backfill(self, bucket: str, df: pd.DataFrame, id_col: str, columns: dict[str, str]) -> int:
+        """Add rows for players the qualified pull didn't cover.
+
+        The qualified thresholds keep the *ranking* honest, but a player Savant
+        publishes a percentile for and we hold no value for renders as a bare
+        percentile in the app. Savant's own player page shows him a number, so
+        this fills those gaps from the unqualified export without touching any
+        player the qualified pull already answered for.
+        """
+        target = self._data.setdefault(bucket, {})
+        added = 0
+        df = df.copy()
+        df[id_col] = pd.to_numeric(df[id_col], errors="coerce")
+        for _, row in df.iterrows():
+            pid = int(row[id_col]) if pd.notna(row[id_col]) else None
+            if not pid or pid in target:
+                continue
+            target[pid] = {dest: row.get(src) for dest, src in columns.items()}
+            added += 1
+        return added
 
     def _prefetch_all(self):
         """Prefetch all actual value data from all sources."""
@@ -254,7 +298,12 @@ class ActualValueStore:
                     self._data["batter_exitvelo"][pid] = {
                         "avg_hit_speed": row.get("avg_hit_speed"),
                         "brl_percent": row.get("brl_percent"),
-                        "hard_hit_percent": row.get("ev95percent"),
+                        # Keyed by Savant's own column name. It used to be
+                        # stored as "hard_hit_percent" while the reader asked
+                        # for "ev95percent", so every batter's Hard-Hit% came
+                        # back blank while pitchers' (stored under the raw name)
+                        # worked.
+                        "ev95percent": row.get("ev95percent"),
                         "max_hit_speed": row.get("max_hit_speed"),
                         "anglesweetspotpercent": row.get("anglesweetspotpercent"),
                     }
@@ -262,6 +311,25 @@ class ActualValueStore:
         except Exception as e:
             logger.warning("Failed to load batter exit velo: %s", e)
             self._data["batter_exitvelo"] = {}
+
+        # Everyone else with tracked contact, so a percentile Savant publishes
+        # never renders without the number beside it.
+        try:
+            added = self._backfill(
+                "batter_exitvelo",
+                statcast_batter_exitvelo_barrels(self.season, minBBE=1),
+                "player_id",
+                {
+                    "avg_hit_speed": "avg_hit_speed",
+                    "brl_percent": "brl_percent",
+                    "ev95percent": "ev95percent",
+                    "max_hit_speed": "max_hit_speed",
+                    "anglesweetspotpercent": "anglesweetspotpercent",
+                },
+            )
+            logger.info("Backfilled %d sub-qualifier batter exit velo rows", added)
+        except Exception as e:
+            logger.warning("Failed to backfill batter exit velo: %s", e)
 
         # Sprint speed
         try:
@@ -281,6 +349,17 @@ class ActualValueStore:
             logger.warning("Failed to load sprint speed: %s", e)
             self._data["sprint_speed"] = {}
 
+        try:
+            added = self._backfill(
+                "sprint_speed",
+                statcast_sprint_speed(self.season, min_opp=1),
+                "player_id",
+                {"sprint_speed": "sprint_speed", "hp_to_1b": "hp_to_1b"},
+            )
+            logger.info("Backfilled %d sub-qualifier sprint speed rows", added)
+        except Exception as e:
+            logger.warning("Failed to backfill sprint speed: %s", e)
+
         # Outs above average (fielding)
         try:
             df = statcast_outs_above_average(self.season, pos="all", min_att="q")
@@ -297,6 +376,48 @@ class ActualValueStore:
         except Exception as e:
             logger.warning("Failed to load OAA: %s", e)
             self._data["oaa"] = {}
+
+        # Bat tracking (Squared-Up%). pybaseball has no wrapper for this
+        # leaderboard, so it comes off Savant's CSV export directly.
+        # `squared_up_per_swing` is the one that reproduces Savant's
+        # Squared-Up% percentile (Spearman 0.9998 against the percentiles we
+        # already store; per-contact comes out at 0.895 and is a different
+        # stat).
+        try:
+            df = savant_leaderboard_csv(
+                "bat-tracking",
+                {"type": "batter", "year": self.season, "minSwings": "q", "minGroupSwings": "1"},
+            )
+            self._data["bat_tracking"] = {}
+            for _, row in df.iterrows():
+                pid = int(row["id"]) if pd.notna(row.get("id")) else None
+                if pid:
+                    self._data["bat_tracking"][pid] = {
+                        "squared_up_per_swing": row.get("squared_up_per_swing"),
+                    }
+            logger.info("Loaded %d bat-tracking rows", len(self._data["bat_tracking"]))
+        except Exception as e:
+            logger.warning("Failed to load bat tracking: %s", e)
+            self._data["bat_tracking"] = {}
+
+        # Arm strength. Same story: no pybaseball wrapper, and `arm_overall`
+        # (average throw velocity) is what Savant ranks, not max.
+        try:
+            df = savant_leaderboard_csv(
+                "arm-strength",
+                {"type": "player", "year": self.season, "minThrows": "q"},
+            )
+            self._data["arm_strength"] = {}
+            for _, row in df.iterrows():
+                pid = int(row["player_id"]) if pd.notna(row.get("player_id")) else None
+                if pid:
+                    self._data["arm_strength"][pid] = {
+                        "arm_overall": row.get("arm_overall"),
+                    }
+            logger.info("Loaded %d arm-strength rows", len(self._data["arm_strength"]))
+        except Exception as e:
+            logger.warning("Failed to load arm strength: %s", e)
+            self._data["arm_strength"] = {}
 
         # Pitcher expected stats
         try:
@@ -335,6 +456,22 @@ class ActualValueStore:
         except Exception as e:
             logger.warning("Failed to load pitcher exit velo: %s", e)
             self._data["pitcher_exitvelo"] = {}
+
+        try:
+            added = self._backfill(
+                "pitcher_exitvelo",
+                statcast_pitcher_exitvelo_barrels(self.season, minBBE=1),
+                "player_id",
+                {
+                    "avg_hit_speed": "avg_hit_speed",
+                    "brl_percent": "brl_percent",
+                    "ev95percent": "ev95percent",
+                    "max_hit_speed": "max_hit_speed",
+                },
+            )
+            logger.info("Backfilled %d sub-qualifier pitcher exit velo rows", added)
+        except Exception as e:
+            logger.warning("Failed to backfill pitcher exit velo: %s", e)
 
         # Pitcher arsenal
         try:
@@ -392,6 +529,8 @@ class ActualValueStore:
                         "fastball_spin": row.get("fastball_spin"),
                         "breaking_spin": row.get("breaking_spin"),
                         "offspeed_spin": row.get("offspeed_spin"),
+                        "whiff_percent": row.get("whiff_percent"),
+                        "chase_percent": row.get("chase_percent"),
                     }
                 logger.info("Loaded %d pitcher aggregated stats", len(self._data["pitcher_agg"]))
         except Exception as e:
@@ -517,16 +656,36 @@ class ActualValueStore:
                         value = f"{v:.2f}"
                         unit = " ft"
 
+            elif metric_key == "squared_up_rate":
+                if player_id in self._data.get("bat_tracking", {}):
+                    v = self._data["bat_tracking"][player_id].get("squared_up_per_swing")
+                    if pd.notna(v):
+                        # Savant exports this as a 0-1 rate and displays it as
+                        # a percentage.
+                        value = f"{float(v) * 100:.1f}"
+                        unit = "%"
+
+            elif metric_key == "arm_strength":
+                if player_id in self._data.get("arm_strength", {}):
+                    v = self._data["arm_strength"][player_id].get("arm_overall")
+                    if pd.notna(v):
+                        value = f"{float(v):.1f}"
+                        unit = " mph"
+
+            # Whiff% and Chase% exist on both sides of the ball, and the
+            # aggregator now computes both from the same pitch frame.
             elif metric_key == "whiff_percent":
-                if player_id in self._data.get("batter_agg", {}):
-                    v = self._data["batter_agg"][player_id].get("whiff_percent")
+                src = "pitcher_agg" if player_type == "pitcher" else "batter_agg"
+                if player_id in self._data.get(src, {}):
+                    v = self._data[src][player_id].get("whiff_percent")
                     if pd.notna(v):
                         value = f"{v:.1f}"
                         unit = "%"
 
             elif metric_key == "chase_percent":
-                if player_id in self._data.get("batter_agg", {}):
-                    v = self._data["batter_agg"][player_id].get("chase_percent")
+                src = "pitcher_agg" if player_type == "pitcher" else "batter_agg"
+                if player_id in self._data.get(src, {}):
+                    v = self._data[src][player_id].get("chase_percent")
                     if pd.notna(v):
                         value = f"{v:.1f}"
                         unit = "%"

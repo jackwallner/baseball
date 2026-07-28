@@ -3,10 +3,9 @@ import SwiftUI
 struct DashboardView: View {
     @EnvironmentObject private var store: StoreService
     @Bindable var viewModel: DashboardViewModel
-    /// Advanced / Standard / Best-Worst, when this board is being shown inside
-    /// `StatsView`. It rides in the control row below rather than in the nav
-    /// bar, which has no width left for it.
-    var statsMode: Binding<StatsMode>? = nil
+    /// Set when this board is hosted by `StatsView`, which owns the choice of
+    /// board and therefore has to be reachable from this board's own controls.
+    var boardBindings: StatsBoardBindings? = nil
     @State private var showingAbout = false
     @State private var paywallTrigger: PaywallTrigger?
     @State private var isSearching = false
@@ -123,90 +122,17 @@ struct DashboardView: View {
         .padding(.top, 8)
     }
 
-    // Single button that hosts every secondary control, qualifier scope plus
-    // the active sort metric and direction. Keeps the header to two visible
-    // rows while still putting the controls one tap away.
-    private var filtersMenu: some View {
-        Menu {
-            Section("Sort by") {
-                ForEach(viewModel.availableSortMetrics, id: \.self) { metric in
-                    Button {
-                        viewModel.setUserSortMetric(metric)
-                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                    } label: {
-                        if metric == viewModel.currentSortMetric {
-                            Label(metric, systemImage: "checkmark")
-                        } else {
-                            Text(metric)
-                        }
-                    }
-                }
-            }
-
-            Section("Direction") {
-                Button {
-                    if !viewModel.sortDescending { viewModel.toggleSortDirection() }
-                } label: {
-                    if viewModel.sortDescending {
-                        Label("Highest first", systemImage: "checkmark")
-                    } else {
-                        Text("Highest first")
-                    }
-                }
-                Button {
-                    if viewModel.sortDescending { viewModel.toggleSortDirection() }
-                } label: {
-                    if !viewModel.sortDescending {
-                        Label("Lowest first", systemImage: "checkmark")
-                    } else {
-                        Text("Lowest first")
-                    }
-                }
-            }
-
-            Section("Qualifier") {
-                ForEach(DashboardViewModel.QualifierLevel.allCases) { level in
-                    Button {
-                        viewModel.qualifierLevel = level
-                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                    } label: {
-                        if level == viewModel.qualifierLevel {
-                            Label("\(level.rawValue) · \(level.description)", systemImage: "checkmark")
-                        } else {
-                            Text("\(level.rawValue) · \(level.description)")
-                        }
-                    }
-                }
-            }
-        } label: {
-            SavantChip(
-                title: "Filters",
-                systemImage: "line.3.horizontal.decrease.circle",
-                trailing: .chevron,
-                isActive: viewModel.qualifierLevel != .qualified
-            )
-        }
-        .menuOrder(.fixed)
-        .accessibilityLabel("Filters")
-    }
-
-    // Compact sort chip on the left (tap to flip direction), then a search
-    // toggle and the Filters menu trailing. The column header in the table
-    // acts as the live sort indicator, so the chip stays terse, no
-    // "Sorted by"/"Highest first" narration.
+    // Sort chip (tap to flip direction), search, and the View menu that holds
+    // everything else. Three controls, so this row fits a 375pt phone without
+    // scrolling; the scroller stays as a safety net for a long metric name on
+    // the narrowest hardware rather than as the normal state.
+    //
+    // The column header in the table acts as the live sort indicator, so the
+    // chip stays terse, no "Sorted by"/"Highest first" narration.
     private var activeSortChip: some View {
-        // Two zones, one gap size, in reading order. The variable-width chips
-        // (mode, sorted metric, position) scroll horizontally, because a long
-        // metric name alone can outrun a 402pt phone. Search and Filters are
-        // pinned outside that scroller on the trailing edge: when everything
-        // lived in one scroll view, a long sort metric pushed Filters off the
-        // right and it looked like the app had lost its filter control.
         HStack(spacing: 8) {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
-                    if let statsMode {
-                        StatsModeMenu(mode: statsMode)
-                    }
                     Button {
                         viewModel.toggleSortDirection()
                         UIImpactFeedbackGenerator(style: .light).impactOccurred()
@@ -219,7 +145,11 @@ struct DashboardView: View {
                     .buttonStyle(.plain)
                     .accessibilityLabel("Sorted by \(viewModel.currentSortMetric ?? viewModel.sortLabel), \(viewModel.sortDescending ? "highest first" : "lowest first")")
                     .accessibilityHint("Tap to flip sort direction")
-                    if viewModel.positionFilterApplies {
+                    // Position moved into the View menu, but an active filter
+                    // that only shows up inside a closed menu is an invisible
+                    // filter, so the chip comes back as its own indicator once
+                    // the board is actually narrowed.
+                    if viewModel.positionFilterApplies, viewModel.positionFilter != .all {
                         positionMenu
                     }
                 }
@@ -245,17 +175,22 @@ struct DashboardView: View {
             )
 
             searchToggle
-            filtersMenu
+            if let boardBindings {
+                StatsViewMenu(
+                    viewModel: viewModel,
+                    board: boardBindings.$board,
+                    standardStat: boardBindings.$standardStat,
+                    sortDescending: boardBindings.$standardSortDescending
+                )
+            }
         }
         .padding(.trailing, 12)
         .frame(height: SavantControl.height + 2)
         .padding(.top, 8)
     }
 
-    /// Narrows the board to one position, or to the infield / outfield as a
-    /// group. Sits beside the sort chip because it answers the same shape of
-    /// question, which slice of the league am I ranking, where the trailing
-    /// chips are modes and search.
+    /// The active position filter, as a chip you can tap to change or clear.
+    /// Only drawn when a filter is on; picking one starts in the View menu.
     ///
     /// Hidden on the pitching board, where every player is a P.
     private var positionMenu: some View {
@@ -277,7 +212,7 @@ struct DashboardView: View {
                 title: viewModel.positionFilter.chipLabel,
                 systemImage: "figure.baseball",
                 trailing: .chevron,
-                isActive: viewModel.positionFilter != .all
+                isActive: true
             )
         }
         .menuOrder(.fixed)

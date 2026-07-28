@@ -190,21 +190,36 @@ def compute_batter_stats(df: pd.DataFrame) -> pd.DataFrame:
 
 def compute_pitcher_stats(df: pd.DataFrame) -> pd.DataFrame:
     """Compute pitcher statistics from pitch data.
-    
+
     Returns DataFrame with columns:
     - pitcher (player_id)
     - avg_spin_rate (overall)
     - fastball_spin (4-seam, sinker)
     - breaking_spin (slider, curve, sweeper)
     - changeup_spin
+    - whiff_percent, chase_percent (the pitcher's side of the same two rates
+      the batter frame already reports; Savant publishes a percentile for both
+      and without these the app had a ranking with no number beside it)
     """
     logger.info("Computing pitcher statistics...")
-    
+
     # Map pitch names to categories
     fastball_types = ['4-Seam Fastball', 'Sinker', 'Fastball']
     breaking_types = ['Slider', 'Curveball', 'Sweeper', 'Knuckle Curve']
     offspeed_types = ['Changeup', 'Split-Finger']
-    
+
+    # Same definitions the batter pass uses, recomputed here because
+    # compute_batter_stats may not have run on this frame.
+    swing_outcomes = [
+        'hit_into_play', 'foul', 'swinging_strike',
+        'foul_tip', 'swinging_strike_blocked', 'foul_bunt'
+    ]
+    whiff_outcomes = ['swinging_strike', 'swinging_strike_blocked']
+    df['is_swing'] = df['description'].isin(swing_outcomes)
+    df['is_whiff'] = df['description'].isin(whiff_outcomes)
+    df['is_outside'] = df['zone'].isin([11, 12, 13, 14])
+    df['is_chase'] = df['is_swing'] & df['is_outside']
+
     def categorize_pitch(pitch_name):
         if not isinstance(pitch_name, str):
             return 'Other'
@@ -233,13 +248,26 @@ def compute_pitcher_stats(df: pd.DataFrame) -> pd.DataFrame:
         fb_spin = fb_spins['release_spin_rate'].mean() if len(fb_spins) > 0 else None
         breaking_spin = breaking_spins['release_spin_rate'].mean() if len(breaking_spins) > 0 else None
         offspeed_spin = offspeed_spins['release_spin_rate'].mean() if len(offspeed_spins) > 0 else None
-        
+
+        # Plate discipline the pitcher induced rather than showed: the
+        # denominators are swings taken against him and pitches he threw
+        # outside the zone.
+        total_swings = group['is_swing'].sum()
+        total_whiffs = group['is_whiff'].sum()
+        pitches_outside = group['is_outside'].sum()
+        total_chases = group['is_chase'].sum()
+
+        whiff_percent = (total_whiffs / total_swings * 100) if total_swings > 0 else None
+        chase_percent = (total_chases / pitches_outside * 100) if pitches_outside > 0 else None
+
         pitcher_stats.append({
             'player_id': int(pitcher_id),
             'avg_spin_rate': round(avg_spin, 0) if pd.notna(avg_spin) else None,
             'fastball_spin': round(fb_spin, 0) if pd.notna(fb_spin) else None,
             'breaking_spin': round(breaking_spin, 0) if pd.notna(breaking_spin) else None,
             'offspeed_spin': round(offspeed_spin, 0) if pd.notna(offspeed_spin) else None,
+            'whiff_percent': round(whiff_percent, 1) if whiff_percent is not None else None,
+            'chase_percent': round(chase_percent, 1) if chase_percent is not None else None,
             'total_pitches': len(group),
         })
     

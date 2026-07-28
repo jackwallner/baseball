@@ -26,16 +26,14 @@ struct HotColdView: View {
     @State private var favorites = FavoritesStore.shared
     @State private var showingCold = false
     @State private var side: TrendSide = .batting
-    @State private var statMode: TrendStatMode = .advanced
     @State private var metric: TrendMetric = TrendMetric.batting[0]
 
-    /// The metrics the picker offers, narrowed by the Advanced / Standard
-    /// switch. Every other board in the app splits its stats this way (the
-    /// player page, the team page, the Stats tab), and Trends was the one place
-    /// where the two vocabularies were mixed into a single long menu.
-    private var metricOptions: [TrendMetric] {
-        statMode == .advanced ? TrendMetric.statcast(for: side) : TrendMetric.standard(for: side)
-    }
+    /// Every metric this side can be ranked by, Statcast and traditional in one
+    /// list. The picker groups them into sections, which is a cheaper way to
+    /// say the same thing than a mode switch you have to set before you can
+    /// pick a stat: the vocabulary follows from the stat, not the other way
+    /// round.
+    private var metricOptions: [TrendMetric] { TrendMetric.list(for: side) }
 
     private var forms: [RecentForm] {
         Array(viewModel.recentFormByWindow[viewModel.recentWindow.rawValue]?.values ?? [:].values)
@@ -111,28 +109,16 @@ struct HotColdView: View {
             // metric rather than an empty board.
             metric = metricOptions[0]
         }
-        .onChange(of: statMode) { _, _ in
-            metric = metricOptions[0]
-        }
     }
 
     private var header: some View {
         VStack(spacing: 8) {
-            // Which side of the ball, and which vocabulary. Both narrow the
-            // stat list below them, so they sit above it.
-            SavantPickerRow(spacing: 8) {
-                SavantSegmented(
-                    segments: TrendSide.allCases.map { .init(value: $0, label: $0.label) },
-                    selection: $side
-                )
-                .segmentCount(TrendSide.allCases.count)
-
-                SavantSegmented(
-                    segments: TrendStatMode.allCases.map { .init(value: $0, label: $0.label) },
-                    selection: $statMode
-                )
-                .segmentCount(TrendStatMode.allCases.count)
-            }
+            // Which side of the ball. It narrows the stat list below it, so it
+            // sits above it.
+            SavantSegmented(
+                segments: TrendSide.allCases.map { .init(value: $0, label: $0.label) },
+                selection: $side
+            )
 
             HStack(spacing: 8) {
                 metricPicker
@@ -165,7 +151,7 @@ struct HotColdView: View {
             // games the player actually appeared in inside it. Two numbers of
             // different kinds sat next to each other with nothing saying which
             // was which, so the picker read as a game count.
-            Text("Calendar days, not games — G is games played in the window.")
+            Text("Calendar days, not games. G is games played in the window.")
                 .font(SavantType.micro)
                 .tracking(0.2)
                 .foregroundStyle(SavantPalette.inkTertiary)
@@ -176,13 +162,18 @@ struct HotColdView: View {
         .padding(.top, 12)
     }
 
-    /// Thirteen Statcast metrics per side is far past what a segmented row can
-    /// hold, so this is the app's other picker shape: the same plain `Menu` the
-    /// season selector and every sort control use. The Advanced / Standard
-    /// switch above decides which family it lists.
+    /// Seventeen metrics per side is far past what a segmented row can hold, so
+    /// this is the app's other picker shape: the same plain `Menu` the season
+    /// selector and every sort control use, with the two vocabularies as
+    /// sections inside it.
     private var metricPicker: some View {
         Menu {
-            metricButtons(metricOptions)
+            Section("Statcast") {
+                metricButtons(TrendMetric.statcast(for: side))
+            }
+            Section("Standard") {
+                metricButtons(TrendMetric.standard(for: side))
+            }
         } label: {
             SavantInlinePill(systemImage: "chart.bar.fill", title: metric.label)
         }
@@ -213,10 +204,19 @@ struct HotColdView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 40)
         } else if let error = viewModel.recentFormError, forms.isEmpty {
+            // This board doesn't scroll far enough to pull-to-refresh, so the
+            // way back from an error is a button rather than a gesture the
+            // copy has to describe.
             ContentUnavailableView {
                 Label("Couldn't load recent form", systemImage: "exclamationmark.triangle")
             } description: {
                 Text(error)
+            } actions: {
+                Button("Try Again") {
+                    Task { await viewModel.reloadRecentForm() }
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(SavantPalette.savantRed)
             }
             .padding(.vertical, 32)
         } else if ranked.isEmpty {
@@ -288,7 +288,7 @@ struct HotColdView: View {
         // not the screen edge, so this is the pill's height above the inset
         // plus a hair, the page doesn't scroll, so unlike every other screen
         // there's nothing to gain from running underneath it.
-        .padding(.bottom, 46)
+        .padding(.bottom, 56)
     }
 
     /// Row one of the locked board: the genuine leader once the rollup lands,

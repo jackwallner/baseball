@@ -94,18 +94,6 @@ struct TrendMetric: Identifiable, Hashable, Sendable {
     }
 }
 
-/// Which vocabulary the Trends board is ranking in: the expected-stats line or
-/// the traditional one. The same split the Stats tab, the player page and the
-/// team page all use, so a user who has picked "Standard" once knows what it
-/// means everywhere.
-enum TrendStatMode: String, CaseIterable, Identifiable, Sendable {
-    case advanced
-    case standard
-
-    var id: String { rawValue }
-    var label: String { self == .advanced ? "Advanced" : "Standard" }
-}
-
 /// Which side of the ball the Trends board is ranking. Mixing them was never an
 /// option: the same key means opposite things to a hitter and a pitcher.
 enum TrendSide: String, CaseIterable, Identifiable, Sendable {

@@ -239,6 +239,16 @@ final class DashboardViewModel {
         recentFormByWindow[recentWindow.rawValue]?.values.compactMap(\.asOf).max()
     }
 
+    /// Drops the cached window and fetches it again. What the Trends board's
+    /// "Try Again" calls: `loadRecentFormIfNeeded` returns early on a window
+    /// it's already holding, which after a failure is nothing at all.
+    func reloadRecentForm(window: RecentWindow? = nil) async {
+        let target = window ?? recentWindow
+        recentFormByWindow.removeValue(forKey: target.rawValue)
+        recentFormError = nil
+        await loadRecentFormIfNeeded(window: target)
+    }
+
     func loadRecentFormIfNeeded(window: RecentWindow? = nil) async {
         let target = window ?? recentWindow
         // Season changed under us, the cache describes a different year.
@@ -266,7 +276,12 @@ final class DashboardViewModel {
             }
             recentFormByWindow[target.rawValue] = byPlayer
         } catch {
-            recentFormError = "Couldn't load recent form. Pull to refresh."
+            // A window the user has already flipped away from cancels its own
+            // fetch. Reporting that as a failure is how tapping quickly around
+            // the Trends board produced an error on a board that was fine.
+            if !isTaskCancellation(error) {
+                recentFormError = "Couldn't load recent form."
+            }
         }
         recentFormLoadingWindows.remove(target.rawValue)
     }

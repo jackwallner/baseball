@@ -548,3 +548,77 @@ def test_fielding_line_is_its_own_category():
     fielding = _by_category(rows, "fielding")
     assert fielding["E"] == "1"
     assert fielding["FLD%"] == "0.950"
+
+
+class TestValueSourcesForPercentileOnlyMetrics:
+    """The metrics that used to ship a ranking with no number beside it.
+
+    Each of these rendered as a bare "PERCENTILE" cell on the comparison
+    screen and as a column of dashes on its own leaderboard.
+    """
+
+    def _store(self, data):
+        store = ingest.ActualValueStore.__new__(ingest.ActualValueStore)
+        store.season = 2026
+        store._data = data
+        return store
+
+    def test_batter_hard_hit_reads_savants_own_column_name(self):
+        # The prefetch stored ev95percent under a renamed key while the reader
+        # asked for the raw name, so every batter came back blank.
+        store = self._store({"batter_exitvelo": {592450: {"ev95percent": 57.3}}})
+        assert store.get_value(592450, "hard_hit_percent", "batter") == "57.3%"
+
+    def test_squared_up_is_scaled_from_savants_zero_to_one_rate(self):
+        store = self._store({"bat_tracking": {691406: {"squared_up_per_swing": 0.24174}}})
+        assert store.get_value(691406, "squared_up_rate", "batter") == "24.2%"
+
+    def test_arm_strength_uses_average_not_max_throw(self):
+        store = self._store({"arm_strength": {695506: {"arm_overall": 98.5}}})
+        assert store.get_value(695506, "arm_strength", "batter") == "98.5 mph"
+
+    def test_plate_discipline_resolves_per_side(self):
+        store = self._store({
+            "batter_agg": {592450: {"whiff_percent": 28.4, "chase_percent": 21.1}},
+            "pitcher_agg": {694973: {"whiff_percent": 34.2, "chase_percent": 32.8}},
+        })
+        assert store.get_value(592450, "whiff_percent", "batter") == "28.4%"
+        assert store.get_value(694973, "whiff_percent", "pitcher") == "34.2%"
+        assert store.get_value(694973, "chase_percent", "pitcher") == "32.8%"
+
+    def test_backfill_never_overwrites_a_qualified_row(self):
+        store = self._store({"sprint_speed": {1: {"sprint_speed": 28.8}}})
+        added = store._backfill(
+            "sprint_speed",
+            pd.DataFrame([
+                {"player_id": 1, "sprint_speed": 99.9, "hp_to_1b": 4.0},
+                {"player_id": 2, "sprint_speed": 26.1, "hp_to_1b": 4.5},
+            ]),
+            "player_id",
+            {"sprint_speed": "sprint_speed", "hp_to_1b": "hp_to_1b"},
+        )
+        assert added == 1
+        assert store._data["sprint_speed"][1]["sprint_speed"] == 28.8
+        assert store.get_value(2, "sprint_speed", "batter") == "26.1 ft/s"
+
+
+class TestPitcherPlateDiscipline:
+    def test_whiff_and_chase_are_computed_for_pitchers(self):
+        from statcast_aggregator import compute_pitcher_stats
+
+        # Four pitches to one pitcher: a swinging strike in the zone, a foul in
+        # the zone, a chase out of the zone, and a take out of the zone.
+        df = pd.DataFrame([
+            {"pitcher": 1, "description": "swinging_strike", "zone": 5,
+             "pitch_name": "4-Seam Fastball", "release_spin_rate": 2400},
+            {"pitcher": 1, "description": "foul", "zone": 5,
+             "pitch_name": "4-Seam Fastball", "release_spin_rate": 2400},
+            {"pitcher": 1, "description": "foul", "zone": 13,
+             "pitch_name": "Slider", "release_spin_rate": 2600},
+            {"pitcher": 1, "description": "ball", "zone": 13,
+             "pitch_name": "Slider", "release_spin_rate": 2600},
+        ])
+        row = compute_pitcher_stats(df).iloc[0]
+        # One whiff on three swings; one chase on two pitches outside.
+        assert row["whiff_percent"] == pytest.approx(33.3, abs=0.1)
+        assert row["chase_percent"] == pytest.approx(50.0)

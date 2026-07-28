@@ -6,9 +6,8 @@ Pulls pitch-level data from Baseball Savant via pybaseball.statcast(),
 aggregates to per-player-per-game (separate rows for batter / pitcher
 contributions), and upserts into Supabase public.player_game_logs.
 
-Incremental by default: starts from the day after the latest game_date
-already in the DB for the season. Pass --full to re-ingest the whole
-season.
+Incremental by default: starts from the latest game_date already in the DB for
+the season and runs to yesterday. Pass --full to re-ingest the whole season.
 
 Env: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY (same as ingest.py).
 """
@@ -542,8 +541,12 @@ def run(full: bool = False) -> None:
         # games whose final state wasn't in Savant yet on the prior run.
         start = latest if latest else SEASON_START
 
-    today = datetime.now(UTC).date()
-    end = min(today, SEASON_END)
+    # Yesterday, never today. Today's slate is either unplayed or half-played,
+    # and a half-played day upserted into the game logs drags the rolling
+    # windows (and the team form card built on them) toward a partial line
+    # until the next night's pass overwrites it. The refresh runs overnight and
+    # closes out the day that finished; today is tomorrow's job.
+    end = min(datetime.now(UTC).date() - timedelta(days=1), SEASON_END)
 
     if start > end:
         logger.info("Nothing to ingest: start=%s end=%s", start, end)

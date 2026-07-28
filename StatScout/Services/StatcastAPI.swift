@@ -1,5 +1,20 @@
 import Foundation
 
+/// True when a thrown error is only this task being cancelled.
+///
+/// Every card in the app loads inside a `.task(id:)`, which cancels the moment
+/// its id changes: a tab switch, a window flip, a season change. URLSession
+/// reports that as `URLError.cancelled` rather than `CancellationError`, so a
+/// plain `catch` can't tell an interrupted load from a failed one. That's what
+/// put "Couldn't load team form" on screen for anyone who tapped between the
+/// Trends and Teams tabs faster than a fetch could finish: nothing had failed,
+/// the answer had just been superseded by the one they asked for next.
+func isTaskCancellation(_ error: Error) -> Bool {
+    if error is CancellationError { return true }
+    if let urlError = error as? URLError, urlError.code == .cancelled { return true }
+    return false
+}
+
 protocol StatcastProviding: Sendable {
     func fetchPlayers() async throws -> [Player]
     func fetchHistoricalPlayers() async throws -> [Player]
