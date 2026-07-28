@@ -114,6 +114,9 @@ struct OnboardingCards: View {
 
     private var isLastPage: Bool { currentPage == pages.count - 1 }
     private var dataReady: Bool { viewModel.isReady }
+    /// The free-tier exit + trial legalese only mean anything on the last page
+    /// for a non-subscriber, but the space is reserved on every page.
+    private var showsUpsellBlock: Bool { isLastPage && !store.isPro }
 
     /// CTA label / disclosure mirror the direct-purchase pop-ups: trial copy
     /// when eligible, price-forward yearly copy otherwise. Both come from
@@ -131,20 +134,21 @@ struct OnboardingCards: View {
             SavantPalette.canvas.ignoresSafeArea()
 
             VStack(spacing: 0) {
+                // Fixed-height header: Skip fades out on the last page rather
+                // than being removed, so the TabView below it never changes
+                // height and the card content never shifts mid-swipe.
                 HStack {
                     Spacer()
-                    if !isLastPage {
-                        Button("Skip") {
-                            withAnimation { hasCompletedOnboarding = true }
-                        }
-                        .font(SavantType.bodyBold)
-                        .foregroundStyle(SavantPalette.savantRed)
-                        .padding(.trailing, 20)
-                        .padding(.top, 8)
-                    } else {
-                        Color.clear.frame(height: 32)
+                    Button("Skip") {
+                        withAnimation { hasCompletedOnboarding = true }
                     }
+                    .font(SavantType.bodyBold)
+                    .foregroundStyle(SavantPalette.savantRed)
+                    .padding(.trailing, 20)
+                    .opacity(isLastPage ? 0 : 1)
+                    .allowsHitTesting(!isLastPage)
                 }
+                .frame(height: 32)
 
                 TabView(selection: $currentPage) {
                     ForEach(Array(pages.enumerated()), id: \.offset) { index, page in
@@ -183,17 +187,21 @@ struct OnboardingCards: View {
 
     @ViewBuilder
     private var bottomButtons: some View {
-        // Layout invariant: the primary red button and the 24pt footer slot are
-        // the ONLY things below the top of this stack that set the button's Y.
-        // The button + footer slot are IDENTICAL on every page (Continue and the
-        // trial CTA are both a 52pt red button with the same 24pt slot beneath),
-        // and everything else (Get Started, status line, disclosure, Terms/
-        // Privacy) lives ABOVE the button where it grows upward. Because the
-        // stack is bottom-anchored, that upper content can never move the button,
-        // so the red button is pixel-identical across all onboarding pages.
+        // Layout invariant: this whole stack is the SAME HEIGHT on every page.
+        // Every slot is either fixed (the 52pt red button, the 32pt status line,
+        // the 24pt footer) or always present and merely faded (the upsell block).
+        // Nothing is conditionally inserted or removed. That keeps two things
+        // true at once: the red button is pixel-identical across pages, and the
+        // TabView above never resizes, so card content can't drift on a swipe.
         VStack(spacing: 10) {
-            if isLastPage && !store.isPro {
-                // --- Above the primary button (grows upward, never moves it) ---
+            // --- Above the primary button ---
+            // Always in the layout, faded out where it doesn't apply. It used to
+            // be inserted only on the last page, which grew this bottom-anchored
+            // stack by ~130pt on arrival: the TabView above absorbed the change,
+            // so the card's icon, title and bullets visibly floated up as the
+            // StatScout+ page came in. Reserving the space on every page keeps
+            // the TabView one constant height and kills the float.
+            VStack(spacing: 10) {
                 getStartedButton(prominent: false)
 
                 // Reserved fixed-height status line: a restore/purchase result
@@ -225,6 +233,9 @@ struct OnboardingCards: View {
                 .tracking(0.3)
                 .foregroundStyle(SavantPalette.inkTertiary)
             }
+            .opacity(showsUpsellBlock ? 1 : 0)
+            .allowsHitTesting(showsUpsellBlock)
+            .accessibilityHidden(!showsUpsellBlock)
 
             // --- Primary red button: identical 52pt slot on every page ---
             if isLastPage {

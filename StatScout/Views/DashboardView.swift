@@ -22,9 +22,6 @@ struct DashboardView: View {
                             searchRow
                             teamResults
                         }
-                        if viewModel.showingRecent {
-                            recentWindowRow
-                        }
                     }
                     leaderboardSection
                     if !viewModel.players.isEmpty {
@@ -69,8 +66,8 @@ struct DashboardView: View {
             }
             .presentationDragIndicator(.visible)
         }
-        // Every offer that opens from this screen (the Recent chip, the footer
-        // upgrade) is a contextual pitch, so it gets the low-friction sheet
+        // Every offer that opens from this screen (the footer upgrade) is a
+        // contextual pitch, so it gets the low-friction sheet
         // whose CTA buys the yearly plan in place. The full plan picker stays
         // one quiet "See all plans" tap away inside it.
         .sheet(item: $paywallTrigger) { trigger in
@@ -198,43 +195,59 @@ struct DashboardView: View {
     // acts as the live sort indicator, so the chip stays terse, no
     // "Sorted by"/"Highest first" narration.
     private var activeSortChip: some View {
-        // One row, one gap size, in reading order: what's being ranked, then the
-        // modes that change what's on the board. It used to be two groups pushed
-        // apart by a Spacer, which made the gaps inconsistent and, once the
-        // sorted metric had a long name, pushed the row wider than a 402pt
-        // phone: the sort chip was clipped off the left edge and Filters off the
-        // right. Scrolling horizontally keeps every chip whole at every width
-        // and keeps the spacing even.
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                if let statsMode {
-                    StatsModeMenu(mode: statsMode)
+        // Two zones, one gap size, in reading order. The variable-width chips
+        // (mode, sorted metric, position) scroll horizontally, because a long
+        // metric name alone can outrun a 402pt phone. Search and Filters are
+        // pinned outside that scroller on the trailing edge: when everything
+        // lived in one scroll view, a long sort metric pushed Filters off the
+        // right and it looked like the app had lost its filter control.
+        HStack(spacing: 8) {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    if let statsMode {
+                        StatsModeMenu(mode: statsMode)
+                    }
+                    Button {
+                        viewModel.toggleSortDirection()
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    } label: {
+                        SavantChip(
+                            title: viewModel.currentSortMetric ?? viewModel.sortLabel,
+                            trailing: .sortArrow(descending: viewModel.sortDescending)
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Sorted by \(viewModel.currentSortMetric ?? viewModel.sortLabel), \(viewModel.sortDescending ? "highest first" : "lowest first")")
+                    .accessibilityHint("Tap to flip sort direction")
+                    if viewModel.positionFilterApplies {
+                        positionMenu
+                    }
                 }
-                Button {
-                    viewModel.toggleSortDirection()
-                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                } label: {
-                    SavantChip(
-                        title: viewModel.currentSortMetric ?? viewModel.sortLabel,
-                        trailing: .sortArrow(descending: viewModel.sortDescending)
-                    )
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Sorted by \(viewModel.currentSortMetric ?? viewModel.sortLabel), \(viewModel.sortDescending ? "highest first" : "lowest first")")
-                .accessibilityHint("Tap to flip sort direction")
-                if viewModel.positionFilterApplies {
-                    positionMenu
-                }
-                recentToggle
-                searchToggle
-                filtersMenu
+                .padding(.leading, 12)
+                .padding(.trailing, 2)
+                // Room for the capsule strokes, which a tight frame would clip.
+                .padding(.vertical, 1)
             }
-            .padding(.horizontal, 12)
-            // Room for the capsule strokes, which a tight frame would clip.
-            .padding(.vertical, 1)
+            .scrollBounceBehavior(.basedOnSize)
+            // Fades the chip that's mid-scroll at the boundary instead of
+            // guillotining it, which reads as "there's more here" rather than
+            // as a clipped control.
+            .mask(
+                LinearGradient(
+                    stops: [
+                        .init(color: .black, location: 0),
+                        .init(color: .black, location: 0.88),
+                        .init(color: .clear, location: 1)
+                    ],
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+            )
+
+            searchToggle
+            filtersMenu
         }
-        .scrollBounceBehavior(.basedOnSize)
-        .scrollClipDisabled()
+        .padding(.trailing, 12)
         .frame(height: SavantControl.height + 2)
         .padding(.top, 8)
     }
@@ -270,60 +283,6 @@ struct DashboardView: View {
         .menuOrder(.fixed)
         .accessibilityLabel("Position")
         .accessibilityValue(viewModel.positionFilter.label)
-    }
-
-    /// Flips the leaderboard from season totals to a rolling window, and (when
-    /// active) exposes the window length. Reads the pre-aggregated
-    /// player_recent_form table, so switching is a single small fetch rather
-    /// than an on-device aggregation of the whole league's game logs.
-    ///
-    /// StatScout+ only: a free tap pitches the trial instead of loading, since
-    /// "who's hot right now" is the thing the subscription is actually for.
-    private var recentToggle: some View {
-        Button {
-            if store.isPro {
-                withAnimation(.easeInOut(duration: 0.2)) {
-                    viewModel.showingRecent.toggle()
-                }
-                if viewModel.showingRecent {
-                    Task { await viewModel.loadRecentFormIfNeeded() }
-                }
-            } else {
-                paywallTrigger = .recentForm
-            }
-            UIImpactFeedbackGenerator(style: .light).impactOccurred()
-        } label: {
-            SavantChip(
-                // "Last 15", not "15d", the same wording the window picker
-                // right below it and every other screen uses.
-                title: viewModel.showingRecent ? viewModel.recentWindow.label : "Recent",
-                systemImage: "flame.fill",
-                isActive: viewModel.showingRecent,
-                isLocked: !store.isPro
-            )
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel("Recent form")
-        .accessibilityValue(viewModel.showingRecent ? viewModel.recentWindow.label : "off")
-    }
-
-    /// Window lengths, shown only while Recent is on, a picker for a mode
-    /// you're not in is just noise in the header.
-    private var recentWindowRow: some View {
-        HStack(spacing: 6) {
-            SavantSegmented(
-                segments: RecentWindow.allCases.map { .init(value: $0, label: $0.segmentLabel) },
-                selection: $viewModel.recentWindow
-            )
-            if viewModel.isRecentFormLoading {
-                ProgressView().scaleEffect(0.6).frame(width: 20)
-            }
-        }
-        .padding(.horizontal, 12)
-        .padding(.top, 8)
-        .onChange(of: viewModel.recentWindow) { _, _ in
-            Task { await viewModel.loadRecentFormIfNeeded() }
-        }
     }
 
     // Magnifier that expands the inline search row. When a query is active it
