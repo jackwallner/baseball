@@ -1,1 +1,1 @@
-savant,בייסבול,סטטיסטיקה,אחוזון,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs,fantasy,השוואה
+savant,בייסבול,סטטיסטיקה,אחוזון,wrc,xwoba,oaa,שחקן,sprint,velo,scout,strike,dfs,fantasy,השוואה

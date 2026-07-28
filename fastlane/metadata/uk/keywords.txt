@@ -1,1 +1,1 @@
-savant,бейсбол,статистика,відсоток,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy,рейтинг
+savant,бейсбол,статистика,відсоток,wrc,xwoba,oaa,гравець,sprint,velo,strike,dfs,fantasy,рейтинг

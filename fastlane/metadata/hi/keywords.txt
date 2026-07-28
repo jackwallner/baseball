@@ -1,1 +1,1 @@
-savant,बेसबॉल,आंकड़े,wrc,xwoba,oaa,barrel,sprint,velo,scout,strike,dfs,fantasy,तुलना,बल्लेबाजी
+savant,बेसबॉल,आंकड़े,wrc,xwoba,oaa,खिलाड़ी,sprint,velo,scout,strike,dfs,fantasy,तुलना,बल्लेबाजी

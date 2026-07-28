@@ -1,1 +1,1 @@
-savant,beyzbol,istatistik,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy,karşılaştırma,vuruş
+savant,beyzbol,istatistik,wrc,xwoba,oaa,oyuncu,sprint,velo,strike,dfs,fantasy,karşılaştırma,vuruş

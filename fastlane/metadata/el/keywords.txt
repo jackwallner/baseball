@@ -1,1 +1,1 @@
-savant,μπέιζμπολ,στατιστικά,ποσοστό,wrc,xwoba,oaa,barrel,sprint,velo,strike,dfs,fantasy,κατάταξη
+savant,μπέιζμπολ,στατιστικά,ποσοστό,wrc,xwoba,oaa,παίκτες,sprint,velo,strike,dfs,fantasy,κατάταξη
