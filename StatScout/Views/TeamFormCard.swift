@@ -189,12 +189,7 @@ struct TeamRankingsCard: View {
     }
 
     private func errorRow(_ message: String) -> some View {
-        Text(message)
-            .font(SavantType.small)
-            .foregroundStyle(SavantPalette.inkSecondary)
-            .multilineTextAlignment(.center)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 24)
+        InlineLoadError(message: message) { await load() }
     }
 
     private var windowPicker: some View {
@@ -432,12 +427,7 @@ struct TeamRankingsCard: View {
             .frame(maxWidth: .infinity)
             .padding(.vertical, 24)
         } else if let err = loadError {
-            Text(err)
-                .font(SavantType.small)
-                .foregroundStyle(SavantPalette.inkSecondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, SavantGeo.padInline)
-                .padding(.vertical, 24)
+            InlineLoadError(message: err) { await load() }
         } else if let w = recentWindow {
             recentSummaryRow(w)
             let rows = recentDisplayRows(window: w)
@@ -591,7 +581,11 @@ struct TeamRankingsCard: View {
             let since = Calendar.current.date(byAdding: .day, value: -37, to: .now) ?? .now
             logs = try await fetch(team, season, since)
         } catch {
-            loadError = "Couldn't load team form. Pull to refresh."
+            // A superseded load isn't a failed one, and the card that's about
+            // to be replaced shouldn't flash an error on its way out.
+            if !isTaskCancellation(error) {
+                loadError = "Couldn't load team form."
+            }
         }
         loading = false
     }

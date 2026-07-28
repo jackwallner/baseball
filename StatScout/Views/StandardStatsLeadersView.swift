@@ -13,60 +13,23 @@ import SwiftUI
 struct StandardStatsLeadersView: View {
     @EnvironmentObject private var store: StoreService
     let players: [Player]
+    /// The stat being ranked, and the category whose tab is showing. Owned
+    /// above this view: inside `StatsView` they're shared with the Statcast
+    /// board so switching vocabularies doesn't reshuffle the header, and on the
+    /// pushed drill-down screen `StandardStatsLeaderboardScreen` holds them.
+    @Binding var selectedStat: String
+    @Binding var selectedCategory: MetricCategory
+    @Binding var sortDescending: Bool
     /// Set when arrived at by tapping a specific stat on a player profile, so
     /// the leaderboard opens on the stat that was tapped rather than AVG.
     var season: Int? = nil
-    /// Advanced / Standard / Best-Worst, when this board is shown inside
-    /// `StatsView`. Rides in this board's own control row, exactly as it does
-    /// on the Advanced board, so the two headers are the same header.
-    var statsMode: Binding<StatsMode>? = nil
-    @State private var selectedCategory: MetricCategory
-    @State private var selectedStat: String
-    @State private var sortDescending = true
+    /// Present when this board is hosted by `StatsView`, which draws the shared
+    /// View menu in this board's own control row.
+    var boardBindings: StatsBoardBindings? = nil
+    var viewModel: DashboardViewModel? = nil
 
-    init(
-        players: [Player],
-        initialStat: String = "AVG",
-        initialCategory: MetricCategory = .hitting,
-        season: Int? = nil,
-        statsMode: Binding<StatsMode>? = nil
-    ) {
-        self.players = players
-        self.season = season
-        self.statsMode = statsMode
-        _selectedCategory = State(initialValue: initialCategory)
-        _selectedStat = State(initialValue: initialStat)
-    }
-
-    /// Stats where lower is the better outcome, sort defaults to ascending so the
-    /// leader (lowest ERA, fewest losses, etc.) sits at the top.
-    private static let lowerIsBetter: Set<String> = ["ERA", "WHIP", "BB/9", "L", "E", "CS"]
-
-    // SO is contextual: pitcher strikeouts (good) vs batter strikeouts (bad).
-    // The pitching tab keeps SO as "more is better"; the hitting tab flips it.
-    private func defaultDescending(for stat: String) -> Bool {
-        if stat == "SO" {
-            return selectedCategory == .pitching
-        }
-        return !Self.lowerIsBetter.contains(stat)
-    }
-
-    // Available stats per category
-    var availableStats: [String] {
-        switch selectedCategory {
-        case .hitting:
-            return ["AVG", "HR", "RBI", "OBP", "SLG", "OPS", "H", "R", "2B", "3B", "BB", "SO"]
-        case .pitching:
-            return ["ERA", "WHIP", "W", "L", "SV", "SO", "IP", "K/9", "BB/9", "QS"]
-        case .fielding:
-            // Fielding percentage leads, not errors: "fewest errors" sorted
-            // ascending is fifty players on zero, and the top of that list is
-            // whoever touched the ball least.
-            return ["FLD%", "E", "A", "PO", "DP"]
-        case .running:
-            return ["SB", "SB%", "CS", "3B", "R"]
-        }
-    }
+    /// Available stats per category.
+    var availableStats: [String] { StandardStatCatalog.stats(for: selectedCategory) }
 
     /// Rates that are computed here rather than stored, because the pipeline
     /// ships the components and not the ratio.
@@ -193,14 +156,15 @@ struct StandardStatsLeadersView: View {
         .navigationBarTitleDisplayMode(.inline)
         .onChange(of: selectedCategory) { _, _ in
             guard !availableStats.contains(selectedStat) else { return }
-            let stat = availableStats.first ?? "AVG"
+            let stat = StandardStatCatalog.defaultStat(for: selectedCategory)
             selectedStat = stat
-            sortDescending = defaultDescending(for: stat)
+            sortDescending = StandardStatCatalog.defaultDescending(for: stat, category: selectedCategory)
         }
     }
 
-    /// The same underlined four-tab header the Advanced board carries, in the
-    /// same place, so the mode chip only changes the stats underneath it.
+    /// The same underlined four-tab header the Statcast board carries, in the
+    /// same place, so moving between the two vocabularies doesn't move the
+    /// furniture.
     private var categorySelector: some View {
         CategoryFilter(
             selectedCategory: Binding(
@@ -212,16 +176,13 @@ struct StandardStatsLeadersView: View {
         .padding(.top, 8)
     }
 
-    /// Mode chip, then the sorted stat, then the stat menu. Same row, same
-    /// order, same three shapes as the Advanced board's control row: the twelve
-    /// capsules that used to live here were a fourth kind of control that only
-    /// this screen had.
+    /// The sorted stat, then the View menu: the same two shapes, in the same
+    /// order, as the Statcast board's control row. Picking a different stat
+    /// (in either vocabulary) happens in that menu, so this board no longer
+    /// carries a stat picker only it has.
     private var controlRow: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
-                if let statsMode {
-                    StatsModeMenu(mode: statsMode)
-                }
                 Button {
                     sortDescending.toggle()
                     UIImpactFeedbackGenerator(style: .light).impactOccurred()
@@ -235,7 +196,18 @@ struct StandardStatsLeadersView: View {
                 .accessibilityLabel("Sorted by \(selectedStat), \(sortDescending ? "highest first" : "lowest first")")
                 .accessibilityHint("Tap to flip sort direction")
 
-                statMenu
+                if let boardBindings, let viewModel {
+                    StatsViewMenu(
+                        viewModel: viewModel,
+                        board: boardBindings.$board,
+                        standardStat: boardBindings.$standardStat,
+                        sortDescending: boardBindings.$standardSortDescending
+                    )
+                } else {
+                    // Pushed on its own, with no Stats tab behind it to hold
+                    // the wider selection, so it keeps a plain stat picker.
+                    statMenu
+                }
             }
             .padding(.horizontal, 12)
             // Room for the capsule strokes, which a tight frame would clip.
@@ -253,7 +225,7 @@ struct StandardStatsLeadersView: View {
                 ForEach(availableStats, id: \.self) { stat in
                     Button {
                         selectedStat = stat
-                        sortDescending = defaultDescending(for: stat)
+                        sortDescending = StandardStatCatalog.defaultDescending(for: stat, category: selectedCategory)
                         UIImpactFeedbackGenerator(style: .light).impactOccurred()
                     } label: {
                         if stat == selectedStat {
@@ -265,11 +237,7 @@ struct StandardStatsLeadersView: View {
                 }
             }
         } label: {
-            SavantChip(
-                title: "Stat",
-                systemImage: "line.3.horizontal.decrease.circle",
-                trailing: .chevron
-            )
+            SavantChip(title: "Stat", systemImage: "slider.horizontal.3", trailing: .chevron)
         }
         .menuOrder(.fixed)
         .accessibilityLabel("Stat")
@@ -401,10 +369,49 @@ struct StandardStatsLeadersView: View {
     }
 }
 
+/// The standard board as its own pushed screen, reached by tapping a
+/// traditional stat on a player or team page.
+///
+/// It owns the selection that `StatsView` owns on the Stats tab: a drill-down
+/// is a fresh question ("who leads the league in RBI"), not a change to what
+/// the tab behind it was showing.
+struct StandardStatsLeaderboardScreen: View {
+    let players: [Player]
+    var season: Int? = nil
+    @State private var stat: String
+    @State private var category: MetricCategory
+    @State private var sortDescending: Bool
+
+    init(
+        players: [Player],
+        initialStat: String = "AVG",
+        initialCategory: MetricCategory = .hitting,
+        season: Int? = nil
+    ) {
+        self.players = players
+        self.season = season
+        _stat = State(initialValue: initialStat)
+        _category = State(initialValue: initialCategory)
+        _sortDescending = State(
+            initialValue: StandardStatCatalog.defaultDescending(for: initialStat, category: initialCategory)
+        )
+    }
+
+    var body: some View {
+        StandardStatsLeadersView(
+            players: players,
+            selectedStat: $stat,
+            selectedCategory: $category,
+            sortDescending: $sortDescending,
+            season: season
+        )
+    }
+}
+
 #if DEBUG
 #Preview {
     NavigationStack {
-        StandardStatsLeadersView(players: SampleData.players)
+        StandardStatsLeaderboardScreen(players: SampleData.players)
             .environmentObject(StoreService.shared)
             .navigationTitle("Standard Stats")
     }

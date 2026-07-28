@@ -2,24 +2,24 @@ name: Nightly Statcast Refresh
 
 on:
   schedule:
-    # Two runs a night, both closing the same previous day.
+    # Four attempts, one update. The app is meant to wake up holding
+    # yesterday's finished data and hold still all day: a refresh that lands
+    # mid-afternoon folds half-played games into the season line.
     #
-    # 08:30 UTC — 4:30am ET / 1:30am PT. The overnight pass, and the one that
-    # decides what the app says when someone opens it at breakfast. West-coast
-    # games finish around 06:00 UTC, so this is roughly 2.5 hours after the
-    # last pitch of the night.
+    # So every attempt sits inside the overnight window, and `refresh_guard.py`
+    # makes all but the first a no-op. The attempts exist because a GitHub cron
+    # is not a promise: they routinely land one to three hours late and are
+    # sometimes dropped altogether, which is what left the app reading two days
+    # stale. Four shots at the window means one of them lands.
     #
-    # 14:00 UTC — 10am ET / 7am PT. The backstop, and the reason the early run
-    # is safe to add. An earlier single run is exactly what this workflow used
-    # to have (09:00 UTC) and it broke the app: Savant hadn't published the
-    # previous night yet, every run came back with nothing newer than the day
-    # before, and the app permanently read "Through <two days ago>". Moving to
-    # 14:00 fixed that by waiting. Keeping 14:00 as a second run keeps the fix
-    # while letting the early pass win on the nights Savant is prompt — the
-    # ingest upserts on (id, season), so a re-run over the same day is a no-op
-    # and a re-run over a day the early pass missed picks it up.
-    - cron: "30 8 * * *"
-    - cron: "0 14 * * *"
+    # West-coast games finish around 06:00 UTC and Savant publishes an hour or
+    # two later, so 07:00 is the earliest with any chance of data. 10:00 UTC is
+    # 3am PT, which keeps the last attempt inside the "done by 4am PT" budget
+    # even when it fires late.
+    - cron: "0 7 * * *"
+    - cron: "0 8 * * *"
+    - cron: "0 9 * * *"
+    - cron: "0 10 * * *"
   workflow_dispatch:
     inputs:
       full_game_log_reingest:
@@ -56,7 +56,17 @@ jobs:
       - name: Run tests
         run: PYTHONPATH=backend python -m pytest backend/tests
 
+      # Every step below is gated on this. A manual dispatch always runs, so
+      # there's still a way to force a refresh.
+      - name: Decide whether tonight's refresh still has work
+        id: guard
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: python backend/refresh_guard.py
+
       - name: Run ingestion (with actual values)
+        if: steps.guard.outputs.run == 'true' || github.event_name == 'workflow_dispatch'
         shell: bash
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -67,6 +77,7 @@ jobs:
           python backend/ingest.py 2>&1 | tee ingestion.log
 
       - name: Run per-game ingestion (Recent Form data)
+        if: steps.guard.outputs.run == 'true' || github.event_name == 'workflow_dispatch'
         shell: bash
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -83,6 +94,7 @@ jobs:
           fi
 
       - name: Roll up rolling windows (7/15/30 day)
+        if: steps.guard.outputs.run == 'true' || github.event_name == 'workflow_dispatch'
         shell: bash
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}

@@ -1,6 +1,6 @@
 Scout the league like a pro.
  Statcast percentile rankings and MLB Savant-style metrics.
-StatScout brings baseball percentile rankings to your iPhone. See where qualified players rank — from xwOBA to Sprint Speed to Outs Above Average — with fast visual red-blue metric bars. 
+StatScout brings baseball percentile rankings to your iPhone. See where qualified players rank (from xwOBA to Sprint Speed to Outs Above Average) with fast visual red-blue metric bars.
 
 VISUAL PERCENTILES
 Every metric displays as a horizontal percentile bar with a colored circle marker. The color shifts continuously from blue (0th percentile) through gray (50th) to red (100th), so you can spot elite performers instantly.
@@ -16,11 +16,11 @@ Browse the full league leaderboard filtered by Hitting, Pitching, Fielding, or R
 
 STATSCOUT PRO
 Unlock additional analysis with StatScout Pro:
-• Historical Seasons — load past seasons on demand
-• Player Comparisons — compare any two players side by side
-• Year-Over-Year Tracking — see how a player's metrics changed season to season
+• Historical Seasons: load past seasons on demand
+• Player Comparisons: compare any two players side by side
+• Year-Over-Year Tracking: see how a player's metrics changed season to season
 
-Choose Monthly, Yearly (with free trial), or Lifetime — one purchase covers everything.
+Choose Monthly, Yearly (with free trial), or Lifetime. One purchase covers everything.
 
 PRIVACY-FIRST
 No accounts. No sign-up. No ads. No third-party tracking. The app makes only the network requests needed for baseball statistics, player images, and optional purchase verification.

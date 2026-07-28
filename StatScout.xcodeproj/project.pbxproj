@@ -10,6 +10,7 @@
 		03322BA439762FE028116ADC /* TeamsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93AB140AC9F51D7E0F0E2C6D /* TeamsView.swift */; };
 		04023875866CC802E984C0B3 /* RecentForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F95C02E1622E88F580A23B6 /* RecentForm.swift */; };
 		0C20C0897F6EC50FBA50DE50 /* UpdateShowcaseUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2FD89608305043ACAAA6F5E /* UpdateShowcaseUITests.swift */; };
+		0C8027710FFC6FF7B837EF7A /* StatsBoardControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22FE0335BB2C3B67BA44ED9B /* StatsBoardControls.swift */; };
 		0DBDA29FECAC0D4AC9F8A986 /* PlayerComparisonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FCAA022DB7A039D9E5D4EC6 /* PlayerComparisonView.swift */; };
 		0E0F4D3999340FBAB1444C63 /* RobotoCondensed-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1E6744289B66B875DB9A8AF1 /* RobotoCondensed-Bold.ttf */; };
 		0E57D0D337381AEB2F905D79 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 80FA4CA4AA0C875123767D0C /* PrivacyInfo.xcprivacy */; };
@@ -107,6 +108,7 @@
 		1E4FF70B13A65617E39C4E75 /* DashboardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardViewModel.swift; sourceTree = "<group>"; };
 		1E6744289B66B875DB9A8AF1 /* RobotoCondensed-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "RobotoCondensed-Bold.ttf"; sourceTree = "<group>"; };
 		227F1309E0C8906969049D9F /* TrialPitchSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrialPitchSheet.swift; sourceTree = "<group>"; };
+		22FE0335BB2C3B67BA44ED9B /* StatsBoardControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsBoardControls.swift; sourceTree = "<group>"; };
 		278BC9B90F41966E86B41E02 /* SavantSegmented.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavantSegmented.swift; sourceTree = "<group>"; };
 		28F7C1A7CADA7CA917C9B9BF /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
 		2BF12CF754F018EFD7BE7729 /* SampleData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleData.swift; sourceTree = "<group>"; };
@@ -354,6 +356,7 @@
 				278BC9B90F41966E86B41E02 /* SavantSegmented.swift */,
 				147A7B626DB00162FDED79EA /* SettingsView.swift */,
 				F9CBAD749A639F5A5ADCF10B /* StandardStatsLeadersView.swift */,
+				22FE0335BB2C3B67BA44ED9B /* StatsBoardControls.swift */,
 				372D20325E276F7B6CAA3798 /* StatsView.swift */,
 				6029BCBF6CD96B24E1EF3DDB /* TeamFormCard.swift */,
 				AAD45B2E53DDFC8BEC30D957 /* TeamStandardCard.swift */,
@@ -563,6 +566,7 @@
 				194BDDCA1D45B8E71852DF10 /* StandardStatsLeadersView.swift in Sources */,
 				97ADF393CE14DE856A50A0B5 /* StatScoutApp.swift in Sources */,
 				C5718F0C8435928CBF995DE5 /* StatcastAPI.swift in Sources */,
+				0C8027710FFC6FF7B837EF7A /* StatsBoardControls.swift in Sources */,
 				D3DAADB476B1D20557FF32A4 /* StatsView.swift in Sources */,
 				DBAED006FBC8ACCE2A4D49FD /* StoreService.swift in Sources */,
 				D13F5E714076E4346EF8F0EA /* TeamFormCard.swift in Sources */,

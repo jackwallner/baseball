@@ -472,15 +472,19 @@ struct LeaderboardTableRow: View {
         displayMetric?.percentile ?? 0
     }
 
-    // Raw stat value only, never the percentile. The colored bar to the left
-    // already conveys percentile visually; numeric percentile in this column
-    // duplicates that signal and reads as "the stat value" at a glance.
+    // Raw stat value where there is one. The colored bar to the left already
+    // conveys the percentile, so repeating it here would read as "the stat
+    // value" at a glance, but a whole column of dashes on a board Savant ranks
+    // (Arm Strength before its value source was wired up) is worse: it says the
+    // app has nothing when it has the ranking the page is sorted by. Falling
+    // back to an explicitly-labelled percentile keeps the column honest.
     private var displayValueText: String {
         if let valueOverride { return valueOverride }
-        if let metric = displayMetric, !metric.value.isEmpty {
-            return metric.value
-        }
-        return "-"
+        guard let metric = displayMetric else { return "-" }
+        if !metric.value.isEmpty { return metric.value }
+        // The ordinal is what distinguishes the two: "94th" can't be misread as
+        // a rate the way a bare "94" can.
+        return metric.percentile.ordinal
     }
 
     /// A window value has no percentile behind it, so it stays ink rather than
@@ -574,6 +578,33 @@ struct LeaderboardTableRow: View {
 /// sheet ever appeared. The button says what it does and then does it; the plan
 /// picker stays reachable behind a quiet "See all plans" link for anyone who
 /// actually wants to weigh monthly against lifetime.
+/// A card whose data didn't load, and the way to ask for it again.
+///
+/// These cards live inside scroll views that own no refresh gesture, so the
+/// copy used to end in "Pull to refresh" and name an affordance that wasn't
+/// there. A button is both honest and one tap instead of a hunt.
+struct InlineLoadError: View {
+    let message: String
+    let retry: () async -> Void
+
+    var body: some View {
+        VStack(spacing: 10) {
+            Text(message)
+                .font(SavantType.small)
+                .foregroundStyle(SavantPalette.inkSecondary)
+                .multilineTextAlignment(.center)
+            Button("Try Again") {
+                Task { await retry() }
+            }
+            .font(SavantType.smallBold)
+            .foregroundStyle(SavantPalette.savantRed)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, SavantGeo.padInline)
+        .padding(.vertical, 24)
+    }
+}
+
 struct BlurGateUnlock: View {
     let headline: String
     /// Entry point this gate represents, drives the impression id and the

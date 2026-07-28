@@ -179,8 +179,8 @@ struct RootTabView: View {
                 }
             }
         }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 6)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 7)
         .background(.ultraThinMaterial.opacity(0.8), in: Capsule())
         .overlay(Capsule().stroke(SavantPalette.hairline, lineWidth: 0.5))
         .shadow(color: .black.opacity(0.10), radius: 12, y: 4)
@@ -246,16 +246,16 @@ private struct TabBarButton: View {
 
     var body: some View {
         Button(action: action) {
-            VStack(spacing: 3) {
+            VStack(spacing: 4) {
                 Image(systemName: icon)
-                    .font(.system(size: 17, weight: .semibold))
+                    .font(.system(size: 20, weight: .semibold))
                 Text(label)
-                    .font(SavantType.micro)
-                    .tracking(0.3)
+                    .font(SavantType.small)
+                    .tracking(0.2)
                     .fontWeight(.semibold)
             }
             .foregroundStyle(isSelected ? SavantPalette.savantRed : SavantPalette.inkSecondary)
-            .frame(width: 70, height: 44)
+            .frame(width: 78, height: 52)
             .background(
                 isSelected ? SavantPalette.savantRed.opacity(0.12) : .clear,
                 in: Capsule()
@@ -458,7 +458,7 @@ private struct StandardDestinations: ViewModifier {
             }
             .navigationDestination(for: StandardStatRoute.self) { route in
                 let season = route.season ?? viewModel.selectedSeason
-                StandardStatsLeadersView(
+                StandardStatsLeaderboardScreen(
                     players: viewModel.players(forSeason: season),
                     initialStat: route.stat,
                     initialCategory: route.category,

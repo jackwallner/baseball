@@ -212,7 +212,7 @@ struct TeamStandardCard: View {
             .frame(maxWidth: .infinity)
             .padding(.vertical, 24)
         } else if let loadError {
-            emptyState(loadError)
+            InlineLoadError(message: loadError) { await load() }
         } else {
             let totals = windowTotals()
             if totals.isEmpty {
@@ -524,7 +524,11 @@ struct TeamStandardCard: View {
             let since = Calendar.current.date(byAdding: .day, value: -37, to: .now) ?? .now
             logs = try await fetch(team, season, since)
         } catch {
-            loadError = "Couldn't load team form. Pull to refresh."
+            // Cancelled loads are the normal cost of flipping between the
+            // season and recent windows; only a real failure is an error.
+            if !isTaskCancellation(error) {
+                loadError = "Couldn't load team form."
+            }
         }
         loading = false
     }

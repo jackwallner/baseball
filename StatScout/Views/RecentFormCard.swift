@@ -189,12 +189,7 @@ struct RecentFormCard: View {
             .frame(maxWidth: .infinity)
             .padding(.vertical, 24)
         } else if let err = loadError {
-            Text(err)
-                .font(SavantType.small)
-                .foregroundStyle(SavantPalette.inkSecondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, SavantGeo.padInline)
-                .padding(.vertical, 24)
+            InlineLoadError(message: err) { await load() }
         } else if let w = window {
             statsBody(window: w)
         } else {
@@ -333,7 +328,11 @@ struct RecentFormCard: View {
             let result = try await fetch(player.playerId, season)
             logs = result
         } catch {
-            loadError = "Couldn't load recent games. Pull to refresh."
+            // Switching window or season cancels the in-flight fetch; that's
+            // the user changing their mind, not a failure to answer them.
+            if !isTaskCancellation(error) {
+                loadError = "Couldn't load recent games."
+            }
         }
         loading = false
     }

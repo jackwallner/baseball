@@ -262,3 +262,61 @@ def test_game_date_serializes_as_plain_date():
 def test_empty_frame_yields_no_rows():
     assert _aggregate_batters(pd.DataFrame()) == []
     assert _aggregate_pitchers(pd.DataFrame()) == []
+
+
+class TestIngestWindow:
+    """The refresh closes out finished days only.
+
+    Today's slate is either unplayed or half-played. A half-played day upserted
+    into the game logs drags every rolling window and the team form card built
+    on them toward a partial line until the next night overwrites it.
+    """
+
+    def _window(self, monkeypatch, latest_in_db, now):
+        import ingest_game_logs as gl
+
+        captured = {}
+
+        monkeypatch.setattr(gl, "create_client", lambda url, key: object())
+        monkeypatch.setattr(gl, "_latest_game_date", lambda client, season: latest_in_db)
+        monkeypatch.setattr(gl, "SUPABASE_URL", "https://example.supabase.co")
+        monkeypatch.setattr(gl, "SUPABASE_SERVICE_ROLE_KEY", "key")
+
+        class FakeDatetime(gl.datetime):
+            @classmethod
+            def now(cls, tz=None):
+                return now
+
+        monkeypatch.setattr(gl, "datetime", FakeDatetime)
+
+        def fake_statcast(start_dt, end_dt):
+            captured.setdefault("chunks", []).append((start_dt, end_dt))
+            return pd.DataFrame()
+
+        monkeypatch.setattr(gl, "statcast", fake_statcast)
+        gl.run()
+        return captured.get("chunks", [])
+
+    def test_never_fetches_today(self, monkeypatch):
+        from datetime import date, datetime as dt, timezone
+
+        chunks = self._window(
+            monkeypatch,
+            latest_in_db=date(2026, 7, 25),
+            now=dt(2026, 7, 28, 9, 0, tzinfo=timezone.utc),
+        )
+        assert chunks, "expected at least one chunk"
+        assert chunks[0][0] == "2026-07-25"
+        assert max(end for _, end in chunks) == "2026-07-27"
+
+    def test_nothing_to_do_when_yesterday_is_already_in(self, monkeypatch):
+        from datetime import date, datetime as dt, timezone
+
+        chunks = self._window(
+            monkeypatch,
+            latest_in_db=date(2026, 7, 27),
+            now=dt(2026, 7, 28, 9, 0, tzinfo=timezone.utc),
+        )
+        # start == end == yesterday: the last known day is re-read once in case
+        # it had late games, but nothing beyond it is touched.
+        assert chunks == [("2026-07-27", "2026-07-27")]
