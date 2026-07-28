@@ -84,6 +84,18 @@ final class StandardStatsTests: XCTestCase {
         XCTAssertEqual(stat.value, "105")
     }
 
+    func testCategoryDecodesLowercaseBackendValue() throws {
+        let json = #"{"id":"std-hit-H","label":"H","value":"105","category":"hitting"}"#.data(using: .utf8)!
+        let stat = try JSONDecoder().decode(StandardStat.self, from: json)
+        XCTAssertEqual(stat.category, .hitting)
+    }
+
+    func testPlayerDecodesLiveStandardStatCategoryCasing() throws {
+        let json = #"{"id":660271,"name":"Shohei Ohtani","team":"LAD","position":"TWP","handedness":"L/R","image_url":null,"updated_at":"2026-07-28T05:40:44.802835+00:00","season":2026,"player_type":"two_way","source":"baseball_savant_enhanced","metrics":[{"id":"h1","label":"xwOBA","value":".405","category":"Hitting","percentile":98}],"standard_stats":[{"id":"std-hit-H","label":"H","value":"105","category":"hitting"}],"games":[]}"#.data(using: .utf8)!
+        let player = try JSONDecoder.statScout.decode(Player.self, from: json)
+        XCTAssertEqual(player.standardStats?.first?.category, .hitting)
+    }
+
     // MARK: - Overall percentile weighting
 
     /// A flat mean over every metric let whichever category happened to carry
