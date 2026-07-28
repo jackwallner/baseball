@@ -483,31 +483,62 @@ final class DashboardViewModel {
     // exact metric are partitioned to the end so blank-value rows never
     // interleave above genuinely-ranked players.
     var leaderboard: [Player] {
-        let sortLabel = currentSortMetric
-        guard let category = selectedCategory, let label = sortLabel else {
-            return filteredPlayers.sorted { p1, p2 in
-                let v1 = Self.rawNumeric(p1.metrics.first(where: { $0.label == "xwOBA" })?.value ?? "") ?? -.infinity
-                let v2 = Self.rawNumeric(p2.metrics.first(where: { $0.label == "xwOBA" })?.value ?? "") ?? -.infinity
-                return sortDescending ? v1 > v2 : v1 < v2
-            }
+        guard let category = selectedCategory, let label = currentSortMetric else {
+            return filteredPlayers.sorted(
+                by: Self.metricComparator(label: "xwOBA", category: .hitting, descending: sortDescending)
+            )
         }
+        return filteredPlayers.sorted(
+            by: Self.metricComparator(label: label, category: category, descending: sortDescending)
+        )
+    }
 
-        func rawValue(_ p: Player) -> Double? {
-            guard let m = p.metrics.first(where: { $0.label == label && $0.category == category }) else { return nil }
-            return Self.rawNumeric(m.value)
+    /// Orders players by one metric, percentile first and raw value only as a
+    /// tiebreak.
+    ///
+    /// Ranking by the parsed value string was wrong: 14.5% of historical metric
+    /// rows carry a valid Savant percentile and an *empty* value (Arm Strength
+    /// and Squared-Up% are blank 100% of the time, pitching xISO/xOBP/Chase%/
+    /// Whiff% around two thirds), and `rawNumeric("")` is nil, so those players
+    /// were swept into a tail below everyone who happened to have a printable
+    /// number, however much worse they were. Percentile is always present and
+    /// already direction-corrected by the backend (a pitcher allowing 6.6%
+    /// Barrel% is the 66th percentile, not the 34th).
+    ///
+    /// `descending` still describes the *raw value*, because that's what the
+    /// sort chip says and what the user flips. For a lower-is-better metric
+    /// that's the opposite of the percentile direction, hence the XOR.
+    static func metricComparator(
+        label: String,
+        category: MetricCategory,
+        descending: Bool
+    ) -> (Player, Player) -> Bool {
+        let percentileDescending = descending != lowerIsBetter(label: label, category: category)
+        return { p1, p2 in
+            let m1 = p1.metrics.first { $0.label == label && $0.category == category }
+            let m2 = p2.metrics.first { $0.label == label && $0.category == category }
+
+            // A player without the metric at all sorts last in either direction.
+            switch (m1, m2) {
+            case (nil, nil): return p1.name < p2.name
+            case (nil, _): return false
+            case (_, nil): return true
+            default: break
+            }
+            guard let m1, let m2 else { return false }
+
+            if m1.percentile != m2.percentile {
+                return percentileDescending
+                    ? m1.percentile > m2.percentile
+                    : m1.percentile < m2.percentile
+            }
+            // Same percentile bucket: the printed value breaks the tie when both
+            // players have one, so the board doesn't reshuffle arbitrarily.
+            if let v1 = rawNumeric(m1.value), let v2 = rawNumeric(m2.value), v1 != v2 {
+                return descending ? v1 > v2 : v1 < v2
+            }
+            return p1.name < p2.name
         }
-
-        let ranked = filteredPlayers.filter { rawValue($0) != nil }
-            .sorted { p1, p2 in
-                let v1 = rawValue(p1) ?? 0
-                let v2 = rawValue(p2) ?? 0
-                return sortDescending ? v1 > v2 : v1 < v2
-            }
-        let tail = filteredPlayers.filter { rawValue($0) == nil }
-            .sorted { (p1, p2) in
-                (p1.percentile(for: category) ?? 0) > (p2.percentile(for: category) ?? 0)
-            }
-        return ranked + tail
     }
 
     /// Parse a leading numeric value from a metric's display string.
@@ -525,13 +556,23 @@ final class DashboardViewModel {
     /// default sort direction (so pitcher xwOBA lists best pitchers first
     /// instead of worst) and Best/Lowest selection on MetricLeadersView.
     /// Hitter xwOBA / Barrel% high = good; pitcher xwOBA / Barrel% low = good.
+    /// Labels here had drifted off what the backend emits: the pitching set
+    /// asked for "HardHit%", "EV", "LA", "GB%" and "FB%", none of which exist,
+    /// so the real `Hard-Hit%`, `Avg EV Against`, `Max EV Against`, `xISO` and
+    /// `xOBP` fell through to "highest first" and opened those boards with the
+    /// worst pitchers at rank 1. Hitting was missing `Chase%` and `Whiff%`,
+    /// which `TrendMetric` already signs correctly on the Trends tab.
+    /// `DashboardViewModelTests` pins every string here to a real label.
     static func lowerIsBetter(label: String, category: MetricCategory) -> Bool {
         switch category {
         case .pitching:
-            return ["xwOBA", "xBA", "xSLG", "xERA", "ERA", "WHIP", "BB%",
-                    "Barrel%", "HardHit%", "EV", "LA", "GB%", "FB%"].contains(label)
+            // Contact allowed and free baserunners: less of each is better.
+            return ["xwOBA", "xBA", "xSLG", "xISO", "xOBP", "xERA", "ERA", "WHIP",
+                    "BB%", "Barrel%", "Hard-Hit%", "Avg EV Against",
+                    "Max EV Against"].contains(label)
         case .hitting:
-            return ["K%"].contains(label)
+            // Swinging at balls and missing them are the hitter's own failures.
+            return ["K%", "Whiff%", "Chase%"].contains(label)
         case .fielding, .running:
             return false
         }
@@ -603,20 +644,20 @@ final class DashboardViewModel {
         return ("xwOBA", nil)
     }
 
+    /// Hitters first (best xwOBA down), then pitchers (best xwOBA-against down).
+    /// Both halves rank by percentile for the same reason the leaderboard does,
+    /// and because percentile is already signed per side, the two halves need
+    /// the same comparator direction rather than opposite ones.
     func players(forTeam team: String) -> [Player] {
-        // Sort by raw xwOBA value to match the leaderboard convention.
-        // Pitchers (where lower xwOBA is better) sort to the bottom, then by
-        // ascending xwOBA, gives a sane "best hitters first, best pitchers
-        // last" team roster ordering.
         let normalized = normalizedTeamAbbreviation(team)
+        let hittingOrder = Self.metricComparator(label: "xwOBA", category: .hitting, descending: true)
+        let pitchingOrder = Self.metricComparator(label: "xwOBA", category: .pitching, descending: false)
         return seasonPlayers.filter { normalizedTeamAbbreviation($0.team) == normalized }
             .sorted { p0, p1 in
                 let isPitcher0 = p0.playerType?.lowercased() == "pitcher"
                 let isPitcher1 = p1.playerType?.lowercased() == "pitcher"
                 if isPitcher0 != isPitcher1 { return !isPitcher0 }
-                let v0 = Self.rawNumeric(p0.metrics.first(where: { $0.label == "xwOBA" })?.value ?? "") ?? -.infinity
-                let v1 = Self.rawNumeric(p1.metrics.first(where: { $0.label == "xwOBA" })?.value ?? "") ?? -.infinity
-                return isPitcher0 ? v0 < v1 : v0 > v1
+                return isPitcher0 ? pitchingOrder(p0, p1) : hittingOrder(p0, p1)
             }
     }
 

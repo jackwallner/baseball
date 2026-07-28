@@ -54,6 +54,21 @@ def test_build_metrics_with_values_uses_actual_value_when_available():
     assert ev[0]["percentile"] == 92
 
 
+def test_build_metrics_keeps_published_percentile_without_actual_value():
+    row = pd.Series({"player_id": 1, "player_name": "Test", "hard_hit_percent": 97})
+    store = make_mock_value_store()
+
+    metrics = ingest.build_metrics_with_values(row, "batter", ingest.BATTER_METRICS, 1, store)
+
+    assert metrics == [{
+        "id": "batter-1-hard_hit_percent",
+        "label": "Hard-Hit%",
+        "value": "",
+        "percentile": 97,
+        "category": "Hitting",
+    }]
+
+
 def test_metrics_omit_the_duplicate_value_fields():
     """actual_value duplicated value and display_value was derivable from it.
 
@@ -378,9 +393,24 @@ class TestExpectedOnBasePercentage:
 
         assert players[2]["metrics"][0]["value"] == "0.303"
 
-    def test_drops_the_metric_when_inputs_are_missing(self):
-        # "No value, no metric" — a percentile with a blank cell beside it is
-        # the failure mode the rest of the build already refuses to ship.
+    def test_two_way_pitcher_xobp_uses_pitching_walks(self):
+        player = self._player(
+            [{"id": "pitcher-2-xobp", "label": "xOBP", "value": "", "percentile": 70,
+              "category": "Pitching"}],
+            {},
+        )
+        player["standard_stats"] = [
+            {"label": "BB", "value": "90", "category": "hitting"},
+            {"label": "BB", "value": "30", "category": "pitching"},
+            {"label": "BF", "value": "600", "category": "pitching"},
+        ]
+        store = SimpleNamespace(expected_stat=lambda pid, col, kind: 0.240)
+
+        ingest._add_expected_obp({2: player}, store)
+
+        assert player["metrics"][0]["value"] == "0.278"
+
+    def test_keeps_the_percentile_when_inputs_are_missing(self):
         players = {
             3: self._player(
                 [{"id": "batter-3-xobp", "label": "xOBP", "value": "", "percentile": 55,
@@ -394,7 +424,8 @@ class TestExpectedOnBasePercentage:
 
         ingest._add_expected_obp(players, store)
 
-        assert [m["label"] for m in players[3]["metrics"]] == ["xBA"]
+        assert [m["label"] for m in players[3]["metrics"]] == ["xOBP", "xBA"]
+        assert players[3]["metrics"][0]["value"] == ""
 
     def test_leaves_an_already_valued_metric_alone(self):
         players = {
@@ -409,3 +440,111 @@ class TestExpectedOnBasePercentage:
         ingest._add_expected_obp(players, store)
 
         assert players[4]["metrics"][0]["value"] == "0.350"
+
+
+# --- standard_stats: two-way players carry two lines, not one merged one ---
+
+
+def _two_way_stats():
+    """Ohtani-shaped input: a real batting line plus a real pitching line.
+
+    The five labels that exist on both sides (H, R, HR, BB, SO) arrive
+    namespaced from the fetchers so the pitching side can't overwrite the
+    batting side, which is exactly the bug this guards.
+    """
+    return {
+        "player_type": "two_way",
+        # batting
+        "avg": "0.282", "obp": "0.387", "slg": "0.520", "ops": "0.907",
+        "hr": 46, "rbi": 61, "r": 103, "h": 105, "doubles": 19, "triples": 2,
+        "bb": 96, "so": 189, "sb": 6, "cs": 2, "pa": 447, "ab": 373,
+        # pitching
+        "era": "1.79", "whip": "0.95", "wins": 8, "losses": 2, "saves": 0,
+        "ip": "85.2", "er": 17, "p_h": 55, "p_r": 21, "p_hr": 4,
+        "p_bb": 26, "p_so": 95, "qs": 0, "g": 14, "gs": 14, "bf": 340,
+    }
+
+
+def _by_category(rows, category):
+    return {r["label"]: r["value"] for r in rows if r["category"] == category}
+
+
+def test_two_way_batting_line_survives_the_pitching_line():
+    rows = ingest._build_standard_stats_from_mlb(_two_way_stats())
+    hitting = _by_category(rows, "hitting")
+    pitching = _by_category(rows, "pitching")
+
+    # The regression: these five used to hold the pitching values.
+    assert hitting["H"] == "105"
+    assert hitting["HR"] == "46"
+    assert hitting["R"] == "103"
+    assert hitting["BB"] == "96"
+    assert hitting["SO"] == "189"
+
+    # And the pitching side keeps its own, distinct values.
+    assert pitching["H"] == "55"
+    assert pitching["HR"] == "4"
+    assert pitching["BB"] == "26"
+    assert pitching["SO"] == "95"
+
+
+def test_two_way_batting_line_is_internally_consistent():
+    """AVG x AB should land on H. It didn't when H held hits allowed."""
+    hitting = _by_category(ingest._build_standard_stats_from_mlb(_two_way_stats()), "hitting")
+    expected_hits = float(hitting["AVG"]) * float(hitting["AB"])
+    assert abs(expected_hits - float(hitting["H"])) < 1.0
+    # A batter cannot strike out more often than he bats.
+    assert float(hitting["SO"]) <= float(hitting["AB"])
+
+
+def test_two_way_pitching_line_is_internally_consistent():
+    """(H + BB) / IP should land on WHIP."""
+    pitching = _by_category(ingest._build_standard_stats_from_mlb(_two_way_stats()), "pitching")
+    innings = 85.0 + 2.0 / 3.0  # 85.2 is 85 and two thirds
+    whip = (float(pitching["H"]) + float(pitching["BB"])) / innings
+    assert abs(whip - float(pitching["WHIP"])) < 0.02
+
+
+def test_two_way_colliding_labels_get_distinct_ids():
+    rows = ingest._build_standard_stats_from_mlb(_two_way_stats())
+    ids = [r["id"] for r in rows]
+    assert len(ids) == len(set(ids)), "duplicate ids would collapse in an Identifiable list"
+    assert "std-hit-H" in ids and "std-pit-H" in ids
+
+
+def test_pure_pitcher_still_reads_unprefixed_keys():
+    """emit() falls back to the bare key, so a legacy dict still builds."""
+    rows = ingest._build_standard_stats_from_mlb({
+        "player_type": "pitcher",
+        "era": "2.82", "whip": "1.01", "ip": "120.0",
+        "h": 88, "r": 40, "hr": 11, "bb": 33, "so": 145,
+    })
+    pitching = _by_category(rows, "pitching")
+    assert pitching["H"] == "88"
+    assert pitching["SO"] == "145"
+    assert all(r["category"] == "pitching" for r in rows)
+
+
+def test_pure_batter_line_is_unchanged_apart_from_category():
+    rows = ingest._build_standard_stats_from_mlb({
+        "player_type": "batter",
+        "avg": "0.311", "obp": "0.398", "slg": "0.601", "ops": "0.999",
+        "hr": 53, "rbi": 144, "r": 122, "h": 180, "bb": 133, "so": 171,
+        "pa": 704, "ab": 579,
+    })
+    assert all(r["category"] == "hitting" for r in rows)
+    hitting = _by_category(rows, "hitting")
+    assert hitting["H"] == "180"
+    assert hitting["AVG"] == "0.311"
+
+
+def test_fielding_line_is_its_own_category():
+    rows = ingest._build_standard_stats_from_mlb({
+        "player_type": "two_way",
+        "avg": "0.282", "ab": 373, "h": 105,
+        "era": "1.79", "ip": "85.2", "p_h": 55,
+        "e": 1, "a": 8, "po": 11, "dp": 0, "fpct": "0.950", "gf": 14,
+    })
+    fielding = _by_category(rows, "fielding")
+    assert fielding["E"] == "1"
+    assert fielding["FLD%"] == "0.950"

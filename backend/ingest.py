@@ -76,12 +76,6 @@ FIELDING_METRICS = [
     ("arm_strength", "Arm Strength", "Fielding"),
 ]
 
-# Metrics whose value can't be resolved at metric-build time because it depends
-# on standard stats that are fetched later. They survive the "no value, no
-# metric" filter with an empty value and are resolved (or dropped) by a
-# post-pass — see _add_expected_obp.
-DEFERRED_VALUE_KEYS = {"xobp"}
-
 PITCHER_METRICS = [
     ("xera", "xERA", "Pitching"),
     ("xwoba", "xwOBA", "Pitching"),
@@ -590,10 +584,18 @@ def build_metrics_with_values(
     player_id: int,
     value_store: ActualValueStore,
 ) -> list[dict[str, Any]]:
-    """Build metrics with both percentile and actual values.
+    """Build metrics for every percentile Savant publishes.
 
-    Only includes metrics that have both a valid percentile AND an actual value.
-    This prevents showing metrics with empty values in the app.
+    The percentile is the metric. A value string is a nicety on top of it, and
+    for several metrics Savant publishes the ranking without exposing a value
+    column at all: batter Hard-Hit%, Squared-Up% and Arm Strength are the big
+    ones. Dropping those rows for want of a printable number meant the app
+    silently hid 253 batters' Hard-Hit%, 207 Squared-Up% and 322 Arm Strength
+    ranks that Savant itself shows, which breaks the one rule this app has.
+
+    The client renders a value-less metric as its percentile and ranks by
+    percentile everywhere, so an empty value is a display detail, not a reason
+    to throw the ranking away.
     """
     metrics: list[dict[str, Any]] = []
 
@@ -605,17 +607,7 @@ def build_metrics_with_values(
         if percentile is None:
             continue
 
-        actual_value = value_store.get_value(player_id, key, player_type)
-
-        # Skip metrics without actual values to prevent empty value issues.
-        # DEFERRED_VALUE_KEYS are the exception: their value depends on data
-        # that isn't fetched until later in build_snapshot_rows, so they ride
-        # through with a placeholder and a post-pass either fills them or
-        # removes them.
-        if not actual_value:
-            if key not in DEFERRED_VALUE_KEYS:
-                continue
-            actual_value = ""
+        actual_value = value_store.get_value(player_id, key, player_type) or ""
 
         # `actual_value` duplicated `value` verbatim and `display_value` was
         # "value · Nth", derivable from the two fields beside it. Together they
@@ -827,17 +819,25 @@ def _rank_percentiles(values: dict[int, float], lower_better: bool) -> dict[int,
     return {int(pid): max(1, min(100, int(round(pct * 100)))) for pid, pct in ranks.items()}
 
 
-def _std_stat(player: dict, *labels: str) -> Optional[float]:
-    """First of ``labels`` present in the player's standard stats, as a float."""
-    by_label = {s["label"].upper(): s["value"] for s in player.get("standard_stats", [])}
+def _std_stat(player: dict, *labels: str, category: Optional[str] = None) -> Optional[float]:
+    """First matching standard stat, optionally restricted to one side."""
     for label in labels:
-        raw = by_label.get(label.upper())
-        if raw in (None, ""):
-            continue
-        try:
-            return float(str(raw).strip())
-        except (TypeError, ValueError):
-            continue
+        key = label.upper()
+        candidates = [
+            stat for stat in player.get("standard_stats", [])
+            if stat["label"].upper() == key
+            and (category is None or stat.get("category") in (None, category))
+        ]
+        if category is not None:
+            candidates.sort(key=lambda stat: stat.get("category") != category)
+        for stat in candidates:
+            raw = stat.get("value")
+            if raw in (None, ""):
+                continue
+            try:
+                return float(str(raw).strip())
+            except (TypeError, ValueError):
+                continue
     return None
 
 
@@ -866,11 +866,11 @@ def _add_expected_obp(players: dict[int, dict], value_store: "ActualValueStore")
     direction. Pitchers use batters-faced as the denominator and BF - BB as the
     at-bat stand-in.
 
-    Anything still without a value afterwards loses the metric, matching the
-    "no value, no metric" rule the rest of the build follows.
+    Anything still without a reconstructed value keeps the published percentile
+    and renders percentile-only, matching the rest of the metric pipeline.
     """
     filled = 0
-    dropped = 0
+    unresolved = 0
 
     for pid, player in players.items():
         metrics = player.get("metrics", [])
@@ -885,13 +885,13 @@ def _add_expected_obp(players: dict[int, dict], value_store: "ActualValueStore")
             )
 
             if is_pitching:
-                denom = _std_stat(player, "BF")
-                walks = _std_stat(player, "BB")
+                denom = _std_stat(player, "BF", category="pitching")
+                walks = _std_stat(player, "BB", category="pitching")
                 at_bats = (denom - walks) if (denom is not None and walks is not None) else None
             else:
-                denom = _std_stat(player, "PA")
-                walks = _std_stat(player, "BB")
-                at_bats = _std_stat(player, "AB")
+                denom = _std_stat(player, "PA", category="hitting")
+                walks = _std_stat(player, "BB", category="hitting")
+                at_bats = _std_stat(player, "AB", category="hitting")
 
             usable = (
                 xba is not None
@@ -905,10 +905,9 @@ def _add_expected_obp(players: dict[int, dict], value_store: "ActualValueStore")
                 metric["value"] = f"{(xba * at_bats + walks) / denom:.3f}"
                 filled += 1
             else:
-                metrics.remove(metric)
-                dropped += 1
+                unresolved += 1
 
-    logger.info("xOBP: filled %d, dropped %d for missing inputs", filled, dropped)
+    logger.info("xOBP: filled %d, left %d percentile-only", filled, unresolved)
 
 
 def _add_calculated_rates(players: dict[int, dict], qualified_pids: set[int]) -> None:
@@ -932,27 +931,16 @@ def _add_calculated_rates(players: dict[int, dict], qualified_pids: set[int]) ->
     for pid, player in players.items():
         if pid not in qualified_pids:
             continue
-        pa = None
-        so = None
-        bb = None
-        bf = None
-
-        for s in player.get("standard_stats", []):
-            label = s["label"]
-            try:
-                if label == "PA":
-                    pa = int(s["value"])
-                elif label == "SO":
-                    so = int(s["value"])
-                elif label == "BB":
-                    bb = int(s["value"])
-                elif label == "BF":
-                    bf = int(s["value"])
-            except (ValueError, TypeError):
-                pass
-
         player_type = player.get("player_type", "batter")
-        is_pitcher = player_type == "pitcher" or (player_type == "two_way" and bf is not None)
+        is_pitcher = player_type == "pitcher" or (
+            player_type == "two_way"
+            and _std_stat(player, "BF", category="pitching") is not None
+        )
+        category = "pitching" if is_pitcher else "hitting"
+        pa = _std_stat(player, "PA", category="hitting")
+        so = _std_stat(player, "SO", category=category)
+        bb = _std_stat(player, "BB", category=category)
+        bf = _std_stat(player, "BF", category="pitching")
 
         # For pitchers, batters-faced is the only correct denominator. The
         # batter-style PA returned by pitching_stats_bref reflects the pitcher's
@@ -1153,8 +1141,11 @@ def build_snapshot_rows(season: int) -> list[dict]:
             for key in ["avg", "obp", "slg", "ops", "era", "whip"]:
                 if not merged.get(key) and bref_data.get(key):
                     merged[key] = bref_data[key]
-            # Use bref counting stats if mlb is missing them
+            # Use bref counting stats if mlb is missing them. The p_-prefixed
+            # keys are the pitching side of the five labels that collide with
+            # batting; they have to be listed or a pitcher's line can't fall back.
             for key in ["hr", "rbi", "r", "h", "doubles", "triples", "bb", "so", "sb", "cs", "pa", "ab",
+                       "p_h", "p_r", "p_hr", "p_bb", "p_so",
                        "wins", "losses", "saves", "ip", "er", "qs", "g", "gs", "bf"]:
                 if merged.get(key, 0) == 0 and bref_data.get(key, 0) != 0:
                     merged[key] = bref_data[key]
@@ -1255,6 +1246,14 @@ def _fetch_mlb_standard_stats(player_ids: list[int], season: int) -> dict[int, d
                             stat = split.get("stat", {})
                             if stat:
                                 existing = stats_by_player.get(pid, {})
+                                # Five of these keys (h, r, hr, bb, so) mean one
+                                # thing to a hitter and the opposite to a pitcher,
+                                # and a two-way player has both lines. Writing them
+                                # unprefixed silently overwrote Ohtani's batting
+                                # totals with what he ALLOWED on the mound, so his
+                                # row claimed a .282 average on 55 hits in 373 AB.
+                                # The pitching side is namespaced; the hitting side
+                                # keeps the bare keys.
                                 existing.update({
                                     "era": stat.get("era", ""),
                                     "whip": stat.get("whip", ""),
@@ -1262,12 +1261,12 @@ def _fetch_mlb_standard_stats(player_ids: list[int], season: int) -> dict[int, d
                                     "losses": stat.get("losses", 0),
                                     "saves": stat.get("saves", 0),
                                     "ip": stat.get("inningsPitched", ""),
-                                    "h": stat.get("hits", 0),
-                                    "r": stat.get("runs", 0),
+                                    "p_h": stat.get("hits", 0),
+                                    "p_r": stat.get("runs", 0),
                                     "er": stat.get("earnedRuns", 0),
-                                    "hr": stat.get("homeRuns", 0),
-                                    "bb": stat.get("baseOnBalls", 0),
-                                    "so": stat.get("strikeOuts", 0),
+                                    "p_hr": stat.get("homeRuns", 0),
+                                    "p_bb": stat.get("baseOnBalls", 0),
+                                    "p_so": stat.get("strikeOuts", 0),
                                     "k9": stat.get("strikeoutsPer9Inn", ""),
                                     "bb9": stat.get("walksPer9Inn", ""),
                                     "kbb": stat.get("strikeoutWalkRatio", ""),
@@ -1416,12 +1415,15 @@ def _fetch_bref_standard_stats(season: int) -> dict[int, dict[str, Any]]:
                 "losses": int(row.get("L", 0)) if pd.notna(row.get("L")) else 0,
                 "saves": int(row.get("SV", 0)) if pd.notna(row.get("SV")) else 0,
                 "ip": str(row.get("IP", "")) if pd.notna(row.get("IP")) else "",
-                "h": int(row.get("H", 0)) if pd.notna(row.get("H")) else 0,
-                "r": int(row.get("R", 0)) if pd.notna(row.get("R")) else 0,
+                # Namespaced for the same reason as the MLB path: these five
+                # labels mean the opposite thing on the mound, and overwriting
+                # them destroyed a two-way player's batting line.
+                "p_h": int(row.get("H", 0)) if pd.notna(row.get("H")) else 0,
+                "p_r": int(row.get("R", 0)) if pd.notna(row.get("R")) else 0,
                 "er": int(row.get("ER", 0)) if pd.notna(row.get("ER")) else 0,
-                "hr": int(row.get("HR", 0)) if pd.notna(row.get("HR")) else 0,
-                "bb": int(row.get("BB", 0)) if pd.notna(row.get("BB")) else 0,
-                "so": int(row.get("SO", 0)) if pd.notna(row.get("SO")) else 0,
+                "p_hr": int(row.get("HR", 0)) if pd.notna(row.get("HR")) else 0,
+                "p_bb": int(row.get("BB", 0)) if pd.notna(row.get("BB")) else 0,
+                "p_so": int(row.get("SO", 0)) if pd.notna(row.get("SO")) else 0,
                 "k9": "",  # Not directly available in bref
                 "bb9": "",  # Not directly available in bref
                 "kbb": "",  # Not directly available in bref
@@ -1440,11 +1442,51 @@ def _fetch_bref_standard_stats(season: int) -> dict[int, dict[str, Any]]:
     return stats_by_player
 
 
-def _build_standard_stats_from_mlb(stats: dict[str, Any]) -> list[dict[str, str]]:
-    """Convert MLB Stats API data to standard_stats JSON format."""
-    result: list[dict[str, str]] = []
+def _format_standard_value(key: str, val: Any) -> str:
+    """Box-score formatting: rate stats to 3 places, ratios to 2, counts bare."""
+    if key in ("avg", "obp", "slg", "ops"):
+        try:
+            return f"{float(val):.3f}"
+        except (ValueError, TypeError):
+            return str(val)
+    if key in ("era", "whip", "k9", "bb9", "kbb"):
+        try:
+            return f"{float(val):.2f}"
+        except (ValueError, TypeError):
+            return str(val)
+    if isinstance(val, (int, float)) and float(val).is_integer():
+        return str(int(val))
+    return str(val)
 
-    if stats.get("player_type") in ("batter", "two_way"):
+
+def _build_standard_stats_from_mlb(stats: dict[str, Any]) -> list[dict[str, str]]:
+    """Convert MLB Stats API data to standard_stats JSON format.
+
+    Every entry carries its own category. A two-way player legitimately has two
+    stats labelled "H" (hits collected, hits allowed) and they are only telling
+    apart by category, so the id is namespaced too and the two blocks no longer
+    deduplicate against each other by label. For a one-way player nothing about
+    the output changes except the added category field.
+    """
+    result: list[dict[str, str]] = []
+    player_type = stats.get("player_type")
+
+    def emit(key: str, label: str, category: str, slug: str) -> None:
+        # p_-prefixed pitching keys are the current shape; the bare key is the
+        # fallback so a dict assembled before the rename still builds.
+        val = stats.get(key)
+        if (val is None or val == "") and key.startswith("p_"):
+            val = stats.get(key[2:])
+        if val is None or val == "":
+            return
+        result.append({
+            "id": f"std-{slug}-{label}",
+            "label": label,
+            "value": _format_standard_value(key, val),
+            "category": category,
+        })
+
+    if player_type in ("batter", "two_way"):
         hitters = [
             ("avg", "AVG"), ("obp", "OBP"), ("slg", "SLG"), ("ops", "OPS"),
             ("hr", "HR"), ("rbi", "RBI"), ("r", "R"), ("h", "H"),
@@ -1452,51 +1494,25 @@ def _build_standard_stats_from_mlb(stats: dict[str, Any]) -> list[dict[str, str]
             ("sb", "SB"), ("cs", "CS"), ("pa", "PA"), ("ab", "AB"),
         ]
         for key, label in hitters:
-            val = stats.get(key)
-            if val is not None and val != "":
-                if key in ("avg", "obp", "slg", "ops") and val != "":
-                    try:
-                        val_str = f"{float(val):.3f}"
-                    except (ValueError, TypeError):
-                        val_str = str(val)
-                else:
-                    val_str = str(int(val)) if isinstance(val, (int, float)) and float(val).is_integer() else str(val)
-                result.append({"id": f"std-{label}", "label": label, "value": val_str})
+            emit(key, label, "hitting", "hit")
 
-    if stats.get("player_type") in ("pitcher", "two_way"):
+    if player_type in ("pitcher", "two_way"):
+        # h/r/hr/bb/so are namespaced upstream so a two-way player's batting
+        # line survives; emit() falls back to the bare key for a pure pitcher.
         pitchers = [
             ("era", "ERA"), ("whip", "WHIP"), ("wins", "W"), ("losses", "L"), ("saves", "SV"),
-            ("ip", "IP"), ("h", "H"), ("r", "R"), ("er", "ER"), ("hr", "HR"),
-            ("bb", "BB"), ("so", "SO"), ("k9", "K/9"), ("bb9", "BB/9"), ("kbb", "K/BB"),
+            ("ip", "IP"), ("p_h", "H"), ("p_r", "R"), ("er", "ER"), ("p_hr", "HR"),
+            ("p_bb", "BB"), ("p_so", "SO"), ("k9", "K/9"), ("bb9", "BB/9"), ("kbb", "K/BB"),
             ("qs", "QS"), ("g", "G"), ("gs", "GS"), ("bf", "BF"),
         ]
-        existing_labels = {s["label"] for s in result}
         for key, label in pitchers:
-            if label in existing_labels:
-                continue
-            val = stats.get(key)
-            if val is not None and val != "":
-                if key in ("era", "whip", "k9", "bb9", "kbb"):
-                    try:
-                        val_str = f"{float(val):.2f}"
-                    except (ValueError, TypeError):
-                        val_str = str(val)
-                else:
-                    val_str = str(int(val)) if isinstance(val, (int, float)) and float(val).is_integer() else str(val)
-                result.append({"id": f"std-{label}", "label": label, "value": val_str})
+            emit(key, label, "pitching", "pit")
 
     # Fielding line, for everyone who took the field. Kept out of the two
     # blocks above because a two-way player has one glove, not two.
     fielding = [("e", "E"), ("a", "A"), ("po", "PO"), ("dp", "DP"), ("fpct", "FLD%"), ("gf", "GF")]
-    existing_labels = {s["label"] for s in result}
     for key, label in fielding:
-        if label in existing_labels:
-            continue
-        val = stats.get(key)
-        if val is None or val == "":
-            continue
-        val_str = str(int(val)) if isinstance(val, (int, float)) and float(val).is_integer() else str(val)
-        result.append({"id": f"std-{label}", "label": label, "value": val_str})
+        emit(key, label, "fielding", "fld")
 
     return result
 

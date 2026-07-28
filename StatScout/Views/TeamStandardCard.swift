@@ -391,9 +391,15 @@ struct TeamStandardCard: View {
         var weighted: [String: (num: Double, den: Double)] = [:]
 
         for player in pool {
-            let stats = player.standardStats ?? []
+            // Only this side's line. A two-way player carries both, and summing
+            // the whole block counted his hits and the hits he allowed into the
+            // same team total.
+            let stats = (player.standardStats ?? []).filter {
+                let category = $0.resolvedCategory(playerType: player.playerType)
+                return category == side.category || category == .fielding
+            }
             func raw(_ label: String) -> Double? {
-                stats.first { $0.label.uppercased() == label }
+                stats.stat(label, category: side.category, playerType: player.playerType)
                     .flatMap { DashboardViewModel.rawNumeric($0.value) }
             }
             for stat in stats {
