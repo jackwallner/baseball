@@ -157,9 +157,20 @@ struct HotColdView: View {
             )
 
             SavantSegmented(
-                segments: RecentWindow.allCases.map { .init(value: $0, label: $0.label) },
+                segments: RecentWindow.allCases.map { .init(value: $0, label: $0.segmentLabel) },
                 selection: $viewModel.recentWindow
             )
+
+            // The window is calendar days; the per-row "· 12G" is how many
+            // games the player actually appeared in inside it. Two numbers of
+            // different kinds sat next to each other with nothing saying which
+            // was which, so the picker read as a game count.
+            Text("Calendar days, not games — G is games played in the window.")
+                .font(SavantType.micro)
+                .tracking(0.2)
+                .foregroundStyle(SavantPalette.inkTertiary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .padding(.horizontal, 12)
         .padding(.top, 12)

@@ -312,7 +312,7 @@ struct DashboardView: View {
     private var recentWindowRow: some View {
         HStack(spacing: 6) {
             SavantSegmented(
-                segments: RecentWindow.allCases.map { .init(value: $0, label: $0.label) },
+                segments: RecentWindow.allCases.map { .init(value: $0, label: $0.segmentLabel) },
                 selection: $viewModel.recentWindow
             )
             if viewModel.isRecentFormLoading {
@@ -472,9 +472,7 @@ struct DashboardView: View {
                                 rank: index + 1,
                                 player: player,
                                 metricLabel: sortMetric.label,
-                                metricCategory: sortMetric.category,
-                                trendDelta: trendDelta(for: player, metric: sortMetric.label),
-                                trendDecimals: sortMetric.label.map { RecentMetricKey.decimals(for: $0) } ?? 3
+                                metricCategory: sortMetric.category
                             )
                         }
                         .buttonStyle(.plain)
@@ -491,24 +489,6 @@ struct DashboardView: View {
         .padding(.horizontal, 12)
         .padding(.top, 8)
         .padding(.bottom, 12)
-    }
-
-    /// Recent-vs-prior change in the displayed metric for one row.
-    ///
-    /// StatScout+ only, and absent rather than obscured without it. The column
-    /// used to render for free users under a blur, which made the league's
-    /// headline board look like it had failed to load its own numbers. A free
-    /// user now gets a clean, complete leaderboard; the trend column appears
-    /// when the subscription does.
-    private func trendDelta(for player: Player, metric label: String?) -> Double? {
-        guard store.isPro,
-              let label,
-              let form = viewModel.recentForm(for: player.playerId) else { return nil }
-        let key = RecentMetricKey.key(
-            for: label,
-            isPitcher: player.playerType?.lowercased() == "pitcher"
-        )
-        return form.delta[key]
     }
 
     private var loadingCard: some View {

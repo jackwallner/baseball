@@ -1,35 +1,46 @@
 import SwiftUI
 
-enum StandardStatCategory: String, CaseIterable {
-    case hitting = "Hitting"
-    case pitching = "Pitching"
-}
-
+/// The traditional-stat leaderboard, split by the same four categories the
+/// Statcast board uses.
+///
+/// It used to offer Hitting and Pitching only, drawn as two big filled buttons,
+/// so switching Advanced → Standard replaced a four-tab underlined header with a
+/// two-button row and the page appeared to become a different screen. The mode
+/// chip changes the vocabulary, not the furniture: same tabs, same order, same
+/// control. Fielding and Running are the categories that had no traditional
+/// counterpart before, and now do, errors and the glove line for one, the
+/// stolen-base line for the other.
 struct StandardStatsLeadersView: View {
     @EnvironmentObject private var store: StoreService
     let players: [Player]
     /// Set when arrived at by tapping a specific stat on a player profile, so
     /// the leaderboard opens on the stat that was tapped rather than AVG.
     var season: Int? = nil
-    @State private var selectedCategory: StandardStatCategory
+    /// Advanced / Standard / Best-Worst, when this board is shown inside
+    /// `StatsView`. Rides in this board's own control row, exactly as it does
+    /// on the Advanced board, so the two headers are the same header.
+    var statsMode: Binding<StatsMode>? = nil
+    @State private var selectedCategory: MetricCategory
     @State private var selectedStat: String
     @State private var sortDescending = true
 
     init(
         players: [Player],
         initialStat: String = "AVG",
-        initialCategory: StandardStatCategory = .hitting,
-        season: Int? = nil
+        initialCategory: MetricCategory = .hitting,
+        season: Int? = nil,
+        statsMode: Binding<StatsMode>? = nil
     ) {
         self.players = players
         self.season = season
+        self.statsMode = statsMode
         _selectedCategory = State(initialValue: initialCategory)
         _selectedStat = State(initialValue: initialStat)
     }
 
     /// Stats where lower is the better outcome, sort defaults to ascending so the
     /// leader (lowest ERA, fewest losses, etc.) sits at the top.
-    private static let lowerIsBetter: Set<String> = ["ERA", "WHIP", "BB/9", "L"]
+    private static let lowerIsBetter: Set<String> = ["ERA", "WHIP", "BB/9", "L", "E", "CS"]
 
     // SO is contextual: pitcher strikeouts (good) vs batter strikeouts (bad).
     // The pitching tab keeps SO as "more is better"; the hitting tab flips it.
@@ -44,18 +55,26 @@ struct StandardStatsLeadersView: View {
     var availableStats: [String] {
         switch selectedCategory {
         case .hitting:
-            return ["AVG", "HR", "RBI", "OBP", "SLG", "OPS", "H", "R", "2B", "3B", "SB", "BB", "SO"]
+            return ["AVG", "HR", "RBI", "OBP", "SLG", "OPS", "H", "R", "2B", "3B", "BB", "SO"]
         case .pitching:
             return ["ERA", "WHIP", "W", "L", "SV", "SO", "IP", "K/9", "BB/9", "QS"]
+        case .fielding:
+            return ["E", "FLD%", "A", "PO", "DP"]
+        case .running:
+            return ["SB", "SB%", "CS", "3B", "R"]
         }
     }
-    
+
+    /// Rates that are computed here rather than stored, because the pipeline
+    /// ships the components and not the ratio.
+    private static let derivedStats: Set<String> = ["SB%"]
+
     // Filter players who have the selected stat
     var filteredPlayers: [Player] {
         players.filter { player in
-            guard let stats = player.standardStats else { return false }
+            guard player.standardStats != nil else { return false }
             guard matchesPlayerType(player: player) else { return false }
-            return stats.contains { $0.label == selectedStat }
+            return numericStat(for: player) != nil
         }
     }
 
@@ -76,105 +95,158 @@ struct StandardStatsLeadersView: View {
         case .pitching:
             return (type == "pitcher" || type == "two_way")
                 && player.metrics.contains { $0.category == .pitching }
+        case .fielding, .running:
+            // The glove and the legs belong to position players, and the
+            // qualification signal is still a hitting percentile: requiring a
+            // *fielding* percentile would cut the board to the handful of
+            // players Savant publishes OAA for.
+            return type != "pitcher"
+                && player.metrics.contains { $0.category == .hitting }
         }
     }
-    
+
     // Sort players by the selected stat value
     var sortedPlayers: [Player] {
         filteredPlayers.sorted { p1, p2 in
-            let v1 = statValue(for: p1)
-            let v2 = statValue(for: p2)
+            let v1 = numericStat(for: p1) ?? 0
+            let v2 = numericStat(for: p2) ?? 0
             return sortDescending ? v1 > v2 : v1 < v2
         }
     }
-    
-    // Get numeric value for sorting
-    private func statValue(for player: Player) -> Double {
-        guard let stats = player.standardStats,
-              let stat = stats.first(where: { $0.label == selectedStat }) else {
-            return 0
+
+    /// Numeric value of the selected stat, nil when this player has no figure
+    /// for it. Derived rates are computed from their components.
+    private func numericStat(for player: Player) -> Double? {
+        guard let stats = player.standardStats else { return nil }
+        if selectedStat == "SB%" {
+            let sb = rawValue("SB", in: stats)
+            let cs = rawValue("CS", in: stats)
+            guard let sb, let cs, sb + cs > 0 else { return nil }
+            return sb / (sb + cs) * 100
         }
-        let cleaned = stat.value.hasPrefix(".") ? "0" + stat.value : stat.value
-        return Double(cleaned) ?? 0
+        return rawValue(selectedStat, in: stats)
     }
-    
+
+    private func rawValue(_ label: String, in stats: [StandardStat]) -> Double? {
+        guard let stat = stats.first(where: { $0.label == label }) else { return nil }
+        let cleaned = stat.value.hasPrefix(".") ? "0" + stat.value : stat.value
+        return Double(cleaned)
+    }
+
     // Get formatted stat value for display
     private func statDisplay(for player: Player) -> String {
+        if Self.derivedStats.contains(selectedStat) {
+            guard let value = numericStat(for: player) else { return "-" }
+            return String(format: "%.1f%%", value)
+        }
         guard let stats = player.standardStats,
               let stat = stats.first(where: { $0.label == selectedStat }) else {
             return "-"
         }
         return stat.value
     }
-    
+
     var body: some View {
         ScrollView {
-            VStack(spacing: 16) {
-                // Category selector
+            VStack(spacing: 0) {
                 categorySelector
-
-                // Stat selector
-                statSelector
-
-                // Leaders list
+                controlRow
                 leadersList
+                    .padding(.horizontal, 12)
+                    .padding(.top, 8)
+                    .padding(.bottom, 12)
+                // Lets the last row scroll through the floating tab bar.
+                Color.clear.frame(height: 88)
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 12)
         }
         .scrollBounceBehavior(.basedOnSize)
         .background(SavantPalette.canvas.ignoresSafeArea())
         .navigationBarTitleDisplayMode(.inline)
-    }
-    
-    private var categorySelector: some View {
-        HStack(spacing: 8) {
-            ForEach(StandardStatCategory.allCases, id: \.self) { category in
-                Button(action: {
-                    selectedCategory = category
-                    let stat = availableStats.first ?? "AVG"
-                    selectedStat = stat
-                    sortDescending = defaultDescending(for: stat)
-                    let generator = UIImpactFeedbackGenerator(style: .light)
-                    generator.impactOccurred()
-                }) {
-                    Text(category.rawValue)
-                        .font(SavantType.bodyBold)
-                        .foregroundStyle(selectedCategory == category ? .white : SavantPalette.ink)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 44)
-                        .background(selectedCategory == category ? SavantPalette.savantRed : SavantPalette.surface)
-                        .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
-                }
-                .buttonStyle(.plain)
-            }
+        .onChange(of: selectedCategory) { _, _ in
+            guard !availableStats.contains(selectedStat) else { return }
+            let stat = availableStats.first ?? "AVG"
+            selectedStat = stat
+            sortDescending = defaultDescending(for: stat)
         }
     }
-    
-    private var statSelector: some View {
+
+    /// The same underlined four-tab header the Advanced board carries, in the
+    /// same place, so the mode chip only changes the stats underneath it.
+    private var categorySelector: some View {
+        CategoryFilter(
+            selectedCategory: Binding(
+                get: { selectedCategory },
+                set: { selectedCategory = $0 ?? .hitting }
+            )
+        )
+        .padding(.horizontal, 12)
+        .padding(.top, 8)
+    }
+
+    /// Mode chip, then the sorted stat, then the stat menu. Same row, same
+    /// order, same three shapes as the Advanced board's control row: the twelve
+    /// capsules that used to live here were a fourth kind of control that only
+    /// this screen had.
+    private var controlRow: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
+                if let statsMode {
+                    StatsModeMenu(mode: statsMode)
+                }
+                Button {
+                    sortDescending.toggle()
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                } label: {
+                    SavantChip(
+                        title: selectedStat,
+                        trailing: .sortArrow(descending: sortDescending)
+                    )
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Sorted by \(selectedStat), \(sortDescending ? "highest first" : "lowest first")")
+                .accessibilityHint("Tap to flip sort direction")
+
+                statMenu
+            }
+            .padding(.horizontal, 12)
+            // Room for the capsule strokes, which a tight frame would clip.
+            .padding(.vertical, 1)
+        }
+        .scrollBounceBehavior(.basedOnSize)
+        .scrollClipDisabled()
+        .frame(height: SavantControl.height + 2)
+        .padding(.top, 8)
+    }
+
+    private var statMenu: some View {
+        Menu {
+            Section("Stat") {
                 ForEach(availableStats, id: \.self) { stat in
-                    Button(action: {
+                    Button {
                         selectedStat = stat
                         sortDescending = defaultDescending(for: stat)
-                        let generator = UIImpactFeedbackGenerator(style: .light)
-                        generator.impactOccurred()
-                    }) {
-                        Text(stat)
-                            .font(SavantType.body)
-                            .foregroundStyle(selectedStat == stat ? .white : SavantPalette.ink)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 8)
-                            .background(selectedStat == stat ? SavantPalette.savantNavy : SavantPalette.surface)
-                            .clipShape(Capsule())
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    } label: {
+                        if stat == selectedStat {
+                            Label(stat, systemImage: "checkmark")
+                        } else {
+                            Text(stat)
+                        }
                     }
-                    .buttonStyle(.plain)
                 }
             }
+        } label: {
+            SavantChip(
+                title: "Stat",
+                systemImage: "line.3.horizontal.decrease.circle",
+                trailing: .chevron
+            )
         }
+        .menuOrder(.fixed)
+        .accessibilityLabel("Stat")
+        .accessibilityValue(selectedStat)
     }
-    
+
     private var leadersList: some View {
         VStack(spacing: 0) {
             // Header - tap stat column to toggle sort direction
@@ -218,7 +290,7 @@ struct StandardStatsLeadersView: View {
                 .overlay(Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline), alignment: .bottom)
             }
             .buttonStyle(.plain)
-            
+
             // Players
             if sortedPlayers.isEmpty {
                 ContentUnavailableView {
@@ -241,7 +313,7 @@ struct StandardStatsLeadersView: View {
                 .stroke(SavantPalette.hairline, lineWidth: 0.5)
         )
     }
-    
+
     private func playerRow(rank: Int, player: Player) -> some View {
         NavigationLink(value: player) {
             HStack(spacing: 0) {

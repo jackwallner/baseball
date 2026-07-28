@@ -14,6 +14,8 @@ struct PlayerProfileView: View {
     /// Pre-aggregated rolling window for this player, when one is loaded.
     var recentFormLookup: ((Int, RecentWindow) -> RecentForm?)?
     var loadRecentForm: ((RecentWindow) async -> Void)?
+    /// Lets a comparison pushed from here swap either side out in place.
+    var comparisonCatalog: ComparisonCatalog?
     @State private var showPercentileInfo = false
     @State private var selectedTab: PlayerStatTab = .statcast
     @State private var selectedPercentileSeason: Int? = nil
@@ -167,7 +169,11 @@ struct PlayerProfileView: View {
             TrialPitchSheet(trigger: trigger)
         }
         .navigationDestination(item: $comparisonRoute) { route in
-            PlayerComparisonView(playerA: route.playerA, playerB: route.playerB)
+            PlayerComparisonView(
+                playerA: route.playerA,
+                playerB: route.playerB,
+                catalog: comparisonCatalog
+            )
         }
         .onAppear {
             // Defer the first-impression pitch: a user verifying one stat from a
@@ -627,7 +633,7 @@ struct PlayerProfileView: View {
 
     private var recentWindowPicker: some View {
         SavantSegmented(
-            segments: RecentWindow.allCases.map { .init(value: $0, label: $0.label) },
+            segments: RecentWindow.allCases.map { .init(value: $0, label: $0.segmentLabel) },
             selection: Binding(
                 get: { RecentWindow(rawValue: recentWindowDays) ?? .fortnight },
                 set: { recentWindowDays = $0.rawValue }
@@ -834,7 +840,19 @@ struct PlayerProfileView: View {
             ? ["ERA", "WHIP", "L", "H", "R", "ER", "HR", "BB", "BB/9",
                // On a pitcher's line these are what hitters did against them.
                "AVG", "OBP", "SLG", "OPS"]
-            : ["SO", "CS"]
+            : ["SO", "CS", "E"]
+    }
+
+    /// Which of the four boards a traditional stat belongs to, so tapping a
+    /// row opens the leaderboard that actually lists it. Errors and the glove
+    /// line moved to Fielding, the stolen-base line to Running, and without
+    /// this a hitter's E row pushed the Hitting board, which has no E column.
+    private static func standardCategory(for label: String, isPitcher: Bool) -> MetricCategory {
+        switch label.uppercased() {
+        case "E", "A", "PO", "DP", "FLD%", "GF": return .fielding
+        case "SB", "CS", "SB%": return .running
+        default: return isPitcher ? .pitching : .hitting
+        }
     }
 
     /// Counting stats. Ranking these is honest but playing-time driven, a
@@ -843,6 +861,7 @@ struct PlayerProfileView: View {
     private static let countingStats: Set<String> = [
         "HR", "R", "RBI", "H", "2B", "3B", "BB", "SO", "SB", "CS", "PA", "AB",
         "W", "L", "SV", "IP", "ER", "QS", "G", "GS", "BF",
+        "E", "A", "PO", "DP", "GF",
     ]
 
     /// Percentile rank for a traditional stat against the league.
@@ -992,7 +1011,7 @@ struct PlayerProfileView: View {
 
     private var standardWindowPicker: some View {
         SavantSegmented(
-            segments: RecentWindow.allCases.map { .init(value: $0, label: $0.label) },
+            segments: RecentWindow.allCases.map { .init(value: $0, label: $0.segmentLabel) },
             selection: $standardWindow
         )
         .padding(.horizontal, SavantGeo.padInline)
@@ -1011,7 +1030,7 @@ struct PlayerProfileView: View {
 
             NavigationLink(value: StandardStatRoute(
                 stat: metric.label,
-                category: isPitcher ? .pitching : .hitting,
+                category: Self.standardCategory(for: metric.label, isPitcher: isPitcher),
                 season: activeSeason
             )) {
                 Group {
@@ -1027,7 +1046,7 @@ struct PlayerProfileView: View {
                         DualMetricBar(
                             season: metric,
                             recent: recent,
-                            recentCaption: "Last \(standardWindow.rawValue)d"
+                            recentCaption: standardWindow.segmentLabel
                         )
                     }
                 }

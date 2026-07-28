@@ -2,30 +2,30 @@ import SwiftUI
 
 struct YearComparisonView: View {
     let history: [Player]
-    @State private var yearA: Int = 0
-    @State private var yearB: Int = 0
-
-    // yearA is the later (more recent) year, yearB is the earlier year
-    private var recentYear: Int { max(yearA, yearB) }
-    private var priorYear: Int { min(yearA, yearB) }
+    /// The baseline season, on the left, and the season being read against it,
+    /// on the right. They used to be sorted into "recent" and "prior" by
+    /// `max`/`min`, which meant the two menus were interchangeable and the
+    /// direction of the comparison couldn't be chosen at all.
+    @State private var fromYear: Int = 0
+    @State private var toYear: Int = 0
 
     private var availableYears: [Int] {
         history.compactMap(\.season).uniqued().sorted(by: >)
     }
 
-    private var playerYearA: Player? {
-        history.first { $0.season == recentYear }
+    private var playerTo: Player? {
+        history.first { $0.season == toYear }
     }
 
-    private var playerYearB: Player? {
-        history.first { $0.season == priorYear }
+    private var playerFrom: Player? {
+        history.first { $0.season == fromYear }
     }
 
     var body: some View {
         VStack(spacing: 12) {
             yearPickerCard
 
-            if let p1 = playerYearA, let p2 = playerYearB {
+            if let p1 = playerTo, let p2 = playerFrom {
                 overallChangeCard(p1: p1, p2: p2)
                 comparisonContent(p1: p1, p2: p2)
             } else {
@@ -37,12 +37,14 @@ struct YearComparisonView: View {
         .onAppear(perform: snapSelections)
     }
 
+    /// Defaults read left to right in time: the season before last on the left,
+    /// the newest on the right.
     private func snapSelections() {
         let years = availableYears
         guard !years.isEmpty else { return }
-        if !years.contains(yearA) { yearA = years.first ?? 0 }
-        if !years.contains(yearB) || yearB == yearA {
-            yearB = years.first(where: { $0 != yearA }) ?? yearB
+        if !years.contains(toYear) { toYear = years.first ?? 0 }
+        if !years.contains(fromYear) || fromYear == toYear {
+            fromYear = years.first(where: { $0 != toYear }) ?? fromYear
         }
     }
 
@@ -52,7 +54,7 @@ struct YearComparisonView: View {
         } description: {
             Text(availableYears.isEmpty
                  ? "No historical data is available for this player."
-                 : "Data for \(recentYear) or \(priorYear) is not available.")
+                 : "Data for \(String(fromYear)) or \(String(toYear)) is not available.")
         }
         .padding(.vertical, 48)
         .frame(maxWidth: .infinity)
@@ -69,11 +71,29 @@ struct YearComparisonView: View {
     private var yearPickerCard: some View {
         VStack(spacing: 12) {
             HStack(spacing: 12) {
-                yearButton(year: $yearA, otherYear: yearB, label: yearA > 0 ? String(yearA) : "Select")
-                Image(systemName: "arrow.right")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(SavantPalette.inkTertiary)
-                yearButton(year: $yearB, otherYear: yearA, label: yearB > 0 ? String(yearB) : "Select")
+                yearButton(year: $fromYear, otherYear: toYear, caption: "From",
+                           label: fromYear > 0 ? String(fromYear) : "Select")
+                // Flips which season is the baseline and which is the result,
+                // one tap instead of two menus. The table below re-labels
+                // itself, so a "how far has he come" reading and a "what has
+                // he lost" reading are the same tap apart.
+                Button {
+                    let held = fromYear
+                    fromYear = toYear
+                    toYear = held
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                } label: {
+                    Image(systemName: "arrow.left.arrow.right")
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundStyle(SavantPalette.inkSecondary)
+                        .frame(width: 34, height: 34)
+                        .background(SavantPalette.surfaceAlt)
+                        .clipShape(Circle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Swap the two seasons")
+                yearButton(year: $toYear, otherYear: fromYear, caption: "To",
+                           label: toYear > 0 ? String(toYear) : "Select")
             }
         }
         .padding(16)
@@ -85,7 +105,7 @@ struct YearComparisonView: View {
         )
     }
 
-    private func yearButton(year: Binding<Int>, otherYear: Int, label: String) -> some View {
+    private func yearButton(year: Binding<Int>, otherYear: Int, caption: String, label: String) -> some View {
         Menu {
             ForEach(availableYears.filter { $0 != otherYear }, id: \.self) { y in
                 Button {
@@ -104,7 +124,7 @@ struct YearComparisonView: View {
                 Text(label)
                     .font(SavantType.statLarge)
                     .foregroundStyle(SavantPalette.ink)
-                Text(year.wrappedValue == recentYear ? "Recent" : "Prior")
+                Text(caption)
                     .font(SavantType.micro)
                     .tracking(0.3)
                     .foregroundStyle(SavantPalette.inkTertiary)
@@ -144,7 +164,7 @@ struct YearComparisonView: View {
                 Text("Overall Average")
                     .font(SavantType.small)
                     .foregroundStyle(SavantPalette.inkSecondary)
-                Text("\(p2.overallPercentile)% (\(String(priorYear))) → \(p1.overallPercentile)% (\(String(recentYear)))")
+                Text("\(p2.overallPercentile)% (\(String(fromYear))) → \(p1.overallPercentile)% (\(String(toYear)))")
                     .font(SavantType.bodyBold)
                     .foregroundStyle(SavantPalette.ink)
             }
@@ -230,12 +250,12 @@ struct YearComparisonView: View {
                 .foregroundStyle(SavantPalette.inkSecondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-            Text(String(priorYear))
+            Text(String(fromYear))
                 .font(SavantType.micro)
                 .foregroundStyle(SavantPalette.inkSecondary)
                 .frame(width: 72)
 
-            Text(String(recentYear))
+            Text(String(toYear))
                 .font(SavantType.micro)
                 .foregroundStyle(SavantPalette.inkSecondary)
                 .frame(width: 72)

@@ -388,11 +388,13 @@ struct LeaderboardTableHeader: View {
 
 /// Recent-vs-prior change for one metric, drawn as an arrow and a magnitude.
 ///
-/// Never blurred. Where the trend is a StatScout+ feature the column is simply
-/// absent for free users: a smeared number on the main leaderboard read as
-/// broken data rather than as a locked feature, and the board's job is to be
-/// trustworthy at a glance. The pitch lives on the controls that open the
-/// feature, not on top of the numbers.
+/// Drawn only on boards that are explicitly in a rolling-window mode: the
+/// Trends tab, the team form cards, the team roster with Recent on. It used to
+/// ride along as an extra column on the season leaderboard too, where it only
+/// rendered for the players the window happened to cover: rows with a trend
+/// lost their percentile bar and rows without it kept one, so the app's
+/// most-read column changed shape halfway down the list. Trends are a screen,
+/// not a garnish on the season leaderboard.
 struct TrendArrow: View {
     let delta: Double
     /// Percent-style metrics move in whole numbers, rate stats in thousandths.
@@ -443,7 +445,10 @@ struct LeaderboardTableRow: View {
     let player: Player
     var metricLabel: String? = nil
     var metricCategory: MetricCategory? = nil
-    /// Recent-vs-prior change in the displayed metric, when a window is loaded.
+    /// Recent-vs-prior change in the displayed metric. Only ever set alongside
+    /// `valueOverride`, i.e. on a board that is explicitly in its rolling-window
+    /// mode; a trend that appears on some rows of a season board and not others
+    /// is the bug this pairing exists to prevent.
     var trendDelta: Double? = nil
     var trendDecimals: Int = 3
     /// The rolling-window value, shown in place of the season number when the
@@ -522,14 +527,9 @@ struct LeaderboardTableRow: View {
                 // from their overall percentile would mislabel a different number
                 // as this column's stat. Show a muted "-" instead.
                 if displayMetric != nil || valueOverride != nil {
-                    // The mini bar and the trend column both compete for the
-                    // same edge of the row, and the trend is the more
-                    // informative of the two, the value's colour already
-                    // carries percentile. Drop the bar when a trend is present
-                    // rather than squeezing the player name. A window value
-                    // drops it too: the season percentile bar beside a
-                    // fortnight's number reads as that number's rank.
-                    if trendDelta == nil, valueOverride == nil {
+                    // A window value drops the bar: the season percentile bar
+                    // beside a fortnight's number reads as that number's rank.
+                    if valueOverride == nil {
                         PercentileBarMini(percentile: displayPercentile)
                             .frame(width: 36)
                     }

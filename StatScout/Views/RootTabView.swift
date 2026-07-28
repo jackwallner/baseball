@@ -17,7 +17,7 @@ struct MetricRoute: Hashable {
 /// Drill-down from a traditional stat row to its league leaderboard.
 struct StandardStatRoute: Hashable {
     let stat: String
-    let category: StandardStatCategory
+    let category: MetricCategory
     var season: Int? = nil
 }
 
@@ -420,7 +420,8 @@ struct PlayerProfileDestination: ViewModifier {
                     },
                     loadRecentForm: { window in
                         await viewModel.loadRecentFormIfNeeded(window: window)
-                    }
+                    },
+                    comparisonCatalog: ComparisonCatalog(viewModel: viewModel)
                 )
                     .modifier(SavantNavBarPublic())
             }
@@ -468,7 +469,11 @@ private struct StandardDestinations: ViewModifier {
                     .modifier(SavantNavBar())
             }
             .navigationDestination(for: ComparisonRoute.self) { route in
-                PlayerComparisonView(playerA: route.playerA, playerB: route.playerB)
+                PlayerComparisonView(
+                    playerA: route.playerA,
+                    playerB: route.playerB,
+                    catalog: ComparisonCatalog(viewModel: viewModel)
+                )
                     .modifier(SavantNavBar())
             }
     }
