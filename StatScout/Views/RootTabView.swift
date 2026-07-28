@@ -129,6 +129,15 @@ struct RootTabView: View {
             floatingTabBar
         }
         .ignoresSafeArea(edges: .bottom)
+        // Every tab stays mounted, so a tab's own `.task` fires once at launch
+        // and never again. Trends is the one that depends on a fetch it doesn't
+        // own the trigger for, and if that single launch attempt lost its race
+        // the board sat empty until the user poked a control. Asking on arrival
+        // is cheap: the model returns immediately when the window is cached.
+        .onChange(of: selection) { _, tab in
+            guard tab == Tab.trends.rawValue else { return }
+            Task { await viewModel.loadRecentFormIfNeeded() }
+        }
     }
 
     private enum Tab: Int, CaseIterable, Identifiable {
@@ -298,14 +307,7 @@ private struct HomeTabToolbar: ViewModifier {
     /// button, tap-through rates were correspondingly weak. The verb makes
     /// the CTA unambiguous, and the trial-aware label appears when an intro
     /// offer is available.
-    private var ctaLabel: String {
-        if let yearly = store.products.first(where: { $0.productKind == .yearly }),
-           store.isEligibleForIntroOffer(yearly),
-           yearly.introOfferLabel != nil {
-            return "Try Free"
-        }
-        return "Upgrade"
-    }
+    private var ctaLabel: String { store.upgradeCTALabel }
 
     private var upgradeButton: some View {
         Button {

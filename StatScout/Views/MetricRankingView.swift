@@ -96,6 +96,9 @@ struct MetricRankingView: View {
             )
             .padding(.horizontal, 12)
             .padding(.top, 12)
+
+            // Clearance for the floating tab bar, same as every other board.
+            Color.clear.frame(height: 88)
         }
         .scrollBounceBehavior(.basedOnSize)
         .background(SavantPalette.canvas.ignoresSafeArea())

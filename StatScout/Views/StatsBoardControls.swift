@@ -53,28 +53,154 @@ enum StandardStatCatalog {
     }
 }
 
-/// Every control that changes what the Stats board shows, behind one chip.
+/// The app's one "which stat is this ranked by" control.
 ///
-/// The row it sits on had grown to five controls and had to scroll to avoid
-/// clipping; scrolling a control row means a filter can be off-screen, which is
-/// how "the app lost its filter button" happens. Everything that answers "what
-/// am I looking at" now lives in here (the stat, in both vocabularies; which
-/// way it sorts; which positions; what counts as qualified; and whether you
-/// want the board or the best-and-worst view), which leaves the row itself at
-/// three items on every phone.
+/// Stats and Trends both answer that question and used to answer it in two
+/// different shapes: Trends put the metric on a pill you tap to change it,
+/// while Stats put an identical-looking pill on the row that *didn't* change
+/// the stat (it flipped the sort direction) and hid the actual picker two
+/// levels down inside the View menu. Same screen furniture, opposite meaning,
+/// which is the kind of thing that makes an app feel like two apps.
 ///
-/// Named "View" rather than "Filters" because it no longer only narrows the
-/// board, it chooses it.
+/// One control now, on both boards: the current stat, a chevron, and the two
+/// vocabularies as sections inside. Sections are dropped when empty, so the
+/// standalone standard board gets the same pill with one section in it.
+struct StatPickerMenu: View {
+    struct Option: Identifiable {
+        let id: String
+        let label: String
+        var isSelected: Bool = false
+    }
+
+    var statcast: [Option] = []
+    var standard: [Option] = []
+    let activeLabel: String
+    var onSelectStatcast: (Option) -> Void = { _ in }
+    var onSelectStandard: (Option) -> Void = { _ in }
+
+    var body: some View {
+        Menu {
+            if !statcast.isEmpty {
+                Section("Statcast") { rows(statcast, select: onSelectStatcast) }
+            }
+            if !standard.isEmpty {
+                Section("Standard") { rows(standard, select: onSelectStandard) }
+            }
+        } label: {
+            SavantInlinePill(systemImage: "chart.bar.fill", title: activeLabel)
+        }
+        .menuOrder(.fixed)
+        .savantMenuAppearance()
+        .accessibilityLabel("Stat")
+        .accessibilityValue(activeLabel)
+    }
+
+    private func rows(_ options: [Option], select: @escaping (Option) -> Void) -> some View {
+        ForEach(options) { option in
+            Button {
+                select(option)
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            } label: {
+                if option.isSelected {
+                    Label(option.label, systemImage: "checkmark")
+                } else {
+                    Text(option.label)
+                }
+            }
+        }
+    }
+}
+
+/// The direction toggle that rides beside the stat pill.
+///
+/// Splitting it out is what lets the pill mean one thing. It's the icon-only
+/// `SavantChip` circle, so it costs about a third of the width the old combined
+/// chip did and can't be mistaken for a chooser.
+struct SortDirectionButton: View {
+    let descending: Bool
+    let statLabel: String
+    let action: () -> Void
+
+    var body: some View {
+        Button {
+            action()
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        } label: {
+            SavantChip(trailing: .sortArrow(descending: descending))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Sort direction")
+        .accessibilityValue("\(statLabel), \(descending ? "highest first" : "lowest first")")
+        .accessibilityHint("Tap to flip sort direction")
+    }
+}
+
+/// The Stats tab's stat pill: one list, two vocabularies, where picking the
+/// stat is also picking the board it belongs to (AVG lands on the standard
+/// leaderboard, xwOBA lands back on the Statcast one).
+struct StatsBoardStatPicker: View {
+    @Bindable var viewModel: DashboardViewModel
+    let bindings: StatsBoardBindings
+
+    private var category: MetricCategory { viewModel.selectedCategory ?? .hitting }
+
+    private var activeLabel: String {
+        switch bindings.board {
+        case .advanced: return viewModel.currentSortMetric ?? viewModel.sortLabel
+        case .standard: return bindings.standardStat
+        case .bestWorst: return "Best & Worst"
+        }
+    }
+
+    var body: some View {
+        StatPickerMenu(
+            statcast: viewModel.availableSortMetrics.map { metric in
+                .init(
+                    id: metric,
+                    label: metric,
+                    isSelected: bindings.board == .advanced && metric == viewModel.currentSortMetric
+                )
+            },
+            standard: StandardStatCatalog.stats(for: category).map { stat in
+                .init(
+                    id: stat,
+                    label: stat,
+                    isSelected: bindings.board == .standard && stat == bindings.standardStat
+                )
+            },
+            activeLabel: activeLabel,
+            onSelectStatcast: { option in
+                bindings.board = .advanced
+                viewModel.setUserSortMetric(option.id)
+            },
+            onSelectStandard: { option in
+                bindings.board = .standard
+                bindings.standardStat = option.id
+                bindings.standardSortDescending = StandardStatCatalog.defaultDescending(
+                    for: option.id,
+                    category: category
+                )
+            }
+        )
+    }
+}
+
+/// What's left once the stat and its direction are back on the row as controls
+/// of their own: who's in the pool (position, qualifier) and which board is
+/// answering (leaderboard vs Best & Worst).
+///
+/// The stat used to live in here too, which kept the row short but put the most
+/// frequently changed control on the board two taps deep, and behind a label
+/// ("View") that doesn't say "stat". Trends never made that trade, and the two
+/// tabs read as different products because of it. The row is still three items
+/// wide on a 375pt phone, because the direction toggle is an icon-only circle.
+///
+/// Named "View" rather than "Filters" because it doesn't only narrow the board,
+/// it chooses which one you get.
 struct StatsViewMenu: View {
     @EnvironmentObject private var store: StoreService
     @Bindable var viewModel: DashboardViewModel
     @Binding var board: StatsBoard
-    @Binding var standardStat: String
-    /// Sort direction for whichever board is on screen. The two boards keep
-    /// their own, so this is a binding rather than a reach into the model.
-    @Binding var sortDescending: Bool
-
-    private var category: MetricCategory { viewModel.selectedCategory ?? .hitting }
 
     /// Red when something in here is narrowing or changing the board, so a
     /// filter left on isn't invisible once the menu closes.
@@ -86,8 +212,6 @@ struct StatsViewMenu: View {
 
     var body: some View {
         Menu {
-            statMenu
-            directionSection
             if viewModel.positionFilterApplies {
                 positionSection
             }
@@ -103,103 +227,6 @@ struct StatsViewMenu: View {
         }
         .menuOrder(.fixed)
         .accessibilityLabel("View options")
-    }
-
-    // MARK: - Stat
-
-    /// One list, two vocabularies. Picking a standard stat moves the board to
-    /// the standard leaderboard and picking a Statcast metric moves it back:
-    /// the choice of stat *is* the choice of board.
-    private var statMenu: some View {
-        Menu {
-            Section("Statcast") {
-                ForEach(viewModel.availableSortMetrics, id: \.self) { metric in
-                    Button {
-                        board = .advanced
-                        viewModel.setUserSortMetric(metric)
-                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                    } label: {
-                        if board == .advanced, metric == viewModel.currentSortMetric {
-                            Label(metric, systemImage: "checkmark")
-                        } else {
-                            Text(metric)
-                        }
-                    }
-                }
-            }
-
-            Section("Standard") {
-                ForEach(StandardStatCatalog.stats(for: category), id: \.self) { stat in
-                    Button {
-                        board = .standard
-                        standardStat = stat
-                        sortDescending = StandardStatCatalog.defaultDescending(for: stat, category: category)
-                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                    } label: {
-                        if board == .standard, stat == standardStat {
-                            Label(stat, systemImage: "checkmark")
-                        } else {
-                            Text(stat)
-                        }
-                    }
-                }
-            }
-        } label: {
-            Label("Stat: \(activeStatLabel)", systemImage: "chart.bar.doc.horizontal")
-        }
-    }
-
-    private var activeStatLabel: String {
-        switch board {
-        case .advanced: return viewModel.currentSortMetric ?? viewModel.sortLabel
-        case .standard: return standardStat
-        case .bestWorst: return "Best & Worst"
-        }
-    }
-
-    // MARK: - Direction
-
-    /// The two boards keep their own direction, so the menu has to read the one
-    /// belonging to whichever is on screen or the checkmark describes the board
-    /// you aren't looking at.
-    private var activeDescending: Bool {
-        board == .advanced ? viewModel.sortDescending : sortDescending
-    }
-
-    @ViewBuilder
-    private var directionSection: some View {
-        if board != .bestWorst {
-            Section("Direction") {
-                Button {
-                    if !activeDescending { flipDirection() }
-                } label: {
-                    if activeDescending {
-                        Label("Highest first", systemImage: "checkmark")
-                    } else {
-                        Text("Highest first")
-                    }
-                }
-                Button {
-                    if activeDescending { flipDirection() }
-                } label: {
-                    if !activeDescending {
-                        Label("Lowest first", systemImage: "checkmark")
-                    } else {
-                        Text("Lowest first")
-                    }
-                }
-            }
-        }
-    }
-
-    /// The advanced board's direction lives in the model, which also has to
-    /// record that the user pinned it; the standard board's is plain state.
-    private func flipDirection() {
-        if board == .advanced {
-            viewModel.toggleSortDirection()
-        } else {
-            sortDescending.toggle()
-        }
     }
 
     // MARK: - Position / qualifier

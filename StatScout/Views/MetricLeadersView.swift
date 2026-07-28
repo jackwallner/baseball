@@ -34,6 +34,8 @@ struct MetricLeadersView: View {
                     .padding(.top, 12)
                     .padding(.bottom, 12)
                 }
+                // Clearance for the floating tab bar, same as every other board.
+                Color.clear.frame(height: 88)
             }
         }
         .scrollBounceBehavior(.basedOnSize)

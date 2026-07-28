@@ -13,18 +13,27 @@ struct AboutView: View {
     }
 
     var body: some View {
+        // Ordered by what people open Settings to do. Subscription status and
+        // Restore first (the reason a paying user is here at all), then the
+        // support and privacy links, then the explanatory cards. "What is
+        // StatScout" was reading first and pushing Contact Support to the very
+        // bottom of a scroll, which is the one place a stuck user shouldn't
+        // have to go looking.
         ScrollView {
             VStack(spacing: 12) {
-                aboutCard
                 proStatusCard
-                refreshCard
                 linkCard
+                refreshCard
+                aboutCard
                 versionCard
                 disclaimerCard
             }
             .padding(.horizontal, 12)
             .padding(.top, 12)
             .padding(.bottom, 12)
+            // Settings was the one scrolling screen with no clearance for the
+            // floating tab bar, so its last rows sat under the glass.
+            Color.clear.frame(height: 88)
         }
         .background(SavantPalette.canvas.ignoresSafeArea())
         .sheet(item: $paywallTrigger) { trigger in
@@ -77,7 +86,12 @@ struct AboutView: View {
                     }
                     Spacer()
                     if !store.isPro {
-                        Button(store.isLapsed ? "Renew" : "Upgrade") {
+                        // Same words as the toolbar pill: "Try Free" when an
+                        // intro offer is live, "Upgrade" otherwise. Settings
+                        // used to say "Upgrade" while the toolbar two taps away
+                        // said "Try Free" and the board footer said "Unlock
+                        // StatScout+", three labels for one destination.
+                        Button(store.isLapsed ? "Renew" : store.upgradeCTALabel) {
                             paywallTrigger = store.defaultUpgradeTrigger
                         }
                         .buttonStyle(.borderedProminent)

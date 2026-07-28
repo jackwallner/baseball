@@ -222,6 +222,23 @@ final class DashboardViewModel {
     var recentFormLoadingWindows: Set<Int> = []
     var recentFormError: String?
     private var recentFormSeason: Int?
+    /// In-flight fetches, keyed by window, owned by the model rather than by
+    /// the `.task` that asked for them.
+    ///
+    /// This is the fix for a Trends board that launched empty and stayed empty.
+    /// The old code marked a window "loading" in a `Set` and had every later
+    /// caller return early on it. SwiftUI cancels a `.task` whenever its id
+    /// changes, and HotColdView's id carries `store.isPro`, which flips as soon
+    /// as RevenueCat answers. The replacement task then hit the in-flight guard,
+    /// did nothing, and the cancelled one cleared the flag with no data and no
+    /// error, so the board had no rows, no spinner and no way back. Because
+    /// every tab stays alive in the root ZStack, that `.task` never runs a
+    /// second time either: tabbing over ran nothing at all.
+    ///
+    /// An unstructured `Task` doesn't inherit its creator's cancellation, so
+    /// the fetch now outlives whichever view kicked it off, and a second caller
+    /// awaits the same task instead of dropping its request on the floor.
+    private var recentFormTasks: [Int: Task<Void, Never>] = [:]
 
     /// The window the Stats leaderboard and trend arrows read from.
     var recentWindow: RecentWindow = .fortnight
@@ -244,6 +261,8 @@ final class DashboardViewModel {
     /// it's already holding, which after a failure is nothing at all.
     func reloadRecentForm(window: RecentWindow? = nil) async {
         let target = window ?? recentWindow
+        recentFormTasks[target.rawValue]?.cancel()
+        recentFormTasks.removeValue(forKey: target.rawValue)
         recentFormByWindow.removeValue(forKey: target.rawValue)
         recentFormError = nil
         await loadRecentFormIfNeeded(window: target)
@@ -253,37 +272,64 @@ final class DashboardViewModel {
         let target = window ?? recentWindow
         // Season changed under us, the cache describes a different year.
         if recentFormSeason != selectedSeason {
+            for task in recentFormTasks.values { task.cancel() }
+            recentFormTasks.removeAll()
+            recentFormLoadingWindows.removeAll()
             recentFormByWindow.removeAll()
             recentFormSeason = selectedSeason
         }
-        guard recentFormByWindow[target.rawValue] == nil,
-              !recentFormLoadingWindows.contains(target.rawValue) else { return }
+        guard recentFormByWindow[target.rawValue] == nil else { return }
+
+        // Join the fetch that's already running rather than returning as if
+        // this request had been served. The caller awaits real data either way.
+        if let inFlight = recentFormTasks[target.rawValue] {
+            await inFlight.value
+            return
+        }
 
         recentFormLoadingWindows.insert(target.rawValue)
         recentFormError = nil
-        do {
-            let rows = try await provider.fetchRecentForm(
-                season: selectedSeason,
-                windowDays: target.rawValue
-            )
-            // A two-way player has a row per side; the leaderboard keys by
-            // player, so keep whichever side has the larger sample.
-            var byPlayer: [Int: RecentForm] = [:]
-            for row in rows {
-                if let existing = byPlayer[row.playerId],
-                   existing.plateAppearances >= row.plateAppearances { continue }
-                byPlayer[row.playerId] = row
+        let season = selectedSeason
+        let task = Task { @MainActor [weak self] in
+            guard let self else { return }
+            defer {
+                self.recentFormLoadingWindows.remove(target.rawValue)
+                self.recentFormTasks.removeValue(forKey: target.rawValue)
             }
-            recentFormByWindow[target.rawValue] = byPlayer
-        } catch {
-            // A window the user has already flipped away from cancels its own
-            // fetch. Reporting that as a failure is how tapping quickly around
-            // the Trends board produced an error on a board that was fine.
-            if !isTaskCancellation(error) {
-                recentFormError = "Couldn't load recent form."
+            do {
+                let rows = try await self.provider.fetchRecentForm(
+                    season: season,
+                    windowDays: target.rawValue
+                )
+                // The season can move under a long fetch (the loader lands on
+                // the newest year with data). Dropping a stale answer is better
+                // than caching last year's board under this year's key.
+                guard season == self.selectedSeason else { return }
+                // A two-way player has a row per side; the leaderboard keys by
+                // player, so keep whichever side has the larger sample.
+                var byPlayer: [Int: RecentForm] = [:]
+                for row in rows {
+                    if let existing = byPlayer[row.playerId],
+                       existing.plateAppearances >= row.plateAppearances { continue }
+                    byPlayer[row.playerId] = row
+                }
+                // An empty answer isn't cached. Early in a season the rollup
+                // genuinely has nothing yet, and caching that would pin the
+                // board to "no movement" for the rest of the launch.
+                guard !byPlayer.isEmpty else { return }
+                self.recentFormByWindow[target.rawValue] = byPlayer
+            } catch {
+                // A window the user has already flipped away from cancels its
+                // own fetch. Reporting that as a failure is how tapping quickly
+                // around the Trends board produced an error on a board that was
+                // fine.
+                if !isTaskCancellation(error) {
+                    self.recentFormError = "Couldn't load recent form."
+                }
             }
         }
-        recentFormLoadingWindows.remove(target.rawValue)
+        recentFormTasks[target.rawValue] = task
+        await task.value
     }
 
     /// Unique players for an arbitrary season, not just the selected one.

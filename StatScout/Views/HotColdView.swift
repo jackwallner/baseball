@@ -89,19 +89,18 @@ struct HotColdView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(SavantPalette.canvas)
-        // Keyed on entitlement as well as the window. `isPro` starts false and
-        // only flips once RevenueCat answers, which on a real device is often
-        // after this view is already on screen, with the window alone as the
-        // id, that first task had already returned at the guard and nothing
-        // ever re-ran it. The board then sat empty forever: not loading, no
-        // error, just a bare header. Switching windows was the only way to get
-        // data, which is exactly how it looked in TestFlight.
+        // Window and season, the two things that change which board this is.
+        // Entitlement used to be in this id as a workaround for a load that
+        // silently dropped itself when the task was cancelled mid-flight; the
+        // fetch is owned by the view model now and survives that, so the id can
+        // say what it actually means again. RootTabView also re-asks on arrival
+        // at the tab, because this view never leaves the hierarchy.
         //
-        // Free users load it too now: the top row of the locked board is the
-        // real league leader, and a fabricated one would be a lie in the one
-        // place we're asking to be trusted. It's a single request against the
+        // Free users load it too: the top row of the locked board is the real
+        // league leader, and a fabricated one would be a lie in the one place
+        // we're asking to be trusted. It's a single request against the
         // pre-aggregated rollup table, the same one Pro reads.
-        .task(id: "\(viewModel.recentWindow.rawValue)-\(store.isPro)") {
+        .task(id: "\(viewModel.recentWindow.rawValue)-\(viewModel.selectedSeason)") {
             await viewModel.loadRecentFormIfNeeded()
         }
         .onChange(of: side) { _, _ in
@@ -163,38 +162,25 @@ struct HotColdView: View {
     }
 
     /// Seventeen metrics per side is far past what a segmented row can hold, so
-    /// this is the app's other picker shape: the same plain `Menu` the season
-    /// selector and every sort control use, with the two vocabularies as
-    /// sections inside it.
+    /// this is `StatPickerMenu`, the same control the Stats boards put in the
+    /// same place: current stat on a pill, the two vocabularies as sections.
     private var metricPicker: some View {
-        Menu {
-            Section("Statcast") {
-                metricButtons(TrendMetric.statcast(for: side))
-            }
-            Section("Standard") {
-                metricButtons(TrendMetric.standard(for: side))
-            }
-        } label: {
-            SavantInlinePill(systemImage: "chart.bar.fill", title: metric.label)
-        }
-        .menuOrder(.fixed)
-        .accessibilityLabel("Metric")
-        .accessibilityValue(metric.label)
+        StatPickerMenu(
+            statcast: options(TrendMetric.statcast(for: side)),
+            standard: options(TrendMetric.standard(for: side)),
+            activeLabel: metric.label,
+            onSelectStatcast: { select($0, from: TrendMetric.statcast(for: side)) },
+            onSelectStandard: { select($0, from: TrendMetric.standard(for: side)) }
+        )
     }
 
-    private func metricButtons(_ list: [TrendMetric]) -> some View {
-        ForEach(list) { option in
-            Button {
-                metric = option
-                UIImpactFeedbackGenerator(style: .light).impactOccurred()
-            } label: {
-                if option.key == metric.key {
-                    Label(option.label, systemImage: "checkmark")
-                } else {
-                    Text(option.label)
-                }
-            }
-        }
+    private func options(_ list: [TrendMetric]) -> [StatPickerMenu.Option] {
+        list.map { .init(id: $0.key, label: $0.label, isSelected: $0.key == metric.key) }
+    }
+
+    private func select(_ option: StatPickerMenu.Option, from list: [TrendMetric]) {
+        guard let picked = list.first(where: { $0.key == option.id }) else { return }
+        metric = picked
     }
 
     @ViewBuilder
