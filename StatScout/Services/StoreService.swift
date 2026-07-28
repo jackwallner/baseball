@@ -294,13 +294,31 @@ final class StoreService: NSObject, ObservableObject {
     ///
     /// This is the terse form. The direct-purchase CTAs that actually take the
     /// money use `directCTALabel(for:)`, which carries the price.
+    ///
+    /// Split into a pure function over one Bool so the copy is unit-testable.
+    /// It otherwise wasn't testable anywhere: `configureIfNeeded()` refuses to
+    /// configure RevenueCat on a simulator, so `yearlyPackage` is nil in every
+    /// simulator run and a `.storekit` config can't change that. The trial
+    /// branch could only ever be seen on a real device.
+    nonisolated static func upgradeCTALabel(trialAvailable: Bool) -> String {
+        trialAvailable ? "Try Free" : "Upgrade"
+    }
+
+    /// Whether the yearly plan is currently offering an intro trial this user
+    /// is eligible to take.
+    var isYearlyTrialAvailable: Bool {
+        #if DEBUG
+        // Simulator-only: lets the trial-copy state of every upgrade surface be
+        // captured headlessly, since the real path needs a device. Same shape
+        // as the existing STATSCOUT_FORCE_PRO hook, and stripped from Release.
+        if ProcessInfo.processInfo.environment["STATSCOUT_FORCE_TRIAL_CTA"] == "1" { return true }
+        #endif
+        guard let yearly = yearlyPackage else { return false }
+        return isEligibleForIntroOffer(yearly) && yearly.introOfferLabel != nil
+    }
+
     var upgradeCTALabel: String {
-        if let yearly = yearlyPackage,
-           isEligibleForIntroOffer(yearly),
-           yearly.introOfferLabel != nil {
-            return "Try Free"
-        }
-        return "Upgrade"
+        Self.upgradeCTALabel(trialAvailable: isYearlyTrialAvailable)
     }
 
     func directCTALabel(for trigger: PaywallTrigger) -> String {
