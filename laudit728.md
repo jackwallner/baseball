@@ -183,6 +183,78 @@ The underlying data presentation is polished and visually distinctive, but the a
 - `audit-evidence/audit-teams.png`, trial pitch sheet over an underlying detail surface.
 - `audit-evidence/audit-compare-tab.png`, trial pitch sheet and persistent bottom navigation over detail content.
 
+## Exhaustive route and feature coverage matrix
+
+Legend: **Observed** means driven in the live simulator and visually inspected. **Source-reviewed** means the route and states were inspected in the implementation, but the exact state was not reached reliably in this run. **Unverified** means it needs a StoreKit/TestFlight/device or dedicated fault-injection pass.
+
+| Area | Coverage | What was checked | Result / limitation |
+|---|---|---|---|
+| Cold launch | Observed | Existing-user launch, data loading, live 2026 leaderboard | Loads live data. Dashboard is usable, but bottom glass covers lower rows. |
+| Fresh install onboarding | Observed + source-reviewed | First page, Skip, Continue layout, final-page upsell behavior | First page is polished. Source confirms 3 pages, final StatScout+ CTA, Get Started, restore, legal links. Page 2/3 content was source-reviewed, not fully screenshot-driven because simulator coordinate mapping was inconsistent. |
+| Onboarding Skip | Observed | Tap Skip from fresh state | Correct logical coordinate exits onboarding. No confirmation is shown, which is appropriate. |
+| Onboarding Continue | Source-reviewed | Three-page progression and final CTA | The implementation has fixed-height slots to prevent layout jumping. Needs a dedicated UI-test capture of all three pages to verify the actual runtime transition. |
+| Stats / Advanced | Observed | Hitting leaderboard, rank/player/team/value columns, scroll-under behavior | Clear and dense. Bottom bar obscures row content. |
+| Stats categories | Source-reviewed | Hitting, Pitching, Fielding, Running | Four categories exist and share the board. Full tap-through of each category was not completed in this run. |
+| Stats sort | Source-reviewed | Sort chip and header direction toggle | Direction is explicit in source. Needs runtime capture for each category and lower-is-better metric. |
+| Stats season picker | Source-reviewed | Current season, locked seasons, crown/checkmark menu states | Native Menu implementation is consistent. Locked-year pitch behavior not fully driven. |
+| Stats View menu | Source-reviewed + partially observed | Advanced, Standard, Best & Worst board switching | Menu route is implemented. Opening the first locked surface repeatedly surfaced the pitch before menu content could be captured. |
+| Standard Stats | Source-reviewed | AVG and category-specific standard stat catalogs, sort direction, fielding/running | Implementation supports all four categories. Full live traversal was not completed. |
+| Best & Worst | Source-reviewed | Pro board and free blur gate | Free board intentionally blurs the metric leaders and presents an unlock gate. Real data/pro state unverified. |
+| Metric ranking | Source-reviewed | Metric-specific route, percentile-only values, season indicator, sort | Handles blank raw values by ranking percentile. Full live route not completed after simulator state became stuck in a pitch. |
+| Player search | Source-reviewed | Search field, filtering, empty result state | Existing UI tests cover normal and empty search. Runtime capture not repeated in this pass. |
+| Player profile | Observed | Player identity, Advanced/Standard/Year Compare tabs, premium controls | Strong identity surface. Duplicate name/header treatment, oversized back control, persistent root bar, and premium interruption are user-facing concerns. |
+| Player favorite/follow | Source-reviewed | Star toggle, accessibility labels, persisted favorites | Free and implemented. Runtime persistence across relaunch was not fully captured. |
+| Player share | Source-reviewed | Share route in existing UI tests/source | Existing UI test covers share sheet. Not re-driven in this pass. |
+| Player Recent / Both | Observed | Crown-marked controls behind free user | Crown communicates premium weakly; trial pitch covers the underlying profile. Pro rendering unverified. |
+| Player percentile info | Source-reviewed | Info sheet route and explanatory content | Route exists. Runtime capture not completed. |
+| Player game logs / Recent Form | Source-reviewed | Loading, error, windows, small sample messaging | Source includes loading/error and window handling. Network-fault rendering not injected. |
+| Year Compare | Source-reviewed | From/To menus, swap, overall delta, category comparison, no-data states | Source handles reversed direction and no-overlap messaging. Full live history route not completed. |
+| Compare tab | Observed + source-reviewed | Your Players card, player-vs-player card, Year-over-Year card, free blur gate | Compare surface is implemented and free following is visible. Premium gate/pitch behavior observed. Full picker flow not completed. |
+| Compare player picker | Source-reviewed | Search, side/season roster, no-player/loading states | Native sheet/list and explicit empty states exist. Runtime picker capture not completed. |
+| Player-vs-player | Source-reviewed | Two slots, cross-season resolution, duplicate-player exclusion, compare button | Logic is present. Pro-only result unverified in simulator. |
+| Teams list | Source-reviewed | Search, favorite card, divisions, 30-team grid, empty states | Five-across abbreviation grid is compact but weak for casual recognition. Full live Teams list capture was interrupted by detail pitch. |
+| Team favorite | Source-reviewed | Set, remove, pinned favorite, context menu | Logic and labels exist. Persistence and remove animation not fully captured. |
+| Team detail Advanced | Observed + source-reviewed | Team identity, advanced season controls, Recent/Both crown controls | Team/player scouting pitch observed. Underlying recent/both Pro states unverified. |
+| Team detail Standard | Source-reviewed | Rate/volume groups, team-vs-league percentile mapping, recent gate | Route and copy exist. Live traversal not completed. |
+| Team roster | Source-reviewed | Hitters/Pitchers, Season/Recent, window, category, search, filters, qualifier states | Broad implementation coverage. Full combinatorial matrix was not runtime-driven. |
+| Team switcher | Source-reviewed | Native menu to jump among all 30 teams | Implemented with alphabetical full names. Runtime capture not completed. |
+| Trends board | Observed | Hot/cold leaderboard, player rows, persistent bar, detail pitch | Board is readable, but bottom bar overlays rows. Metric/side/window combinations were not all driven. |
+| Trends metric menu | Source-reviewed | Statcast/Standard sections, side-dependent options | Native menu route exists. Runtime menu capture not completed. |
+| Trends heating/cooling | Source-reviewed | Direction control, lower-is-better inversion | Logic is explicit. Needs visual verification for pitching and lower-is-better metrics. |
+| Trends windows | Source-reviewed | 7/15/30 calendar-day semantics and G annotation | Copy clarifies days vs games. Error/no-movement states exist but were not fault-injected. |
+| Follow Players sheet | Source-reviewed | Search, batting/pitching switch, follow/unfollow, empty state, Done | Broad source coverage. Runtime sheet capture not completed. |
+| Settings | Observed | StatScout info, StatScout+, restore, refresh timestamp, support/privacy/version/disclaimer | Content is present, but bottom bar covers lower links and utility content is dense. |
+| Support/legal links | Source-reviewed | App Store review, support, privacy, terms | Links exist. External browser handoff was not fully captured. |
+| Restore purchases | Source-reviewed + empty-paywall observed | Restore on Settings/onboarding/paywall | Copy handles no-purchase and pending outcomes. Real StoreKit restore unverified. |
+| Paywall | Observed empty state | Loading/empty state from plain simulator launch | “Couldn't Load Plans” is expected in this launch mode, not a production purchase verdict. Real plans unverified. |
+| Offline/network failure | Source-reviewed only | API errors, recent form errors, retry labels | Error paths exist. No network blocking/fault injection was performed. |
+| Loading states | Source-reviewed | Dashboard, teams, recent form, historical data | Skeleton/progress states exist. Timing and transition polish not exhaustively captured. |
+| Dynamic Type | Source-reviewed only | Text sizing and fixed layouts | No large-content-size simulator pass was completed. |
+| VoiceOver/accessibility | Source-reviewed only | Labels/hints/hidden inactive tabs | Accessibility labels are present in many controls. No full rotor/focus-order audit was completed. |
+| Rotation/landscape | Unverified | Layout behavior | Not tested. |
+| Dark mode | Unverified | Color and contrast behavior | Not tested. |
+| Pro subscriber persona | Unverified | Unlocked recent/history/compare/team states | Requires StoreKit Testing or TestFlight entitlement. |
+
+## Additional findings from the exhaustive pass
+
+### 13. Fresh-install onboarding is visually strong but needs a real three-page capture
+
+A fresh reset showed a well-composed first page with clear value proposition, three bullets, page dots, Skip, and Continue. The source confirms the second page (“Find Insights Fast”) and third page (“Go Deeper with StatScout+”) are materially different, not duplicate placeholders. However, plain coordinate-driven automation did not reliably advance the `TabView` on this simulator, so the second and third pages are not visually signed off. This is a QA coverage gap, not a confirmed product defect.
+
+**Evidence:** `audit-evidence/exhaustive/onboarding-1.png`, `audit-evidence/exhaustive/onboarding-skip-logical.png`, `audit-evidence/exhaustive/onboarding-skip-correct.png`.
+
+### 14. The simulator can become stuck in the empty paywall state after a failed close attempt
+
+During the audit, the empty StoreKit/RevenueCat state displayed a close glyph, but accessibility inspection exposed only the application root and coordinate taps did not consistently dismiss it. A clean rebuild and fresh launch restored normal operation. This may be an automation/runtime artifact, but it is worth testing manually because a user should always have a reliable escape from a failed plan load.
+
+**Evidence:** `audit-evidence/exhaustive/closed-paywall.png`, `audit-evidence/exhaustive/after-paywall-close.png`, `audit-evidence/exhaustive/dashboard-after-clean-build.png`.
+
+### 15. UI-test builds are not safe to install as ordinary app builds
+
+Running the full Xcode test scheme timed out after 10 minutes. The test-installed app then failed to launch through plain `simctl` because its embedded XCTest/Testing framework expected `lib_TestingInterop.dylib`. A normal Debug app build installed afterward and launched correctly. This is not a shipped-app defect, but it is an important audit/release workflow trap: do not use the test runner's app bundle for manual simulator UX review.
+
+**Evidence:** `/tmp/StatScoutAuditTests.log`, `/tmp/audit-rebuild.log`, `audit-evidence/exhaustive/dashboard-after-clean-build.png`.
+
 ## Verification boundary
 
-This is a UX audit only. No fixes were attempted. The screenshots document the states that were actually observed. Real subscription plan-card layout and purchase behavior remain unverified in plain headless `simctl` launch because the project intentionally avoids production RevenueCat configuration on simulators and StoreKit Testing requires the Xcode scheme path.
+This is a UX audit only. No fixes were attempted. The screenshots document the states that were actually observed. Real subscription plan-card layout and purchase behavior remain unverified in plain headless `simctl` launch because the project intentionally avoids production RevenueCat configuration on simulators and StoreKit Testing requires the Xcode scheme path. The matrix above is intentionally explicit about what was source-reviewed versus visually driven, so the remaining coverage is not presented as completed when it was not.
