@@ -119,13 +119,6 @@ struct TeamView: View {
         return (nil, nil)
     }
 
-    private func rawValue(_ player: Player) -> Double? {
-        guard let m = sortMetric,
-              let metric = player.metrics.first(where: { $0.label == m.label && $0.category == m.category })
-        else { return nil }
-        return DashboardViewModel.rawNumeric(metric.value)
-    }
-
     private func fallbackPercentile(_ player: Player) -> Int {
         if let category = selectedCategory, let p = player.percentile(for: category) { return p }
         return player.metrics.first(where: { $0.label == "xwOBA" })?.percentile ?? 0
@@ -200,20 +193,20 @@ struct TeamView: View {
             }
             return ranked + tail
         }
-        guard sortMetric != nil else {
+        guard let sortMetric else {
             return byQualifier.sorted {
                 sortDescending ? fallbackPercentile($0) > fallbackPercentile($1) : fallbackPercentile($0) < fallbackPercentile($1)
             }
         }
-        let ranked = byQualifier.filter { rawValue($0) != nil }.sorted {
-            let v1 = rawValue($0) ?? 0
-            let v2 = rawValue($1) ?? 0
-            return sortDescending ? v1 > v2 : v1 < v2
-        }
-        let tail = byQualifier.filter { rawValue($0) == nil }.sorted {
-            fallbackPercentile($0) > fallbackPercentile($1)
-        }
-        return ranked + tail
+        // Percentile first, raw value only as a tiebreak. Ranking on the parsed
+        // value string dropped everyone on a percentile-only metric into the
+        // tail, which on this roster meant a sort by Arm Strength or
+        // Squared-Up% put the whole team in the "no value" pile.
+        return byQualifier.sorted(by: DashboardViewModel.metricComparator(
+            label: sortMetric.label,
+            category: sortMetric.category,
+            descending: sortDescending
+        ))
     }
 
     /// Roster-local qualifier. Mirrors DashboardViewModel.isQualified but reads

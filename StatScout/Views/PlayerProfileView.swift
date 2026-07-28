@@ -835,23 +835,35 @@ struct PlayerProfileView: View {
     /// This has to be per-side: the same label means opposite things. A
     /// batter's HR, R, H and BB are all good; a pitcher's are runs and homers
     /// surrendered. A batter's SO is bad, a pitcher's is the whole point.
-    private static func lowerIsBetterStandard(isPitcher: Bool) -> Set<String> {
-        isPitcher
-            ? ["ERA", "WHIP", "L", "H", "R", "ER", "HR", "BB", "BB/9",
-               // On a pitcher's line these are what hitters did against them.
-               "AVG", "OBP", "SLG", "OPS"]
-            : ["SO", "CS", "E"]
+    /// Keyed off the stat's own category rather than the player's type, because
+    /// a two-way player carries both lines at once and "H" means the opposite
+    /// thing on each.
+    private static func lowerIsBetterStandard(category: MetricCategory) -> Set<String> {
+        switch category {
+        case .pitching:
+            return ["ERA", "WHIP", "L", "H", "R", "ER", "HR", "BB", "BB/9",
+                    // On a pitcher's line these are what hitters did against them.
+                    "AVG", "OBP", "SLG", "OPS"]
+        case .hitting:
+            return ["SO", "CS"]
+        case .fielding:
+            return ["E"]
+        case .running:
+            return ["CS"]
+        }
     }
 
     /// Which of the four boards a traditional stat belongs to, so tapping a
     /// row opens the leaderboard that actually lists it. Errors and the glove
     /// line moved to Fielding, the stolen-base line to Running, and without
     /// this a hitter's E row pushed the Hitting board, which has no E column.
-    private static func standardCategory(for label: String, isPitcher: Bool) -> MetricCategory {
+    private static func standardCategory(for label: String, statCategory: MetricCategory) -> MetricCategory {
         switch label.uppercased() {
         case "E", "A", "PO", "DP", "FLD%", "GF": return .fielding
         case "SB", "CS", "SB%": return .running
-        default: return isPitcher ? .pitching : .hitting
+        // Otherwise the stat's own line, which is the only thing that gets a
+        // two-way player's "H" onto the right board.
+        default: return statCategory
         }
     }
 
@@ -870,14 +882,30 @@ struct PlayerProfileView: View {
     /// traditional line, so these are computed here, a player's position in
     /// the distribution of every same-type player who has the stat. Returns nil
     /// below a usable pool size rather than drawing a bar off five samples.
-    private func standardStatPercentile(label: String, value: Double) -> Int? {
+    /// The comparison pool must clear the same bar the Standard leaderboard
+    /// applies, or the two screens answer "how does this rank" against
+    /// different leagues. `StandardStatsLeadersView` requires a Savant
+    /// percentile in the matching category (Savant withholds them below its
+    /// qualifying thresholds, so their presence *is* the qualification signal);
+    /// this used to require only a matching player type, which let bench bats
+    /// and mop-up relievers into the denominator.
+    private func standardStatPercentile(label: String, category: MetricCategory, value: Double) -> Int? {
         let key = label.uppercased()
-        let isPitcherPool = isPitcher
+        // Fielding and running stats belong to position players and are gated
+        // on a hitting percentile, matching the leaders board.
+        let qualifyingCategory: MetricCategory = category == .pitching ? .pitching : .hitting
         let values: [Double] = allPlayers.compactMap { other in
-            let otherIsPitcher = other.playerType?.lowercased() == "pitcher"
-            guard otherIsPitcher == isPitcherPool else { return nil }
-            guard let stat = other.standardStats?.first(where: { $0.label.uppercased() == key })
-            else { return nil }
+            let otherType = other.playerType?.lowercased()
+            let sideMatches = qualifyingCategory == .pitching
+                ? (otherType == "pitcher" || otherType == "two_way")
+                : otherType != "pitcher"
+            guard sideMatches else { return nil }
+            guard other.metrics.contains(where: { $0.category == qualifyingCategory }) else { return nil }
+            // Match on category too: a two-way player has an "H" on each line.
+            guard let stat = other.standardStats?.first(where: {
+                $0.label.uppercased() == key
+                    && $0.resolvedCategory(playerType: other.playerType) == category
+            }) else { return nil }
             return DashboardViewModel.rawNumeric(stat.value)
         }
         guard values.count >= 20 else { return nil }
@@ -887,25 +915,32 @@ struct PlayerProfileView: View {
         let below = values.reduce(0) { $0 + ($1 < value ? 1 : 0) }
         let equal = values.reduce(0) { $0 + ($1 == value ? 1 : 0) }
         let raw = (Double(below) + Double(equal) / 2) / Double(values.count) * 100
-        let oriented = Self.lowerIsBetterStandard(isPitcher: isPitcher).contains(key) ? 100 - raw : raw
+        let oriented = Self.lowerIsBetterStandard(category: category).contains(key) ? 100 - raw : raw
         return max(1, min(100, Int(oriented.rounded())))
     }
 
     /// Standard stats rendered as the same `Metric` the percentile card uses,
     /// so both tabs read on one ruler. Stats with too small a league pool keep
     /// their value but get no bar.
+    /// Each stat keeps its own category. This used to stamp every one of them
+    /// with `isPitcher ? .pitching : .hitting`, and `isPitcher` is false for a
+    /// two-way player, so Ohtani's ERA, W-L and innings were all labelled
+    /// hitting and rendered interleaved with his batting line.
     private func standardMetrics(counting: Bool) -> [Metric] {
         (displayedPlayer.standardStats ?? [])
             .filter { Self.countingStats.contains($0.label.uppercased()) == counting }
             .map { stat in
+                let category = stat.resolvedCategory(playerType: displayedPlayer.playerType)
                 let pct = DashboardViewModel.rawNumeric(stat.value)
-                    .flatMap { standardStatPercentile(label: stat.label, value: $0) }
+                    .flatMap { standardStatPercentile(label: stat.label, category: category, value: $0) }
                 return Metric(
-                    id: "std-\(stat.label)",
+                    // Namespaced by category: a two-way player has two "H" rows
+                    // and a duplicate id collapses them in an Identifiable list.
+                    id: "std-\(category.rawValue)-\(stat.label)",
                     label: stat.label.uppercased(),
                     value: stat.value,
                     percentile: pct ?? 0,
-                    category: isPitcher ? .pitching : .hitting
+                    category: category
                 )
             }
     }
@@ -937,7 +972,11 @@ struct PlayerProfileView: View {
             id: "std-recent-\(seasonMetric.label)",
             label: seasonMetric.label,
             value: text,
-            percentile: standardStatPercentile(label: seasonMetric.label, value: value) ?? 0,
+            percentile: standardStatPercentile(
+                label: seasonMetric.label,
+                category: seasonMetric.category,
+                value: value
+            ) ?? 0,
             category: seasonMetric.category
         )
     }
@@ -1030,7 +1069,7 @@ struct PlayerProfileView: View {
 
             NavigationLink(value: StandardStatRoute(
                 stat: metric.label,
-                category: Self.standardCategory(for: metric.label, isPitcher: isPitcher),
+                category: Self.standardCategory(for: metric.label, statCategory: metric.category),
                 season: activeSeason
             )) {
                 Group {

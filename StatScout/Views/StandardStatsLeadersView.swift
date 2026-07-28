@@ -79,7 +79,7 @@ struct StandardStatsLeadersView: View {
             guard matchesPlayerType(player: player) else { return false }
             // A fielding line with no chances is a DH's empty glove, not a
             // perfect one.
-            if selectedCategory == .fielding, chances(in: stats) <= 0 { return false }
+            if selectedCategory == .fielding, chances(in: stats, of: player) <= 0 { return false }
             return numericStat(for: player) != nil
         }
     }
@@ -87,8 +87,8 @@ struct StandardStatsLeadersView: View {
     /// Total fielding chances: the volume behind a glove stat, and the only
     /// honest tie-break for one. Zero errors on 300 chances is a season; zero
     /// on four is a cameo.
-    private func chances(in stats: [StandardStat]) -> Double {
-        ["PO", "A", "E"].reduce(0) { $0 + (rawValue($1, in: stats) ?? 0) }
+    private func chances(in stats: [StandardStat], of player: Player) -> Double {
+        ["PO", "A", "E"].reduce(0) { $0 + (rawValue($1, in: stats, of: player) ?? 0) }
     }
 
     private func matchesPlayerType(player: Player) -> Bool {
@@ -135,9 +135,9 @@ struct StandardStatsLeadersView: View {
     private func volume(for player: Player) -> Double {
         guard let stats = player.standardStats else { return 0 }
         switch selectedCategory {
-        case .fielding: return chances(in: stats)
-        case .pitching: return rawValue("IP", in: stats) ?? 0
-        case .hitting, .running: return rawValue("PA", in: stats) ?? 0
+        case .fielding: return chances(in: stats, of: player)
+        case .pitching: return rawValue("IP", in: stats, of: player) ?? 0
+        case .hitting, .running: return rawValue("PA", in: stats, of: player) ?? 0
         }
     }
 
@@ -146,16 +146,18 @@ struct StandardStatsLeadersView: View {
     private func numericStat(for player: Player) -> Double? {
         guard let stats = player.standardStats else { return nil }
         if selectedStat == "SB%" {
-            let sb = rawValue("SB", in: stats)
-            let cs = rawValue("CS", in: stats)
+            let sb = rawValue("SB", in: stats, of: player)
+            let cs = rawValue("CS", in: stats, of: player)
             guard let sb, let cs, sb + cs > 0 else { return nil }
             return sb / (sb + cs) * 100
         }
-        return rawValue(selectedStat, in: stats)
+        return rawValue(selectedStat, in: stats, of: player)
     }
 
-    private func rawValue(_ label: String, in stats: [StandardStat]) -> Double? {
-        guard let stat = stats.first(where: { $0.label == label }) else { return nil }
+    /// Reads the value off the line this board is about. On the Pitching board
+    /// a two-way player's "H" has to be hits allowed, not hits collected.
+    private func rawValue(_ label: String, in stats: [StandardStat], of player: Player) -> Double? {
+        guard let stat = stats.stat(label, category: selectedCategory, playerType: player.playerType) else { return nil }
         let cleaned = stat.value.hasPrefix(".") ? "0" + stat.value : stat.value
         return Double(cleaned)
     }

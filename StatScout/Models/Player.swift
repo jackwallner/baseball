@@ -65,18 +65,26 @@ struct Player: Identifiable, Codable, Hashable, Sendable {
         games = try container.decodeIfPresent([GameTrend].self, forKey: .games) ?? []
     }
 
+    /// Average of the per-category averages, not of every metric.
+    ///
+    /// A flat mean over `metrics` weights a category by how many metrics happen
+    /// to be present that season, so a hitter with four fielding metrics had his
+    /// "overall" pulled a third of the way toward his glove while a hitter with
+    /// one had it barely moved. Averaging each category first gives both the
+    /// same shape. A two-way player still takes his best side rather than a
+    /// blend of bat and arm.
     var overallPercentile: Int {
         guard !metrics.isEmpty else { return 0 }
+        let categoryAverages = Dictionary(grouping: metrics) { $0.category }
+            .values
+            .map { group in
+                Double(group.map(\.percentile).reduce(0, +)) / Double(group.count)
+            }
+        guard !categoryAverages.isEmpty else { return 0 }
         if playerType == "two_way" {
-            let categoryAverages = Dictionary(grouping: metrics) { $0.category }
-                .values
-                .map { group in
-                    Double(group.map(\.percentile).reduce(0, +)) / Double(group.count)
-                }
             return Int(round(categoryAverages.max() ?? 0))
         }
-        let total = metrics.map(\.percentile).reduce(0, +)
-        return Int(round(Double(total) / Double(metrics.count)))
+        return Int(round(categoryAverages.reduce(0, +) / Double(categoryAverages.count)))
     }
 
     var headlineMetric: Metric? {
@@ -126,6 +134,56 @@ struct StandardStat: Identifiable, Codable, Hashable, Sendable {
     let id: String
     let label: String
     let value: String
+    /// Which line this stat belongs to. A two-way player has two stats labelled
+    /// "H" (hits collected, hits allowed) and this is the only thing that tells
+    /// them apart. Optional because rows ingested before the backend started
+    /// emitting it have no category, in which case `resolvedCategory` infers one.
+    let category: MetricCategory?
+
+    init(id: String, label: String, value: String, category: MetricCategory? = nil) {
+        self.id = id
+        self.label = label
+        self.value = value
+        self.category = category
+    }
+
+    /// Best available category. Falls back to the label for legacy rows: the
+    /// pitching-only labels are unambiguous, the fielding ones likewise, and
+    /// anything left over is a hitting stat. A legacy two-way row still can't
+    /// be split correctly, but nothing can fix that from the client side.
+    func resolvedCategory(playerType: String?) -> MetricCategory {
+        if let category { return category }
+        if Self.pitchingOnlyLabels.contains(label) { return .pitching }
+        if Self.fieldingLabels.contains(label) { return .fielding }
+        return playerType == "pitcher" ? .pitching : .hitting
+    }
+
+    private static let pitchingOnlyLabels: Set<String> = [
+        "ERA", "WHIP", "W", "L", "SV", "IP", "ER", "K/9", "BB/9", "K/BB", "QS", "GS", "BF"
+    ]
+    private static let fieldingLabels: Set<String> = ["E", "A", "PO", "DP", "FLD%", "GF"]
+
+    /// Labels a two-way player carries twice, once per line.
+    static let ambiguousLabels: Set<String> = ["H", "R", "HR", "BB", "SO", "G"]
+}
+
+extension Array where Element == StandardStat {
+    /// The stat with this label on the given side.
+    ///
+    /// Matching on label alone is fine for the 99.9% of players with one line,
+    /// but a two-way player has an "H" for hits collected and an "H" for hits
+    /// allowed, and `first(where:)` would hand back whichever the backend
+    /// happened to emit first.
+    func stat(_ label: String, category: MetricCategory, playerType: String?) -> StandardStat? {
+        let key = label.uppercased()
+        guard StandardStat.ambiguousLabels.contains(key) else {
+            return first { $0.label.uppercased() == key }
+        }
+        return first {
+            $0.label.uppercased() == key
+                && $0.resolvedCategory(playerType: playerType) == category
+        }
+    }
 }
 
 enum MetricDirection: String, Codable, Hashable, Sendable {
@@ -140,16 +198,37 @@ enum MetricCategory: String, Codable, CaseIterable, Hashable, Sendable {
     case fielding = "Fielding"
     case running = "Running"
 
+    /// Every metric label the backend actually emits for this category.
+    ///
+    /// These lists used to be hand-written from memory and had drifted badly:
+    /// the pitching one asked for "HardHit%", "EV", "LA", "GB%" and "FB%", none
+    /// of which exist, while the real "Hard-Hit%", "Avg EV Against", "Max EV
+    /// Against", "xISO" and "xOBP" went unlisted. `StandardStatsTests` asserts
+    /// these stay in step with a captured sample of live labels.
+    static let knownLabels: [MetricCategory: Set<String>] = [
+        .hitting: ["xwOBA", "xBA", "xSLG", "xISO", "xOBP", "K%", "BB%", "Whiff%",
+                   "Chase%", "Barrel%", "Hard-Hit%", "EV", "Max EV", "Squared-Up%",
+                   "Bat Speed", "Swing Length"],
+        .pitching: ["xwOBA", "xERA", "xBA", "xSLG", "xISO", "xOBP", "K%", "BB%",
+                    "Whiff%", "Chase%", "Barrel%", "Hard-Hit%", "Avg EV Against",
+                    "Max EV Against", "Fastball Velo", "Fastball Spin", "Curve Spin"],
+        .fielding: ["Range (OAA)", "Arm Strength", "Arm Value", "Jump", "Burst"],
+        .running: ["Sprint Speed", "Bolts", "Acceleration"],
+    ]
+
     /// The preferred display order of metric labels within this category,
-    /// matching Baseball Savant's convention.
+    /// matching Baseball Savant's convention. Labels not listed here sort
+    /// alphabetically after the ones that are.
     var metricPriorityOrder: [String] {
         switch self {
         case .hitting:
-            return ["xwOBA", "xBA", "xSLG", "wOBA", "BA", "SLG", "OBP", "OPS", "ISO",
-                    "K%", "BB%", "Whiff%", "Barrel%", "HardHit%", "EV", "LA", "Sprint Speed"]
+            return ["xwOBA", "xBA", "xSLG", "xISO", "xOBP", "K%", "BB%", "Whiff%",
+                    "Chase%", "Barrel%", "Hard-Hit%", "EV", "Max EV", "Squared-Up%",
+                    "Bat Speed", "Swing Length"]
         case .pitching:
-            return ["xwOBA", "xERA", "K%", "BB%", "Whiff%", "Barrel%", "Chase%",
-                    "EV", "HardHit%", "GB%", "FB%"]
+            return ["xwOBA", "xERA", "xBA", "xSLG", "xISO", "xOBP", "K%", "BB%",
+                    "Whiff%", "Chase%", "Barrel%", "Hard-Hit%", "Avg EV Against",
+                    "Max EV Against", "Fastball Velo", "Fastball Spin", "Curve Spin"]
         case .fielding:
             return ["Range (OAA)", "Arm Strength", "Arm Value", "Jump", "Burst"]
         case .running:
