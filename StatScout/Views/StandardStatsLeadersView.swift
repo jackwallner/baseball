@@ -59,7 +59,10 @@ struct StandardStatsLeadersView: View {
         case .pitching:
             return ["ERA", "WHIP", "W", "L", "SV", "SO", "IP", "K/9", "BB/9", "QS"]
         case .fielding:
-            return ["E", "FLD%", "A", "PO", "DP"]
+            // Fielding percentage leads, not errors: "fewest errors" sorted
+            // ascending is fifty players on zero, and the top of that list is
+            // whoever touched the ball least.
+            return ["FLD%", "E", "A", "PO", "DP"]
         case .running:
             return ["SB", "SB%", "CS", "3B", "R"]
         }
@@ -72,10 +75,20 @@ struct StandardStatsLeadersView: View {
     // Filter players who have the selected stat
     var filteredPlayers: [Player] {
         players.filter { player in
-            guard player.standardStats != nil else { return false }
+            guard let stats = player.standardStats else { return false }
             guard matchesPlayerType(player: player) else { return false }
+            // A fielding line with no chances is a DH's empty glove, not a
+            // perfect one.
+            if selectedCategory == .fielding, chances(in: stats) <= 0 { return false }
             return numericStat(for: player) != nil
         }
+    }
+
+    /// Total fielding chances: the volume behind a glove stat, and the only
+    /// honest tie-break for one. Zero errors on 300 chances is a season; zero
+    /// on four is a cameo.
+    private func chances(in stats: [StandardStat]) -> Double {
+        ["PO", "A", "E"].reduce(0) { $0 + (rawValue($1, in: stats) ?? 0) }
     }
 
     private func matchesPlayerType(player: Player) -> Bool {
@@ -105,12 +118,26 @@ struct StandardStatsLeadersView: View {
         }
     }
 
-    // Sort players by the selected stat value
+    // Sort players by the selected stat value, then by the playing time behind
+    // it, so a board full of identical values (every 0-error fielder, every
+    // 1.000 fielding percentage) leads with the players who earned it.
     var sortedPlayers: [Player] {
         filteredPlayers.sorted { p1, p2 in
             let v1 = numericStat(for: p1) ?? 0
             let v2 = numericStat(for: p2) ?? 0
-            return sortDescending ? v1 > v2 : v1 < v2
+            if v1 != v2 { return sortDescending ? v1 > v2 : v1 < v2 }
+            return volume(for: p1) > volume(for: p2)
+        }
+    }
+
+    /// The workload a tied value sits on: chances for the glove, plate
+    /// appearances or innings for everything else.
+    private func volume(for player: Player) -> Double {
+        guard let stats = player.standardStats else { return 0 }
+        switch selectedCategory {
+        case .fielding: return chances(in: stats)
+        case .pitching: return rawValue("IP", in: stats) ?? 0
+        case .hitting, .running: return rawValue("PA", in: stats) ?? 0
         }
     }
 
