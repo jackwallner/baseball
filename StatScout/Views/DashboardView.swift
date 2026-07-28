@@ -81,7 +81,7 @@ struct DashboardView: View {
                     HStack(spacing: 6) {
                         Image(systemName: "crown.fill")
                             .font(.system(size: 10))
-                        Text("Unlock StatScout+")
+                        Text(store.upgradeCTALabel)
                             .font(SavantType.micro)
                             .tracking(0.4)
                     }
@@ -122,29 +122,26 @@ struct DashboardView: View {
         .padding(.top, 8)
     }
 
-    // Sort chip (tap to flip direction), search, and the View menu that holds
-    // everything else. Three controls, so this row fits a 375pt phone without
-    // scrolling; the scroller stays as a safety net for a long metric name on
-    // the narrowest hardware rather than as the normal state.
+    // Stat, direction, search, and the View menu that holds what's left. The
+    // stat is the pill and only the pill: it's the same control Trends puts in
+    // the same place, so the two boards are configured the same way rather than
+    // looking the same and behaving differently.
     //
     // The column header in the table acts as the live sort indicator, so the
-    // chip stays terse, no "Sorted by"/"Highest first" narration.
+    // controls stay terse, no "Sorted by"/"Highest first" narration.
     private var activeSortChip: some View {
         HStack(spacing: 8) {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
-                    Button {
-                        viewModel.toggleSortDirection()
-                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                    } label: {
-                        SavantChip(
-                            title: viewModel.currentSortMetric ?? viewModel.sortLabel,
-                            trailing: .sortArrow(descending: viewModel.sortDescending)
-                        )
+                    if let boardBindings {
+                        StatsBoardStatPicker(viewModel: viewModel, bindings: boardBindings)
                     }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel("Sorted by \(viewModel.currentSortMetric ?? viewModel.sortLabel), \(viewModel.sortDescending ? "highest first" : "lowest first")")
-                    .accessibilityHint("Tap to flip sort direction")
+                    SortDirectionButton(
+                        descending: viewModel.sortDescending,
+                        statLabel: viewModel.currentSortMetric ?? viewModel.sortLabel
+                    ) {
+                        viewModel.toggleSortDirection()
+                    }
                     // Position moved into the View menu, but an active filter
                     // that only shows up inside a closed menu is an invisible
                     // filter, so the chip comes back as its own indicator once
@@ -178,10 +175,9 @@ struct DashboardView: View {
             if let boardBindings {
                 StatsViewMenu(
                     viewModel: viewModel,
-                    board: boardBindings.$board,
-                    standardStat: boardBindings.$standardStat,
-                    sortDescending: boardBindings.$standardSortDescending
+                    board: boardBindings.$board
                 )
+
             }
         }
         .padding(.trailing, 12)

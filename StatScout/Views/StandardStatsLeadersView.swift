@@ -176,37 +176,29 @@ struct StandardStatsLeadersView: View {
         .padding(.top, 8)
     }
 
-    /// The sorted stat, then the View menu: the same two shapes, in the same
-    /// order, as the Statcast board's control row. Picking a different stat
-    /// (in either vocabulary) happens in that menu, so this board no longer
-    /// carries a stat picker only it has.
+    /// Stat, direction, then the View menu: the same three shapes, in the same
+    /// order, as the Statcast board's control row and the Trends header.
     private var controlRow: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
-                Button {
-                    sortDescending.toggle()
-                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                } label: {
-                    SavantChip(
-                        title: selectedStat,
-                        trailing: .sortArrow(descending: sortDescending)
-                    )
+                if let boardBindings, let viewModel {
+                    StatsBoardStatPicker(viewModel: viewModel, bindings: boardBindings)
+                } else {
+                    // Pushed on its own, with no Stats tab behind it to hold
+                    // the Statcast half, so the same pill carries one section.
+                    statMenu
                 }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Sorted by \(selectedStat), \(sortDescending ? "highest first" : "lowest first")")
-                .accessibilityHint("Tap to flip sort direction")
+
+                SortDirectionButton(descending: sortDescending, statLabel: selectedStat) {
+                    sortDescending.toggle()
+                }
 
                 if let boardBindings, let viewModel {
                     StatsViewMenu(
                         viewModel: viewModel,
-                        board: boardBindings.$board,
-                        standardStat: boardBindings.$standardStat,
-                        sortDescending: boardBindings.$standardSortDescending
+                        board: boardBindings.$board
                     )
-                } else {
-                    // Pushed on its own, with no Stats tab behind it to hold
-                    // the wider selection, so it keeps a plain stat picker.
-                    statMenu
+
                 }
             }
             .padding(.horizontal, 12)
@@ -220,28 +212,19 @@ struct StandardStatsLeadersView: View {
     }
 
     private var statMenu: some View {
-        Menu {
-            Section("Stat") {
-                ForEach(availableStats, id: \.self) { stat in
-                    Button {
-                        selectedStat = stat
-                        sortDescending = StandardStatCatalog.defaultDescending(for: stat, category: selectedCategory)
-                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                    } label: {
-                        if stat == selectedStat {
-                            Label(stat, systemImage: "checkmark")
-                        } else {
-                            Text(stat)
-                        }
-                    }
-                }
+        StatPickerMenu(
+            standard: availableStats.map {
+                .init(id: $0, label: $0, isSelected: $0 == selectedStat)
+            },
+            activeLabel: selectedStat,
+            onSelectStandard: { option in
+                selectedStat = option.id
+                sortDescending = StandardStatCatalog.defaultDescending(
+                    for: option.id,
+                    category: selectedCategory
+                )
             }
-        } label: {
-            SavantChip(title: "Stat", systemImage: "slider.horizontal.3", trailing: .chevron)
-        }
-        .menuOrder(.fixed)
-        .accessibilityLabel("Stat")
-        .accessibilityValue(selectedStat)
+        )
     }
 
     private var leadersList: some View {

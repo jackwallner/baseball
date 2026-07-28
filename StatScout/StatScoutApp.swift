@@ -413,6 +413,9 @@ struct OnboardingCards: View {
         }
     }
 
+    // Every page carries four bullets. The count is load-bearing: the bottom
+    // button stack is a fixed height and the TabView takes what's left, so a
+    // page with a shorter card visibly floats its content on the swipe in.
     private let pages: [OnboardingPage] = [
         OnboardingPage(
             icon: "baseball.fill",
@@ -421,27 +424,39 @@ struct OnboardingCards: View {
             bullets: [
                 BulletItem(text: "Every qualified player ranked", icon: "checkmark.circle.fill", color: SavantPalette.savantRed),
                 BulletItem(text: "xwOBA, Barrel%, Sprint Speed, and more", icon: "checkmark.circle.fill", color: SavantPalette.savantRed),
-                BulletItem(text: "Updated daily, always fresh", icon: "checkmark.circle.fill", color: SavantPalette.savantRed)
+                BulletItem(text: "Updated daily, always fresh", icon: "checkmark.circle.fill", color: SavantPalette.savantRed),
+                BulletItem(text: "No account, no sign-up", icon: "checkmark.circle.fill", color: SavantPalette.savantRed)
             ]
         ),
+        // Four tabs, and the bullets name all four. This page said "three tabs"
+        // and listed Stats / Teams / Compare long after Trends shipped, which
+        // meant the one screen page three is about was the one screen a new
+        // user was never told existed.
         OnboardingPage(
             icon: "chart.bar.fill",
             title: "Find Insights\nFast",
-            description: "Three tabs cover every angle of the game. See what's happening across the league in seconds.",
+            description: "Four tabs cover every angle of the game. See what's happening across the league in seconds.",
             bullets: [
                 BulletItem(text: "Stats: sort the league, leaders, best & worst", icon: "checkmark.circle.fill", color: SavantPalette.savantRed),
+                BulletItem(text: "Trends: who's heating up and cooling off", icon: "checkmark.circle.fill", color: SavantPalette.savantRed),
                 BulletItem(text: "Teams: browse any roster, see who's hot", icon: "checkmark.circle.fill", color: SavantPalette.savantRed),
                 BulletItem(text: "Compare: stack two players head-to-head", icon: "checkmark.circle.fill", color: SavantPalette.savantRed)
             ]
         ),
+        // The conversion page, so it argues in the same order the TrialPitchSheet
+        // does: the Trends board first (the thing that's only useful today, and
+        // the reason to start now rather than bookmark it), then form, then the
+        // matchups and history. The old copy led with "recent form, every roster
+        // player" — a feature list, in the order the features were built.
         OnboardingPage(
             icon: "crown.fill",
             title: "Go Deeper\nwith StatScout+",
-            description: "Recent form, every roster player, head-to-head matchups, and seasons back to 2015. The full scouting toolkit.",
+            description: "Season numbers tell you who's good. StatScout+ tells you who's good right now, and lets you prove it.",
             bullets: [
-                BulletItem(text: "Last 7 / 15 / 30 day form on any player or team", icon: "flame.fill", color: SavantPalette.savantRed),
-                BulletItem(text: "Head-to-head comparisons across every metric", icon: "person.2.fill", color: SavantPalette.savantRed),
-                BulletItem(text: "Year-over-year trends and every past season", icon: "calendar.badge.clock", color: SavantPalette.savantRed)
+                BulletItem(text: "The Trends board: the league ranked by who's moving", icon: "flame.fill", color: SavantPalette.savantRed),
+                BulletItem(text: "Last 7 / 15 / 30 day form on any player or team", icon: "chart.bar.fill", color: SavantPalette.savantRed),
+                BulletItem(text: "Head-to-head matchups across every percentile", icon: "person.2.fill", color: SavantPalette.savantRed),
+                BulletItem(text: "Every season back to 2015, and year-over-year", icon: "calendar.badge.clock", color: SavantPalette.savantRed)
             ]
         )
     ]

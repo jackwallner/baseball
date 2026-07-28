@@ -287,6 +287,22 @@ final class StoreService: NSObject, ObservableObject {
         directCTALabel(for: .upgrade)
     }
 
+    /// The short label every "go to StatScout+" entry point wears: the toolbar
+    /// pill, the Settings button, the leaderboard footer. Trial-aware, because
+    /// "Try Free" converts and "Upgrade" reads as an account setting, but the
+    /// same everywhere, because three names for one door is three doors.
+    ///
+    /// This is the terse form. The direct-purchase CTAs that actually take the
+    /// money use `directCTALabel(for:)`, which carries the price.
+    var upgradeCTALabel: String {
+        if let yearly = yearlyPackage,
+           isEligibleForIntroOffer(yearly),
+           yearly.introOfferLabel != nil {
+            return "Try Free"
+        }
+        return "Upgrade"
+    }
+
     func directCTALabel(for trigger: PaywallTrigger) -> String {
         if let yearly = yearlyPackage {
             if trigger != .winback,

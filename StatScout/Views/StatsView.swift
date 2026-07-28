@@ -143,10 +143,9 @@ private struct BestWorstBoard: View {
             HStack(spacing: 8) {
                 StatsViewMenu(
                     viewModel: viewModel,
-                    board: bindings.$board,
-                    standardStat: bindings.$standardStat,
-                    sortDescending: bindings.$standardSortDescending
+                    board: bindings.$board
                 )
+
                 Spacer(minLength: 0)
             }
             .padding(.horizontal, 12)
