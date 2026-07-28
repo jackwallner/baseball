@@ -1,1 +1,5 @@
-Bug fixes and performance improvements across stats, compare, and team views.
+Novinky v StatScout:
+• Trends radí hráčov podľa zlepšenia či zhoršenia za 7, 15 a 30 dní.
+• Porovnajte ľubovoľných dvoch hráčov alebo sezóny vedľa seba.
+• Zoraďte pokročilé aj tradičné štatistiky všetkých klubov.
+• Presnejšie poradia, správne riadky obojsmerných hráčov a lepšie limity pre fielding.

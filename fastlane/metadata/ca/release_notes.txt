@@ -1,1 +1,5 @@
-Bug fixes and performance improvements across stats, compare, and team views.
+Novetats de StatScout:
+• Trends classifica qui està millorant o baixant en 7, 15 i 30 dies.
+• Compara dos jugadors o dues temporades cara a cara.
+• Ordena estadístiques avançades i tradicionals de tots els clubs.
+• Rànquings més precisos, línies correctes per a jugadors de doble rol i millors mínims defensius.

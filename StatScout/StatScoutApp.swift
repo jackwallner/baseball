@@ -64,9 +64,11 @@ struct StatScoutApp: App {
 
 struct ContentView: View {
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
+    @AppStorage(UpdateShowcaseCampaign.storageKey) private var seenUpdateShowcase = ""
     @EnvironmentObject private var store: StoreService
 
     @State private var viewModel: DashboardViewModel
+    @State private var showUpdateShowcase = false
 
     init(api: StatcastAPI) {
         _viewModel = State(initialValue: DashboardViewModel(provider: api, cache: TwoTierPlayerCache()))
@@ -75,23 +77,49 @@ struct ContentView: View {
     var body: some View {
         ZStack {
             RootTabView(viewModel: viewModel)
-                .disabled(!hasCompletedOnboarding)
-                .allowsHitTesting(hasCompletedOnboarding)
+                .disabled(!hasCompletedOnboarding || showUpdateShowcase)
+                .allowsHitTesting(hasCompletedOnboarding && !showUpdateShowcase)
 
             if !hasCompletedOnboarding {
                 OnboardingCards(viewModel: viewModel, hasCompletedOnboarding: $hasCompletedOnboarding)
                     .transition(.opacity)
                     .zIndex(1)
             }
+
+            if showUpdateShowcase {
+                UpdateShowcaseView(onFinish: finishUpdateShowcase)
+                    .transition(.opacity)
+                    .zIndex(2)
+            }
         }
         .task { await viewModel.loadIfNeeded() }
-        .onAppear { viewModel.applyProState(store.isPro) }
+        .onAppear {
+            viewModel.applyProState(store.isPro)
+            evaluateUpdateShowcase()
+        }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
             Task { await viewModel.load() }
         }
         .onChange(of: store.isPro) { _, isPro in
             viewModel.applyProState(isPro)
         }
+    }
+
+    private func evaluateUpdateShowcase() {
+        let decision = UpdateShowcaseCampaign.decision(
+            hasCompletedOnboarding: hasCompletedOnboarding,
+            seenCampaign: seenUpdateShowcase,
+            forcePresentation: UpdateShowcaseCampaign.isForced
+        )
+        if decision.shouldMarkSeen {
+            seenUpdateShowcase = UpdateShowcaseCampaign.identifier
+        }
+        showUpdateShowcase = decision.shouldPresent
+    }
+
+    private func finishUpdateShowcase() {
+        seenUpdateShowcase = UpdateShowcaseCampaign.identifier
+        withAnimation { showUpdateShowcase = false }
     }
 }
 

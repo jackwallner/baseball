@@ -1,1 +1,5 @@
-Bug fixes and performance improvements across stats, compare, and team views.
+Noutăți în StatScout:
+• Trends clasifică jucătorii în urcare sau coborâre în 7, 15 și 30 de zile.
+• Compară oricare doi jucători sau sezoane alăturat.
+• Sortează statisticile avansate și tradiționale ale fiecărui club.
+• Clasamente mai precise, linii corecte pentru jucătorii two-way și criterii defensive mai bune.

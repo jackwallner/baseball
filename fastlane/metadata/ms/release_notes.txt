@@ -1,1 +1,5 @@
-Bug fixes and performance improvements across stats, compare, and team views.
+Baharu dalam StatScout:
+• Trends menyusun siapa yang semakin panas atau sejuk dalam 7, 15 dan 30 hari.
+• Bandingkan mana-mana dua pemain atau musim sebelah menyebelah.
+• Susun statistik lanjutan dan tradisional setiap kelab.
+• Kedudukan lebih tepat, baris pemain dua hala yang betul dan syarat fielding lebih baik.

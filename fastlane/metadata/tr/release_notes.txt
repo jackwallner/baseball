@@ -1,1 +1,5 @@
-Bug fixes and performance improvements across stats, compare, and team views.
+StatScout'taki yenilikler:
+• Trends, 7, 15 ve 30 günde formu yükselen veya düşen oyuncuları sıralar.
+• İki oyuncuyu veya sezonu yan yana karşılaştırın.
+• Her kulübün gelişmiş ve klasik istatistiklerini sıralayın.
+• Daha doğru sıralamalar, iki yönlü oyuncular için doğru satırlar ve daha iyi savunma eşikleri.

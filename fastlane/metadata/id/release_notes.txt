@@ -1,1 +1,5 @@
-Bug fixes and performance improvements across stats, compare, and team views.
+Yang baru di StatScout:
+• Trends memberi peringkat pemain yang memanas atau mendingin dalam 7, 15, dan 30 hari.
+• Bandingkan dua pemain atau musim secara berdampingan.
+• Urutkan statistik lanjutan dan tradisional semua klub.
+• Peringkat lebih akurat, baris pemain dua arah yang benar, dan syarat fielding yang lebih baik.

@@ -1,1 +1,5 @@
-Bug fixes and performance improvements across stats, compare, and team views.
+Uutta StatScoutissa:
+• Trends näyttää nousijat ja laskijat 7, 15 ja 30 päivän ajalta.
+• Vertaa kahta pelaajaa tai kautta rinnakkain.
+• Järjestä jokaisen seuran edistyneet ja perinteiset tilastot.
+• Tarkemmat sijoitukset, oikeat two-way-pelaajien rivit ja paremmat kenttäpelin rajat.

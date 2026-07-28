@@ -1,1 +1,5 @@
-Bug fixes and performance improvements across stats, compare, and team views.
+StatScout의 새로운 기능:
+• Trends에서 최근 7일, 15일, 30일간 상승세와 하락세인 선수를 순위로 확인하세요.
+• 원하는 두 선수 또는 두 시즌을 나란히 비교하세요.
+• 모든 구단의 고급 및 전통 기록을 정렬하세요.
+• 순위 정확도, 투타 겸업 선수 기록, 수비 규정 기준을 개선했습니다.

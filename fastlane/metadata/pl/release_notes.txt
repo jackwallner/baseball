@@ -1,1 +1,5 @@
-Bug fixes and performance improvements across stats, compare, and team views.
+Nowości w StatScout:
+• Trends pokazuje, kto zyskuje lub traci formę w 7, 15 i 30 dni.
+• Porównaj dowolnych dwóch graczy lub sezony obok siebie.
+• Sortuj zaawansowane i tradycyjne statystyki każdego klubu.
+• Dokładniejsze rankingi, prawidłowe linie graczy two-way i lepsze minima fieldingu.

@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		03322BA439762FE028116ADC /* TeamsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93AB140AC9F51D7E0F0E2C6D /* TeamsView.swift */; };
 		04023875866CC802E984C0B3 /* RecentForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F95C02E1622E88F580A23B6 /* RecentForm.swift */; };
+		0C20C0897F6EC50FBA50DE50 /* UpdateShowcaseUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2FD89608305043ACAAA6F5E /* UpdateShowcaseUITests.swift */; };
 		0DBDA29FECAC0D4AC9F8A986 /* PlayerComparisonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FCAA022DB7A039D9E5D4EC6 /* PlayerComparisonView.swift */; };
 		0E0F4D3999340FBAB1444C63 /* RobotoCondensed-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1E6744289B66B875DB9A8AF1 /* RobotoCondensed-Bold.ttf */; };
 		0E57D0D337381AEB2F905D79 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 80FA4CA4AA0C875123767D0C /* PrivacyInfo.xcprivacy */; };
@@ -18,8 +19,10 @@
 		194BDDCA1D45B8E71852DF10 /* StandardStatsLeadersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9CBAD749A639F5A5ADCF10B /* StandardStatsLeadersView.swift */; };
 		1C05ED9E954E365E79E177AC /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57A36C805E9D0AB83292B6F7 /* PaywallView.swift */; };
 		2306BFD3CF4759AC2DE1A0BF /* ReviewPromptSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE81BA97A394EF8D27C6BCF8 /* ReviewPromptSheet.swift */; };
+		2982FDAC3BB6B93C02FB73E8 /* UpdateShowcaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E9F9A3189DDAB0CFADFCF3 /* UpdateShowcaseTests.swift */; };
 		2D96A2A958994588B6F847D5 /* YearAuditUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98410E06CAC66BDEE4137CAF /* YearAuditUITests.swift */; };
 		2E76F817A9CCC7A440662F57 /* RecentFormScreenshotUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 645E5E03FB3FD048BA8F563F /* RecentFormScreenshotUITests.swift */; };
+		2FB5B392CF4BE91BC43A7155 /* UpdateShowcaseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A023C87BB9DBC5AECE6E44F7 /* UpdateShowcaseView.swift */; };
 		3235E52D490C1C524DB0FD93 /* TrendMetric.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91C19D405CAFF37040ED3835 /* TrendMetric.swift */; };
 		3A17E9E47DA00F4396C5E4A8 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = B6F6FCA7A34D8F553BA94A8D /* RevenueCat */; };
 		3B490A69CE016E9B17B5808A /* RobotoCondensed-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 06457404302098EA3F0EE221 /* RobotoCondensed-Black.ttf */; };
@@ -142,9 +145,11 @@
 		91C19D405CAFF37040ED3835 /* TrendMetric.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrendMetric.swift; sourceTree = "<group>"; };
 		924C787B5EA5949F5BB19DF5 /* CompareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompareView.swift; sourceTree = "<group>"; };
 		93AB140AC9F51D7E0F0E2C6D /* TeamsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamsView.swift; sourceTree = "<group>"; };
+		96E9F9A3189DDAB0CFADFCF3 /* UpdateShowcaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateShowcaseTests.swift; sourceTree = "<group>"; };
 		98410E06CAC66BDEE4137CAF /* YearAuditUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YearAuditUITests.swift; sourceTree = "<group>"; };
 		9AD97C159FCE484C7AA9DDDF /* PlayerProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerProfileView.swift; sourceTree = "<group>"; };
 		9C04FC271035959EFD5300A2 /* SavantModules.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavantModules.swift; sourceTree = "<group>"; };
+		A023C87BB9DBC5AECE6E44F7 /* UpdateShowcaseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateShowcaseView.swift; sourceTree = "<group>"; };
 		A0F3B0A1BCB8A4DEF203DB61 /* StatScoutUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = StatScoutUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A6DFC3237D3CB5ADC1082AD7 /* RobotoMono-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "RobotoMono-Regular.ttf"; sourceTree = "<group>"; };
 		A722423BB05C1EA767098065 /* YearComparisonFeatureTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YearComparisonFeatureTests.swift; sourceTree = "<group>"; };
@@ -153,6 +158,7 @@
 		B2EAE4FBE4CF576F735F06C7 /* StandardStatsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StandardStatsTests.swift; sourceTree = "<group>"; };
 		C09B5BA2F2442F748C0FC062 /* PaywallScreenshotHarness.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallScreenshotHarness.swift; sourceTree = "<group>"; };
 		C1F9C4B1F4674E2DABB9CF60 /* SavantMenus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavantMenus.swift; sourceTree = "<group>"; };
+		C2FD89608305043ACAAA6F5E /* UpdateShowcaseUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateShowcaseUITests.swift; sourceTree = "<group>"; };
 		C62780264C15B926A095378C /* ReviewPromptTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewPromptTracker.swift; sourceTree = "<group>"; };
 		C7699F37BE47BC9BE5A5A4B1 /* StatScoutTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = StatScoutTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		DE81BA97A394EF8D27C6BCF8 /* ReviewPromptSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewPromptSheet.swift; sourceTree = "<group>"; };
@@ -214,6 +220,7 @@
 				5DC2DEECB438987B32405C3A /* PlayerTests.swift */,
 				B2EAE4FBE4CF576F735F06C7 /* StandardStatsTests.swift */,
 				651F39025F6839FC272B2181 /* StatDirectionTests.swift */,
+				96E9F9A3189DDAB0CFADFCF3 /* UpdateShowcaseTests.swift */,
 				A722423BB05C1EA767098065 /* YearComparisonFeatureTests.swift */,
 				74A4C751088FF846CA40BB91 /* YearComparisonTests.swift */,
 			);
@@ -245,6 +252,7 @@
 				645E5E03FB3FD048BA8F563F /* RecentFormScreenshotUITests.swift */,
 				7D6EF83C10DB1C4887277F68 /* SeasonPickerUITests.swift */,
 				5BC5EE3CB654E37FE99FE844 /* StatScoutComprehensiveUITests.swift */,
+				C2FD89608305043ACAAA6F5E /* UpdateShowcaseUITests.swift */,
 				98410E06CAC66BDEE4137CAF /* YearAuditUITests.swift */,
 			);
 			path = StatScoutUITests;
@@ -352,6 +360,7 @@
 				93AB140AC9F51D7E0F0E2C6D /* TeamsView.swift */,
 				FCF08005AEA98F7CFF7919C6 /* TeamView.swift */,
 				227F1309E0C8906969049D9F /* TrialPitchSheet.swift */,
+				A023C87BB9DBC5AECE6E44F7 /* UpdateShowcaseView.swift */,
 				13A6D136EE3F7A2B36956CA4 /* YearComparePreview.swift */,
 				7021023A2FAE67C688618334 /* YearComparisonView.swift */,
 			);
@@ -511,6 +520,7 @@
 				DE3E81E46D644C2617940B7E /* PlayerTests.swift in Sources */,
 				13627AAB67147D0AE5954433 /* StandardStatsTests.swift in Sources */,
 				A211C246D1B8BD2A42CF97B0 /* StatDirectionTests.swift in Sources */,
+				2982FDAC3BB6B93C02FB73E8 /* UpdateShowcaseTests.swift in Sources */,
 				F6AE33EDC77A2F71DFC9A244 /* YearComparisonFeatureTests.swift in Sources */,
 				6E2C32BBB0EB793230693961 /* YearComparisonTests.swift in Sources */,
 			);
@@ -561,6 +571,7 @@
 				03322BA439762FE028116ADC /* TeamsView.swift in Sources */,
 				3235E52D490C1C524DB0FD93 /* TrendMetric.swift in Sources */,
 				530DACB92F83D8B251DD53FA /* TrialPitchSheet.swift in Sources */,
+				2FB5B392CF4BE91BC43A7155 /* UpdateShowcaseView.swift in Sources */,
 				FC0DF3B89E0E8C6152BC78CF /* YearComparePreview.swift in Sources */,
 				C080C107A1B4ABFAC0DCE3E9 /* YearComparisonView.swift in Sources */,
 			);
@@ -573,6 +584,7 @@
 				2E76F817A9CCC7A440662F57 /* RecentFormScreenshotUITests.swift in Sources */,
 				7FB54B900D718DB5EA583C97 /* SeasonPickerUITests.swift in Sources */,
 				AB2B246F8DF32AF7AF3AEE0B /* StatScoutComprehensiveUITests.swift in Sources */,
+				0C20C0897F6EC50FBA50DE50 /* UpdateShowcaseUITests.swift in Sources */,
 				2D96A2A958994588B6F847D5 /* YearAuditUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
