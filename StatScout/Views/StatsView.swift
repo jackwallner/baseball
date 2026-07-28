@@ -72,8 +72,13 @@ struct StatsView: View {
                 // it costs no vertical space on the screen people live on.
                 DashboardView(viewModel: viewModel, statsMode: $mode)
             case .boxScore:
-                modeRow
-                StandardStatsLeadersView(players: viewModel.qualifiedSeasonPlayers)
+                // Same deal as the advanced board: the chip lives in this
+                // board's own control row, under its own category tabs, so
+                // switching modes doesn't reshuffle the header.
+                StandardStatsLeadersView(
+                    players: viewModel.qualifiedSeasonPlayers,
+                    statsMode: $mode
+                )
             case .bestWorst:
                 modeRow
                 MetricLeadersView(metrics: viewModel.allMetrics)

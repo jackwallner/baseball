@@ -164,6 +164,12 @@ enum RecentWindow: Int, CaseIterable, Identifiable, Sendable {
     case month = 30
 
     var id: Int { rawValue }
-    var label: String { "Last \(rawValue)" }
+    /// Always says "days". The window is calendar days, not games, and "Last
+    /// 15" beside a row that also reports a game count ("· 12G") read as
+    /// fifteen *games* to everyone who wasn't the person who wrote it.
+    var label: String { "Last \(rawValue) days" }
+    /// Segment-width version of the same wording: still explicit about the
+    /// unit, short enough for three of them across a phone.
+    var segmentLabel: String { "\(rawValue) days" }
     var shortLabel: String { "\(rawValue)d" }
 }

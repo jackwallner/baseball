@@ -178,11 +178,19 @@ struct CompareView: View {
         // registrations for one type is a runtime conflict.
         .modifier(PlayerProfileDestination(viewModel: viewModel))
         .navigationDestination(item: $comparisonRoute) { route in
-            PlayerComparisonView(playerA: route.playerA, playerB: route.playerB)
+            PlayerComparisonView(
+                playerA: route.playerA,
+                playerB: route.playerB,
+                catalog: ComparisonCatalog(viewModel: viewModel)
+            )
                 .modifier(SavantNavBarPublic())
         }
         .navigationDestination(item: $yearRoute) { route in
-            YearCompareDestination(route: route, viewModel: viewModel)
+            YearCompareDestination(
+                route: route,
+                viewModel: viewModel,
+                onChangePlayer: { picker = .yearPlayer }
+            )
                 .modifier(SavantNavBarPublic())
         }
     }
@@ -264,25 +272,48 @@ struct CompareView: View {
     private func followedRow(player: Player, index: Int) -> some View {
         let inSlot = playerA?.playerId == player.playerId || playerB?.playerId == player.playerId
 
-        Group {
+        HStack(spacing: 0) {
             if store.isPro {
                 Button {
                     loadIntoSlot(player)
                     UIImpactFeedbackGenerator(style: .light).impactOccurred()
                 } label: {
-                    followedRowLabel(player: player, index: index, inSlot: inSlot)
+                    followedRowLabel(player: player, inSlot: inSlot)
                 }
                 .buttonStyle(.plain)
                 .accessibilityHint("Loads \(player.name) into a comparison slot")
+
+                // A Pro tap is spent on the slot, which left the list you
+                // curated yourself with no way through to any of the pages it
+                // names. The chevron is its own target and does the obvious
+                // thing.
+                NavigationLink(value: player) {
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundStyle(SavantPalette.inkTertiary)
+                        .frame(width: 40, height: SavantGeo.rowHeight)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Open \(player.name)'s page")
             } else {
                 NavigationLink(value: player) {
-                    followedRowLabel(player: player, index: index, inSlot: inSlot)
+                    followedRowLabel(player: player, inSlot: inSlot)
                 }
                 .buttonStyle(.plain)
                 .accessibilityHint("Opens \(player.name)'s stats")
             }
         }
+        .padding(.trailing, store.isPro ? 4 : 0)
+        .background(index % 2 == 0 ? SavantPalette.surface : SavantPalette.surfaceAlt)
+        .overlay(
+            Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline),
+            alignment: .bottom
+        )
         .contextMenu {
+            NavigationLink(value: player) {
+                Label("Open player page", systemImage: "person.text.rectangle")
+            }
             Button(role: .destructive) {
                 favorites.toggleFavorite(playerId: player.playerId)
             } label: {
@@ -291,7 +322,7 @@ struct CompareView: View {
         }
     }
 
-    private func followedRowLabel(player: Player, index: Int, inSlot: Bool) -> some View {
+    private func followedRowLabel(player: Player, inSlot: Bool) -> some View {
         HStack(spacing: 10) {
             PlayerHeadshot(team: player.team, initials: player.initials, size: 34)
             VStack(alignment: .leading, spacing: 2) {
@@ -315,20 +346,17 @@ struct CompareView: View {
                     .background(SavantPalette.savantRed)
                     .clipShape(Capsule())
             } else {
-                // The glyph states the outcome: a slot to fill for Pro, a page
-                // to open for everyone else.
+                // The glyph states the outcome: a slot to fill for Pro (the
+                // chevron beside it opens the page), a page to open for
+                // everyone else.
                 Image(systemName: store.isPro ? "plus.circle" : "chevron.right")
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(SavantPalette.inkTertiary)
             }
         }
-        .padding(.horizontal, SavantGeo.padInline)
+        .padding(.leading, SavantGeo.padInline)
+        .padding(.trailing, store.isPro ? 6 : SavantGeo.padInline)
         .frame(height: SavantGeo.rowHeight)
-        .background(index % 2 == 0 ? SavantPalette.surface : SavantPalette.surfaceAlt)
-        .overlay(
-            Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline),
-            alignment: .bottom
-        )
         .contentShape(Rectangle())
     }
 
@@ -518,24 +546,89 @@ struct CompareView: View {
 private struct YearCompareDestination: View {
     let route: YearCompareRoute
     let viewModel: DashboardViewModel
+    /// Swaps the whole comparison onto a different player without going back.
+    var onChangePlayer: (() -> Void)? = nil
 
     private var history: [Player] {
         viewModel.playerHistories[route.playerId] ?? []
     }
 
+    /// Most recent season we hold for him, for the header identity.
+    private var latest: Player? {
+        history.max { ($0.season ?? 0) < ($1.season ?? 0) }
+    }
+
+    /// Who this is, a way through to his page, and a way to point the whole
+    /// screen at somebody else. Without it the only route to a second player's
+    /// history was back out to the tab and in again.
+    @ViewBuilder
+    private var playerBar: some View {
+        HStack(spacing: 10) {
+            if let latest {
+                NavigationLink(value: latest) {
+                    HStack(spacing: 10) {
+                        PlayerHeadshot(team: latest.team, initials: latest.initials, size: 34)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(route.playerName)
+                                .font(SavantType.bodyBold)
+                                .foregroundStyle(SavantPalette.ink)
+                                .lineLimit(1)
+                            Text("\(displayTeamAbbr(latest.team)) · \(latest.displayPosition)")
+                                .font(SavantType.micro)
+                                .tracking(0.3)
+                                .foregroundStyle(SavantPalette.inkTertiary)
+                        }
+                    }
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityHint("Opens \(route.playerName)'s page")
+            } else {
+                Text(route.playerName)
+                    .font(SavantType.bodyBold)
+                    .foregroundStyle(SavantPalette.ink)
+            }
+
+            Spacer(minLength: 0)
+
+            if let onChangePlayer {
+                Button(action: onChangePlayer) {
+                    SavantInlinePill(systemImage: "arrow.triangle.2.circlepath", title: "Change")
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Compare a different player's seasons")
+            }
+        }
+        .padding(.horizontal, SavantGeo.padInline)
+        .padding(.vertical, 10)
+        .background(SavantPalette.surface)
+        .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
+        .overlay(
+            RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
+                .stroke(SavantPalette.hairline, lineWidth: 0.5)
+        )
+        .padding(.horizontal, 12)
+        .padding(.top, 12)
+    }
+
     var body: some View {
         ScrollView {
-            if history.count < 2 {
-                ContentUnavailableView {
-                    Label("Not enough history", systemImage: "calendar.badge.clock")
-                } description: {
-                    Text(viewModel.isHistoricalLoading
-                         ? "Loading past seasons for \(route.playerName)…"
-                         : "\(route.playerName) doesn't have multiple seasons of data to compare.")
+            VStack(spacing: 0) {
+                playerBar
+                if history.count < 2 {
+                    ContentUnavailableView {
+                        Label("Not enough history", systemImage: "calendar.badge.clock")
+                    } description: {
+                        Text(viewModel.isHistoricalLoading
+                             ? "Loading past seasons for \(route.playerName)…"
+                             : "\(route.playerName) doesn't have multiple seasons of data to compare.")
+                    }
+                    .padding(.vertical, 64)
+                } else {
+                    YearComparisonView(history: history)
                 }
-                .padding(.vertical, 64)
-            } else {
-                YearComparisonView(history: history)
+                // Clears the floating tab bar.
+                Color.clear.frame(height: 88)
             }
         }
         .scrollBounceBehavior(.basedOnSize)
@@ -546,8 +639,9 @@ private struct YearCompareDestination: View {
 }
 
 /// Lightweight, self-contained player picker (the profile screen's picker is
-/// private to that file).
-private struct ComparePlayerPicker: View {
+/// private to that file). Shared with `PlayerComparisonView`, which offers the
+/// same "swap this side out" choice from inside the comparison.
+struct ComparePlayerPicker: View {
     let players: [Player]
     /// Which season's roster this is, so an empty list can say why.
     var season: Int? = nil

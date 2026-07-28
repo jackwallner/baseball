@@ -384,7 +384,7 @@ struct TeamView: View {
 
             if isRosterRecent {
                 SavantSegmented(
-                    segments: RecentWindow.allCases.map { .init(value: $0, label: $0.label) },
+                    segments: RecentWindow.allCases.map { .init(value: $0, label: $0.segmentLabel) },
                     selection: $rosterWindow
                 )
                 .padding(.horizontal, 12)

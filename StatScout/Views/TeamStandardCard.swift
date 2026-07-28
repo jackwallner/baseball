@@ -94,7 +94,7 @@ struct TeamStandardCard: View {
 
             if showingRecent {
                 SavantSegmented(
-                    segments: RecentWindow.allCases.map { .init(value: $0, label: $0.label) },
+                    segments: RecentWindow.allCases.map { .init(value: $0, label: $0.segmentLabel) },
                     selection: Binding(
                         get: { RecentWindow(rawValue: windowDays) ?? .fortnight },
                         set: { windowDays = $0.rawValue }

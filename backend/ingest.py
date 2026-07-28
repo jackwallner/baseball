@@ -1283,6 +1283,70 @@ def _fetch_mlb_standard_stats(player_ids: list[int], season: int) -> dict[int, d
             logger.exception("Failed to fetch MLB stats for batch %d", i // batch_size)
             continue
 
+        # Fielding, so the Standard board can carry the same four categories
+        # the Statcast board does. A season split is reported per position, so
+        # a utility man comes back several times and the counting stats are
+        # summed across all of them.
+        #
+        # Its own try block: the glove line is the least important part of the
+        # payload, and a hiccup here must not throw away the hitting and
+        # pitching stats this batch already collected.
+        try:
+            field_url = "https://statsapi.mlb.com/api/v1/people"
+            field_params = {
+                "personIds": ids_param,
+                "hydrate": f"stats(type=season,season={season},group=fielding)",
+            }
+            field_resp = requests.get(field_url, params=field_params, timeout=30)
+            field_resp.raise_for_status()
+            field_data = field_resp.json()
+
+            for person in field_data.get("people", []):
+                pid = person.get("id")
+                if not pid or pid not in stats_by_player:
+                    continue
+
+                totals = {"e": 0, "a": 0, "po": 0, "dp": 0, "gf": 0}
+                found = False
+                for stat_group in person.get("stats", []):
+                    group_data = stat_group.get("group", {})
+                    if not (isinstance(group_data, dict) and group_data.get("displayName") == "fielding"):
+                        continue
+                    for split in stat_group.get("splits", []):
+                        stat = split.get("stat", {})
+                        if not stat:
+                            continue
+                        # The API reports a DH split with zero chances and a
+                        # real game count; counting it would give a full-time
+                        # DH a fielding line he never earned.
+                        position = (split.get("position") or {}).get("abbreviation")
+                        if position == "DH":
+                            continue
+                        found = True
+                        totals["e"] += int(stat.get("errors", 0) or 0)
+                        totals["a"] += int(stat.get("assists", 0) or 0)
+                        totals["po"] += int(stat.get("putOuts", 0) or 0)
+                        totals["dp"] += int(stat.get("doublePlays", 0) or 0)
+                        totals["gf"] += int(stat.get("games", 0) or 0)
+
+                if not found:
+                    continue
+                chances = totals["po"] + totals["a"] + totals["e"]
+                stats_by_player[pid].update({
+                    "e": totals["e"],
+                    "a": totals["a"],
+                    "po": totals["po"],
+                    "dp": totals["dp"],
+                    "gf": totals["gf"],
+                    # Written the way a box score writes it, ".987" rather than
+                    # 98.7, so it sorts and reads like AVG/OBP beside it.
+                    "fpct": f"{(totals['po'] + totals['a']) / chances:.3f}" if chances else "",
+                })
+
+        except Exception:
+            logger.exception("Failed to fetch MLB fielding stats for batch %d", i // batch_size)
+            continue
+
     logger.info("Fetched MLB standard stats for %d players", len(stats_by_player))
     return stats_by_player
 
@@ -1420,6 +1484,19 @@ def _build_standard_stats_from_mlb(stats: dict[str, Any]) -> list[dict[str, str]
                 else:
                     val_str = str(int(val)) if isinstance(val, (int, float)) and float(val).is_integer() else str(val)
                 result.append({"id": f"std-{label}", "label": label, "value": val_str})
+
+    # Fielding line, for everyone who took the field. Kept out of the two
+    # blocks above because a two-way player has one glove, not two.
+    fielding = [("e", "E"), ("a", "A"), ("po", "PO"), ("dp", "DP"), ("fpct", "FLD%"), ("gf", "GF")]
+    existing_labels = {s["label"] for s in result}
+    for key, label in fielding:
+        if label in existing_labels:
+            continue
+        val = stats.get(key)
+        if val is None or val == "":
+            continue
+        val_str = str(int(val)) if isinstance(val, (int, float)) and float(val).is_integer() else str(val)
+        result.append({"id": f"std-{label}", "label": label, "value": val_str})
 
     return result
 
