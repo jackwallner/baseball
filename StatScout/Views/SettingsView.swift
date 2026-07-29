@@ -168,7 +168,10 @@ struct AboutView: View {
         guard let dataThrough else { return "-" }
         let stamp = dataThrough.formatted(.dateTime.month(.abbreviated).day())
         let calendar = Calendar.current
-        if calendar.isDateInToday(dataThrough) { return "\(stamp) (today)" }
+        // Only reachable if a day got ingested while it was still being played,
+        // which the pipeline is built not to do. Saying so beats a bare "today",
+        // which would read as a complete day.
+        if calendar.isDateInToday(dataThrough) { return "\(stamp) (today, still in progress)" }
         if calendar.isDateInYesterday(dataThrough) { return "\(stamp) (yesterday)" }
         let days = calendar.dateComponents([.day], from: dataThrough, to: .now).day ?? 0
         return "\(stamp) (\(days) days ago)"
