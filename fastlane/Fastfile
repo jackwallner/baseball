@@ -95,7 +95,7 @@ platform :ios do
           5. Browse Teams tab for team rosters
           6. Metrics tab shows best/worst performers per category
 
-          Pro features (IAP via RevenueCat):
+          StatScout+ features (IAP via RevenueCat):
           - Historical seasons, player comparisons, year-over-year tracking
           - Test with Sandbox account via RevenueCat
 
