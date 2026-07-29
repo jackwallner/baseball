@@ -561,6 +561,7 @@ struct LeaderboardTableRow: View {
         }
         .frame(height: SavantGeo.rowHeight)
         .padding(.horizontal, SavantGeo.padInline)
+        .background(rank % 2 == 1 ? SavantPalette.surface : SavantPalette.surfaceAlt)
         .contentShape(Rectangle())
     }
 }
