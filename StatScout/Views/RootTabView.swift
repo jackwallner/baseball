@@ -202,7 +202,7 @@ struct RootTabView: View {
                 .navigationTitle("Stats")
                 .navigationBarTitleDisplayMode(.inline)
                 .modifier(SavantNavBar())
-                .modifier(HomeTabToolbar(lastUpdated: viewModel.lastUpdated))
+                .modifier(HomeTabToolbar(lastUpdated: viewModel.lastUpdated, dataThrough: viewModel.dataThrough))
                 .modifier(StandardDestinations(viewModel: viewModel))
         }
     }
@@ -213,7 +213,7 @@ struct RootTabView: View {
                 .navigationTitle("Trends")
                 .navigationBarTitleDisplayMode(.inline)
                 .modifier(SavantNavBar())
-                .modifier(HomeTabToolbar(lastUpdated: viewModel.lastUpdated))
+                .modifier(HomeTabToolbar(lastUpdated: viewModel.lastUpdated, dataThrough: viewModel.dataThrough))
                 .modifier(StandardDestinations(viewModel: viewModel))
         }
     }
@@ -224,7 +224,7 @@ struct RootTabView: View {
                 .navigationTitle("Teams")
                 .navigationBarTitleDisplayMode(.inline)
                 .modifier(SavantNavBar())
-                .modifier(HomeTabToolbar(lastUpdated: viewModel.lastUpdated))
+                .modifier(HomeTabToolbar(lastUpdated: viewModel.lastUpdated, dataThrough: viewModel.dataThrough))
                 .modifier(StandardDestinations(viewModel: viewModel))
         }
     }
@@ -238,7 +238,7 @@ struct RootTabView: View {
                 .navigationTitle("Compare")
                 .navigationBarTitleDisplayMode(.inline)
                 .modifier(SavantNavBar())
-                .modifier(HomeTabToolbar(lastUpdated: viewModel.lastUpdated))
+                .modifier(HomeTabToolbar(lastUpdated: viewModel.lastUpdated, dataThrough: viewModel.dataThrough))
         }
     }
 
@@ -297,6 +297,7 @@ private struct SavantNavBar: ViewModifier {
 private struct HomeTabToolbar: ViewModifier {
     @EnvironmentObject private var store: StoreService
     let lastUpdated: Date?
+    let dataThrough: Date?
     /// Owned per tab, not shared. All three tabs stay alive in the ZStack, so a
     /// single shared flag would push Settings onto all three stacks at once.
     @State private var showingSettings = false
@@ -352,6 +353,7 @@ private struct HomeTabToolbar: ViewModifier {
             .navigationDestination(isPresented: $showingSettings) {
                 AboutView(
                     lastUpdated: lastUpdated,
+                    dataThrough: dataThrough,
                     onRequestReview: {
                         showingSettings = false
                         Task { @MainActor in

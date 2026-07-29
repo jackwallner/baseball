@@ -3,6 +3,7 @@ import SwiftUI
 struct AboutView: View {
     @EnvironmentObject private var store: StoreService
     let lastUpdated: Date?
+    var dataThrough: Date?
     var onRequestReview: (() -> Void)?
     @State private var paywallTrigger: PaywallTrigger?
 
@@ -156,6 +157,23 @@ struct AboutView: View {
         return "\(stamp) (\(relative.localizedString(for: lastUpdated, relativeTo: .now)))"
     }
 
+    /// The last game day the numbers cover.
+    ///
+    /// The row that "Last Updated" needs standing next to it. A refresh that
+    /// runs before the previous night's slate has published rewrites every row
+    /// without closing out a new day, so the write stamp says today while the
+    /// Trends board says "Through Jul 27" — and the app looked like it was
+    /// contradicting itself. Saying which games are in makes the pair readable.
+    private var gamesThroughText: String {
+        guard let dataThrough else { return "-" }
+        let stamp = dataThrough.formatted(.dateTime.month(.abbreviated).day())
+        let calendar = Calendar.current
+        if calendar.isDateInToday(dataThrough) { return "\(stamp) (today)" }
+        if calendar.isDateInYesterday(dataThrough) { return "\(stamp) (yesterday)" }
+        let days = calendar.dateComponents([.day], from: dataThrough, to: .now).day ?? 0
+        return "\(stamp) (\(days) days ago)"
+    }
+
     private var refreshCard: some View {
         VStack(spacing: 0) {
             SavantSectionBar(title: "DATA")
@@ -166,8 +184,14 @@ struct AboutView: View {
             )
             Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline)
             row(
+                icon: "calendar.badge.clock",
+                title: "Games Through",
+                subtitle: gamesThroughText
+            )
+            Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline)
+            row(
                 icon: "clock.arrow.circlepath",
-                title: "Last Updated",
+                title: "Last Refreshed",
                 subtitle: lastUpdatedText
             )
         }
@@ -307,7 +331,10 @@ struct AboutView: View {
 
 #Preview {
     NavigationStack {
-        AboutView(lastUpdated: Date())
+        AboutView(
+            lastUpdated: Date(),
+            dataThrough: Calendar.current.date(byAdding: .day, value: -1, to: Date())
+        )
             .environmentObject(StoreService.shared)
     }
 }

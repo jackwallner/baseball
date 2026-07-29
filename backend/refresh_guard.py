@@ -8,13 +8,26 @@ the window reliable. This guard is what keeps them from turning into several
 hold still. A second pass later in the day would fold partial in-progress games
 into the season line.
 
-Exits 0 always. Writes ``run=true`` / ``run=false`` to $GITHUB_OUTPUT, and
-prints the reason.
+Exits 0 always. Writes two decisions to $GITHUB_OUTPUT, and prints the reason:
 
-Skip when:
+``run``
+    The season snapshot (percentiles, standard stats). Overnight only. Running
+    this mid-afternoon folds in-progress games into the season line, so the
+    window closes at ``SEASON_WINDOW_END_HOUR_UTC`` and the day waits for the
+    next night.
+
+``run_trends``
+    The per-game logs and rolling windows behind the Trends board. Safe at any
+    hour because ``ingest_game_logs.py`` never reaches past yesterday, so a
+    complete day can be caught up whenever Savant finally publishes it. This is
+    what left the app reading "Through Jul 27" all day on 2026-07-29: Savant
+    hadn't published the 28th by the time the last overnight attempt ran, and
+    nothing looked again.
+
+Both skip when:
   * MLB played no games yesterday (nothing to close out), or
   * yesterday's games are already in ``player_game_logs`` (an earlier attempt
-    tonight got there first).
+    got there first).
 
 Env: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY.
 """
@@ -34,6 +47,10 @@ logger = logging.getLogger(__name__)
 UTC = timezone.utc
 
 MLB_SCHEDULE_URL = "https://statsapi.mlb.com/api/v1/schedule"
+# The season snapshot is an all-day-still number, so it only ever gets written
+# inside the overnight window. 13:00 UTC is 6am PT, which leaves room for a cron
+# that fires up to three hours late and still lands before anyone is reading.
+SEASON_WINDOW_END_HOUR_UTC = 13
 # A game that hasn't finished isn't in Savant's export yet, so it can't be
 # what we're waiting to ingest.
 FINAL_STATES = {"Final", "Game Over", "Completed Early"}
@@ -86,27 +103,40 @@ def _already_ingested(season: int, day) -> bool:
     return latest >= day
 
 
-def decide() -> tuple[bool, str]:
+def decide() -> tuple[bool, bool, str]:
+    """Return (run_season, run_trends, reason)."""
     season = _resolve_season()
-    yesterday = datetime.now(UTC).date() - timedelta(days=1)
+    now = datetime.now(UTC)
+    yesterday = now.date() - timedelta(days=1)
 
     played = _games_played(yesterday)
     if played == 0:
-        return False, f"No MLB games finished on {yesterday}; nothing to close out."
+        return False, False, f"No MLB games finished on {yesterday}; nothing to close out."
 
     if _already_ingested(season, yesterday):
-        return False, f"{yesterday} is already ingested; tonight's refresh is done."
+        return False, False, f"{yesterday} is already ingested; tonight's refresh is done."
 
-    return True, f"{yesterday} ({played} games) is not ingested yet."
+    in_window = now.hour < SEASON_WINDOW_END_HOUR_UTC
+    if not in_window:
+        return (
+            False,
+            True,
+            f"{yesterday} ({played} games) is not ingested yet, and it is past "
+            f"{SEASON_WINDOW_END_HOUR_UTC:02d}:00 UTC: catching up trends only, "
+            "season line waits for tonight.",
+        )
+
+    return True, True, f"{yesterday} ({played} games) is not ingested yet."
 
 
 def main() -> None:
-    should_run, reason = decide()
-    print(f"run={should_run}: {reason}")
+    run_season, run_trends, reason = decide()
+    print(f"run={run_season} run_trends={run_trends}: {reason}")
     output = os.environ.get("GITHUB_OUTPUT")
     if output:
         with open(output, "a", encoding="utf-8") as handle:
-            handle.write(f"run={'true' if should_run else 'false'}\n")
+            handle.write(f"run={'true' if run_season else 'false'}\n")
+            handle.write(f"run_trends={'true' if run_trends else 'false'}\n")
 
 
 if __name__ == "__main__":

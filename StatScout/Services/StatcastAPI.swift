@@ -22,6 +22,9 @@ protocol StatcastProviding: Sendable {
     func fetchGameLogs(playerId: Int, season: Int) async throws -> [PlayerGameLog]
     func fetchTeamGameLogs(team: String, season: Int, sinceDate: Date) async throws -> [PlayerGameLog]
     func fetchRecentForm(season: Int, windowDays: Int) async throws -> [RecentForm]
+    /// The last game day the pipeline has actually closed out. See
+    /// `DashboardViewModel.dataThrough` for why a write timestamp isn't enough.
+    func fetchDataThroughDate(season: Int) async throws -> Date?
 }
 
 struct StatcastAPI: StatcastProviding {
@@ -150,6 +153,45 @@ struct StatcastAPI: StatcastProviding {
         return all
     }
 
+    /// One row, one column: the newest `as_of` in the rolling-window table.
+    ///
+    /// Settings used to report only when the pipeline last wrote rows, which is
+    /// "today" even on a night that found no new games to close out — so it read
+    /// as fresh while the Trends board still said "Through Jul 27". This is the
+    /// number both screens can agree on.
+    func fetchDataThroughDate(season: Int) async throws -> Date? {
+        struct CoverageRow: Decodable {
+            let asOf: String?
+
+            enum CodingKeys: String, CodingKey {
+                case asOf = "as_of"
+            }
+        }
+
+        let endpoint = baseURL
+            .appending(path: "rest/v1/player_recent_form")
+            .appending(queryItems: [
+                URLQueryItem(name: "select", value: "as_of"),
+                URLQueryItem(name: "season", value: "eq.\(season)"),
+                URLQueryItem(name: "order", value: "as_of.desc"),
+                URLQueryItem(name: "limit", value: "1"),
+            ])
+        var request = URLRequest(url: endpoint, cachePolicy: .reloadIgnoringLocalCacheData)
+        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        request.setValue(apiKey, forHTTPHeaderField: "apikey")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse,
+              200..<300 ~= httpResponse.statusCode || httpResponse.statusCode == 206 else {
+            throw URLError(.badServerResponse)
+        }
+
+        let rows = try JSONDecoder().decode([CoverageRow].self, from: data)
+        guard let raw = rows.first?.asOf else { return nil }
+        return Date.fromPostgresDate(raw)
+    }
+
     private func fetchPlayers(seasonFilter: String) async throws -> [Player] {
         var all: [Player] = []
         let pageSize = 1000
@@ -229,6 +271,10 @@ struct PreviewStatcastAPI: StatcastProviding {
 
     func fetchRecentForm(season: Int, windowDays: Int) async throws -> [RecentForm] {
         []
+    }
+
+    func fetchDataThroughDate(season: Int) async throws -> Date? {
+        nil
     }
 }
 #endif
