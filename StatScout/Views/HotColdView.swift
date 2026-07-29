@@ -332,6 +332,44 @@ struct HotColdView: View {
         let now = form.metrics[metric.key]
         let then = form.priorMetrics[metric.key]
 
+        if let player {
+            NavigationLink(value: player) {
+                rowContent(
+                    form: form,
+                    player: player,
+                    rank: rank,
+                    index: index,
+                    delta: delta,
+                    now: now,
+                    then: then
+                )
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("trend-player-\(player.playerId)")
+            .contextMenu { followButton(for: form) }
+        } else {
+            rowContent(
+                form: form,
+                player: nil,
+                rank: rank,
+                index: index,
+                delta: delta,
+                now: now,
+                then: then
+            )
+            .contextMenu { followButton(for: form) }
+        }
+    }
+
+    private func rowContent(
+        form: RecentForm,
+        player: Player?,
+        rank: Int?,
+        index: Int,
+        delta: Double,
+        now: Double?,
+        then: Double?
+    ) -> some View {
         HStack(spacing: 10) {
             if let rank {
                 Text("\(rank)")
@@ -381,21 +419,16 @@ struct HotColdView: View {
             alignment: .bottom
         )
         .contentShape(Rectangle())
-        .overlay {
-            if let player {
-                NavigationLink(value: player) { Color.clear }
-                    .buttonStyle(.plain)
-            }
-        }
-        // Following straight off the board, so a name you spot here can be
-        // pinned without a round trip through the player page.
-        .contextMenu {
-            Button {
-                favorites.toggleFavorite(playerId: form.playerId)
-            } label: {
-                let following = favorites.isFavorite(playerId: form.playerId)
-                Label(following ? "Unfollow" : "Follow", systemImage: following ? "star.slash" : "star")
-            }
+    }
+
+    /// Following straight off the board, so a name you spot here can be pinned
+    /// without a round trip through the player page.
+    private func followButton(for form: RecentForm) -> some View {
+        Button {
+            favorites.toggleFavorite(playerId: form.playerId)
+        } label: {
+            let following = favorites.isFavorite(playerId: form.playerId)
+            Label(following ? "Unfollow" : "Follow", systemImage: following ? "star.slash" : "star")
         }
     }
 
