@@ -2,15 +2,15 @@ name: Nightly Statcast Refresh
 
 on:
   schedule:
-    # Four attempts, one update. The app is meant to wake up holding
+    # Many attempts, one update. The app is meant to wake up holding
     # yesterday's finished data and hold still all day: a refresh that lands
     # mid-afternoon folds half-played games into the season line.
     #
-    # So every attempt sits inside the overnight window, and `refresh_guard.py`
-    # makes all but the first a no-op. The attempts exist because a GitHub cron
-    # is not a promise: they routinely land one to three hours late and are
-    # sometimes dropped altogether, which is what left the app reading two days
-    # stale. Four shots at the window means one of them lands.
+    # So the season snapshot only ever runs inside the overnight window, and
+    # `refresh_guard.py` makes all but the first attempt a no-op. The repeated
+    # attempts exist because a GitHub cron is not a promise: they routinely land
+    # one to three hours late and are sometimes dropped altogether, which is
+    # what left the app reading two days stale. Several shots means one lands.
     #
     # West-coast games finish around 06:00 UTC and Savant publishes an hour or
     # two later, so 07:00 is the earliest with any chance of data. 10:00 UTC is
@@ -20,10 +20,24 @@ on:
     - cron: "0 8 * * *"
     - cron: "0 9 * * *"
     - cron: "0 10 * * *"
+    # Daytime sweeps for the Trends board only. Savant is not always done by
+    # 3am PT: on 2026-07-29 the 28th still wasn't published when the last
+    # overnight attempt ran, so the app spent the whole day saying "Through Jul
+    # 27" while nothing looked again. These attempts close that day out when it
+    # does appear. They can't disturb the all-day-still season line, because the
+    # guard only clears `run` inside the overnight window and the game-log
+    # ingest never reaches past yesterday.
+    - cron: "0 14 * * *"
+    - cron: "0 17 * * *"
+    - cron: "0 20 * * *"
   workflow_dispatch:
     inputs:
       full_game_log_reingest:
         description: "Re-ingest per-game logs from season start (needed after a metric-set change)"
+        type: boolean
+        default: false
+      trends_only:
+        description: "Skip the season snapshot; only catch up game logs + rolling windows (safe mid-day)"
         type: boolean
         default: false
 
@@ -66,7 +80,7 @@ jobs:
         run: python backend/refresh_guard.py
 
       - name: Run ingestion (with actual values)
-        if: steps.guard.outputs.run == 'true' || github.event_name == 'workflow_dispatch'
+        if: (steps.guard.outputs.run == 'true' || github.event_name == 'workflow_dispatch') && !inputs.trends_only
         shell: bash
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -77,7 +91,7 @@ jobs:
           python backend/ingest.py 2>&1 | tee ingestion.log
 
       - name: Run per-game ingestion (Recent Form data)
-        if: steps.guard.outputs.run == 'true' || github.event_name == 'workflow_dispatch'
+        if: steps.guard.outputs.run_trends == 'true' || github.event_name == 'workflow_dispatch'
         shell: bash
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -94,7 +108,7 @@ jobs:
           fi
 
       - name: Roll up rolling windows (7/15/30 day)
-        if: steps.guard.outputs.run == 'true' || github.event_name == 'workflow_dispatch'
+        if: steps.guard.outputs.run_trends == 'true' || github.event_name == 'workflow_dispatch'
         shell: bash
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -102,6 +116,19 @@ jobs:
         run: |
           set -o pipefail
           python backend/rollup_recent_form.py 2>&1 | tee recent_form_rollup.log
+
+      # Success and stale look identical otherwise: every step can exit 0 while
+      # Savant had nothing new to give, which is exactly how the app spent
+      # 2026-07-29 showing "Through Jul 27" under a "last updated today" line.
+      # Early attempts only warn (being too early is the expected case); the
+      # last attempt of the day fails, which opens the issue below.
+      - name: Verify the data actually moved
+        if: github.event_name == 'schedule'
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          FINAL_ATTEMPT: ${{ github.event.schedule == '0 20 * * *' }}
+        run: python backend/verify_freshness.py
 
       - name: Upload artifacts on failure
         if: failure()
@@ -123,6 +150,6 @@ jobs:
             github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: 'Nightly Statcast ingestion failed',
-              body: ':warning: Nightly Statcast ingestion failed — check [run logs](https://github.com/' + context.repo.owner + '/' + context.repo.repo + '/actions/runs/' + context.runId + ')'
+              title: 'Nightly Statcast refresh failed or fell behind',
+              body: ':warning: The nightly Statcast refresh failed, or finished a full day of attempts without closing out yesterday (see the freshness check) — check [run logs](https://github.com/' + context.repo.owner + '/' + context.repo.repo + '/actions/runs/' + context.runId + ')'
             })

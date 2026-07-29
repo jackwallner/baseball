@@ -159,6 +159,15 @@ final class DashboardViewModel {
         players.map(\.updatedAt).max()
     }
 
+    /// The last game day the data actually covers, as opposed to when the rows
+    /// were written.
+    ///
+    /// These come apart whenever Savant publishes a slate late: the overnight
+    /// refresh runs, rewrites every row (so `lastUpdated` is today) and closes
+    /// out no new games. Settings reported the write stamp alone and so claimed
+    /// fresh data while the Trends board correctly said "Through Jul 27".
+    var dataThrough: Date?
+
     var freshnessText: String? {
         guard let lastUpdated else { return nil }
         let formatter = DateFormatter()
@@ -318,6 +327,12 @@ final class DashboardViewModel {
                 // board to "no movement" for the rest of the launch.
                 guard !byPlayer.isEmpty else { return }
                 self.recentFormByWindow[target.rawValue] = byPlayer
+                // Keep the Settings coverage line and the Trends "Through …"
+                // header reading off the same answer once a window has landed.
+                if season == StatScoutSeason.current,
+                   let asOf = byPlayer.values.compactMap(\.asOf).max() {
+                    self.dataThrough = asOf
+                }
             } catch {
                 // A window the user has already flipped away from cancels its
                 // own fetch. Reporting that as a failure is how tapping quickly
@@ -847,6 +862,13 @@ final class DashboardViewModel {
         }
         isLoading = false
         loadingProgress = 1
+
+        // Off the critical path on purpose: one tiny row that only Settings
+        // reads, fetched after the leaderboard is already on screen. A failure
+        // here leaves the coverage line blank rather than failing the load.
+        if let coverage = try? await provider.fetchDataThroughDate(season: StatScoutSeason.current) {
+            dataThrough = coverage
+        }
     }
 
     func loadHistoricalIfNeeded() async {

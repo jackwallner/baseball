@@ -1,5 +1,23 @@
 import Foundation
 
+extension Date {
+    /// Parses a Postgres `date` column ("YYYY-MM-DD").
+    ///
+    /// These arrive with no time and no zone, so they can't go through the
+    /// ISO8601 decoding strategy the rest of the payload uses. Anchoring them
+    /// at local midnight is what makes "Through Jul 28" mean the same calendar
+    /// day the pipeline closed out, whatever zone the reader is in.
+    static func fromPostgresDate(_ raw: String) -> Date? {
+        let bits = raw.split(separator: "-").compactMap { Int($0) }
+        guard bits.count == 3 else { return nil }
+        var parts = DateComponents()
+        parts.year = bits[0]
+        parts.month = bits[1]
+        parts.day = bits[2]
+        return Calendar.current.date(from: parts)
+    }
+}
+
 /// One player's rolling window, as stored in `public.player_recent_form`.
 ///
 /// Mirrors Baseball Savant's rolling leaderboard shape: the current window,
@@ -53,14 +71,7 @@ struct RecentForm: Codable, Hashable, Sendable, Identifiable {
         // as_of is a Postgres `date`, so it arrives as "YYYY-MM-DD" and won't
         // parse with the ISO8601 strategy the rest of the payload uses.
         if let raw = try c.decodeIfPresent(String.self, forKey: .asOf) {
-            var parts = DateComponents()
-            let bits = raw.split(separator: "-").compactMap { Int($0) }
-            if bits.count == 3 {
-                parts.year = bits[0]; parts.month = bits[1]; parts.day = bits[2]
-                asOf = Calendar.current.date(from: parts)
-            } else {
-                asOf = nil
-            }
+            asOf = Date.fromPostgresDate(raw)
         } else {
             asOf = nil
         }

@@ -47,6 +47,7 @@ struct DashboardView: View {
             NavigationStack {
                 AboutView(
                     lastUpdated: viewModel.lastUpdated,
+                    dataThrough: viewModel.dataThrough,
                     onRequestReview: {
                         showingAbout = false
                         Task { @MainActor in

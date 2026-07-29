@@ -50,6 +50,51 @@ final class DashboardViewModelTests: XCTestCase {
         XCTAssertNil(vm.lastUpdated)
     }
 
+    /// The two freshness numbers have to be able to disagree. A refresh that
+    /// runs before the previous night's slate publishes rewrites every row
+    /// (`lastUpdated` = now) without closing out a new day, and Settings has to
+    /// be able to say so rather than claiming the data is current.
+    @MainActor
+    func testDataThroughReportsCoverageNotWriteTime() async {
+        let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: Date())!
+        let players: [Player] = [
+            Player(
+                playerId: 1, name: "A", team: "NYY", position: "DH", handedness: "L/R", imageURL: nil,
+                updatedAt: Date(), season: 2026,
+                metrics: [
+                    Metric(id: "m1", label: "xwOBA", value: ".400", percentile: 90, category: .hitting)
+                ],
+                standardStats: [],
+                games: []
+            )
+        ]
+        let vm = DashboardViewModel(provider: MockProvider(players: players, dataThrough: yesterday))
+        await vm.load()
+        XCTAssertEqual(vm.dataThrough, yesterday)
+        XCTAssertNotNil(vm.lastUpdated)
+        XCTAssertTrue(vm.lastUpdated! > vm.dataThrough!)
+    }
+
+    @MainActor
+    func testDataThroughStaysNilWhenTheCoverageQueryFails() async {
+        let vm = DashboardViewModel(provider: MockProvider(error: URLError(.timedOut)))
+        await vm.load()
+        XCTAssertNil(vm.dataThrough)
+    }
+
+    /// `as_of` is a Postgres `date`, not a timestamp, so it can't go through the
+    /// ISO8601 decoding strategy the rest of the payload uses.
+    func testPostgresDateParsing() {
+        let parsed = Date.fromPostgresDate("2026-07-28")
+        XCTAssertNotNil(parsed)
+        let parts = Calendar.current.dateComponents([.year, .month, .day], from: parsed!)
+        XCTAssertEqual(parts.year, 2026)
+        XCTAssertEqual(parts.month, 7)
+        XCTAssertEqual(parts.day, 28)
+        XCTAssertNil(Date.fromPostgresDate("2026-07"))
+        XCTAssertNil(Date.fromPostgresDate(""))
+    }
+
     @MainActor
     func testTeamFullNameReturnsCorrectFullName() {
         // City-only naming (nickname dropped in the Savant-style UI), with the
@@ -285,10 +330,19 @@ final class InMemoryPlayerCache: PlayerCaching, @unchecked Sendable {
 struct MockProvider: StatcastProviding, @unchecked Sendable {
     let players: [Player]?
     let error: Error?
+    let recentForm: [RecentForm]
+    let dataThrough: Date?
 
-    init(players: [Player]? = nil, error: Error? = nil) {
+    init(
+        players: [Player]? = nil,
+        error: Error? = nil,
+        recentForm: [RecentForm] = [],
+        dataThrough: Date? = nil
+    ) {
         self.players = players
         self.error = error
+        self.recentForm = recentForm
+        self.dataThrough = dataThrough
     }
 
     func fetchPlayers() async throws -> [Player] {
@@ -318,6 +372,11 @@ struct MockProvider: StatcastProviding, @unchecked Sendable {
 
     func fetchRecentForm(season: Int, windowDays: Int) async throws -> [RecentForm] {
         if let error { throw error }
-        return []
+        return recentForm
+    }
+
+    func fetchDataThroughDate(season: Int) async throws -> Date? {
+        if let error { throw error }
+        return dataThrough
     }
 }
