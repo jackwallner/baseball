@@ -112,6 +112,53 @@ struct MetricRankingView: View {
 
 }
 
+/// The Statcast drill-down as a season-owning screen, so the year printed in its
+/// header is also the year you can change from it. Mirrors
+/// `StandardStatsLeaderboardScreen`.
+struct MetricRankingScreen: View {
+    let viewModel: DashboardViewModel
+    let metricLabel: String
+    let metricCategory: MetricCategory
+    @State private var season: Int
+    @State private var paywallTrigger: PaywallTrigger?
+
+    init(
+        viewModel: DashboardViewModel,
+        metricLabel: String,
+        metricCategory: MetricCategory,
+        initialSeason: Int
+    ) {
+        self.viewModel = viewModel
+        self.metricLabel = metricLabel
+        self.metricCategory = metricCategory
+        _season = State(initialValue: initialSeason)
+    }
+
+    var body: some View {
+        MetricRankingView(
+            metricLabel: metricLabel,
+            metricCategory: metricCategory,
+            players: viewModel.players(forSeason: season),
+            season: season
+        )
+        // Identity is the metric plus the season; without the season in the id
+        // the sort-direction default wouldn't survive a year change.
+        .id(season)
+        .modifier(DrillDownSeasonPill(
+            viewModel: viewModel,
+            season: $season,
+            paywallTrigger: $paywallTrigger
+        ))
+        .task(id: season) {
+            guard season != viewModel.selectedSeason else { return }
+            await viewModel.loadHistoricalIfNeeded()
+        }
+        .sheet(item: $paywallTrigger) { trigger in
+            TrialPitchSheet(trigger: trigger)
+        }
+    }
+}
+
 #if DEBUG
 #Preview {
     NavigationStack {

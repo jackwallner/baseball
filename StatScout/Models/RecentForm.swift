@@ -184,3 +184,59 @@ enum RecentWindow: Int, CaseIterable, Identifiable, Sendable {
     var segmentLabel: String { "\(rawValue) days" }
     var shortLabel: String { "\(rawValue)d" }
 }
+
+/// How much playing time inside a rolling window a player needs before the
+/// Trends board will rank him.
+///
+/// Expressed as a rate per window day rather than a flat count, because the flat
+/// count `isSmallSample` uses means two different things depending on which
+/// window is showing: 15 PA over seven days is an everyday hitter, 15 PA over
+/// thirty is a bench bat whose one hot week produces a delta big enough to bury
+/// every real riser. The rate keeps "Regulars" meaning the same thing on all
+/// three boards.
+enum TrendQualifier: String, CaseIterable, Identifiable, Sendable {
+    case all = "All"
+    case sample = "Min Sample"
+    case regulars = "Regulars"
+
+    var id: String { rawValue }
+
+    /// Plate appearances per window day for a hitter. A pitcher's equivalent is
+    /// batters faced, which `RecentForm.plateAppearances` already holds for a
+    /// pitcher row, and he faces more of them per appearance than a hitter gets
+    /// trips to the plate.
+    private var battingRate: Double {
+        switch self {
+        case .all: return 0
+        case .sample: return 1
+        case .regulars: return 2.5
+        }
+    }
+
+    private var pitchingRate: Double {
+        switch self {
+        case .all: return 0
+        case .sample: return 2
+        case .regulars: return 4
+        }
+    }
+
+    func minimum(isPitcher: Bool, windowDays: Int) -> Int {
+        Int(((isPitcher ? pitchingRate : battingRate) * Double(windowDays)).rounded())
+    }
+
+    func admits(_ form: RecentForm, windowDays: Int) -> Bool {
+        guard self != .all else { return true }
+        return form.plateAppearances >= minimum(
+            isPitcher: form.playerType == "pitcher",
+            windowDays: windowDays
+        )
+    }
+
+    /// Spells the active threshold out in the window's own numbers, so "Min
+    /// Sample" and "Regulars" don't read as synonyms.
+    func description(isPitcher: Bool, windowDays: Int) -> String {
+        guard self != .all else { return "No minimum" }
+        return "\(minimum(isPitcher: isPitcher, windowDays: windowDays))+ \(isPitcher ? "BF" : "PA")"
+    }
+}

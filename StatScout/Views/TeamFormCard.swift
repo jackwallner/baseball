@@ -66,21 +66,22 @@ struct TeamRankingsCard: View {
                 trailing: store.isPro ? nil : AnyView(proBadge)
             )
 
-            // Side and mode share one row, split in proportion to how many
-            // options each holds, an even split squeezed "Season / Recent /
-            // Both" into two capsules' worth of width, and the free tier's
-            // crowns made it worse.
-            SavantPickerRow {
-                sidePicker.segmentCount(Side.allCases.count)
-                modePicker.segmentCount(Mode.allCases.count)
+            // Side and mode used to share one row, split in proportion to how
+            // many options each held. Even sized correctly, five capsules in a
+            // strip read as one control with five choices: "Hitting / Pitching /
+            // Season / Recent / Both" asks two unrelated questions and gives no
+            // sign of where one ends. They stack now, widest-scope first, which
+            // is the shape the Trends header already uses.
+            VStack(spacing: 8) {
+                sidePicker
+                modePicker
+                if mode.usesRecent {
+                    windowPicker
+                }
             }
             .padding(.horizontal, SavantGeo.padInline)
             .padding(.vertical, 8)
             .background(SavantPalette.surfaceAlt)
-
-            if mode.usesRecent {
-                windowPicker
-            }
 
             switch mode {
             case .season: seasonBars
@@ -200,9 +201,6 @@ struct TeamRankingsCard: View {
                 set: { windowDays = $0.rawValue }
             )
         )
-        .padding(.horizontal, SavantGeo.padInline)
-        .padding(.bottom, 8)
-        .background(SavantPalette.surfaceAlt)
     }
 
     @ViewBuilder

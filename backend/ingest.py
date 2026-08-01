@@ -1380,6 +1380,10 @@ def _fetch_mlb_standard_stats(player_ids: list[int], season: int) -> dict[int, d
                                     "cs": stat.get("caughtStealing", 0),
                                     "pa": stat.get("plateAppearances", 0),
                                     "ab": stat.get("atBats", 0),
+                                    # Namespaced away from the pitching "g"
+                                    # below: a two-way player has both, and the
+                                    # pitching block updates this same dict.
+                                    "g_bat": stat.get("gamesPlayed", 0),
                                     "player_type": "batter",
                                 }
 
@@ -1651,6 +1655,9 @@ def _build_standard_stats_from_mlb(stats: dict[str, Any]) -> list[dict[str, str]
             ("hr", "HR"), ("rbi", "RBI"), ("r", "R"), ("h", "H"),
             ("doubles", "2B"), ("triples", "3B"), ("bb", "BB"), ("so", "SO"),
             ("sb", "SB"), ("cs", "CS"), ("pa", "PA"), ("ab", "AB"),
+            # Games played closes the gap the rate-stat leaderboards had: without
+            # it a hitter with two at-bats and a hit sat on top of the AVG board.
+            ("g_bat", "G"),
         ]
         for key, label in hitters:
             emit(key, label, "hitting", "hit")

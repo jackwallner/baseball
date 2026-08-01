@@ -9,7 +9,7 @@ here and copy outward.
 
 **App Store reviews:** enjoyment funnel in `StatScout/Services/ReviewPromptTracker.swift`
 (passive triggers: 3rd+ player profile open, Pro player comparison). App Store
-ID `6743780853`; feedback `jackwallner+bb@gmail.com`.
+ID `6763945657`; feedback `jackwallner+bb@gmail.com`.
 
 ## Backend / data pipeline (Statcast)
 

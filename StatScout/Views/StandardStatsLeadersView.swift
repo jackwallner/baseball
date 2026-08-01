@@ -27,6 +27,10 @@ struct StandardStatsLeadersView: View {
     /// View menu in this board's own control row.
     var boardBindings: StatsBoardBindings? = nil
     var viewModel: DashboardViewModel? = nil
+    /// True while a past season's roster is still being pulled. Without it,
+    /// picking 2019 from the drill-down's season pill shows "no players" for the
+    /// second or two before the history lands, which reads as "no data".
+    var isLoadingSeason: Bool = false
 
     /// Available stats per category.
     var availableStats: [String] { StandardStatCatalog.stats(for: selectedCategory) }
@@ -37,14 +41,123 @@ struct StandardStatsLeadersView: View {
 
     // Filter players who have the selected stat
     var filteredPlayers: [Player] {
-        players.filter { player in
+        // Measured once for the whole board, not per row: it's a league-wide
+        // fact, and asking each player for it would make the filter quadratic.
+        let teamGames = teamGamesPlayed
+        return players.filter { player in
             guard let stats = player.standardStats else { return false }
             guard matchesPlayerType(player: player) else { return false }
+            guard hasPlayedEnough(player, stats: stats) else { return false }
+            guard meetsRateQualifier(player, stats: stats, teamGames: teamGames) else { return false }
             // A fielding line with no chances is a DH's empty glove, not a
             // perfect one.
             if selectedCategory == .fielding, chances(in: stats, of: player) <= 0 { return false }
             return numericStat(for: player) != nil
         }
+    }
+
+    // MARK: - Qualification
+
+    /// Games a player needs on the season before his line belongs on a board at
+    /// all.
+    ///
+    /// Savant's percentile gate is looser than this and lets a call-up with a
+    /// 2-for-4 debut onto the leaderboard, which is the one thing that makes a
+    /// board obviously untrustworthy. Deliberately automatic rather than a
+    /// picker: nobody opens a home-run board wanting the guy with one game in
+    /// it, and the caption under the board says the bar is there.
+    static let minGamesPlayed = 10
+
+    /// Plate appearances that stand in for a missing games count.
+    ///
+    /// Bundled historical seasons were written before the pipeline carried a
+    /// batting "G", so they'd all be cut by a games test they can't answer.
+    /// Ten games is roughly 30 PA for a regular; 20 is the same bar set where a
+    /// part-time player who really has played ten games still clears it.
+    static let minPlateAppearancesFallback: Double = 20
+
+    /// Boards whose value is a rate, and therefore need a real qualifier rather
+    /// than a floor.
+    ///
+    /// A counting stat ranks itself: nobody with twelve games leads the league
+    /// in home runs, so the games floor is all it needs. A rate does the
+    /// opposite, the smaller the sample the more extreme the number, which is
+    /// how a 25-PA hitter came to sit above Luis Arraez on the AVG board.
+    private static let rateStats: Set<String> = [
+        "AVG", "OBP", "SLG", "OPS",
+        "ERA", "WHIP", "K/9", "BB/9", "K/BB",
+    ]
+
+    /// How many games the clubs have played, which is what MLB's qualifier is a
+    /// multiple of (3.1 PA or 1.0 IP per team game).
+    ///
+    /// Measured off the board's own pool rather than assumed from the calendar,
+    /// so it's right in April, right in a strike year, and right on a past
+    /// season. The league's games-played leader has appeared in all but a
+    /// handful of his club's games; before the pipeline carried a batting G,
+    /// the PA leader's ~4.7 trips a game is the next best ruler.
+    private var teamGamesPlayed: Double {
+        var maxGames = 0.0
+        var maxPA = 0.0
+        for player in players {
+            guard let stats = player.standardStats else { continue }
+            if let stat = stats.stat("G", category: .hitting, playerType: player.playerType),
+               let games = Double(stat.value.trimmingCharacters(in: .whitespaces)) {
+                maxGames = max(maxGames, games)
+            }
+            if let stat = stats.first(where: { $0.label == "PA" }),
+               let pa = Double(stat.value.trimmingCharacters(in: .whitespaces)) {
+                maxPA = max(maxPA, pa)
+            }
+        }
+        if maxGames > 0 { return maxGames }
+        return maxPA / 4.7
+    }
+
+    /// True when this player has enough season behind him for the board.
+    ///
+    /// The games line is read off the *side* rather than off the board's
+    /// category: fielding and running are position-player boards, and a hitter's
+    /// G lives on his hitting line, not a fielding one.
+    private func hasPlayedEnough(_ player: Player, stats: [StandardStat]) -> Bool {
+        let gamesCategory: MetricCategory = selectedCategory == .pitching ? .pitching : .hitting
+        if let stat = stats.stat("G", category: gamesCategory, playerType: player.playerType),
+           let games = Double(stat.value.trimmingCharacters(in: .whitespaces)) {
+            return games >= Double(Self.minGamesPlayed)
+        }
+        // No G on the line: a season written before the pipeline carried one.
+        if gamesCategory == .pitching {
+            return (rawValue("IP", in: stats, of: player) ?? 0) >= 10
+        }
+        return (rawValue("PA", in: stats, of: player) ?? 0) >= Self.minPlateAppearancesFallback
+    }
+
+    /// MLB's own rate-stat qualifier, applied only to the boards that are rates.
+    ///
+    /// SB% and FLD% are deliberately not in here: they're rates of chances
+    /// rather than of playing time, and they already carry their own volume
+    /// tests (a stolen-base attempt, a fielding chance).
+    private func meetsRateQualifier(_ player: Player, stats: [StandardStat], teamGames: Double) -> Bool {
+        guard Self.rateStats.contains(selectedStat), teamGames > 0 else { return true }
+        if selectedCategory == .pitching {
+            return (rawValue("IP", in: stats, of: player) ?? 0) >= teamGames
+        }
+        return (rawValue("PA", in: stats, of: player) ?? 0) >= 3.1 * teamGames
+    }
+
+    /// What the board is currently hiding, in its own words.
+    private var qualifierCaption: String {
+        guard Self.rateStats.contains(selectedStat) else {
+            return "Ranks players with at least \(Self.minGamesPlayed) games this season."
+        }
+        let teamGames = teamGamesPlayed
+        guard teamGames > 0 else {
+            return "Ranks players with at least \(Self.minGamesPlayed) games this season."
+        }
+        if selectedCategory == .pitching {
+            return "\(selectedStat) is a rate, so this board ranks qualified pitchers only: 1 inning per team game (\(Int(teamGames.rounded()))+ IP)."
+        }
+        return "\(selectedStat) is a rate, so this board ranks qualified hitters only: 3.1 PA per team game (\(Int((3.1 * teamGames).rounded()))+ PA)."
     }
 
     /// Total fielding chances: the volume behind a glove stat, and the only
@@ -145,6 +258,17 @@ struct StandardStatsLeadersView: View {
                 controlRow
                 leadersList
                     .padding(.horizontal, 12)
+                    .padding(.top, 8)
+
+                // A board that quietly drops players has to say so, otherwise a
+                // missing name reads as missing data.
+                Text(qualifierCaption)
+                    .font(SavantType.micro)
+                    .tracking(0.2)
+                    .foregroundStyle(SavantPalette.inkTertiary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, 16)
                     .padding(.top, 8)
                     .padding(.bottom, 12)
                 // Lets the last row scroll through the floating tab bar.
@@ -274,9 +398,14 @@ struct StandardStatsLeadersView: View {
             // Players
             if sortedPlayers.isEmpty {
                 ContentUnavailableView {
-                    Label("No data available", systemImage: "chart.bar")
+                    Label(
+                        isLoadingSeason ? "Loading season…" : "No data available",
+                        systemImage: isLoadingSeason ? "clock" : "chart.bar"
+                    )
                 } description: {
-                    Text("No players have \(selectedStat) data for the current season.")
+                    Text(isLoadingSeason
+                         ? "Pulling \(season.map(String.init) ?? "this season")'s players."
+                         : "No players with \(Self.minGamesPlayed)+ games have \(selectedStat) data for this season.")
                 }
                 .padding(.vertical, 48)
                 .background(SavantPalette.surface)
@@ -357,27 +486,40 @@ struct StandardStatsLeadersView: View {
 ///
 /// It owns the selection that `StatsView` owns on the Stats tab: a drill-down
 /// is a fresh question ("who leads the league in RBI"), not a change to what
-/// the tab behind it was showing.
+/// the tab behind it was showing. That includes the year: the screen used to
+/// print the season it was opened on and offer no way to move it, so answering
+/// "who led the league in home runs in 2024" meant backing all the way out to
+/// the Stats tab, changing the season there, and finding the stat again.
 struct StandardStatsLeaderboardScreen: View {
-    let players: [Player]
-    var season: Int? = nil
+    let viewModel: DashboardViewModel
+    /// Fallback roster for previews and any caller without a view model.
+    var fallbackPlayers: [Player] = []
     @State private var stat: String
     @State private var category: MetricCategory
     @State private var sortDescending: Bool
+    @State private var season: Int
+    @State private var paywallTrigger: PaywallTrigger?
 
     init(
-        players: [Player],
+        viewModel: DashboardViewModel,
+        fallbackPlayers: [Player] = [],
         initialStat: String = "AVG",
         initialCategory: MetricCategory = .hitting,
-        season: Int? = nil
+        initialSeason: Int
     ) {
-        self.players = players
-        self.season = season
+        self.viewModel = viewModel
+        self.fallbackPlayers = fallbackPlayers
         _stat = State(initialValue: initialStat)
         _category = State(initialValue: initialCategory)
+        _season = State(initialValue: initialSeason)
         _sortDescending = State(
             initialValue: StandardStatCatalog.defaultDescending(for: initialStat, category: initialCategory)
         )
+    }
+
+    private var players: [Player] {
+        let roster = viewModel.players(forSeason: season)
+        return roster.isEmpty ? fallbackPlayers : roster
     }
 
     var body: some View {
@@ -386,17 +528,80 @@ struct StandardStatsLeaderboardScreen: View {
             selectedStat: $stat,
             selectedCategory: $category,
             sortDescending: $sortDescending,
-            season: season
+            season: season,
+            isLoadingSeason: players.isEmpty && viewModel.isHistoricalLoading
         )
+        // String(), not the Int: interpolating a number into a
+        // `LocalizedStringKey` runs it through the number formatter, which is
+        // how this title read "2,026".
+        .navigationTitle("\(stat) · \(String(season))")
+        .navigationBarTitleDisplayMode(.inline)
+        .modifier(DrillDownSeasonPill(
+            viewModel: viewModel,
+            season: $season,
+            paywallTrigger: $paywallTrigger
+        ))
+        // Past seasons only exist once the history load has run.
+        .task(id: season) {
+            guard season != viewModel.selectedSeason else { return }
+            await viewModel.loadHistoricalIfNeeded()
+        }
+        .sheet(item: $paywallTrigger) { trigger in
+            TrialPitchSheet(trigger: trigger)
+        }
+    }
+}
+
+/// The season pill the pushed leaderboards carry in their trailing toolbar slot.
+///
+/// Same control, same place, as the Teams page's own season switcher, so a year
+/// can be changed wherever a year is being shown.
+struct DrillDownSeasonPill: ViewModifier {
+    let viewModel: DashboardViewModel
+    @Binding var season: Int
+    @Binding var paywallTrigger: PaywallTrigger?
+
+    private var pill: some View {
+        SeasonMenu(
+            seasons: viewModel.availableSeasons,
+            selected: season,
+            isLocked: { viewModel.isSeasonLocked($0) },
+            onSelect: { picked in
+                if viewModel.isSeasonLocked(picked) {
+                    paywallTrigger = .lockedSeason(picked)
+                } else {
+                    season = picked
+                }
+            }
+        ) {
+            SavantNavPill(systemImage: "calendar", title: String(season))
+        }
+        .accessibilityHint("Choose which season this leaderboard ranks")
+    }
+
+    func body(content: Content) -> some View {
+        content.toolbar {
+            // The red pill draws its own capsule; suppress the iOS 26 Liquid
+            // Glass container so it doesn't read as a double-pill.
+            if #available(iOS 26.0, *) {
+                ToolbarItem(placement: .topBarTrailing) { pill }
+                    .sharedBackgroundVisibility(.hidden)
+            } else {
+                ToolbarItem(placement: .topBarTrailing) { pill }
+            }
+        }
     }
 }
 
 #if DEBUG
 #Preview {
     NavigationStack {
-        StandardStatsLeaderboardScreen(players: SampleData.players)
-            .environmentObject(StoreService.shared)
-            .navigationTitle("Standard Stats")
+        StandardStatsLeaderboardScreen(
+            viewModel: DashboardViewModel(),
+            fallbackPlayers: SampleData.players,
+            initialSeason: StatScoutSeason.current
+        )
+        .environmentObject(StoreService.shared)
     }
 }
 #endif

@@ -451,25 +451,21 @@ private struct StandardDestinations: ViewModifier {
                     .modifier(SavantNavBar())
             }
             .navigationDestination(for: MetricRoute.self) { route in
-                let season = route.season ?? viewModel.selectedSeason
-                MetricRankingView(
+                MetricRankingScreen(
+                    viewModel: viewModel,
                     metricLabel: route.label,
                     metricCategory: route.category,
-                    players: viewModel.players(forSeason: season),
-                    season: season
+                    initialSeason: route.season ?? viewModel.selectedSeason
                 )
                     .modifier(SavantNavBar())
             }
             .navigationDestination(for: StandardStatRoute.self) { route in
-                let season = route.season ?? viewModel.selectedSeason
                 StandardStatsLeaderboardScreen(
-                    players: viewModel.players(forSeason: season),
+                    viewModel: viewModel,
                     initialStat: route.stat,
                     initialCategory: route.category,
-                    season: season
+                    initialSeason: route.season ?? viewModel.selectedSeason
                 )
-                    .navigationTitle("\(route.stat) · \(season)")
-                    .navigationBarTitleDisplayMode(.inline)
                     .modifier(SavantNavBar())
             }
             .navigationDestination(for: ComparisonRoute.self) { route in
