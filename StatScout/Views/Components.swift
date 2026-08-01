@@ -449,8 +449,29 @@ struct LeaderboardTableRow: View {
     /// `valueOverride`, i.e. on a board that is explicitly in its rolling-window
     /// mode; a trend that appears on some rows of a season board and not others
     /// is the bug this pairing exists to prevent.
-    var trendDelta: Double? = nil
+    var trend: Trend = .absent
     var trendDecimals: Int = 3
+
+    /// What the trend column has to say about this row.
+    ///
+    /// `unavailable` is the case that used to fall through the crack: a player
+    /// who appeared inside the window but not inside the window before it has a
+    /// current value and no prior one to subtract, so the rollup ships no delta
+    /// for him. Rendering that as an absent column both hid the reason and left
+    /// his row 46pt wider than every row around it, which is how Rob Refsnyder
+    /// came to have an xwOBA and, apparently, no trend.
+    enum Trend {
+        /// Season board: no trend column at all.
+        case absent
+        /// Window board, but no prior window for this player.
+        case unavailable
+        case change(Double)
+
+        var showsColumn: Bool {
+            if case .absent = self { return false }
+            return true
+        }
+    }
     /// The rolling-window value, shown in place of the season number when the
     /// list is ranking by recent form. Uncoloured: the season percentile is the
     /// wrong ruler for a fortnight's number, and there is no window curve to
@@ -552,10 +573,21 @@ struct LeaderboardTableRow: View {
                         .monospacedDigit()
                 }
             }
-            .frame(width: trendDelta == nil ? 92 : 56, alignment: .trailing)
+            .frame(width: trend.showsColumn ? 56 : 92, alignment: .trailing)
 
-            if let trendDelta {
-                TrendArrow(delta: trendDelta, decimals: trendDecimals)
+            // Reserved for the whole board once it's in window mode, so a row
+            // with nothing to compare stays in line with the rows around it.
+            switch trend {
+            case .absent:
+                EmptyView()
+            case .unavailable:
+                Text("N/A")
+                    .font(SavantType.micro)
+                    .foregroundStyle(SavantPalette.inkTertiary)
+                    .frame(width: 46, alignment: .trailing)
+                    .accessibilityLabel("No prior window to compare")
+            case .change(let delta):
+                TrendArrow(delta: delta, decimals: trendDecimals)
                     .frame(width: 46, alignment: .trailing)
             }
         }

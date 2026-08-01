@@ -25,6 +25,9 @@ struct TeamView: View {
     /// Whether the roster ranks on the season line or on a rolling window.
     @State private var rosterMode: RosterMode = .season
     @State private var rosterWindow: RecentWindow = .fortnight
+    /// In Recent mode, whether the list ranks on the window's value or on how
+    /// far it moved from the window before it.
+    @State private var rosterRecentRank: RecentRank = .value
     /// An explicit "Sort by" pick from the Filters menu. Nil falls back to the
     /// category's headline metric, which is what the list opens on.
     @State private var userSortLabel: String?
@@ -44,6 +47,18 @@ struct TeamView: View {
     enum RosterMode: String, CaseIterable, Identifiable {
         case season = "Season"
         case recent = "Recent"
+
+        var id: String { rawValue }
+    }
+
+    /// What "best" means on a rolling-window roster.
+    ///
+    /// The board already printed the change beside every value and would only
+    /// sort by the value, so the obvious question a form board exists to answer,
+    /// who has fallen off hardest in the last fortnight, couldn't be asked.
+    enum RecentRank: String, CaseIterable, Identifiable {
+        case value = "Window value"
+        case change = "Change vs prior"
 
         var id: String { rawValue }
     }
@@ -113,6 +128,15 @@ struct TeamView: View {
         return sortMetric?.label ?? "Top Category"
     }
 
+    /// What the sort chip and the table header say the list is ranked by. In
+    /// window mode that has to name the window, and say whether it's the value
+    /// or the movement being ranked; the two produce very different lists.
+    private var rosterSortLabel: String {
+        guard isRosterRecent else { return sortLabel }
+        let base = rosterRecentRank == .change ? "Δ \(sortLabel)" : sortLabel
+        return "\(base) · \(rosterWindow.rawValue)d"
+    }
+
     private var rowDisplayMetric: (label: String?, category: MetricCategory?) {
         if let m = sortMetric { return (m.label, m.category) }
         if selectedCategory == nil { return ("xwOBA", nil) }
@@ -156,6 +180,15 @@ struct TeamView: View {
         return RecentMetricKey.format(value, label: label)
     }
 
+    /// What the row's trend column shows. A player who appeared in the window
+    /// but not in the window before it has no delta to report, and saying so is
+    /// the difference between "he hasn't moved" and "we can't tell you".
+    private func trend(for player: Player) -> LeaderboardTableRow.Trend {
+        guard isRosterRecent else { return .absent }
+        guard let delta = recentDelta(player) else { return .unavailable }
+        return .change(delta)
+    }
+
     /// True once the window this roster is ranking on has arrived.
     private var hasRecentData: Bool {
         viewModel?.recentFormByWindow[rosterWindow.rawValue] != nil
@@ -181,14 +214,18 @@ struct TeamView: View {
         // Recent mode ranks on the rolling window instead of the season number.
         // Players with no games in the window keep their place on the roster but
         // fall to the tail, a bench bat you're checking on shouldn't vanish
-        // because he hasn't started in a fortnight.
+        // because he hasn't started in a fortnight. Ranking by change puts the
+        // players with no prior window in that same tail: there is no movement
+        // to rank them on, and inventing a zero would slot them in the middle of
+        // the list as if they'd held steady.
         if isRosterRecent, sortMetric != nil {
-            let ranked = byQualifier.filter { recentValue($0) != nil }.sorted {
-                let v1 = recentValue($0) ?? 0
-                let v2 = recentValue($1) ?? 0
+            let key: (Player) -> Double? = rosterRecentRank == .change ? recentDelta : recentValue
+            let ranked = byQualifier.filter { key($0) != nil }.sorted {
+                let v1 = key($0) ?? 0
+                let v2 = key($1) ?? 0
                 return sortDescending ? v1 > v2 : v1 < v2
             }
-            let tail = byQualifier.filter { recentValue($0) == nil }.sorted {
+            let tail = byQualifier.filter { key($0) == nil }.sorted {
                 fallbackPercentile($0) > fallbackPercentile($1)
             }
             return ranked + tail
@@ -365,24 +402,21 @@ struct TeamView: View {
 
     private var rosterContent: some View {
         VStack(spacing: 0) {
-            // Side and season/recent share a row, sized so all four capsules
-            // come out the same width, the same control pair the Advanced and
-            // Standard cards carry above.
-            SavantPickerRow {
-                sidePicker.segmentCount(RosterSide.allCases.count)
-                rosterModePicker.segmentCount(RosterMode.allCases.count)
+            // One question per row, matching the Advanced and Standard cards
+            // above: side, then season-or-window, then the window itself. The
+            // pair used to share a line and read as one four-choice control.
+            VStack(spacing: 8) {
+                sidePicker
+                rosterModePicker
+                if isRosterRecent {
+                    SavantSegmented(
+                        segments: RecentWindow.allCases.map { .init(value: $0, label: $0.segmentLabel) },
+                        selection: $rosterWindow
+                    )
+                }
             }
             .padding(.horizontal, 12)
             .padding(.top, 12)
-
-            if isRosterRecent {
-                SavantSegmented(
-                    segments: RecentWindow.allCases.map { .init(value: $0, label: $0.segmentLabel) },
-                    selection: $rosterWindow
-                )
-                .padding(.horizontal, 12)
-                .padding(.top, 8)
-            }
 
             // Only the categories that mean anything for the active side, so a
             // pitcher list never offers a Running tab that would empty it.
@@ -431,12 +465,12 @@ struct TeamView: View {
                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
             } label: {
                 SavantChip(
-                    title: sortLabel,
+                    title: rosterSortLabel,
                     trailing: .sortArrow(descending: sortDescending)
                 )
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("Sorted by \(sortLabel), \(sortDescending ? "highest first" : "lowest first")")
+            .accessibilityLabel("Sorted by \(rosterSortLabel), \(sortDescending ? "highest first" : "lowest first")")
             .accessibilityHint("Tap to flip sort direction")
 
             Spacer(minLength: 0)
@@ -511,6 +545,25 @@ struct TeamView: View {
                 }
             }
 
+            // Only meaningful on a window board: a season line has nothing to
+            // have moved from.
+            if isRosterRecent {
+                Section("Rank by") {
+                    ForEach(RecentRank.allCases) { option in
+                        Button {
+                            rosterRecentRank = option
+                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                        } label: {
+                            if option == rosterRecentRank {
+                                Label(option.rawValue, systemImage: "checkmark")
+                            } else {
+                                Text(option.rawValue)
+                            }
+                        }
+                    }
+                }
+            }
+
             Section("Minimum playing time") {
                 ForEach(DashboardViewModel.QualifierLevel.allCases) { level in
                     Button {
@@ -561,7 +614,7 @@ struct TeamView: View {
     /// Highlights the Filters pill whenever something is actually being hidden,
     /// so a short roster is never a mystery.
     private var isFiltered: Bool {
-        qualifierLevel != .all
+        qualifierLevel != .all || (isRosterRecent && rosterRecentRank != .value)
     }
 
     private var searchRow: some View {
@@ -614,7 +667,7 @@ struct TeamView: View {
                 } label: {
                     LeaderboardTableHeader(
                         sortDescending: sortDescending,
-                        sortLabel: isRosterRecent ? "\(sortLabel) · \(rosterWindow.rawValue)d" : sortLabel
+                        sortLabel: rosterSortLabel
                     )
                 }
                 .buttonStyle(.plain)
@@ -626,7 +679,7 @@ struct TeamView: View {
                             player: player,
                             metricLabel: rowDisplayMetric.label,
                             metricCategory: rowDisplayMetric.category,
-                            trendDelta: isRosterRecent ? recentDelta(player) : nil,
+                            trend: trend(for: player),
                             trendDecimals: rowDisplayMetric.label.map { RecentMetricKey.decimals(for: $0) } ?? 3,
                             valueOverride: isRosterRecent ? recentValueText(player) : nil
                         )

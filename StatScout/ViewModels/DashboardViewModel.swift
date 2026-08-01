@@ -265,6 +265,32 @@ final class DashboardViewModel {
         recentFormByWindow[recentWindow.rawValue]?.values.compactMap(\.asOf).max()
     }
 
+    /// The coverage date every cached window was built from.
+    private var cachedRecentFormAsOf: Date? {
+        recentFormByWindow.values.flatMap(\.values).compactMap(\.asOf).max()
+    }
+
+    /// Drops every cached rolling window and refetches the ones that were held.
+    ///
+    /// The windows are cached for the life of the process, which is fine for a
+    /// session but wrong across a refresh: the app spends most of its life
+    /// suspended, and coming back after the overnight run left the Trends board
+    /// (and its "Through …" header) sitting on yesterday's rollup while the
+    /// season line Settings reports had already moved on. That is the whole of
+    /// "the Trends side is a day behind".
+    private func refreshCachedRecentFormWindows() async {
+        let held = Set(recentFormByWindow.keys)
+        guard !held.isEmpty else { return }
+        for task in recentFormTasks.values { task.cancel() }
+        recentFormTasks.removeAll()
+        recentFormLoadingWindows.removeAll()
+        recentFormByWindow.removeAll()
+        for days in held {
+            guard let window = RecentWindow(rawValue: days) else { continue }
+            await loadRecentFormIfNeeded(window: window)
+        }
+    }
+
     /// Drops the cached window and fetches it again. What the Trends board's
     /// "Try Again" calls: `loadRecentFormIfNeeded` returns early on a window
     /// it's already holding, which after a failure is nothing at all.
@@ -867,7 +893,13 @@ final class DashboardViewModel {
         // reads, fetched after the leaderboard is already on screen. A failure
         // here leaves the coverage line blank rather than failing the load.
         if let coverage = try? await provider.fetchDataThroughDate(season: StatScoutSeason.current) {
+            // A coverage date newer than what the cached windows were built from
+            // is the signal that the rollup moved while we were backgrounded.
+            let cacheIsStale = cachedRecentFormAsOf.map { coverage > $0 } ?? false
             dataThrough = coverage
+            if cacheIsStale, selectedSeason == StatScoutSeason.current {
+                await refreshCachedRecentFormWindows()
+            }
         }
     }
 

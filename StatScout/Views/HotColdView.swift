@@ -27,6 +27,9 @@ struct HotColdView: View {
     @State private var showingCold = false
     @State private var side: TrendSide = .batting
     @State private var metric: TrendMetric = TrendMetric.batting[0]
+    /// Starts where the board's old hardcoded `isSmallSample` cut sat, so the
+    /// default board is the one people already know.
+    @State private var qualifier: TrendQualifier = .sample
 
     /// Every metric this side can be ranked by, Statcast and traditional in one
     /// list. The picker groups them into sections, which is a cheaper way to
@@ -47,12 +50,17 @@ struct HotColdView: View {
         return metric.lowerIsBetter ? -delta : delta
     }
 
-    /// Ranked by improvement, hot first or cold first. Small samples are
-    /// excluded outright, a 3-PA week produces enormous deltas that would
-    /// crowd out every real riser.
+    /// Ranked by improvement, hot first or cold first. Playing time inside the
+    /// window is the user's call now: a 3-PA week produces enormous deltas that
+    /// crowd out every real riser, but where exactly to draw that line is a
+    /// judgement the board used to make silently.
     private var ranked: [RecentForm] {
         forms
-            .filter { !$0.isSmallSample && $0.playerType == side.playerType && improvement($0) != nil }
+            .filter {
+                qualifier.admits($0, windowDays: viewModel.recentWindow.rawValue)
+                    && $0.playerType == side.playerType
+                    && improvement($0) != nil
+            }
             .sorted {
                 let a = improvement($0) ?? 0
                 let b = improvement($1) ?? 0
@@ -119,15 +127,14 @@ struct HotColdView: View {
                 selection: $side
             )
 
+            // Stat, then who's in the pool: the same two shapes, in the same
+            // order, the Stats board's control row uses. The coverage date moved
+            // down to the caption to make room, it's a fact about the board
+            // rather than a control on it.
             HStack(spacing: 8) {
                 metricPicker
                 Spacer(minLength: 0)
-                if let asOf = viewModel.recentFormAsOf {
-                    Text("Through \(asOf.formatted(.dateTime.month(.abbreviated).day()))")
-                        .font(SavantType.micro)
-                        .tracking(0.3)
-                        .foregroundStyle(SavantPalette.inkTertiary)
-                }
+                qualifierMenu
             }
 
             // Same control as every other inline picker; only the selected fill
@@ -150,7 +157,7 @@ struct HotColdView: View {
             // games the player actually appeared in inside it. Two numbers of
             // different kinds sat next to each other with nothing saying which
             // was which, so the picker read as a game count.
-            Text("Calendar days, not games. G is games played in the window.")
+            Text(captionText)
                 .font(SavantType.micro)
                 .tracking(0.2)
                 .foregroundStyle(SavantPalette.inkTertiary)
@@ -159,6 +166,51 @@ struct HotColdView: View {
         }
         .padding(.horizontal, 12)
         .padding(.top, 12)
+    }
+
+    /// Coverage date, then the two things that get misread about this board:
+    /// the window is calendar days, and the row's "G" is games appeared in.
+    private var captionText: String {
+        var parts: [String] = []
+        if let asOf = viewModel.recentFormAsOf {
+            parts.append("Through \(asOf.formatted(.dateTime.month(.abbreviated).day()))")
+        }
+        parts.append("calendar days, not games")
+        parts.append("G is games played in the window")
+        return parts.joined(separator: " · ") + "."
+    }
+
+    /// Minimum playing time inside the window. The board used to hard-code this
+    /// at 15 PA and never say so, which on the 30-day board quietly hid anyone
+    /// short of a fortnight's work and on the 7-day board let almost nobody out.
+    private var qualifierMenu: some View {
+        Menu {
+            Section("Minimum playing time") {
+                ForEach(TrendQualifier.allCases) { level in
+                    Button {
+                        qualifier = level
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    } label: {
+                        let title = "\(level.rawValue) · \(level.description(isPitcher: side == .pitching, windowDays: viewModel.recentWindow.rawValue))"
+                        if level == qualifier {
+                            Label(title, systemImage: "checkmark")
+                        } else {
+                            Text(title)
+                        }
+                    }
+                }
+            }
+        } label: {
+            SavantChip(
+                title: "Qualifier",
+                systemImage: "line.3.horizontal.decrease.circle",
+                trailing: .chevron,
+                isActive: qualifier != .sample
+            )
+        }
+        .menuOrder(.fixed)
+        .accessibilityLabel("Minimum playing time")
+        .accessibilityValue(qualifier.rawValue)
     }
 
     /// Seventeen metrics per side is far past what a segmented row can hold, so
@@ -213,7 +265,9 @@ struct HotColdView: View {
             ContentUnavailableView {
                 Label("No movement to rank yet", systemImage: "chart.line.flattrend.xyaxis")
             } description: {
-                Text("\(metric.label) doesn't have enough of a prior window to compare against. Try another stat or a longer window.")
+                Text(qualifier == .regulars
+                     ? "Nobody clears the Regulars minimum on \(metric.label) in this window. Try a lower qualifier or a longer window."
+                     : "\(metric.label) doesn't have enough of a prior window to compare against. Try another stat or a longer window.")
             }
             .padding(.vertical, 32)
         } else {

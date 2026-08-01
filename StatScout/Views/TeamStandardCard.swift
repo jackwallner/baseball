@@ -72,12 +72,13 @@ struct TeamStandardCard: View {
         VStack(spacing: 0) {
             SavantSectionBar(title: "TEAM STANDARD STATS")
 
-            SavantPickerRow {
+            // One question per row. See TeamFormCard: side and mode on a shared
+            // strip read as a single five-choice control.
+            VStack(spacing: 8) {
                 SavantSegmented(
                     segments: TeamRankingsCard.Side.allCases.map { .init(value: $0, label: $0.label) },
                     selection: $side
                 )
-                .segmentCount(TeamRankingsCard.Side.allCases.count)
                 SavantSegmented(
                     segments: [
                         .init(value: false, label: "Season"),
@@ -86,24 +87,19 @@ struct TeamStandardCard: View {
                     selection: $showingRecent,
                     onLockedTap: { _ in onUpgradeTap() }
                 )
-                .segmentCount(2)
+                if showingRecent {
+                    SavantSegmented(
+                        segments: RecentWindow.allCases.map { .init(value: $0, label: $0.segmentLabel) },
+                        selection: Binding(
+                            get: { RecentWindow(rawValue: windowDays) ?? .fortnight },
+                            set: { windowDays = $0.rawValue }
+                        )
+                    )
+                }
             }
             .padding(.horizontal, SavantGeo.padInline)
             .padding(.vertical, 8)
             .background(SavantPalette.surfaceAlt)
-
-            if showingRecent {
-                SavantSegmented(
-                    segments: RecentWindow.allCases.map { .init(value: $0, label: $0.segmentLabel) },
-                    selection: Binding(
-                        get: { RecentWindow(rawValue: windowDays) ?? .fortnight },
-                        set: { windowDays = $0.rawValue }
-                    )
-                )
-                .padding(.horizontal, SavantGeo.padInline)
-                .padding(.bottom, 8)
-                .background(SavantPalette.surfaceAlt)
-            }
 
             if showingRecent {
                 recentContent

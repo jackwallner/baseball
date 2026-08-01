@@ -29,6 +29,11 @@ struct CompareView: View {
         var id: Int { hashValue }
     }
 
+    private enum TeamSlot: Identifiable {
+        case a, b
+        var id: Int { hashValue }
+    }
+
     @State private var playerA: Player?
     @State private var playerB: Player?
     @State private var picker: PickerTarget?
@@ -43,9 +48,46 @@ struct CompareView: View {
     // silently pin these to a stale year.
     @State private var seasonA: Int?
     @State private var seasonB: Int?
+    // Team slots, with their own seasons for the same reason the player slots
+    // have them: a club against its own past year is the comparison people
+    // actually want, and it can't be asked without two years.
+    @State private var teamA: String?
+    @State private var teamB: String?
+    @State private var teamSeasonA: Int?
+    @State private var teamSeasonB: Int?
+    @State private var teamPicker: TeamSlot?
+    @State private var teamRoute: TeamComparisonRoute?
 
     private var activeSeasonA: Int { seasonA ?? viewModel.selectedSeason }
     private var activeSeasonB: Int { seasonB ?? viewModel.selectedSeason }
+    private var activeTeamSeasonA: Int { teamSeasonA ?? viewModel.selectedSeason }
+    private var activeTeamSeasonB: Int { teamSeasonB ?? viewModel.selectedSeason }
+
+    /// The same club in the same year on both sides compares a roster with
+    /// itself, and every row would tie. Any other pairing is fair game.
+    private var isSameTeamContext: Bool {
+        guard let teamA, let teamB else { return false }
+        return normalizedTeamAbbreviation(teamA) == normalizedTeamAbbreviation(teamB)
+            && activeTeamSeasonA == activeTeamSeasonB
+    }
+
+    private var canCompareTeams: Bool {
+        teamA != nil && teamB != nil && !isSameTeamContext
+    }
+
+    /// Says why the button is off. The fix (change one side's season) isn't
+    /// guessable from a greyed-out button.
+    private var teamWarning: String? {
+        guard isSameTeamContext, let teamA else { return nil }
+        return "Both sides are \(teamFullName(teamA)) in \(String(activeTeamSeasonA)). Change one side's season to compare."
+    }
+
+    /// Clubs with data in a given season, so a slot can't be pointed at a team
+    /// the year has nothing for.
+    private func teamsWithData(season: Int) -> [String] {
+        Set(viewModel.players(forSeason: season).map { normalizedTeamAbbreviation($0.team) })
+            .sorted { teamFullName($0).localizedCompare(teamFullName($1)) == .orderedAscending }
+    }
 
     private func players(forSeason season: Int) -> [Player] {
         viewModel.players(forSeason: season).sorted { $0.name < $1.name }
@@ -97,6 +139,7 @@ struct CompareView: View {
                 ZStack(alignment: .bottom) {
                     VStack(spacing: 12) {
                         playerVsPlayerCard
+                        teamVsTeamCard
                         yearOverYearCard
                     }
                     .blur(radius: store.isPro ? 0 : 5)
@@ -107,7 +150,7 @@ struct CompareView: View {
                         // The same gate every other locked module uses, rather
                         // than this screen's own floating panel.
                         BlurGateUnlock(
-                            headline: "Stack any two players, or any player against his own past seasons",
+                            headline: "Stack any two players or any two clubs, and any of them against their own past seasons",
                             trigger: .playerComparison
                         )
                         .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
@@ -134,9 +177,12 @@ struct CompareView: View {
         }
         // Past seasons only exist once the history load has run, and a slot
         // pinned to 2025 is useless without it.
-        .task(id: "\(activeSeasonA)-\(activeSeasonB)") {
+        .task(id: "\(activeSeasonA)-\(activeSeasonB)-\(activeTeamSeasonA)-\(activeTeamSeasonB)") {
             guard store.isPro,
-                  activeSeasonA != viewModel.selectedSeason || activeSeasonB != viewModel.selectedSeason
+                  activeSeasonA != viewModel.selectedSeason
+                    || activeSeasonB != viewModel.selectedSeason
+                    || activeTeamSeasonA != viewModel.selectedSeason
+                    || activeTeamSeasonB != viewModel.selectedSeason
             else { return }
             await viewModel.loadHistoricalIfNeeded()
         }
@@ -170,6 +216,16 @@ struct CompareView: View {
                 }
             }
         }
+        .sheet(item: $teamPicker) { slot in
+            let season = slot == .a ? activeTeamSeasonA : activeTeamSeasonB
+            CompareTeamPicker(
+                teams: teamsWithData(season: season),
+                season: season,
+                isLoading: viewModel.isHistoricalLoading
+            ) { picked in
+                if slot == .a { teamA = picked } else { teamB = picked }
+            }
+        }
         .sheet(isPresented: $showingTrial) {
             TrialPitchSheet(trigger: .playerComparison)
         }
@@ -182,6 +238,14 @@ struct CompareView: View {
                 playerA: route.playerA,
                 playerB: route.playerB,
                 catalog: ComparisonCatalog(viewModel: viewModel)
+            )
+                .modifier(SavantNavBarPublic())
+        }
+        .navigationDestination(item: $teamRoute) { route in
+            TeamComparisonView(
+                route: route,
+                leaguePlayersA: viewModel.players(forSeason: route.seasonA),
+                leaguePlayersB: viewModel.players(forSeason: route.seasonB)
             )
                 .modifier(SavantNavBarPublic())
         }
@@ -434,6 +498,139 @@ struct CompareView: View {
             RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
                 .stroke(SavantPalette.hairline, lineWidth: 0.5)
         )
+    }
+
+    /// Two clubs, each with a year of its own. Same furniture as the player
+    /// card above it, because it's the same question one level up.
+    private var teamVsTeamCard: some View {
+        VStack(spacing: 0) {
+            SavantSectionBar(title: "TEAM VS TEAM")
+
+            VStack(spacing: 12) {
+                HStack(alignment: .top, spacing: 10) {
+                    teamSlotColumn(
+                        team: teamA,
+                        placeholder: "Team A",
+                        season: activeTeamSeasonA,
+                        onPickTeam: { teamPicker = .a },
+                        onPickSeason: { teamSeasonA = $0 }
+                    )
+                    Text("vs")
+                        .font(SavantType.smallBold)
+                        .foregroundStyle(SavantPalette.inkTertiary)
+                        .padding(.top, 40)
+                    teamSlotColumn(
+                        team: teamB,
+                        placeholder: "Team B",
+                        season: activeTeamSeasonB,
+                        onPickTeam: { teamPicker = .b },
+                        onPickSeason: { teamSeasonB = $0 }
+                    )
+                }
+
+                if let teamWarning {
+                    Text(teamWarning)
+                        .font(SavantType.micro)
+                        .tracking(0.3)
+                        .foregroundStyle(SavantPalette.inkTertiary)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                Button {
+                    guard let teamA, let teamB, canCompareTeams else { return }
+                    teamRoute = TeamComparisonRoute(
+                        teamA: teamA,
+                        teamB: teamB,
+                        seasonA: activeTeamSeasonA,
+                        seasonB: activeTeamSeasonB
+                    )
+                } label: {
+                    Text("Compare Teams")
+                        .font(SavantType.bodyBold)
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 46)
+                        .background(canCompareTeams ? SavantPalette.savantRed : SavantPalette.inkTertiary)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                }
+                .buttonStyle(.plain)
+                .disabled(!canCompareTeams)
+            }
+            .padding(16)
+        }
+        .background(SavantPalette.surface)
+        .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
+        .overlay(
+            RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
+                .stroke(SavantPalette.hairline, lineWidth: 0.5)
+        )
+    }
+
+    private func teamSlotColumn(
+        team: String?,
+        placeholder: String,
+        season: Int,
+        onPickTeam: @escaping () -> Void,
+        onPickSeason: @escaping (Int) -> Void
+    ) -> some View {
+        VStack(spacing: 6) {
+            Button(action: onPickTeam) {
+                VStack(spacing: 6) {
+                    if let team {
+                        ZStack {
+                            Circle()
+                                .fill(MLBTeamColor.color(team))
+                                .frame(width: 44, height: 44)
+                            Text(displayTeamAbbr(team))
+                                .font(SavantType.micro)
+                                .fontWeight(.bold)
+                                .foregroundStyle(.white)
+                        }
+                        Text(teamFullName(team))
+                            .font(SavantType.smallBold)
+                            .foregroundStyle(SavantPalette.ink)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                    } else {
+                        ZStack {
+                            Circle()
+                                .fill(SavantPalette.surfaceAlt)
+                                .frame(width: 44, height: 44)
+                            Image(systemName: "plus")
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundStyle(SavantPalette.inkTertiary)
+                        }
+                        Text(placeholder)
+                            .font(SavantType.small)
+                            .foregroundStyle(SavantPalette.inkTertiary)
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+                .background(SavantPalette.surfaceAlt)
+                .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
+            }
+            .buttonStyle(.plain)
+
+            SeasonMenu(
+                seasons: viewModel.availableSeasons,
+                selected: season,
+                isLocked: { viewModel.isSeasonLocked($0) },
+                onSelect: { picked in
+                    if viewModel.isSeasonLocked(picked) {
+                        showingTrial = true
+                    } else {
+                        onPickSeason(picked)
+                    }
+                }
+            ) {
+                SavantInlinePill(systemImage: "calendar", title: String(season))
+            }
+            .accessibilityLabel("Season for \(team.map(teamFullName) ?? placeholder)")
+        }
+        .frame(maxWidth: .infinity)
     }
 
     private var yearOverYearCard: some View {
@@ -698,7 +895,77 @@ struct ComparePlayerPicker: View {
                 }
             }
             .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search players")
-            .navigationTitle(season.map { "Select Player · \($0)" } ?? "Select Player")
+            // String(), not the Int: a number interpolated into a
+            // LocalizedStringKey picks up the grouping separator and reads
+            // "2,026".
+            .navigationTitle(season.map { "Select Player · \(String($0))" } ?? "Select Player")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+            }
+        }
+    }
+}
+
+/// Team picker for the team-vs-team slots. Mirrors `ComparePlayerPicker`, so
+/// filling a team slot works the way filling a player slot already does.
+struct CompareTeamPicker: View {
+    let teams: [String]
+    /// Which season's clubs these are, so an empty list can say why.
+    var season: Int? = nil
+    var isLoading: Bool = false
+    var onSelect: (String) -> Void
+    @Environment(\.dismiss) private var dismiss
+    @State private var searchText = ""
+
+    private var filtered: [String] {
+        guard !searchText.isEmpty else { return teams }
+        return teams.filter { teamMatchesQuery($0, query: searchText) }
+    }
+
+    var body: some View {
+        NavigationStack {
+            List(filtered, id: \.self) { abbr in
+                Button {
+                    dismiss()
+                    onSelect(abbr)
+                } label: {
+                    HStack(spacing: 12) {
+                        ZStack {
+                            Circle()
+                                .fill(MLBTeamColor.color(abbr))
+                                .frame(width: 36, height: 36)
+                            Text(displayTeamAbbr(abbr))
+                                .font(SavantType.micro)
+                                .fontWeight(.bold)
+                                .foregroundStyle(.white)
+                        }
+                        Text(teamFullName(abbr))
+                            .font(SavantType.bodyBold)
+                            .foregroundStyle(SavantPalette.ink)
+                    }
+                    .padding(.vertical, 4)
+                }
+            }
+            .overlay {
+                if filtered.isEmpty {
+                    ContentUnavailableView {
+                        Label(isLoading ? "Loading teams…" : "No teams", systemImage: "flag.slash")
+                    } description: {
+                        if isLoading {
+                            Text("Pulling the \(season.map(String.init) ?? "") season.")
+                        } else if !searchText.isEmpty {
+                            Text("Nobody matches “\(searchText)”.")
+                        } else if let season {
+                            Text("No team data for the \(String(season)) season.")
+                        }
+                    }
+                }
+            }
+            .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search teams")
+            .navigationTitle(season.map { "Select Team · \(String($0))" } ?? "Select Team")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
