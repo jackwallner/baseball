@@ -458,6 +458,7 @@ def _two_way_stats():
         "avg": "0.282", "obp": "0.387", "slg": "0.520", "ops": "0.907",
         "hr": 46, "rbi": 61, "r": 103, "h": 105, "doubles": 19, "triples": 2,
         "bb": 96, "so": 189, "sb": 6, "cs": 2, "pa": 447, "ab": 373,
+        "g_bat": 114,
         # pitching
         "era": "1.79", "whip": "0.95", "wins": 8, "losses": 2, "saves": 0,
         "ip": "85.2", "er": 17, "p_h": 55, "p_r": 21, "p_hr": 4,
@@ -503,6 +504,27 @@ def test_two_way_pitching_line_is_internally_consistent():
     innings = 85.0 + 2.0 / 3.0  # 85.2 is 85 and two thirds
     whip = (float(pitching["H"]) + float(pitching["BB"])) / innings
     assert abs(whip - float(pitching["WHIP"])) < 0.02
+
+
+def test_two_way_games_played_stays_per_side():
+    """G means "games batted" on one line and "games pitched" on the other.
+
+    The batting side is namespaced `g_bat` upstream precisely because the
+    pitching block updates the same dict; an unprefixed key would have given
+    Ohtani 14 games as a hitter. The client leaderboards gate on this number, so
+    a collision here silently drops every regular from the AVG board.
+    """
+    rows = ingest._build_standard_stats_from_mlb(_two_way_stats())
+    assert _by_category(rows, "hitting")["G"] == "114"
+    assert _by_category(rows, "pitching")["G"] == "14"
+
+
+def test_pure_batter_carries_games_played():
+    rows = ingest._build_standard_stats_from_mlb({
+        "player_type": "batter",
+        "avg": "0.300", "pa": 500, "ab": 450, "h": 135, "g_bat": 111,
+    })
+    assert _by_category(rows, "hitting")["G"] == "111"
 
 
 def test_two_way_colliding_labels_get_distinct_ids():
