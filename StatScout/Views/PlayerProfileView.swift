@@ -1,5 +1,32 @@
 import SwiftUI
 
+/// Qualification used only for cumulative traditional-stat percentiles.
+///
+/// Rate-stat percentiles keep their existing comparison pool. A cumulative
+/// line is compared only with players who have appeared in at least ten games,
+/// using the hitting or pitching games line that owns the stat.
+enum StandardStatPercentileRules {
+    static let minGamesPlayed = 10
+
+    static let countingStats: Set<String> = [
+        "HR", "R", "RBI", "H", "2B", "3B", "BB", "SO", "SB", "CS", "PA", "AB",
+        "W", "L", "SV", "IP", "ER", "QS", "G", "GS", "BF",
+        "E", "A", "PO", "DP", "GF",
+    ]
+
+    static func qualifies(_ player: Player, label: String, category: MetricCategory) -> Bool {
+        guard countingStats.contains(label.uppercased()) else { return true }
+
+        let gamesCategory: MetricCategory = category == .pitching ? .pitching : .hitting
+        guard let stats = player.standardStats,
+              let gamesStat = stats.stat("G", category: gamesCategory, playerType: player.playerType),
+              let games = Double(gamesStat.value.trimmingCharacters(in: .whitespaces)) else {
+            return false
+        }
+        return games >= Double(minGamesPlayed)
+    }
+}
+
 struct PlayerProfileView: View {
     @EnvironmentObject private var store: StoreService
     let player: Player
@@ -867,28 +894,16 @@ struct PlayerProfileView: View {
         }
     }
 
-    /// Counting stats. Ranking these is honest but playing-time driven, a
-    /// bench bat's 2 HR isn't a talent signal, so they're grouped separately
-    /// from the rate stats and captioned as volume.
-    private static let countingStats: Set<String> = [
-        "HR", "R", "RBI", "H", "2B", "3B", "BB", "SO", "SB", "CS", "PA", "AB",
-        "W", "L", "SV", "IP", "ER", "QS", "G", "GS", "BF",
-        "E", "A", "PO", "DP", "GF",
-    ]
-
     /// Percentile rank for a traditional stat against the league.
     ///
     /// Savant publishes percentiles for its Statcast metrics but not for the
     /// traditional line, so these are computed here, a player's position in
     /// the distribution of every same-type player who has the stat. Returns nil
     /// below a usable pool size rather than drawing a bar off five samples.
-    /// The comparison pool must clear the same bar the Standard leaderboard
-    /// applies, or the two screens answer "how does this rank" against
-    /// different leagues. `StandardStatsLeadersView` requires a Savant
-    /// percentile in the matching category (Savant withholds them below its
-    /// qualifying thresholds, so their presence *is* the qualification signal);
-    /// this used to require only a matching player type, which let bench bats
-    /// and mop-up relievers into the denominator.
+    /// Cumulative rows additionally require 10+ games in the comparison pool.
+    /// Rate rows keep their existing pool. Every row still requires the
+    /// matching side and a Savant metric, so bench bats and mop-up relievers do
+    /// not silently enter the denominator.
     private func standardStatPercentile(label: String, category: MetricCategory, value: Double) -> Int? {
         let key = label.uppercased()
         // Fielding and running stats belong to position players and are gated
@@ -900,6 +915,7 @@ struct PlayerProfileView: View {
                 ? (otherType == "pitcher" || otherType == "two_way")
                 : otherType != "pitcher"
             guard sideMatches else { return nil }
+            guard StandardStatPercentileRules.qualifies(other, label: key, category: category) else { return nil }
             guard other.metrics.contains(where: { $0.category == qualifyingCategory }) else { return nil }
             // Match on category too: a two-way player has an "H" on each line.
             guard let stat = other.standardStats?.first(where: {
@@ -928,7 +944,7 @@ struct PlayerProfileView: View {
     /// hitting and rendered interleaved with his batting line.
     private func standardMetrics(counting: Bool) -> [Metric] {
         (displayedPlayer.standardStats ?? [])
-            .filter { Self.countingStats.contains($0.label.uppercased()) == counting }
+            .filter { StandardStatPercentileRules.countingStats.contains($0.label.uppercased()) == counting }
             .map { stat in
                 let category = stat.resolvedCategory(playerType: displayedPlayer.playerType)
                 let pct = DashboardViewModel.rawNumeric(stat.value)
