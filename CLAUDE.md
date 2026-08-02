@@ -1,7 +1,7 @@
 # Baseball — Project Guide
 
 StatScout: Statcast percentiles / player-comparison app (iOS). XcodeGen
-project/scheme: `StatScout`, simulator device `agent-baseball`.
+project/scheme: `StatScout`, sim lease owner `baseball`.
 
 **This repo is the fastlane template for the other iOS apps** — keep `Appfile`,
 `metadata/en-US/`, `screenshots/en-US/`, and `Fastfile` review info canonical
