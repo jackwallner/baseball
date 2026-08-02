@@ -41,123 +41,14 @@ struct StandardStatsLeadersView: View {
 
     // Filter players who have the selected stat
     var filteredPlayers: [Player] {
-        // Measured once for the whole board, not per row: it's a league-wide
-        // fact, and asking each player for it would make the filter quadratic.
-        let teamGames = teamGamesPlayed
-        return players.filter { player in
+        players.filter { player in
             guard let stats = player.standardStats else { return false }
             guard matchesPlayerType(player: player) else { return false }
-            guard hasPlayedEnough(player, stats: stats) else { return false }
-            guard meetsRateQualifier(player, stats: stats, teamGames: teamGames) else { return false }
             // A fielding line with no chances is a DH's empty glove, not a
             // perfect one.
             if selectedCategory == .fielding, chances(in: stats, of: player) <= 0 { return false }
             return numericStat(for: player) != nil
         }
-    }
-
-    // MARK: - Qualification
-
-    /// Games a player needs on the season before his line belongs on a board at
-    /// all.
-    ///
-    /// Savant's percentile gate is looser than this and lets a call-up with a
-    /// 2-for-4 debut onto the leaderboard, which is the one thing that makes a
-    /// board obviously untrustworthy. Deliberately automatic rather than a
-    /// picker: nobody opens a home-run board wanting the guy with one game in
-    /// it, and the caption under the board says the bar is there.
-    static let minGamesPlayed = 10
-
-    /// Plate appearances that stand in for a missing games count.
-    ///
-    /// Bundled historical seasons were written before the pipeline carried a
-    /// batting "G", so they'd all be cut by a games test they can't answer.
-    /// Ten games is roughly 30 PA for a regular; 20 is the same bar set where a
-    /// part-time player who really has played ten games still clears it.
-    static let minPlateAppearancesFallback: Double = 20
-
-    /// Boards whose value is a rate, and therefore need a real qualifier rather
-    /// than a floor.
-    ///
-    /// A counting stat ranks itself: nobody with twelve games leads the league
-    /// in home runs, so the games floor is all it needs. A rate does the
-    /// opposite, the smaller the sample the more extreme the number, which is
-    /// how a 25-PA hitter came to sit above Luis Arraez on the AVG board.
-    private static let rateStats: Set<String> = [
-        "AVG", "OBP", "SLG", "OPS",
-        "ERA", "WHIP", "K/9", "BB/9", "K/BB",
-    ]
-
-    /// How many games the clubs have played, which is what MLB's qualifier is a
-    /// multiple of (3.1 PA or 1.0 IP per team game).
-    ///
-    /// Measured off the board's own pool rather than assumed from the calendar,
-    /// so it's right in April, right in a strike year, and right on a past
-    /// season. The league's games-played leader has appeared in all but a
-    /// handful of his club's games; before the pipeline carried a batting G,
-    /// the PA leader's ~4.7 trips a game is the next best ruler.
-    private var teamGamesPlayed: Double {
-        var maxGames = 0.0
-        var maxPA = 0.0
-        for player in players {
-            guard let stats = player.standardStats else { continue }
-            if let stat = stats.stat("G", category: .hitting, playerType: player.playerType),
-               let games = Double(stat.value.trimmingCharacters(in: .whitespaces)) {
-                maxGames = max(maxGames, games)
-            }
-            if let stat = stats.first(where: { $0.label == "PA" }),
-               let pa = Double(stat.value.trimmingCharacters(in: .whitespaces)) {
-                maxPA = max(maxPA, pa)
-            }
-        }
-        if maxGames > 0 { return maxGames }
-        return maxPA / 4.7
-    }
-
-    /// True when this player has enough season behind him for the board.
-    ///
-    /// The games line is read off the *side* rather than off the board's
-    /// category: fielding and running are position-player boards, and a hitter's
-    /// G lives on his hitting line, not a fielding one.
-    private func hasPlayedEnough(_ player: Player, stats: [StandardStat]) -> Bool {
-        let gamesCategory: MetricCategory = selectedCategory == .pitching ? .pitching : .hitting
-        if let stat = stats.stat("G", category: gamesCategory, playerType: player.playerType),
-           let games = Double(stat.value.trimmingCharacters(in: .whitespaces)) {
-            return games >= Double(Self.minGamesPlayed)
-        }
-        // No G on the line: a season written before the pipeline carried one.
-        if gamesCategory == .pitching {
-            return (rawValue("IP", in: stats, of: player) ?? 0) >= 10
-        }
-        return (rawValue("PA", in: stats, of: player) ?? 0) >= Self.minPlateAppearancesFallback
-    }
-
-    /// MLB's own rate-stat qualifier, applied only to the boards that are rates.
-    ///
-    /// SB% and FLD% are deliberately not in here: they're rates of chances
-    /// rather than of playing time, and they already carry their own volume
-    /// tests (a stolen-base attempt, a fielding chance).
-    private func meetsRateQualifier(_ player: Player, stats: [StandardStat], teamGames: Double) -> Bool {
-        guard Self.rateStats.contains(selectedStat), teamGames > 0 else { return true }
-        if selectedCategory == .pitching {
-            return (rawValue("IP", in: stats, of: player) ?? 0) >= teamGames
-        }
-        return (rawValue("PA", in: stats, of: player) ?? 0) >= 3.1 * teamGames
-    }
-
-    /// What the board is currently hiding, in its own words.
-    private var qualifierCaption: String {
-        guard Self.rateStats.contains(selectedStat) else {
-            return "Ranks players with at least \(Self.minGamesPlayed) games this season."
-        }
-        let teamGames = teamGamesPlayed
-        guard teamGames > 0 else {
-            return "Ranks players with at least \(Self.minGamesPlayed) games this season."
-        }
-        if selectedCategory == .pitching {
-            return "\(selectedStat) is a rate, so this board ranks qualified pitchers only: 1 inning per team game (\(Int(teamGames.rounded()))+ IP)."
-        }
-        return "\(selectedStat) is a rate, so this board ranks qualified hitters only: 3.1 PA per team game (\(Int((3.1 * teamGames).rounded()))+ PA)."
     }
 
     /// Total fielding chances: the volume behind a glove stat, and the only
@@ -258,17 +149,6 @@ struct StandardStatsLeadersView: View {
                 controlRow
                 leadersList
                     .padding(.horizontal, 12)
-                    .padding(.top, 8)
-
-                // A board that quietly drops players has to say so, otherwise a
-                // missing name reads as missing data.
-                Text(qualifierCaption)
-                    .font(SavantType.micro)
-                    .tracking(0.2)
-                    .foregroundStyle(SavantPalette.inkTertiary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(.horizontal, 16)
                     .padding(.top, 8)
                     .padding(.bottom, 12)
                 // Lets the last row scroll through the floating tab bar.
@@ -405,7 +285,7 @@ struct StandardStatsLeadersView: View {
                 } description: {
                     Text(isLoadingSeason
                          ? "Pulling \(season.map(String.init) ?? "this season")'s players."
-                         : "No players with \(Self.minGamesPlayed)+ games have \(selectedStat) data for this season.")
+                         : "No players have \(selectedStat) data for this season.")
                 }
                 .padding(.vertical, 48)
                 .background(SavantPalette.surface)
