@@ -3,7 +3,7 @@ import StoreKit
 
 /// App Store review deep links for StatScout.
 enum AppStoreReviewLinks {
-    static let appStoreID = "6743780853"
+    static let appStoreID = "6763945657"
 
     /// Opens the App Store write-review page in the user's storefront.
     static var writeReviewURL: URL {
