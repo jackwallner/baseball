@@ -10,7 +10,11 @@ enum StatScoutProduct {
 }
 
 enum RevenueCatConfig {
+    #if DEBUG
+    static let apiKey = "test_LwVQkuPHKAMldYwZpzbPktrjOlA"
+    #else
     static let apiKey = "appl_qNlZGCCfGWBTsvcxlqYSNCtRupx"
+    #endif
     static let proEntitlement = "StatScout Pro"
     static let fallbackEntitlement = "pro"
 }
@@ -189,6 +193,11 @@ extension Package {
     }
 
     var introOfferLabel: String? {
+        #if DEBUG && targetEnvironment(simulator)
+        if RevenueCatConfig.apiKey.hasPrefix("test_"), productKind == .monthly || productKind == .yearly {
+            return "7-day free trial"
+        }
+        #endif
         guard let intro = storeProduct.introductoryDiscount, intro.paymentMode == .freeTrial else {
             return nil
         }
@@ -366,6 +375,23 @@ final class StoreService: NSObject, ObservableObject {
             return "\(trial.capitalized), then \(yearly.priceLabel). \(renew)"
         }
         return "\(yearly.priceLabel). \(renew)"
+    }
+
+    var onboardingMonthlyCTALabel: String {
+        guard let monthly = monthlyPackage else { return "Upgrade to StatScout+" }
+        if isEligibleForIntroOffer(monthly), let trial = monthly.introOfferLabel {
+            return "Start \(trial)"
+        }
+        return "Try StatScout+ for \(monthly.priceLabel)"
+    }
+
+    var onboardingMonthlyDisclosureText: String? {
+        guard let monthly = monthlyPackage else { return nil }
+        let renew = "Auto-renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel in Settings › Apple ID › Subscriptions."
+        if isEligibleForIntroOffer(monthly), let trial = monthly.introOfferLabel {
+            return "\(trial.capitalized), then \(monthly.priceLabel). \(renew)"
+        }
+        return "\(monthly.priceLabel). \(renew)"
     }
 
     /// The monthly package, when present. Used as the anchor when computing
@@ -571,9 +597,8 @@ final class StoreService: NSObject, ObservableObject {
     private func configureIfNeeded() -> Bool {
         guard !isConfigured else { return true }
         #if targetEnvironment(simulator)
-        logger.info("Skipping RevenueCat configuration in simulator")
-        return false
-        #else
+        guard RevenueCatConfig.apiKey.hasPrefix("test_") else { return false }
+        #endif
         #if DEBUG
         Purchases.logLevel = .debug
         #endif
@@ -581,7 +606,6 @@ final class StoreService: NSObject, ObservableObject {
         Purchases.shared.delegate = self
         isConfigured = true
         return true
-        #endif
     }
 }
 
