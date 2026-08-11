@@ -1,5 +1,3 @@
-Nouveautés de StatScout :
-• Trends classe les joueurs en hausse ou en baisse sur 7, 15 et 30 jours.
-• Comparez deux joueurs ou saisons côte à côte.
-• Triez les stats avancées et traditionnelles de chaque club.
-• Classements plus précis, bonnes lignes pour les joueurs à double rôle et meilleurs seuils défensifs.
+Écran d'abonnement plus clair : chaque formule affiche désormais son coût mensuel et la formule annuelle indique l'économie réalisée.
+
+Correction du lien Noter StatScout, qui ouvrait la mauvaise page de l'App Store.

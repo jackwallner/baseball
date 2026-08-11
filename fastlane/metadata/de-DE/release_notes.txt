@@ -1,5 +1,3 @@
-Neu in StatScout:
-• Trends zeigt Auf- und Absteiger über 7, 15 und 30 Tage.
-• Vergleiche beliebige Spieler oder Saisons direkt.
-• Sortiere moderne und klassische Statistiken für jeden Club.
-• Präzisere Rankings, korrekte Werte für Two-Way-Spieler und bessere Fielding-Qualifikationen.
+Übersichtlichere Upgrade-Seite: Jeder Tarif zeigt jetzt den Preis pro Monat, und der Jahrestarif nennt die Ersparnis.
+
+Der Link „StatScout bewerten“ öffnete die falsche App-Store-Seite. Das ist behoben.

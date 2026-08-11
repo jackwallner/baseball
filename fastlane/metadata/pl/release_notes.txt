@@ -1,5 +1,3 @@
-Nowości w StatScout:
-• Trends pokazuje, kto zyskuje lub traci formę w 7, 15 i 30 dni.
-• Porównaj dowolnych dwóch graczy lub sezony obok siebie.
-• Sortuj zaawansowane i tradycyjne statystyki każdego klubu.
-• Dokładniejsze rankingi, prawidłowe linie graczy two-way i lepsze minima fieldingu.
+Czytelniejszy ekran subskrypcji: każdy plan pokazuje teraz kwotę miesięczną, a plan roczny podaje wysokość oszczędności.
+
+Poprawiono link Oceń StatScout, który otwierał niewłaściwą stronę w App Store.

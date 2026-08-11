@@ -1,5 +1,3 @@
-Nytt i StatScout:
-• Trends rankar vilka som blir hetare eller kallare över 7, 15 och 30 dagar.
-• Jämför två spelare eller säsonger sida vid sida.
-• Sortera avancerad och traditionell statistik för alla klubbar.
-• Mer exakta rankningar, korrekta rader för two-way-spelare och bättre fieldingkrav.
+Tydligare uppgraderingsvy: varje plan visar nu vad den motsvarar per månad och årsplanen anger hur mycket du sparar.
+
+Rättade länken Betygsätt StatScout, som öppnade fel sida i App Store.

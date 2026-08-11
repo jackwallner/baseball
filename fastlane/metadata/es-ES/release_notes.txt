@@ -1,5 +1,3 @@
-Novedades de StatScout:
-• Trends ordena quién mejora o empeora en 7, 15 y 30 días.
-• Compara dos jugadores o temporadas cara a cara.
-• Ordena estadísticas avanzadas y tradicionales de todos los clubes.
-• Rankings más precisos, líneas correctas para jugadores de doble función y mejores requisitos defensivos.
+Pantalla de mejora más clara: cada plan muestra ahora su coste mensual equivalente y el plan anual indica cuánto ahorras.
+
+Se ha corregido el enlace Valorar StatScout, que abría una página equivocada de la App Store.

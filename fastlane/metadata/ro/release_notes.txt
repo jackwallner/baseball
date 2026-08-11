@@ -1,5 +1,3 @@
-Noutăți în StatScout:
-• Trends clasifică jucătorii în urcare sau coborâre în 7, 15 și 30 de zile.
-• Compară oricare doi jucători sau sezoane alăturat.
-• Sortează statisticile avansate și tradiționale ale fiecărui club.
-• Clasamente mai precise, linii corecte pentru jucătorii two-way și criterii defensive mai bune.
+Ecran de abonare mai clar: fiecare plan arată acum costul lunar, iar planul anual precizează cât economisești.
+
+Am corectat linkul Evaluează StatScout, care deschidea pagina greșită din App Store.

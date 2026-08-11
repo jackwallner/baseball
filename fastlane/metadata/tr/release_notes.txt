@@ -1,5 +1,3 @@
-StatScout'taki yenilikler:
-• Trends, 7, 15 ve 30 günde formu yükselen veya düşen oyuncuları sıralar.
-• İki oyuncuyu veya sezonu yan yana karşılaştırın.
-• Her kulübün gelişmiş ve klasik istatistiklerini sıralayın.
-• Daha doğru sıralamalar, iki yönlü oyuncular için doğru satırlar ve daha iyi savunma eşikleri.
+Daha anlaşılır yükseltme ekranı: her plan artık aylık tutarını gösteriyor, yıllık plan ise ne kadar kazandırdığını belirtiyor.
+
+Yanlış App Store sayfasını açan StatScout'u Değerlendir bağlantısı düzeltildi.
