@@ -1,5 +1,3 @@
-New in StatScout:
-• Trends ranks who’s heating up or cooling off over 7, 15, and 30 days.
-• Compare any two players or seasons side by side.
-• Sort advanced and traditional stats across every club.
-• More accurate rankings, two-way player lines, and fielding qualifiers.
+Clearer upgrade screen: every plan now shows what it comes to per month, and the yearly plan states how much it saves.
+
+Fixed the Rate StatScout link, which opened the wrong App Store page.

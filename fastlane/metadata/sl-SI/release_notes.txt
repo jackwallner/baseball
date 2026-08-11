@@ -1,5 +1,3 @@
-Novo v StatScoutu:
-• Trends razvrsti, kdo napreduje ali nazaduje v 7, 15 in 30 dneh.
-• Primerjajte katera koli dva igralca ali sezoni.
-• Razvrstite napredne in tradicionalne statistike vseh klubov.
-• Natančnejše lestvice, pravilne vrstice dvosmernih igralcev in boljši pogoji za obrambo.
+Preglednejši zaslon za nadgradnjo: vsak paket zdaj prikaže mesečni znesek, letni paket pa navede, koliko prihranite.
+
+Popravili smo povezavo Oceni StatScout, ki je odprla napačno stran v App Storu.

@@ -1,5 +1,3 @@
-Điểm mới trong StatScout:
-• Trends xếp hạng ai đang nóng lên hoặc nguội đi trong 7, 15 và 30 ngày.
-• So sánh hai cầu thủ hoặc mùa giải cạnh nhau.
-• Sắp xếp chỉ số nâng cao và truyền thống của mọi CLB.
-• Xếp hạng chính xác hơn, dòng đúng cho cầu thủ hai vai trò và tiêu chuẩn phòng thủ tốt hơn.
+Màn hình nâng cấp rõ ràng hơn: mỗi gói giờ hiển thị mức tương đương mỗi tháng, và gói năm nêu rõ mức tiết kiệm.
+
+Đã sửa liên kết Đánh giá StatScout vốn mở sai trang App Store.

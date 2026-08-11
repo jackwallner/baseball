@@ -1,5 +1,3 @@
-Újdonságok a StatScoutban:
-• A Trends 7, 15 és 30 nap alapján rangsorolja a javuló és visszaeső játékosokat.
-• Hasonlíts össze két játékost vagy szezont egymás mellett.
-• Rendezd minden klub haladó és hagyományos statisztikáit.
-• Pontosabb rangsorok, helyes kétirányú játékosadatok és jobb mezőnyjátékos-küszöbök.
+Áttekinthetőbb előfizetési képernyő: minden csomag mutatja a havi árat, az éves csomag pedig a megtakarítást.
+
+Javítottuk a StatScout értékelése hivatkozást, amely rossz App Store-oldalt nyitott meg.

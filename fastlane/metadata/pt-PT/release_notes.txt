@@ -1,5 +1,3 @@
-Novidades no StatScout:
-• Trends classifica quem está a subir ou a descer em 7, 15 e 30 dias.
-• Compara dois jogadores ou épocas lado a lado.
-• Ordena estatísticas avançadas e tradicionais de todos os clubes.
-• Rankings mais precisos, linhas corretas para jogadores de duas vias e melhores critérios defensivos.
+Ecrã de subscrição mais claro: cada plano mostra agora quanto fica por mês e o plano anual indica quanto poupa.
+
+Corrigido o link Avaliar o StatScout, que abria a página errada na App Store.

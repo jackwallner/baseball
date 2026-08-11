@@ -131,7 +131,9 @@ platform :ios do
       skip_screenshots: true,
       force: true,
       submit_for_review: true,
-      automatic_release: true,
+      # Manual release. The price ladder changes on its own schedule, so an
+      # approval must never put a version on sale by itself.
+      automatic_release: false,
       run_precheck_before_submit: false,
       submission_information: {
         add_id_info_uses_idfa: false,

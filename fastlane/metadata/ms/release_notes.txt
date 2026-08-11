@@ -1,5 +1,3 @@
-Baharu dalam StatScout:
-• Trends menyusun siapa yang semakin panas atau sejuk dalam 7, 15 dan 30 hari.
-• Bandingkan mana-mana dua pemain atau musim sebelah menyebelah.
-• Susun statistik lanjutan dan tradisional setiap kelab.
-• Kedudukan lebih tepat, baris pemain dua hala yang betul dan syarat fielding lebih baik.
+Skrin naik taraf lebih jelas: setiap pelan kini menunjukkan kos sebulan, dan pelan tahunan menyatakan jumlah penjimatan.
+
+Membaiki pautan Nilai StatScout yang membuka halaman App Store yang salah.
