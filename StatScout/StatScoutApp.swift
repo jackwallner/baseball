@@ -147,14 +147,14 @@ struct OnboardingCards: View {
     private var showsUpsellBlock: Bool { isLastPage && !store.isPro }
 
     /// CTA label / disclosure mirror the direct-purchase pop-ups: trial copy
-    /// when eligible, price-forward yearly copy otherwise. Both come from
+    /// when eligible, price-forward monthly copy otherwise. Both come from
     /// StoreService so every one-tap conversion surface reads the same.
     private var proCTALabel: String {
-        store.yearlyPackage != nil ? store.paywallBlurCTA : "Upgrade to StatScout+"
+        store.onboardingMonthlyCTALabel
     }
 
     private var trialDisclosure: String? {
-        store.yearlyCTADisclosureText
+        store.onboardingMonthlyDisclosureText
     }
 
     var body: some View {
@@ -271,7 +271,7 @@ struct OnboardingCards: View {
                     getStartedButton(prominent: true)
                 } else {
                     Button {
-                        buyYearly()
+                        buyMonthly()
                     } label: {
                         ZStack {
                             Text(proCTALabel)
@@ -383,12 +383,12 @@ struct OnboardingCards: View {
         .buttonStyle(.plain)
     }
 
-    // One-tap conversion: buy the yearly plan in place, trial when eligible,
+    // One-tap conversion: buy the monthly plan in place, trial when eligible,
     // straight purchase otherwise, never a second paywall. PaywallView is only
     // the emergency fallback when products didn't load. Success flips
     // store.isPro, which finishes onboarding via the onChange handler.
-    private func buyYearly() {
-        guard let yearly = store.yearlyPackage else {
+    private func buyMonthly() {
+        guard let monthly = store.monthlyPackage else {
             paywallTrigger = .onboarding
             return
         }
@@ -397,7 +397,7 @@ struct OnboardingCards: View {
         Task { @MainActor in
             defer { isStartingTrial = false }
             do {
-                switch try await store.purchase(yearly) {
+                switch try await store.purchase(monthly) {
                 case .purchased:
                     break
                 case .pending:

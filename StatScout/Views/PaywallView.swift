@@ -568,8 +568,8 @@ private struct PaywallPlanCard: View {
                         Text(package.displayName)
                             .font(SavantType.bodyBold)
                             .foregroundStyle(SavantPalette.ink)
-                        if isMostPopular {
-                            Text("MOST POPULAR")
+                        if let savingsPercent {
+                            Text("SAVE \(savingsPercent)%")
                                 .font(SavantType.micro)
                                 .tracking(0.4)
                                 .foregroundStyle(.white)
@@ -583,8 +583,8 @@ private struct PaywallPlanCard: View {
                             .font(SavantType.micro)
                             .tracking(0.3)
                             .foregroundStyle(SavantPalette.savantRed)
-                    } else if let savingsPercent {
-                        Text("Save \(savingsPercent)% vs monthly")
+                    } else if isMostPopular {
+                        Text("Best value")
                             .font(SavantType.micro)
                             .tracking(0.3)
                             .foregroundStyle(SavantPalette.savantRed)
