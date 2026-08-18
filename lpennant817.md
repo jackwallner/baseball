@@ -39,6 +39,16 @@ implementation, compliance, or measurement blocker remains. Do not reopen a
 resolved point as a stylistic preference. Raise it only with new repository,
 Apple, RevenueCat, or current-season evidence.
 
+### Review protocol
+
+Each subsequent verifier reviews this current working-tree revision, not an
+earlier commit. A score below 100 must name only a material blocker and give the
+smallest exact edit needed. A score of 100 means no edit is requested. Do not
+reopen the resolved eligibility, no-stacking, localized-price, redemption
+fallback, creative allowlist, privacy, stale-data, or expiry decisions without
+new evidence. Append the verifier's score and evidence here so the same issue
+does not loop across reviews.
+
 Final RevenueCat and StoreKit verifier: 100/100. The repository's project.yml
 targets iOS 17.0 and pins RevenueCat from 5.72.0. That SDK exposes
 presentCodeRedemptionSheet() on iOS 14 and later, syncPurchases() as an async
@@ -68,6 +78,11 @@ until App Store Connect confirms the live annual baseline, offer price,
 eligibility, no-stacking choice, renewal behavior, and storefronts. Future
 review should add new evidence only, not reopen these settled decisions.
 
+Current revision hardening: the campaign cutoff is recorded as the exact UTC
+instant 2026-10-01T06:59:59Z, activation fails closed without trusted time, and
+cached config is used only for transient fetch failures. Explicit disable,
+malformed, stale, or expired responses invalidate the cache immediately.
+
 ## Executive recommendation
 
 ### Campaign concept
@@ -82,9 +97,10 @@ Apple offer are ready, ideally August 20 to August 24, 2026, and no later than
 August 31. Keep in-app merchandising active through September 30, covering the
 final regular-season push and the opening Wild Card games. Set the Apple code's
 expiration date to October 1 because Apple expires codes at 12:00 a.m. Pacific
-on the selected date. If the build is not ready by August 31, move the start
-and end dates together. Never ship copy that says an offer is active when its
-Apple offer is not active.
+on the selected date. The hardcoded in-app cutoff is
+2026-10-01T06:59:59Z, which is September 30 at 11:59 p.m. Pacific. If the build
+is not ready by August 31, move the start and end dates together. Never ship
+copy that says an offer is active when its Apple offer is not active.
 
 **Offer code:** STRETCH26
 
@@ -270,7 +286,7 @@ Configure:
 | Eligibility | New and expired subscribers only for V1; exclude active subscribers, including grace-period and billing-retry states |
 | Introductory offer interaction | No stacking for V1. Keep the existing 7-day introductory offer on the See all plans path |
 | Redemption limit | Start conservatively, for example 10,000; increase only if demand justifies it |
-| Expiration | Apple expiration October 1, 2026 at 12:00 a.m. Pacific Time; in-app cutoff September 30 at 11:59 p.m. |
+| Expiration | Apple expiration October 1, 2026 at 12:00 a.m. Pacific Time; hardcoded in-app cutoff 2026-10-01T06:59:59Z |
 | Local prices | Use Apple's comparable price calculation, then review high-volume storefronts manually |
 
 The code is not a secret. It is a campaign identifier and discount key. A
@@ -563,9 +579,11 @@ decoder, production and preview data providers, and test mock coverage as part
 of the change. The client must enforce all of these rules:
 
 - enabled is true.
-- The fetched campaign timestamps are UTC and the client uses server-provided
-  time where available. A device clock may fail closed, but must never extend
-  the campaign beyond the hardcoded cutoff.
+- The fetched campaign timestamps are UTC. Use a trusted server timestamp from
+  the campaign response when available. If trusted time is unavailable, fail
+  closed rather than activating the campaign from an untrusted device clock.
+  A device clock may make an active campaign disappear, but must never activate
+  or extend it beyond the hardcoded cutoff 2026-10-01T06:59:59Z.
 - The campaign season matches StatScoutSeason.current.
 - The creative_id, offer code, and offer reference match app-allowlisted values.
 - Localized campaign copy comes from the reviewed binary for the creative_id.
@@ -575,8 +593,10 @@ of the change. The client must enforce all of these rules:
   freshness timestamp for every player snapshot.
 - Missing, malformed, stale, or expired config fails closed to the ordinary
   paywall.
-- A last-known-good config is cached for at most six hours and never beyond a
-  hardcoded September 30, 2026 client cutoff.
+- A last-known-good config is cached for at most six hours and never beyond the
+  hardcoded cutoff. Use that cache only for transient fetch failures. An
+  explicit disabled, malformed, stale, or expired response invalidates the
+  cache immediately.
 - Remote config controls merchandising only. It must never grant Pro or alter
   entitlement state.
 
@@ -720,6 +740,8 @@ Add tests for:
 - Campaign is active inside the valid window.
 - Campaign is inactive after ends_at.
 - Disabled, missing, malformed, stale, and wrong-season config fails closed.
+- Missing trusted time fails closed; explicit disable, malformed, stale, or
+  expired responses invalidate a cached config.
 - Unknown customer state, active monthly/yearly, grace-period, billing-retry,
   and lifetime users do not see the acquisition offer.
 - The campaign creative, offer reference, and link use the app-allowlisted
@@ -810,7 +832,8 @@ Before release:
 - [ ] Configure no stacking with the existing introductory offer.
 - [ ] Create sandbox code and test it.
 - [ ] Create production custom code STRETCH26.
-- [ ] Set redemption limit and October 1 Apple expiration, with September 30 in-app cutoff.
+- [ ] Set redemption limit and October 1 Apple expiration, with the hardcoded
+  2026-10-01T06:59:59Z in-app cutoff.
 - [ ] Upload or verify the RevenueCat Apple In-App Purchase key.
 
 ### Product and code
