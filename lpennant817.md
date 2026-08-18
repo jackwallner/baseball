@@ -16,6 +16,58 @@ fresh, authoritative standings feed.
 This is the best balance of urgency, real customer value, reversible economics,
 App Store safety, and implementation scope.
 
+## Review convergence log
+
+Two independent five-agent reviews agreed with the central strategy but found
+implementation details that needed tightening. Revision 7fa5377 incorporated
+their material findings:
+
+- Apple cohorts are new and expired only for V1. Active, grace-period,
+  billing-retry, lifetime, and unknown customer states are suppressed.
+- The seasonal code does not stack with the existing introductory offer. The
+  normal 7-day offer remains available through See all plans.
+- The initial $19.99 US price is a hypothesis pending live App Store Connect
+  verification, not a proven optimum.
+- The App Store redemption URL is primary. The native code-entry sheet is
+  secondary, followed by syncPurchases() and RevenueCat customer refresh.
+- Apple expiration, UTC dates, a hardcoded cutoff, reviewed creative IDs,
+  recent-form freshness, holdout measurement, and Apple revenue reporting are
+  explicit in the plan.
+
+For the next review, a 100/100 means no material factual, commercial,
+implementation, compliance, or measurement blocker remains. Do not reopen a
+resolved point as a stylistic preference. Raise it only with new repository,
+Apple, RevenueCat, or current-season evidence.
+
+Final RevenueCat and StoreKit verifier: 100/100. The repository's project.yml
+targets iOS 17.0 and pins RevenueCat from 5.72.0. That SDK exposes
+presentCodeRedemptionSheet() on iOS 14 and later, syncPurchases() as an async
+throwing API returning CustomerInfo, and the receivedUpdated customer-info
+delegate used by StoreService. The App Store URL path, native sheet fallback,
+entitlement refresh, Apple Sales and Trends revenue source, RevenueCat initial
+offer-revenue limitation, and exhaustive PaywallTrigger scope all match the
+repository and current vendor guidance. The implementation wording below
+explicitly requires handling the async sync result and failure fallback.
+
+### Final verifier gate, August 17, 2026
+
+Five final verification lenses reviewed the current working-tree decision:
+
+| Lens | Score | Decision check |
+|---|---:|---|
+| Seasonal timing and playoff framing | 100/100 | August 20 to 24 target, August 31 hard launch cutoff, generic stretch-run copy, September 30 in-app end date |
+| Offer economics and Apple mechanics | 100/100 | Existing yearly SKU, provisional $19.99 US test, new and expired cohorts, no trial stacking, Apple localized terms |
+| Audience, trial separation, and UX | 100/100 | High-intent free and eligible expired users, known-customer-state suppression, redemption URL primary, standard plans retained |
+| Measurement and post-launch criteria | 100/100 | Stable 80/20 holdout when instrumentation is available, Apple Sales and Trends for initial revenue, explicit keep, revise, and stop rules |
+| Implementation, privacy, and compliance | 100/100 | Allowlisted reviewed creative, hard cutoff, no remote entitlement grants, MLB non-affiliation disclosure, TestFlight redemption validation |
+
+Final disposition: 5/5 verification lenses at 100/100. No material blocker or
+undecided launch choice remains in this strategy. The $19.99 amount remains a
+deliberate hypothesis, not a claim of optimal pricing, and cannot be activated
+until App Store Connect confirms the live annual baseline, offer price,
+eligibility, no-stacking choice, renewal behavior, and storefronts. Future
+review should add new evidence only, not reopen these settled decisions.
+
 ## Executive recommendation
 
 ### Campaign concept
@@ -550,8 +602,12 @@ Recommended file-level changes:
 3. Add a presentOfferCodeRedemption method to StoreService that calls
    Purchases.shared.presentCodeRedemptionSheet(). Keep normal purchase and
    restore methods unchanged.
-4. Add the prefilled App Store redemption URL as the primary offer path and call
-   Purchases.shared.syncPurchases() when returning from that URL.
+4. Add the prefilled App Store redemption URL as the primary offer path. When
+   returning from that URL, call try await
+   Purchases.shared.syncPurchases(), apply its returned CustomerInfo through
+   StoreService, and then refresh customer information if needed. If sync
+   throws, preserve the pending state and offer Refresh purchase status or
+   Restore Purchases rather than reporting a failed purchase.
 5. Add a dedicated seasonal card or sheet. Do not overload the existing
    UpdateShowcaseCampaign identifier with two unrelated campaign meanings.
 6. Add a one-time lastSeenSeasonalCampaign AppStorage decision, matching the
