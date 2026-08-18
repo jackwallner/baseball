@@ -61,6 +61,39 @@ Optional repository variable:
 
 - `STATCAST_SEASON`
 
+## Apple Retention Messaging
+
+Baseball's Retention Messaging endpoint is a Supabase Edge Function at
+`supabase/functions/apple-retention-message`. It does not use the database or
+RevenueCat at request time, so it can respond within Apple's 700 ms limit.
+
+The function verifies Apple's signed request, selects a message by product, and
+returns the approved message identifier. Supabase JWT verification is disabled
+for this function because Apple calls it directly.
+
+Deploy it with:
+
+```bash
+supabase functions deploy apple-retention-message --no-verify-jwt
+supabase secrets set \
+  APPLE_RETENTION_MESSAGE_ID_YEARLY=011d8acb-3ea0-5c98-bdd4-6d72ab531072 \
+  APPLE_RETENTION_MESSAGE_ID_MONTHLY=252b8604-d259-5318-a6f2-dcce30824529 \
+  APPLE_RETENTION_MESSAGE_ID_DEFAULT=011d8acb-3ea0-5c98-bdd4-6d72ab531072
+```
+
+The Apple setup script uploads the sandbox messages, configures the English
+fallbacks, and registers the deployed URL:
+
+```bash
+python3 scripts/apple-retention-messaging.py setup-sandbox \
+  --endpoint-url https://babzqsbmcunrezsdpyng.supabase.co/functions/v1/apple-retention-message
+```
+
+Apple's Retention Messaging access must be enabled for the app before those
+StoreKit API calls succeed. The script uses the In-App Purchase JWT credentials
+from `APPLE_IAP_KEY_ID`, `APPLE_IAP_ISSUER_ID`, and `APPLE_IAP_KEY_PATH`, with
+the existing `ASC_*` values as a local fallback.
+
 The workflow runs daily at `14:00 UTC` (10:00 EDT) and can also be run manually from GitHub Actions.
 
 ## Next production steps
