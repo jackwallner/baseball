@@ -1,3 +1,3 @@
-Pregledniji zaslon nadogradnje: svaki plan sada prikazuje mjesečni iznos, a godišnji plan navodi koliko štedite.
+Završnica sezone je počela. Nova sezonska kartica na ploči statistike vodi vas do alata koji sada najviše znače: ploča trendova, nedavna forma, izravne usporedbe i analiza momčadi.
 
-Ispravljena poveznica Ocijeni StatScout, koja je otvarala pogrešnu stranicu App Storea.
+Već ste pretplaćeni? Kartica vas vodi ravno na Trendove umjesto da vam nudi nešto što već imate.

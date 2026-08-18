@@ -1,3 +1,3 @@
-Czytelniejszy ekran subskrypcji: każdy plan pokazuje teraz kwotę miesięczną, a plan roczny podaje wysokość oszczędności.
+Rozpoczęła się końcówka sezonu. Nowa sezonowa karta na tablicy statystyk kieruje Cię do narzędzi, które teraz liczą się najbardziej: tablicy trendów, ostatniej formy, bezpośrednich porównań i analizy drużyn.
 
-Poprawiono link Oceń StatScout, który otwierał niewłaściwą stronę w App Store.
+Masz już subskrypcję? Karta przenosi Cię prosto do Trendów, zamiast sprzedawać coś, co już masz.

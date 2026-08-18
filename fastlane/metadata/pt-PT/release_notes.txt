@@ -1,3 +1,3 @@
-Ecrã de subscrição mais claro: cada plano mostra agora quanto fica por mês e o plano anual indica quanto poupa.
+A reta final da época já começou. Um novo cartão sazonal no painel de estatísticas leva-o às ferramentas que mais contam agora: o painel de tendências, a forma recente, os confrontos diretos e a análise de equipas.
 
-Corrigido o link Avaliar o StatScout, que abria a página errada na App Store.
+Já é subscritor? O cartão leva-o diretamente às Tendências em vez de lhe vender algo que já tem.

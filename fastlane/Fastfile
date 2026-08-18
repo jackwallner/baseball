@@ -99,6 +99,14 @@ platform :ios do
           - Historical seasons, player comparisons, year-over-year tracking
           - Test with Sandbox account via RevenueCat
 
+          New in this version: a seasonal "stretch run" card on the Stats board.
+          It is merchandising only, shown between 2026-08-18 and 2026-09-30, and
+          it grants nothing. For a free user its button opens the same StatScout+
+          pitch reachable from the existing upgrade entry points. For a
+          subscriber it shows a benefit message whose button switches to the
+          Trends tab. There is no promo code, no discount, and no price quoted
+          anywhere in the card: all prices come from StoreKit.
+
           Known: Light mode only. No shadows. No accounts. No social features.
         NOTES
       },

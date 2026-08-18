@@ -1,3 +1,3 @@
-Preglednejši zaslon za nadgradnjo: vsak paket zdaj prikaže mesečni znesek, letni paket pa navede, koliko prihranite.
+Začel se je zaključek sezone. Nova sezonska kartica na plošči s statistiko vas usmeri k orodjem, ki zdaj štejejo največ: plošča trendov, zadnja forma, neposredne primerjave in analiza ekip.
 
-Popravili smo povezavo Oceni StatScout, ki je odprla napačno stran v App Storu.
+Ste že naročeni? Kartica vas popelje naravnost na Trende, namesto da bi vam prodajala nekaj, kar že imate.

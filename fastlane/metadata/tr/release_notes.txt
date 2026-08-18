@@ -1,3 +1,3 @@
-Daha anlaşılır yükseltme ekranı: her plan artık aylık tutarını gösteriyor, yıllık plan ise ne kadar kazandırdığını belirtiyor.
+Sezonun son düzlüğü başladı. İstatistik panosundaki yeni sezon kartı sizi şu anda en çok işe yarayan araçlara götürüyor: trend panosu, son dönem formu, birebir karşılaştırmalar ve takım analizi.
 
-Yanlış App Store sayfasını açan StatScout'u Değerlendir bağlantısı düzeltildi.
+Zaten aboneyseniz kart, size zaten sahip olduğunuz bir şeyi satmak yerine doğrudan Trendler ekranını açar.

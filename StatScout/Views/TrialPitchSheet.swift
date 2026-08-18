@@ -32,7 +32,7 @@ struct TrialPitchSheet: View {
     /// were the ones nobody scrolled to.
     private var benefits: [Benefit] {
         switch trigger {
-        case .playerScouting, .recentForm, .upgrade, .onboarding, .activation, .bestWorst:
+        case .playerScouting, .recentForm, .upgrade, .onboarding, .activation, .bestWorst, .stretchRun:
             return [
                 Benefit(icon: "flame.fill",
                         title: "The Trends board",

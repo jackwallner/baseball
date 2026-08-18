@@ -23,6 +23,9 @@ struct StatsBoardBindings {
 /// the lazy-load behavior the old per-tab guards had.
 struct StatsView: View {
     let viewModel: DashboardViewModel
+    /// Passed through to the advanced board, whose seasonal card sends
+    /// subscribers to Trends. Absent when this view isn't inside the tab host.
+    var onOpenTrends: (() -> Void)? = nil
     @EnvironmentObject private var store: StoreService
 
     @State private var board: StatsBoard = .advanced
@@ -44,7 +47,7 @@ struct StatsView: View {
         VStack(spacing: 0) {
             switch board {
             case .advanced:
-                DashboardView(viewModel: viewModel, boardBindings: bindings)
+                DashboardView(viewModel: viewModel, boardBindings: bindings, onOpenTrends: onOpenTrends)
             case .standard:
                 StandardStatsLeadersView(
                     players: standardBoardPlayers,
