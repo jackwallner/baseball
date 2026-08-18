@@ -5,8 +5,8 @@
 Ship a seasonal **Stretch Run** campaign for the 2026 playoff chase, with a
 real but controlled discount on the existing yearly StatScout+ subscription.
 Use an Apple custom offer code for the first annual term, keep the normal
-monthly, yearly, lifetime, and 7-day trial products intact, and sell the
-campaign through the features that already exist in the app: Trends, recent
+monthly, yearly, lifetime, and 7-day introductory-offer paths intact, and sell
+the campaign through the features that already exist in the app: Trends, recent
 form, team scouting, player comparison, and historical context.
 
 Do not add a postseason data product, a new seasonal SKU, or a lifetime sale in
@@ -26,38 +26,46 @@ App Store safety, and implementation scope.
 the players shaping the race before the postseason.
 
 **Recommended merchandising window:** Launch as soon as the approved binary and
-Apple offer are ready, ideally August 25 to August 31, 2026. Run through
-October 5, 2026, covering the final regular-season push and the opening Wild
-Card window. If the build is not ready by August 31, move the start and end
-dates together. Never ship copy that says an offer is active when its Apple
-offer is not active.
+Apple offer are ready, ideally August 20 to August 24, 2026, and no later than
+August 31. Keep in-app merchandising active through September 30, covering the
+final regular-season push and the opening Wild Card games. Set the Apple code's
+expiration date to October 1 because Apple expires codes at 12:00 a.m. Pacific
+on the selected date. If the build is not ready by August 31, move the start
+and end dates together. Never ship copy that says an offer is active when its
+Apple offer is not active.
 
 **Offer code:** STRETCH26
 
 **Product:** Existing yearly subscription,
 com.jackwallner.baseball.pro.yearly
 
-**US price target:** $19.99 for the first annual term, then the standard yearly
-price, currently planned in the repository as $29.99/year after the August 12
-price raise. The exact price must be configured and confirmed in App Store
-Connect, then shown through Apple's localized purchase and redemption surfaces.
-Never hardcode $19.99 into the app for every storefront.
+**US price hypothesis:** $19.99 for the first annual term, then the standard
+yearly price, if App Store Connect confirms that the live US yearly price is
+$29.99 after the August 12 price raise. Treat $19.99 as the initial test price,
+not a validated optimum. The exact price must be configured and confirmed in
+App Store Connect, then shown through Apple's localized purchase and redemption
+surfaces. Never hardcode $19.99 into the app for every storefront.
 
-**Discount:** Approximately 33% off the planned $29.99 US annual price. This is
-meaningful enough to create urgency without resetting the product's normal
-price position.
+**Discount model:** If the live US annual price is $29.99, the initial test is
+approximately 33% off. This is a modeling assumption, not proof that $19.99 is
+the optimal price. Compare net revenue per eligible user against the post-raise
+baseline before extending or changing it.
 
 **Renewal:** The customer sees the standard localized yearly renewal price after
 the discounted term. The final terms shown by Apple are authoritative.
 
-**Audience:** Free users who have never purchased, plus eligible former or
-recent purchasers as allowed by the Apple offer configuration. Hide the
-campaign from users who already have active StatScout+ or lifetime access.
+**Audience:** High-intent free users who have never purchased, plus eligible
+expired subscribers. Configure only Apple's new and expired cohorts for V1.
+Exclude active subscribers, including billing-retry and grace-period states,
+because the public code can be redeemed outside the app. Hide the campaign from
+lifetime users and from any customer whose RevenueCat state is not yet known.
 
 **Primary CTA:** Claim the Stretch Run offer
 
-The CTA opens Apple's offer-code redemption flow. The normal See all plans path
-remains available and continues to use the existing RevenueCat purchase flow.
+The primary CTA opens the prefilled App Store redemption URL. A secondary
+in-app redemption path can call Apple's native sheet and tell the customer to
+enter STRETCH26 manually. The normal See all plans path remains available and
+continues to use the existing RevenueCat purchase flow.
 
 ### Why this fits the moment
 
@@ -134,8 +142,8 @@ Using the planned post-raise US values only for economic modeling:
 
 - Monthly annualized: $5.99 × 12 = $71.88.
 - Standard yearly: $29.99, already about 58% below twelve monthly payments.
-- Target Stretch Run yearly: $19.99, about 33% below the standard yearly price.
-- Target Stretch Run monthly equivalent: about $1.67.
+- Modeled Stretch Run test: $19.99, about 33% below the standard yearly price.
+- Modeled Stretch Run monthly equivalent: about $1.67.
 - Lifetime: $59.99, unchanged. It is already only 2x standard annual, so
   discounting it would make one-time access too attractive and damage recurring
   revenue.
@@ -192,9 +200,9 @@ can reach both new customers and previously purchased customers without
 changing the base price for every subscriber.
 
 Apple's current documentation says offer codes can provide a free or discounted
-period for auto-renewable subscriptions, can be configured for never-purchased,
-recently purchased, and older purchased customers, and can be redeemed through
-the App Store, a redemption URL, or an in-app StoreKit sheet. See [Apple's
+period for auto-renewable subscriptions, can be configured for new, existing,
+and expired subscribers, and can be redeemed through the App Store, a redemption
+URL, or an in-app StoreKit sheet. See [Apple's
 offer-code setup guide](https://developer.apple.com/help/app-store-connect/manage-subscriptions/set-up-subscription-offer-codes)
 and [Apple's StoreKit offer-code support](https://developer.apple.com/documentation/storekit/supporting-offer-codes-in-your-app).
 
@@ -205,11 +213,12 @@ Configure:
 | Product | Existing yearly StatScout+ SKU |
 | Reference name | stretch-run-2026-yearly |
 | Custom code | STRETCH26 |
-| Offer type | Paid offer, one annual discounted term |
-| US price target | $19.99, subject to a valid App Store price point |
-| Eligibility | Start with all three Apple purchase-history cohorts; suppress in-app merchandising for active StatScout+ users |
+| Offer type | Pay up front, one year |
+| US price hypothesis | $19.99, only after ASC confirms the live annual baseline and a valid price point |
+| Eligibility | New and expired subscribers only for V1; exclude active subscribers, including grace-period and billing-retry states |
+| Introductory offer interaction | No stacking for V1. Keep the existing 7-day introductory offer on the See all plans path |
 | Redemption limit | Start conservatively, for example 10,000; increase only if demand justifies it |
-| Expiration | October 5, 2026 at 11:59 p.m. Pacific Time |
+| Expiration | Apple expiration October 1, 2026 at 12:00 a.m. Pacific Time; in-app cutoff September 30 at 11:59 p.m. |
 | Local prices | Use Apple's comparable price calculation, then review high-volume storefronts manually |
 
 The code is not a secret. It is a campaign identifier and discount key. A
@@ -217,19 +226,28 @@ redemption limit and expiration date make leakage bounded. A unique reference
 name also makes offer-code sales attributable in App Store Connect and
 RevenueCat.
 
+App Store Connect offer configurations cannot be edited after creation. Confirm
+the product, eligibility, introductory-offer interaction, one-year duration,
+price point, storefronts, and renewal behavior before creating the production
+offer. If one of those choices changes, create a new offer rather than assuming
+the existing configuration can be repaired.
+
 ### Redemption flow
 
 Implement both paths:
 
-1. **Primary in-app path:** present Apple's native offer-code redemption sheet
-   from a Claim offer button.
-2. **Fallback path:** provide a prefilled App Store redemption URL if the native
-   sheet fails or is unavailable:
+1. **Primary path:** open the prefilled App Store redemption URL so the customer
+   does not have to type the public code:
    https://apps.apple.com/redeem?ctx=offercodes&id=6763945657&code=STRETCH26
-3. When the app returns to the foreground, refresh RevenueCat customer
-   information using the existing path. Dismiss the seasonal sheet when
-   isPro changes to true.
-4. If Apple does not propagate the entitlement immediately, show a clear
+2. **Secondary in-app path:** call
+   Purchases.shared.presentCodeRedemptionSheet() when supported. The native
+   sheet does not prefill STRETCH26, so label this path as entering a code.
+3. When returning from the external App Store URL, call
+   Purchases.shared.syncPurchases(), then refresh RevenueCat customer
+   information. For the native sheet, rely on the existing RevenueCat customer
+   information listener because Apple does not provide a redemption callback.
+   Dismiss the seasonal sheet when the entitlement becomes active.
+4. If Apple or RevenueCat does not propagate the entitlement immediately, show a clear
    Refresh purchase status or Restore Purchases fallback. Do not report a
    failed purchase merely because RevenueCat is briefly pending.
 
@@ -237,7 +255,11 @@ RevenueCat documents the redemption sheet and App Store URL flow, but also
 warns that the in-app sheet has had reliability issues. The fallback URL is
 therefore part of the design, not an afterthought. Upload the required Apple
 In-App Purchase key to RevenueCat so offer-code transactions are accurately
-tracked. Do not place that key in the app.
+tracked. RevenueCat notes that initial offer-code purchases may appear as $0 in
+its revenue chart because of Apple data limitations. Use [Apple Sales and
+Trends](https://developer.apple.com/help/app-store-connect/measure-app-performance/download-and-view-reports)
+for initial offer revenue, and use RevenueCat for attribution, entitlements,
+renewals, and retention. Do not place the key in the app.
 
 Relevant RevenueCat references:
 
@@ -262,16 +284,17 @@ Use this hierarchy:
   least 24 hours before renewal. Manage or cancel in Apple Account subscription
   settings.
 
-For the US launch brief, the intended terms can say:
+For a US-only launch brief, the intended terms can say:
 
 ~~~text
 $19.99 for your first year, then the standard yearly price. Exact price and
 renewal terms vary by storefront and are shown by Apple before purchase.
 ~~~
 
-Only show the $19.99 sentence when the copy is explicitly US-localized and the
-ASC price has been verified. The safer default copy omits the number and lets
-the native Apple sheet display the exact localized discounted price.
+This is planning copy, not a universal runtime string. Do not infer an App Store
+storefront from Locale.current. Unless the app has a verified storefront-aware
+offer object containing the localized price and renewal terms, omit the number
+and let Apple's redemption surface display the exact offer.
 
 Do not show a crossed-out $29.99 beside the ordinary yearly plan unless the
 app has a verified StoreKit offer object containing both the localized offer and
@@ -354,7 +377,8 @@ Recommended order:
    push.
 
 2. Tapping the card opens the seasonal campaign sheet.
-3. Claim the offer opens the Apple redemption sheet.
+3. Claim the offer opens the prefilled App Store redemption URL. The secondary
+   in-app path opens Apple's code-entry sheet.
 4. See all plans opens the existing PaywallView.
 5. Not now dismisses the card for the current campaign and does not trigger a
    second automatic modal in the same session.
@@ -413,7 +437,7 @@ after onboarding completion or from the normal upgrade entry point.
 #### Store metadata promotional text
 
 > The stretch run is here. Track the players shaping the playoff picture with
-> nightly-updated Statcast rankings, recent form, comparisons, and team
+> current-season Statcast rankings, recent form, comparisons, and team
 > scouting.
 
 Do not put the discount amount or a fixed price in permanent store metadata.
@@ -433,6 +457,10 @@ the repository's required pull-and-diff workflow in the ios-dev guidance.
 Retain the existing non-affiliation language for MLB, MLB Advanced Media,
 MLBPA, and teams.
 
+Place a compact non-affiliation statement on the campaign sheet or its
+information path. Do not rely on a disclaimer that exists only in Settings when
+the seasonal card uses MLB, postseason, or team language.
+
 ## Implementation plan
 
 ### Phase 0: verify the commercial state
@@ -441,9 +469,13 @@ Before writing app code:
 
 - Verify the live yearly, monthly, and lifetime prices in App Store Connect.
 - Verify the current RevenueCat products and default offering.
-- Verify the yearly subscription is approved and the app is Ready for
-  Distribution, which Apple requires for production custom offer codes.
+- Verify the app and associated subscription meet the current App Store Connect
+  production offer-code requirements, including the approved in-app purchase
+  state and the sale/distribution status shown in App Store Connect.
 - Verify the existing 7-day introductory offer remains configured as intended.
+- Record the introductory-offer interaction explicitly. For V1, choose no
+  stacking so the seasonal code gives the discounted annual term and the normal
+  7-day introductory offer remains a separate See all plans choice.
 - Upload the Apple In-App Purchase key to RevenueCat if it is not already
   present.
 - Create a sandbox offer code and a production custom code only after the
@@ -451,8 +483,9 @@ Before writing app code:
 - Record the exact offer price, duration, eligibility, expiration, storefronts,
   and redemption limit in the release checklist.
 
-Do not alter the current monthly or yearly free-trial intro offers. The fleet
-pricing guidance explicitly says to preserve them.
+Do not alter the current monthly or yearly introductory offers. The fleet
+pricing guidance explicitly says to preserve them. The app should describe
+these as offers attached to subscriptions, not as separate trial products.
 
 ### Phase 1: add a safe campaign control plane
 
@@ -467,33 +500,38 @@ season                   smallint not null
 enabled                  boolean not null default false
 starts_at                timestamptz not null
 ends_at                  timestamptz not null
+creative_id              text not null
 offer_code               text not null
 offer_reference          text not null
-headline                 text not null
-body                     text not null
 minimum_data_age_hours   integer not null default 48
 ~~~
 
-The first row can be stretch-run-2026. The client must enforce all of these
-rules:
+The first row can be stretch-run-2026. Add the migration, read policy, client
+decoder, production and preview data providers, and test mock coverage as part
+of the change. The client must enforce all of these rules:
 
 - enabled is true.
-- The current date is inside the start and end interval.
+- The fetched campaign timestamps are UTC and the client uses server-provided
+  time where available. A device clock may fail closed, but must never extend
+  the campaign beyond the hardcoded cutoff.
 - The campaign season matches StatScoutSeason.current.
-- The offer code equals an app-allowlisted value such as STRETCH26.
-- Copy is plain text, not executable or HTML.
-- Current player data is within the allowed age, using the existing
-  DashboardViewModel.dataThrough coverage value where available.
+- The creative_id, offer code, and offer reference match app-allowlisted values.
+- Localized campaign copy comes from the reviewed binary for the creative_id.
+  Do not ship arbitrary headline or body text from remote config.
+- Recent-form coverage is within the allowed age, using the existing
+  DashboardViewModel.dataThrough value where available. This is not a universal
+  freshness timestamp for every player snapshot.
 - Missing, malformed, stale, or expired config fails closed to the ordinary
   paywall.
-- A last-known-good config is cached for at most six hours.
+- A last-known-good config is cached for at most six hours and never beyond a
+  hardcoded September 30, 2026 client cutoff.
 - Remote config controls merchandising only. It must never grant Pro or alter
   entitlement state.
 
 For a strictly one-off release, a compiled SeasonalCampaign value type with the
-same date and allowlist checks is acceptable as a fallback. The remote flag is
-better because an expired code, App Store mistake, or copy problem can be fixed
-without a new binary.
+same UTC date and allowlist checks is the safer fallback. A remote flag is useful
+for a kill switch, but it must not extend the hardcoded cutoff or replace the
+reviewed creative.
 
 Do not add standings_as_of to the V1 campaign unless the campaign actually
 renders standings. If a future version adds team-specific claims, then add
@@ -504,21 +542,27 @@ standings_as_of, standings_source, and a separate standings freshness check.
 Recommended file-level changes:
 
 1. Add SeasonalCampaign and a small campaign-fetching layer next to the existing
-   services.
+   services. Update the Supabase migration, read policy, production and preview
+   providers, decoder, and test mock together.
 2. Add PaywallTrigger.stretchRun, icon, title, subtitle, feature copy, and
-   statscout_paywall_stretch_run impression ID in PaywallView.swift.
-3. Add a presentOfferCodeRedemption method to StoreService that calls the
-   RevenueCat-supported Apple redemption sheet. Keep normal purchase and
+   statscout_paywall_stretch_run impression ID in PaywallView.swift. Update every
+   exhaustive PaywallTrigger switch, including TrialPitchSheet.swift.
+3. Add a presentOfferCodeRedemption method to StoreService that calls
+   Purchases.shared.presentCodeRedemptionSheet(). Keep normal purchase and
    restore methods unchanged.
-4. Add a fallback redemption URL for the App Store path.
+4. Add the prefilled App Store redemption URL as the primary offer path and call
+   Purchases.shared.syncPurchases() when returning from that URL.
 5. Add a dedicated seasonal card or sheet. Do not overload the existing
    UpdateShowcaseCampaign identifier with two unrelated campaign meanings.
 6. Add a one-time lastSeenSeasonalCampaign AppStorage decision, matching the
    pure decision-test pattern already used by UpdateShowcaseCampaign.
 7. Keep the existing full plan picker and a clear See all plans route.
-8. Suppress the offer for active Pro and lifetime users.
-9. Refresh customer information on return from the redemption sheet and rely on
-   the existing isPro observation to dismiss after successful entitlement sync.
+8. Suppress the offer for active, grace-period, billing-retry, and lifetime
+   users. Wait for a known RevenueCat customer state before rendering it, since
+   isPro initially defaults to false.
+9. Add only privacy-reviewed campaign events if card-to-tap and redemption
+   funnel metrics are required. The existing paywall impression call does not
+   measure those events.
 10. Add a debug-only force flag such as STATSCOUT_FORCE_STRETCH_RUN=1, never
     enabled in Release.
 
@@ -541,19 +585,30 @@ If a new build is needed for the redemption flow, include App Review notes with:
 The app must still be fully usable and the standard purchase path must remain
 discoverable if the offer has expired.
 
+Keep the offer duration, renewal price, and cancellation language clear at the
+purchase point, consistent with [Apple's subscription review guidance](https://developer.apple.com/app-store/review/guidelines/).
+
 ## Measurement plan
 
 Do not add a new analytics SDK for this campaign. The app currently has no
-analytics or ad SDK and should preserve that privacy posture.
+analytics or ad SDK and should preserve that privacy posture. If the campaign
+adds event counters beyond RevenueCat impressions, review privacy wording and
+App Privacy disclosures before release.
 
 Use the following sources:
 
 - RevenueCat custom paywall impression ID:
   statscout_paywall_stretch_run.
-- RevenueCat offer-code transactions, after the Apple key is configured.
-- App Store Connect Sales and Trends reports, segmented by offer code.
-- Existing RevenueCat entitlement and renewal charts.
+- App Store Connect Sales and Trends reports, segmented by offer code, for
+  initial offer revenue.
+- RevenueCat offer attribution, entitlement state, renewals, and retention after
+  the Apple key is configured. Initial offer-code revenue may appear as $0 in
+  RevenueCat's revenue chart.
 - Support messages and redemption-failure reports.
+
+The current app does not measure seasonal-card-to-tap or redemption attempts.
+Add minimal privacy-reviewed counters if those funnel metrics are required;
+otherwise mark them unavailable rather than presenting them as existing data.
 
 Track:
 
@@ -568,19 +623,27 @@ Track:
 | Refunds and support complaints | Detects misleading terms or bad redemption | Kill switch and copy repair |
 | Revenue per eligible install | Measures net economics | Compare with the post-raise baseline |
 
-Use at least one pre-campaign window after the August price raise as the
-baseline. A simple before-and-after read is acceptable for this first campaign.
-A later experiment can add a stable holdout, but do not build a full
-experimentation framework before validating that offer-code redemption works.
+Use a stable per-install 80/20 holdout if the campaign instrumentation is added:
+
+- 80% see the seasonal offer.
+- 20% see the same seasonal value message, but only the standard plans and
+  introductory offer.
+- Keep assignment stable for the campaign and measure annual starts, trial
+  starts, net revenue per eligible user, redemption failures, refunds, and
+  lifetime cannibalization.
+
+Use the post-raise window as context, not as the only causal baseline. If a
+holdout cannot be implemented without adding unreviewed tracking, run an
+observational pilot and do not claim incremental lift.
 
 ### Success thresholds
 
 Set the thresholds before launch. A reasonable first-pass decision rule is:
 
-- Keep the campaign if annual starts per eligible user increase materially over
-  baseline and net revenue per eligible install does not fall.
-- Keep it only if first-renewal and refund rates are not materially worse than
-  the standard annual cohort.
+- Keep the campaign if annual starts per eligible user and net revenue per
+  eligible user beat the holdout without materially worse refunds.
+- Keep it only if first-renewal and retention rates are not materially worse
+  than the holdout or the post-raise standard annual cohort.
 - Stop or revise it if offer-code redemption is low because of UI friction,
   even if the underlying demand is strong.
 - Stop it if lifetime share rises enough to offset annual revenue gains.
@@ -601,8 +664,13 @@ Add tests for:
 - Campaign is active inside the valid window.
 - Campaign is inactive after ends_at.
 - Disabled, missing, malformed, stale, and wrong-season config fails closed.
-- Active Pro and lifetime users do not see the acquisition offer.
-- STRETCH26 is the only accepted offer code.
+- Unknown customer state, active monthly/yearly, grace-period, billing-retry,
+  and lifetime users do not see the acquisition offer.
+- The campaign creative, offer reference, and link use the app-allowlisted
+  STRETCH26 configuration. Apple, not the app, validates entered codes.
+- The hardcoded cutoff wins over cached remote configuration and device-clock
+  changes.
+- The no-stacking introductory-offer rule is reflected in copy and tests.
 - Seasonal PaywallTrigger copy and impression ID are stable.
 - Existing UpdateShowcaseCampaign behavior remains unchanged.
 - The standard See all plans purchase path remains available.
@@ -615,12 +683,16 @@ Test on a real sandbox or TestFlight build, not only a plain simulator launch:
 - Never purchased, redeemed seasonal offer.
 - Trial active, then offer-code attempt.
 - Trial expired without paid conversion.
+- Active monthly subscriber.
+- Active yearly subscriber.
+- Subscriber in billing retry or grace period.
 - Paid yearly subscriber.
 - Lapsed yearly subscriber.
 - Lifetime owner.
 - Offer code invalid, expired, exhausted, or ineligible.
 - User cancels the redemption sheet.
 - User redeems through the App Store URL and returns to the app.
+- App Store URL return calls syncPurchases() before customer refresh.
 - Entitlement update delayed.
 - Offline at campaign-config fetch.
 - Offline at product fetch.
@@ -642,7 +714,9 @@ Before release:
 - Inspect the seasonal card, standard paywall, offer-code sheet entry point,
   fallback URL, and Pro state transitions.
 - Verify every price shown in the normal paywall is StoreKit-localized.
+- Verify no runtime price claim relies on Locale.current as a storefront proxy.
 - Verify the seasonal text does not claim a specific team status.
+- Verify the non-affiliation statement is reachable from the seasonal surface.
 - Archive and upload a TestFlight build for any app-code change, following the
   repository's scripts/testflight.sh path after credentials are sourced.
 - Test the real offer on TestFlight/Sandbox with a non-production test account.
@@ -656,11 +730,14 @@ Before release:
 | Discounted amount is wrong in a storefront | Medium | High | Apple owns price display, no hardcoded global amount, test multiple currencies |
 | Current price references remain inconsistent | High | Medium | Verify ASC and RevenueCat before setup; keep runtime dynamic; fix web copy separately |
 | Offer code is leaked | Medium | Low | Treat code as public, cap redemptions, expire after the campaign |
-| Offer appears after the postseason window | Medium | Medium | ASC expiry plus client dates plus remote kill switch and season check |
+| Offer appears after the postseason window | Medium | Medium | Apple expiry, UTC client dates, hardcoded cutoff, remote kill switch, and season check |
 | Stale player data makes urgency claim look false | Medium | Medium | Use generic stretch-run copy and hide campaign on stale coverage |
 | Existing trial is accidentally removed or hidden | Low | High | Preserve intro offers, keep normal plan cards, test trial eligibility |
+| Active customer sees an acquisition offer before RevenueCat syncs | Medium | High | Wait for known customer state; test active, grace-period, and billing-retry states |
 | Lifetime cannibalizes annual | Medium | High | Do not discount lifetime, measure lifetime share, suppress offer for lifetime owners |
 | A second annual SKU creates duplicate cards | Low | High | No new SKU in V1, use offer code on existing yearly product |
+| Remote copy changes after review | Low | High | Remote creative ID only, reviewed localized copy in binary, hardcoded cutoff |
+| RevenueCat reports initial offer revenue as zero | Medium | Medium | Use Apple Sales and Trends for initial revenue; use RevenueCat for renewals and entitlements |
 | App Review cannot discover or test the offer | Medium | High | Review notes, sandbox code, standard paywall fallback, stable in-app route |
 | Remote config grants entitlement | Low | Critical | Remote config controls copy and merchandising only; RevenueCat remains authoritative |
 | The campaign claims MLB affiliation | Low | High | Generic language, existing non-affiliation disclaimer, no MLB branding or guarantees |
@@ -671,11 +748,13 @@ Before release:
 
 - [ ] Verify live ASC prices and yearly product approval.
 - [ ] Verify RevenueCat default offering and entitlement mapping.
-- [ ] Confirm planned annual baseline and target offer price.
+- [ ] Confirm live annual baseline and provisional test price.
 - [ ] Create stretch-run-2026-yearly paid offer.
+- [ ] Configure new and expired subscribers only for V1.
+- [ ] Configure no stacking with the existing introductory offer.
 - [ ] Create sandbox code and test it.
 - [ ] Create production custom code STRETCH26.
-- [ ] Set redemption limit and October 5 expiration.
+- [ ] Set redemption limit and October 1 Apple expiration, with September 30 in-app cutoff.
 - [ ] Upload or verify the RevenueCat Apple In-App Purchase key.
 
 ### Product and code
@@ -683,8 +762,8 @@ Before release:
 - [ ] Add remote campaign row or safe compiled fallback.
 - [ ] Add seasonal card/sheet and one-time dismissal.
 - [ ] Add seasonal PaywallTrigger and impression ID.
-- [ ] Add Apple redemption sheet and App Store URL fallback.
-- [ ] Refresh customer info after returning to the app.
+- [ ] Add the App Store URL primary path and native redemption-sheet fallback.
+- [ ] Call syncPurchases() after returning from the App Store URL, then refresh customer info.
 - [ ] Keep standard plans, restore, terms, privacy, and trial copy intact.
 - [ ] Add unit tests and debug force flags.
 - [ ] Regenerate Xcode project when needed.
@@ -701,11 +780,11 @@ Before release:
 
 ### Post-launch
 
-- [ ] Confirm offer-code transactions are attributed in RevenueCat and ASC.
+- [ ] Confirm offer-code transactions are attributed in RevenueCat and Apple Sales and Trends.
 - [ ] Check redemption failures daily during the first week.
 - [ ] Check current player-data coverage and campaign config freshness.
 - [ ] Review annual starts, trial conversion, lifetime share, and refunds.
-- [ ] Disable the campaign after October 5 or earlier if the kill criteria fire.
+- [ ] Disable the campaign after September 30 or earlier if the kill criteria fire.
 - [ ] Remove seasonal merchandising while leaving the normal StatScout+ plans intact.
 - [ ] Write a short results note before designing the 2027 campaign.
 
@@ -715,8 +794,9 @@ The seasonal opportunity is real, but the value should be framed as **better
 late-season scouting**, not as a speculative postseason-data feature. The app
 already contains the right product: recent form, trends, head-to-head
 comparisons, team scouting, and historical context. The safest real discount is
-a time-boxed Apple offer code on the existing yearly product, with the standard
-paywall and lifetime price protected.
+a time-boxed Apple offer code on the existing yearly product, configured for
+new and expired subscribers, with the standard paywall and lifetime price
+protected.
 
 The one compromise is that an offer-code flow cannot display a universal,
 inline discounted price as cleanly as a base-price change. That compromise is
