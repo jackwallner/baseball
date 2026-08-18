@@ -198,7 +198,7 @@ struct RootTabView: View {
 
     private var statsTab: some View {
         NavigationStack {
-            StatsView(viewModel: viewModel)
+            StatsView(viewModel: viewModel, onOpenTrends: { selection = Tab.trends.rawValue })
                 .navigationTitle("Stats")
                 .navigationBarTitleDisplayMode(.inline)
                 .modifier(SavantNavBar())

@@ -6,6 +6,12 @@ struct DashboardView: View {
     /// Set when this board is hosted by `StatsView`, which owns the choice of
     /// board and therefore has to be reachable from this board's own controls.
     var boardBindings: StatsBoardBindings? = nil
+    /// Set when a tab host can move the user to Trends. The seasonal card's
+    /// subscriber variant sends them there instead of pitching an upgrade, so
+    /// without a route it has nothing to offer and stays hidden.
+    var onOpenTrends: (() -> Void)? = nil
+    @AppStorage(StretchRunCampaign.storageKey) private var seenStretchRun = ""
+    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     @State private var showingAbout = false
     @State private var paywallTrigger: PaywallTrigger?
     @State private var isSearching = false
@@ -21,6 +27,7 @@ struct DashboardView: View {
                             searchRow
                             teamResults
                         }
+                        stretchRunSection
                     }
                     leaderboardSection
                     if !viewModel.players.isEmpty {
@@ -73,6 +80,35 @@ struct DashboardView: View {
         .sheet(item: $paywallTrigger) { trigger in
             TrialPitchSheet(trigger: trigger)
         }
+    }
+
+    /// The 2026 seasonal card. Inline in the scroll content, above the board,
+    /// and only outside an active search, where it would otherwise push the
+    /// team results the user is reading off the screen.
+    @ViewBuilder
+    private var stretchRunSection: some View {
+        if !isActiveSearch, let creative = stretchRunDecision.creative {
+            StretchRunCard(
+                creative: creative,
+                onUpgrade: { paywallTrigger = .stretchRun },
+                onOpenTrends: { onOpenTrends?() },
+                onDismiss: { seenStretchRun = StretchRunCampaign.identifier }
+            )
+        }
+    }
+
+    private var stretchRunDecision: StretchRunDecision {
+        // The subscriber variant is only worth showing where Trends is one tap
+        // away, so a host that can't route there gets no card at all.
+        if store.isPro && onOpenTrends == nil { return .hidden }
+        return StretchRunCampaign.decision(
+            now: Date(),
+            hasCompletedOnboarding: hasCompletedOnboarding,
+            seenCampaign: seenStretchRun,
+            customerStateResolved: store.customerInfo != nil,
+            isPro: store.isPro,
+            forcePresentation: StretchRunCampaign.isForced
+        )
     }
 
     private var aboutFooter: some View {

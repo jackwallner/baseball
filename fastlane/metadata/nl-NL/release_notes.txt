@@ -1,3 +1,3 @@
-Duidelijker upgradescherm: elk abonnement toont nu de prijs per maand en het jaarabonnement vermeldt hoeveel je bespaart.
+De eindsprint van het seizoen is begonnen. Een nieuwe seizoenskaart op het statistiekenbord wijst je de weg naar wat nu het meeste oplevert: het trendbord, recente vorm, onderlinge vergelijkingen en teamanalyse.
 
-De link Beoordeel StatScout opende de verkeerde App Store-pagina. Dat is opgelost.
+Al geabonneerd? De kaart brengt je meteen naar Trends in plaats van je iets te verkopen dat je al hebt.

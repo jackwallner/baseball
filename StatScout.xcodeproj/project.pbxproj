@@ -55,6 +55,7 @@
 		AB2B246F8DF32AF7AF3AEE0B /* StatScoutComprehensiveUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BC5EE3CB654E37FE99FE844 /* StatScoutComprehensiveUITests.swift */; };
 		ABBBBE498E9A1E517A147E40 /* PaywallScreenshotMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 572A0EB8383B16EB9207EE2A /* PaywallScreenshotMode.swift */; };
 		AC4568CDBDB8D9DD78A080F9 /* ReviewPromptTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = C62780264C15B926A095378C /* ReviewPromptTracker.swift */; };
+		AF5DA64B6F0C942DB651EB81 /* StretchRunCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B0BB14225A267C22CEE7167 /* StretchRunCard.swift */; };
 		B254FB702E1FD23611E5472B /* DashboardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E4FF70B13A65617E39C4E75 /* DashboardViewModel.swift */; };
 		B4DCC3A1E6B450909ED5F5DC /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B12DA38BF60E2D7C4CC7DFF /* Player.swift */; };
 		B5240594E14DF2FC8A45B40A /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E111095560BABC78B5DCB36E /* XCTest.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
@@ -73,8 +74,10 @@
 		D3DAADB476B1D20557FF32A4 /* StatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372D20325E276F7B6CAA3798 /* StatsView.swift */; };
 		D701F13035200994D96A5350 /* StandardStatsQualifierTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E672B9C8F60D5640DC5EA6D /* StandardStatsQualifierTests.swift */; };
 		D9CEF61479D01BFCC8BE6AF3 /* TrendQualifierTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 863BFF7A316DFA39C2BC952C /* TrendQualifierTests.swift */; };
+		D9DD3E969AA626709400D964 /* StretchRunTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5855CA7EC2123CF5FAF229D /* StretchRunTests.swift */; };
 		DBAED006FBC8ACCE2A4D49FD /* StoreService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F817C1759417F135E7CD20C2 /* StoreService.swift */; };
 		DE3E81E46D644C2617940B7E /* PlayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC2DEECB438987B32405C3A /* PlayerTests.swift */; };
+		E9C1D7DC21222CC61141047C /* StretchRunUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB2E1B1851943F5C1541EDE0 /* StretchRunUITests.swift */; };
 		F341C68173E63893D81C1AD6 /* PaywallScreenshotHarness.swift in Sources */ = {isa = PBXBuildFile; fileRef = C09B5BA2F2442F748C0FC062 /* PaywallScreenshotHarness.swift */; };
 		F65F628FCC2C7A7A8316B80C /* RobotoMono-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8D88814D266E6855622D4A66 /* RobotoMono-Bold.ttf */; };
 		F6AE33EDC77A2F71DFC9A244 /* YearComparisonFeatureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A722423BB05C1EA767098065 /* YearComparisonFeatureTests.swift */; };
@@ -132,6 +135,7 @@
 		572A0EB8383B16EB9207EE2A /* PaywallScreenshotMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallScreenshotMode.swift; sourceTree = "<group>"; };
 		57A36C805E9D0AB83292B6F7 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
 		5915A8F24A5447D26C221603 /* StatScout.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = StatScout.entitlements; sourceTree = "<group>"; };
+		5B0BB14225A267C22CEE7167 /* StretchRunCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StretchRunCard.swift; sourceTree = "<group>"; };
 		5BC5EE3CB654E37FE99FE844 /* StatScoutComprehensiveUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatScoutComprehensiveUITests.swift; sourceTree = "<group>"; };
 		5DC2DEECB438987B32405C3A /* PlayerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerTests.swift; sourceTree = "<group>"; };
 		6029BCBF6CD96B24E1EF3DDB /* TeamFormCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamFormCard.swift; sourceTree = "<group>"; };
@@ -170,6 +174,7 @@
 		A996CF23065305111921AA2F /* RobotoMono-Medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "RobotoMono-Medium.ttf"; sourceTree = "<group>"; };
 		AAD45B2E53DDFC8BEC30D957 /* TeamStandardCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamStandardCard.swift; sourceTree = "<group>"; };
 		B2EAE4FBE4CF576F735F06C7 /* StandardStatsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StandardStatsTests.swift; sourceTree = "<group>"; };
+		BB2E1B1851943F5C1541EDE0 /* StretchRunUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StretchRunUITests.swift; sourceTree = "<group>"; };
 		C09B5BA2F2442F748C0FC062 /* PaywallScreenshotHarness.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallScreenshotHarness.swift; sourceTree = "<group>"; };
 		C1F9C4B1F4674E2DABB9CF60 /* SavantMenus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavantMenus.swift; sourceTree = "<group>"; };
 		C2FD89608305043ACAAA6F5E /* UpdateShowcaseUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateShowcaseUITests.swift; sourceTree = "<group>"; };
@@ -180,6 +185,7 @@
 		E111095560BABC78B5DCB36E /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = System/Library/Frameworks/XCTest.framework; sourceTree = SDKROOT; };
 		E2D1812126A525283A3CEC7F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		ECB59368024F23FBC63D833E /* StatScoutApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatScoutApp.swift; sourceTree = "<group>"; };
+		F5855CA7EC2123CF5FAF229D /* StretchRunTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StretchRunTests.swift; sourceTree = "<group>"; };
 		F817C1759417F135E7CD20C2 /* StoreService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreService.swift; sourceTree = "<group>"; };
 		F9CBAD749A639F5A5ADCF10B /* StandardStatsLeadersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StandardStatsLeadersView.swift; sourceTree = "<group>"; };
 		FCF08005AEA98F7CFF7919C6 /* TeamView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamView.swift; sourceTree = "<group>"; };
@@ -235,6 +241,7 @@
 				3E672B9C8F60D5640DC5EA6D /* StandardStatsQualifierTests.swift */,
 				B2EAE4FBE4CF576F735F06C7 /* StandardStatsTests.swift */,
 				651F39025F6839FC272B2181 /* StatDirectionTests.swift */,
+				F5855CA7EC2123CF5FAF229D /* StretchRunTests.swift */,
 				863BFF7A316DFA39C2BC952C /* TrendQualifierTests.swift */,
 				96E9F9A3189DDAB0CFADFCF3 /* UpdateShowcaseTests.swift */,
 				0C2D78846A3531791CF22EA6 /* UpgradeCTATests.swift */,
@@ -270,6 +277,7 @@
 				645E5E03FB3FD048BA8F563F /* RecentFormScreenshotUITests.swift */,
 				7D6EF83C10DB1C4887277F68 /* SeasonPickerUITests.swift */,
 				5BC5EE3CB654E37FE99FE844 /* StatScoutComprehensiveUITests.swift */,
+				BB2E1B1851943F5C1541EDE0 /* StretchRunUITests.swift */,
 				A59DB3D279B9E8DDE8F7177D /* TrendsNavigationUITests.swift */,
 				C2FD89608305043ACAAA6F5E /* UpdateShowcaseUITests.swift */,
 				98410E06CAC66BDEE4137CAF /* YearAuditUITests.swift */,
@@ -375,6 +383,7 @@
 				F9CBAD749A639F5A5ADCF10B /* StandardStatsLeadersView.swift */,
 				22FE0335BB2C3B67BA44ED9B /* StatsBoardControls.swift */,
 				372D20325E276F7B6CAA3798 /* StatsView.swift */,
+				5B0BB14225A267C22CEE7167 /* StretchRunCard.swift */,
 				71A740F6E79E0D88C75CB7BC /* TeamComparisonView.swift */,
 				6029BCBF6CD96B24E1EF3DDB /* TeamFormCard.swift */,
 				AAD45B2E53DDFC8BEC30D957 /* TeamStandardCard.swift */,
@@ -542,6 +551,7 @@
 				D701F13035200994D96A5350 /* StandardStatsQualifierTests.swift in Sources */,
 				13627AAB67147D0AE5954433 /* StandardStatsTests.swift in Sources */,
 				A211C246D1B8BD2A42CF97B0 /* StatDirectionTests.swift in Sources */,
+				D9DD3E969AA626709400D964 /* StretchRunTests.swift in Sources */,
 				D9CEF61479D01BFCC8BE6AF3 /* TrendQualifierTests.swift in Sources */,
 				2982FDAC3BB6B93C02FB73E8 /* UpdateShowcaseTests.swift in Sources */,
 				3CB3B900460AE06C13D3A1A3 /* UpgradeCTATests.swift in Sources */,
@@ -590,6 +600,7 @@
 				0C8027710FFC6FF7B837EF7A /* StatsBoardControls.swift in Sources */,
 				D3DAADB476B1D20557FF32A4 /* StatsView.swift in Sources */,
 				DBAED006FBC8ACCE2A4D49FD /* StoreService.swift in Sources */,
+				AF5DA64B6F0C942DB651EB81 /* StretchRunCard.swift in Sources */,
 				F84FF154295FA07FE60CCFD7 /* TeamComparisonView.swift in Sources */,
 				D13F5E714076E4346EF8F0EA /* TeamFormCard.swift in Sources */,
 				B82ABFD1F3A3EDEC4CB20F27 /* TeamStandardCard.swift in Sources */,
@@ -611,6 +622,7 @@
 				2E76F817A9CCC7A440662F57 /* RecentFormScreenshotUITests.swift in Sources */,
 				7FB54B900D718DB5EA583C97 /* SeasonPickerUITests.swift in Sources */,
 				AB2B246F8DF32AF7AF3AEE0B /* StatScoutComprehensiveUITests.swift in Sources */,
+				E9C1D7DC21222CC61141047C /* StretchRunUITests.swift in Sources */,
 				CF8D8BC5D7FE56D2BA015F56 /* TrendsNavigationUITests.swift in Sources */,
 				0C20C0897F6EC50FBA50DE50 /* UpdateShowcaseUITests.swift in Sources */,
 				2D96A2A958994588B6F847D5 /* YearAuditUITests.swift in Sources */,
@@ -639,7 +651,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = StatScout/StatScout.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CURRENT_PROJECT_VERSION = 165;
+				CURRENT_PROJECT_VERSION = 166;
 				DEVELOPMENT_TEAM = YXG4MP6W39;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = StatScout/Info.plist;
@@ -647,7 +659,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.4.3;
+				MARKETING_VERSION = 1.4.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.jackwallner.baseball;
 				PRODUCT_NAME = "Baseball Savvy StatScout";
 				SDKROOT = iphoneos;
@@ -758,7 +770,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = StatScout/StatScout.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 165;
+				CURRENT_PROJECT_VERSION = 166;
 				DEVELOPMENT_TEAM = YXG4MP6W39;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = StatScout/Info.plist;
@@ -766,7 +778,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.4.3;
+				MARKETING_VERSION = 1.4.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.jackwallner.baseball;
 				PRODUCT_NAME = "Baseball Savvy StatScout";
 				PROVISIONING_PROFILE_SPECIFIER = "$(PROVISIONING_PROFILE_SPECIFIER)";

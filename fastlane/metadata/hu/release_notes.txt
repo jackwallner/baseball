@@ -1,3 +1,3 @@
-Áttekinthetőbb előfizetési képernyő: minden csomag mutatja a havi árat, az éves csomag pedig a megtakarítást.
+Elkezdődött a szezon hajrája. A statisztikai táblán megjelenő új szezonális kártya azokhoz az eszközökhöz visz, amelyek most a legfontosabbak: trendtábla, aktuális forma, közvetlen összehasonlítások és csapatelemzés.
 
-Javítottuk a StatScout értékelése hivatkozást, amely rossz App Store-oldalt nyitott meg.
+Már előfizető? A kártya egyenesen a Trendekhez visz, ahelyett hogy olyasmit kínálna, ami már megvan.

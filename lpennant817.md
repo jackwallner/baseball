@@ -1,5 +1,37 @@
 # StatScout 2026 Stretch Run Campaign
 
+## Status, August 18, 2026: superseded in part
+
+The **discount half of this plan is cancelled.** The offer-code campaign was
+priced against a US annual baseline of $29.99 that has never been live. The
+real live price is **$14.99** (App Store Connect, verified August 18, 2026), so
+the proposed STRETCH26 price of $19.99 would have been a 33% price increase
+sold as a limited-time discount. See "Prices and the important source conflict"
+below for the corrected figures and the reasoning.
+
+**Cancelled:** the STRETCH26 offer code, the $19.99 price test, the offer-code
+redemption plumbing, the Supabase campaign control plane, and the 80/20
+holdout.
+
+**Shipped instead**, in version 1.4.4: the timing and positioning insight,
+with no discount attached.
+
+1. A `.stretchRun` PaywallTrigger with seasonal copy and the
+   `statscout_paywall_stretch_run` impression ID, routed through the existing
+   TrialPitchSheet so its CTA still buys the yearly plan in one tap.
+2. A one-time dismissible seasonal card on the dashboard, gated by a compiled
+   window that runs 2026-08-18 to 2026-10-01T06:59:59Z and self-expires. No
+   remote config. The window opens on the build date rather than the doc's
+   August 20 target, because App Review turnaround is unknowable and a card
+   that opens after its own release notes are live reads as a missing feature.
+3. A Pro-user variant of that card that deep-links to Trends instead of
+   pitching an upgrade, gated on a resolved RevenueCat customer state.
+4. Seasonal App Store promotional text with no price in it.
+
+The rest of this document is retained as the reasoning record. Read the
+sections below as the analysis that produced that outcome, not as a live
+instruction to configure an Apple offer code.
+
 ## Decision
 
 Ship a seasonal **Stretch Run** campaign for the 2026 playoff chase, with a
@@ -15,6 +47,9 @@ fresh, authoritative standings feed.
 
 This is the best balance of urgency, real customer value, reversible economics,
 App Store safety, and implementation scope.
+
+> **Superseded.** The discount mechanism above is cancelled. See the status
+> block at the top of this file.
 
 ## Review convergence log
 
@@ -48,6 +83,21 @@ reopen the resolved eligibility, no-stacking, localized-price, redemption
 fallback, creative allowlist, privacy, stale-data, or expiry decisions without
 new evidence. Append the verifier's score and evidence here so the same issue
 does not loop across reviews.
+
+**Correction, August 18, 2026.** This protocol failed. Ten consecutive
+verifier passes scored 100/100 on a campaign whose central number was wrong,
+because every one of them checked the document against itself and against the
+repository's own text files. None queried App Store Connect, where the live
+$14.99 annual price was one API call away. A protocol that forbids reopening
+"settled" decisions without new evidence, while never requiring anyone to go
+get external evidence, converts an unverified assumption into a permanent one.
+
+Any future verification gate on commercial claims must require a live source of
+truth, not internal consistency: App Store Connect for prices, offers, and
+product state, RevenueCat for entitlements and cohorts. A price, discount
+percentage, or eligibility claim that has not been read from Apple's API in the
+current session is unverified, regardless of how many reviews have passed over
+it.
 
 Final RevenueCat and StoreKit verifier: 100/100. The repository's project.yml
 targets iOS 17.0 and pins RevenueCat from 5.72.0. That SDK exposes
@@ -192,29 +242,44 @@ savings in [StoreService.swift](StatScout/Services/StoreService.swift#L136-L184)
 and [StoreService.swift](StatScout/Services/StoreService.swift#L398-L420).
 That is the correct foundation for a promotion.
 
-The repository has conflicting historical price references:
+The live US prices, read from the App Store Connect API on August 18, 2026,
+are the authority. The price raise took effect on the storefront start date
+2026-08-13:
 
-| Source | Values | Interpretation |
+| Product | Before | Live since 2026-08-13 |
+|---|---:|---:|
+| com.jackwallner.baseball.pro.monthly | $1.99 | **$5.99** |
+| com.jackwallner.baseball.pro.yearly | $4.99 | **$14.99** |
+
+Both subscriptions are APPROVED, the 7-day free-trial introductory offer is
+live on both, and neither has any promotional offer or offer code configured.
+
+Earlier revisions of this document ranked the repository's price references
+backwards. The corrected ranking:
+
+| Source | Values | Status |
 |---|---:|---|
-| Commit 1fa94ba, staged August 10 | $5.99 / $29.99 / $59.99 | Planned post-raise monthly, yearly, lifetime values effective August 12 |
-| docs/index.html | $5.99 / $14.99 / $39.99 | Stale landing-page values; not safe for offer math |
-| Untracked postseasonplan.md | $1.99 / $4.99 / $9.99 | Older pre-raise values; not authoritative |
-| Runtime paywall | Localized StoreKit values | Source of truth for the customer |
+| App Store Connect price schedule | $5.99 / $14.99 | **Authoritative.** Verified via scripts/asc_lib.py on August 18, 2026 |
+| docs/index.html | $5.99 / $14.99 / $39.99 | **Correct and current.** Set by 84c59ad on August 11 to match the raise |
+| Commit 1fa94ba, staged August 10 | $5.99 / $29.99 / $59.99 | **Never applied.** Staged description copy only, deleted from all 50 locales by 1c58aad the same day. It never described a live price |
+| Untracked postseasonplan.md | $1.99 / $4.99 / $9.99 | Pre-raise values, superseded |
+| Runtime paywall | Localized StoreKit values | What the customer actually sees |
 
-Before creating the offer, verify the current US and target-storefront prices
-directly in App Store Connect and RevenueCat. Use the actual yearly product
-price returned by Apple when calculating the discount. Do not use any of the
-stale web or planning values as a runtime fallback.
-
-Using the planned post-raise US values only for economic modeling:
+Economic consequences of the corrected baseline:
 
 - Monthly annualized: $5.99 × 12 = $71.88.
-- Standard yearly: $29.99, already about 58% below twelve monthly payments.
-- Modeled Stretch Run test: $19.99, about 33% below the standard yearly price.
-- Modeled Stretch Run monthly equivalent: about $1.67.
-- Lifetime: $59.99, unchanged. It is already only 2x standard annual, so
-  discounting it would make one-time access too attractive and damage recurring
-  revenue.
+- Standard yearly: $14.99, already about 79% below twelve monthly payments.
+  Almost all of the available discount headroom is already spent on the annual
+  plan's standing price advantage.
+- A $19.99 seasonal price is **not a 33% discount. It is a 33% increase** over
+  the live $14.99 annual price, merchandised as a limited-time sale. That is
+  the opposite of the campaign's intent and would be a misleading offer.
+- The raise landed on August 13, five days before this correction. Discounting
+  the annual product now would destroy the ability to read the raise's effect,
+  which is the more valuable experiment currently running.
+- Lifetime: unchanged. Against a $14.99 annual price it is roughly 2.7x annual,
+  not the 2x claimed earlier. The conclusion that it should not be discounted
+  still holds, but not for the reason previously given.
 
 The app's localized price strings and existing plan-card savings calculation
 should remain the authority. The seasonal campaign should never draw a fake

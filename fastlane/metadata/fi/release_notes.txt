@@ -1,3 +1,3 @@
-Selkeämpi tilausnäkymä: jokainen tilaus näyttää nyt kuukausihinnan ja vuositilaus kertoo, paljonko säästät.
+Kauden loppukiri on käynnissä. Tilastonäkymän uusi kausikortti vie sinut työkaluihin, joilla on nyt eniten merkitystä: trendinäkymä, viimeaikainen vire, kaksinkamppailut ja joukkueanalyysi.
 
-Korjattu Arvioi StatScout -linkki, joka avasi väärän App Store -sivun.
+Onko tilaus jo voimassa? Kortti vie sinut suoraan Trendeihin sen sijaan, että kauppaisi jotain, mikä sinulla jo on.

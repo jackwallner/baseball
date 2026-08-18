@@ -1,3 +1,3 @@
-Écran d'abonnement plus clair : chaque formule affiche désormais son coût mensuel et la formule annuelle indique l'économie réalisée.
+Le sprint final de la saison est lancé. Une nouvelle carte saisonnière dans le tableau des statistiques vous oriente vers les outils qui comptent le plus en ce moment : le tableau des tendances, la forme récente, les duels et l'analyse d'équipe.
 
-Correction du lien Noter StatScout, qui ouvrait la mauvaise page de l'App Store.
+Déjà abonné ? La carte vous emmène directement aux Tendances au lieu de vous vendre ce que vous avez déjà.

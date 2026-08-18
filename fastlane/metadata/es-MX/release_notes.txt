@@ -1,3 +1,3 @@
-Pantalla de mejora más clara: cada plan ahora muestra su costo mensual equivalente y el plan anual indica cuánto ahorras.
+La recta final de la temporada ya llegó. Una nueva tarjeta de temporada en el tablero de estadísticas te lleva a las herramientas que más importan ahora: el tablero de tendencias, la forma reciente, los duelos directos y el análisis de equipos.
 
-Se corrigió el enlace Calificar StatScout, que abría una página equivocada de la App Store.
+¿Ya tienes suscripción? La tarjeta te lleva directo a Tendencias en lugar de venderte algo que ya tienes.

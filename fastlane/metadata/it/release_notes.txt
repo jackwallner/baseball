@@ -1,3 +1,3 @@
-Schermata di abbonamento più chiara: ogni piano mostra ora il costo mensile e il piano annuale indica quanto fa risparmiare.
+La volata finale della stagione è iniziata. Una nuova scheda stagionale nella bacheca statistiche ti porta agli strumenti che contano di più adesso: la bacheca dei trend, la forma recente, i confronti diretti e l'analisi delle squadre.
 
-Corretto il link Valuta StatScout, che apriva la pagina sbagliata dell'App Store.
+Sei già abbonato? La scheda ti porta direttamente ai Trend invece di venderti qualcosa che hai già.
