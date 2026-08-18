@@ -138,6 +138,10 @@ platform :ios do
       skip_metadata: true,
       skip_screenshots: true,
       force: true,
+      # Matches upload_metadata. The 11 deprecated locale directories are still
+      # required by ASC but rejected by deliver's validator, and this lane
+      # uploads no metadata anyway, so the directory check has nothing to guard.
+      ignore_language_directory_validation: true,
       submit_for_review: true,
       # Manual release. The price ladder changes on its own schedule, so an
       # approval must never put a version on sale by itself.
