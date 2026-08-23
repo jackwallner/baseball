@@ -110,10 +110,11 @@ platform :ios do
           Response to the 1.4.4 rejection:
 
           2.1(b): both auto-renewable subscriptions
-          (com.jackwallner.baseball.pro.monthly and .yearly) are included as
-          items in this submission. Each had an unsubmitted en-US display-name
-          change pending ("StatScout Pro" to "StatScout+"), which is what left
-          them out of the previous review. Both carry an App Review screenshot.
+          (com.jackwallner.baseball.pro.monthly and .yearly) have now been
+          submitted for review and are Waiting for Review alongside this build.
+          Each was carrying an unsubmitted en-US display-name change
+          ("StatScout Pro" to "StatScout+"), which is what left them out of the
+          previous review. Both carry an App Review screenshot.
 
           3.1.2(c): the total billed amount is now the most conspicuous
           pricing element in every purchase flow. Each purchase button now has
