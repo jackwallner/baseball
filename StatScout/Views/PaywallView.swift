@@ -443,11 +443,14 @@ struct PaywallView: View {
 
     // MARK: - Copy
 
+    /// Apple 3.1.2(c): the billed amount has to be the most conspicuous pricing
+    /// element in the flow, and this is the biggest, boldest text on the sheet,
+    /// so it carries the price rather than the trial. The trial stays in the
+    /// micro disclosure directly beneath it.
     private var ctaTitle: String {
         guard let package = selectedPackage else { return "Continue" }
-        if package.productKind == .lifetime { return "Unlock Lifetime" }
-        if store.isEligibleForIntroOffer(package) { return "Start Free Trial" }
-        return "Subscribe"
+        if package.productKind == .lifetime { return "Unlock Lifetime for \(package.priceLabel)" }
+        return "Subscribe for \(package.priceLabel)"
     }
 
     /// Apple 3.1.2 disclosure adjacent to the purchase button.
@@ -459,7 +462,7 @@ struct PaywallView: View {
         }
         let renew = "Auto-renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel in Settings › Apple ID › Subscriptions."
         if store.isEligibleForIntroOffer(package), let trial = package.introOfferLabel {
-            return "\(trial.capitalized), then \(price). \(renew)"
+            return "\(price), starting after a \(trial). \(renew)"
         }
         return "\(price). \(renew)"
     }
@@ -589,10 +592,12 @@ private struct PaywallPlanCard: View {
                         }
                     }
                     if showsTrialBadge, let trial = package.introOfferLabel {
+                        // Subordinate to the price on the right (3.1.2(c)): the
+                        // trial is a quiet tertiary line, never the red accent.
                         Text(trial.capitalized)
                             .font(SavantType.micro)
                             .tracking(0.3)
-                            .foregroundStyle(SavantPalette.savantRed)
+                            .foregroundStyle(SavantPalette.inkTertiary)
                     } else if isMostPopular {
                         Text("Best value")
                             .font(SavantType.micro)
@@ -605,8 +610,8 @@ private struct PaywallPlanCard: View {
 
                 VStack(alignment: .trailing, spacing: 2) {
                     Text(package.priceLabel)
-                        .font(SavantType.smallBold)
-                        .foregroundStyle(SavantPalette.inkSecondary)
+                        .font(SavantType.bodyBold)
+                        .foregroundStyle(SavantPalette.ink)
                     if let perMonthLabel {
                         HStack(spacing: 5) {
                             if let monthlyAnchorLabel, savingsPercent != nil {

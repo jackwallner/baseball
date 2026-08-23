@@ -330,13 +330,13 @@ final class StoreService: NSObject, ObservableObject {
         Self.upgradeCTALabel(trialAvailable: isYearlyTrialAvailable)
     }
 
+    /// Apple 3.1.2(c): the billed amount has to be the most clear and
+    /// conspicuous pricing element in the purchase flow, and this button label
+    /// is the largest, boldest text on every one of those flows. So it always
+    /// carries the price, never the trial, trial-eligible or not. The trial is
+    /// still disclosed, one step down, in the micro disclosure beneath it.
     func directCTALabel(for trigger: PaywallTrigger) -> String {
         if let yearly = yearlyPackage {
-            if trigger != .winback,
-               isEligibleForIntroOffer(yearly),
-               let trial = yearly.introOfferLabel {
-                return "Start \(trial)"
-            }
             let verb = trigger == .winback ? "Restart" : "Try"
             return "\(verb) StatScout+ for \(yearly.priceLabel)"
         }
@@ -372,16 +372,15 @@ final class StoreService: NSObject, ObservableObject {
         guard let yearly = yearlyPackage else { return nil }
         let renew = "Auto-renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel in Settings › Apple ID › Subscriptions."
         if isEligibleForIntroOffer(yearly), let trial = yearly.introOfferLabel {
-            return "\(trial.capitalized), then \(yearly.priceLabel). \(renew)"
+            return "\(yearly.priceLabel), starting after a \(trial). \(renew)"
         }
         return "\(yearly.priceLabel). \(renew)"
     }
 
+    /// Same 3.1.2(c) rule as `directCTALabel(for:)`: price on the button, trial
+    /// in the subordinate disclosure line.
     var onboardingMonthlyCTALabel: String {
         guard let monthly = monthlyPackage else { return "Upgrade to StatScout+" }
-        if isEligibleForIntroOffer(monthly), let trial = monthly.introOfferLabel {
-            return "Start \(trial)"
-        }
         return "Try StatScout+ for \(monthly.priceLabel)"
     }
 
@@ -389,7 +388,7 @@ final class StoreService: NSObject, ObservableObject {
         guard let monthly = monthlyPackage else { return nil }
         let renew = "Auto-renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel in Settings › Apple ID › Subscriptions."
         if isEligibleForIntroOffer(monthly), let trial = monthly.introOfferLabel {
-            return "\(trial.capitalized), then \(monthly.priceLabel). \(renew)"
+            return "\(monthly.priceLabel), starting after a \(trial). \(renew)"
         }
         return "\(monthly.priceLabel). \(renew)"
     }
