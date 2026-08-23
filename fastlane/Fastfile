@@ -107,6 +107,23 @@ platform :ios do
           Trends tab. There is no promo code, no discount, and no price quoted
           anywhere in the card: all prices come from StoreKit.
 
+          Response to the 1.4.4 rejection:
+
+          2.1(b): both auto-renewable subscriptions
+          (com.jackwallner.baseball.pro.monthly and .yearly) are included as
+          items in this submission. Each had an unsubmitted en-US display-name
+          change pending ("StatScout Pro" to "StatScout+"), which is what left
+          them out of the previous review. Both carry an App Review screenshot.
+
+          3.1.2(c): every purchase flow now leads with the billed amount. The
+          primary purchase button reads "Try StatScout+ for $X / month" (or
+          "Subscribe for $X / year" on the plan sheet) rather than "Start 7-day
+          free trial". The free trial now appears only in the small disclosure
+          line under the button, and on the plan picker the billed price is the
+          bold primary text while the trial label is a small tertiary line. No
+          pricing element anywhere in the flow is larger, bolder, or higher
+          contrast than the billed amount.
+
           Known: Light mode only. No shadows. No accounts. No social features.
         NOTES
       },
