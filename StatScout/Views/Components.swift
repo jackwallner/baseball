@@ -701,6 +701,17 @@ struct PlusDirectCTA: View {
 
     var body: some View {
         VStack(spacing: 8) {
+            // Billed amount, directly above the purchase point. Apple 3.1.2(c):
+            // it has to outweigh every other pricing element in the flow, trial
+            // copy on the button included, so it sits one type step above the
+            // CTA label and nothing else here is allowed to grow past it.
+            if let price = store.yearlyPackage?.priceLabel {
+                Text(price)
+                    .font(SavantType.priceLead)
+                    .foregroundStyle(SavantPalette.ink)
+                    .multilineTextAlignment(.center)
+            }
+
             Button(action: buy) {
                 label
             }

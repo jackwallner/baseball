@@ -115,14 +115,13 @@ platform :ios do
           change pending ("StatScout Pro" to "StatScout+"), which is what left
           them out of the previous review. Both carry an App Review screenshot.
 
-          3.1.2(c): every purchase flow now leads with the billed amount. The
-          primary purchase button reads "Try StatScout+ for $X / month" (or
-          "Subscribe for $X / year" on the plan sheet) rather than "Start 7-day
-          free trial". The free trial now appears only in the small disclosure
-          line under the button, and on the plan picker the billed price is the
-          bold primary text while the trial label is a small tertiary line. No
-          pricing element anywhere in the flow is larger, bolder, or higher
-          contrast than the billed amount.
+          3.1.2(c): the total billed amount is now the most conspicuous
+          pricing element in every purchase flow. Each purchase button now has
+          the price directly above it, set larger and heavier than any other
+          pricing text on the screen, including the free-trial wording on the
+          button and the small print beneath it. Onboarding shows
+          "$5.99 / month" above its button; the trial sheet and the plan sheet
+          show the selected plan's price the same way.
 
           Known: Light mode only. No shadows. No accounts. No social features.
         NOTES
