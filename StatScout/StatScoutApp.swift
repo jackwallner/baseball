@@ -260,6 +260,16 @@ struct OnboardingCards: View {
                 .font(SavantType.micro)
                 .tracking(0.3)
                 .foregroundStyle(SavantPalette.inkTertiary)
+
+                // Billed amount, last thing before the CTA. Apple 3.1.2(c):
+                // the trial named on the button can't be more conspicuous than
+                // the price, so this sits one type step above the button label
+                // and stays the largest pricing element on the page.
+                if let price = store.monthlyPackage?.priceLabel {
+                    Text(price)
+                        .font(SavantType.priceLead)
+                        .foregroundStyle(SavantPalette.ink)
+                }
             }
             .opacity(showsUpsellBlock ? 1 : 0)
             .allowsHitTesting(showsUpsellBlock)

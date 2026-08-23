@@ -94,6 +94,11 @@ enum SavantType {
     static let small         = SavantFont.condensed(12, weight: .regular)
     static let smallBold     = SavantFont.condensed(12, weight: .medium)
     static let micro         = SavantFont.condensed(11, weight: .black)
+    /// Billed amount shown directly above a purchase button. Apple 3.1.2(c)
+    /// wants the price to be the most conspicuous pricing element in the flow,
+    /// so this sits one step above `bodyBold` (the CTA label) and nothing else
+    /// in a purchase surface may outweigh it.
+    static let priceLead     = SavantFont.condensed(16, weight: .bold)
     static let statHero      = SavantFont.mono(32, weight: .bold)
     static let statLarge     = SavantFont.mono(20, weight: .bold)
     static let statMed       = SavantFont.mono(14, weight: .bold)
