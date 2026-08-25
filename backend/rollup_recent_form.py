@@ -37,6 +37,10 @@ SUPABASE_SERVICE_ROLE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
 
 WINDOW_DAYS = (7, 15, 30)
 
+# Statcast's regular-season game type. These windows are regular-season
+# windows; see `_fetch_logs`.
+REGULAR_SEASON = "R"
+
 # Which stored denominator each metric is a rate of. Aggregating a rate as
 # sum(rate * denom) / sum(denom) reproduces sum(numerator) / sum(denominator)
 # exactly, so these windows match a from-scratch recompute — unlike weighting
@@ -112,7 +116,15 @@ def _resolve_season() -> int:
 
 
 def _fetch_logs(client, season: int, since: date) -> list[dict]:
-    """Page through every game log for the season on or after `since`."""
+    """Page through every regular-season game log on or after `since`.
+
+    The game_type filter is belt and braces. `ingest_game_logs.py` already
+    declines to write anything but regular season, but these windows are the
+    one place a stray postseason row does real damage: a playoff club's newest
+    games are its playoff games, so a phase-blind "last 7 days" for anyone
+    still playing in October is entirely postseason while the board above it
+    still says otherwise.
+    """
     rows: list[dict] = []
     page_size = 1000
     offset = 0
@@ -121,6 +133,7 @@ def _fetch_logs(client, season: int, since: date) -> list[dict]:
             client.table("player_game_logs")
             .select("*")
             .eq("season", season)
+            .eq("game_type", REGULAR_SEASON)
             .gte("game_date", since.isoformat())
             .order("game_date", desc=True)
             .range(offset, offset + page_size - 1)

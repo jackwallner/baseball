@@ -32,10 +32,34 @@ UTC = timezone.utc
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
 SUPABASE_SERVICE_ROLE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
 
-# Season window. MLB regular season runs late-March → early-October; spring
-# training Statcast data exists but we don't want it polluting trends.
+# Season window. Deliberately wider than the regular season at both ends:
+# SEASON_START predates Opening Day (2026-03-25) and SEASON_END reaches past
+# the World Series. What actually gets stored is decided by game type below,
+# not by these bounds, which only cap how far a --full run reaches.
 SEASON_START = date(2026, 3, 20)
 SEASON_END = date(2026, 11, 5)
+
+# Statcast's own game_type codes. The date bound above was the only thing ever
+# holding spring training out, and it doesn't: pybaseball 2.2.7's statcast()
+# hardcodes hfGT=R|PO|S in its request, so every chunk we pull carries spring
+# and postseason pitches alongside the regular season. SEASON_END reaches past
+# the World Series, so from the first Wild Card game on, an unfiltered ingest
+# writes postseason rows that are indistinguishable from regular-season ones.
+#
+# That matters more here than it looks. Recent Form and the Trends board are
+# regular-season boards, and the shipped app queries player_game_logs directly
+# with no game_type filter of its own, so what we write is the only control we
+# have over what it shows.
+#
+# STATCAST_GAME_TYPES widens this when a build is ready to ask for a phase.
+# Until then the table stays regular season.
+REGULAR_SEASON = "R"
+SPRING_TRAINING = "S"
+POSTSEASON_TYPES = ("F", "D", "L", "W")
+
+# Last day of the 2026 regular season. Only used to stop a regular-season-only
+# run from walking into October; see `run`.
+REGULAR_SEASON_END = date(2026, 9, 27)
 
 # Pull pitch-level data in chunks. Wider = fewer HTTP calls but more memory
 # and a higher chance of a Savant timeout. 7 days is a reasonable middle.
@@ -118,6 +142,43 @@ def _latest_game_date(client, season: int) -> Optional[date]:
         return None
     raw = resp.data[0]["game_date"]
     return datetime.strptime(raw, "%Y-%m-%d").date()
+
+
+def _allowed_game_types() -> set[str]:
+    """Which Statcast game types this run is allowed to store.
+
+    Regular season only unless STATCAST_GAME_TYPES says otherwise, e.g.
+    "R,F,D,L,W" once a build can filter by phase for itself.
+    """
+    raw = os.environ.get("STATCAST_GAME_TYPES", REGULAR_SEASON)
+    codes = {code.strip().upper() for code in raw.split(",") if code.strip()}
+    return codes or {REGULAR_SEASON}
+
+
+def _filter_game_types(df: pd.DataFrame, allowed: set[str]) -> pd.DataFrame:
+    """Drop every pitch whose game type this run isn't storing.
+
+    A frame with no game_type column is a hand-built or legacy one; treat those
+    rows as regular season rather than discarding data we can't classify.
+    """
+    if df.empty or "game_type" not in df.columns:
+        return df
+    codes = df["game_type"].fillna(REGULAR_SEASON).astype(str).str.upper()
+    return df[codes.isin(allowed)]
+
+
+def _game_type_for(grp: pd.DataFrame) -> str:
+    """The game type of one player-game.
+
+    A single date is a single phase, so the first pitch of the group answers
+    for all of them.
+    """
+    if "game_type" not in grp.columns:
+        return REGULAR_SEASON
+    value = grp["game_type"].iat[0]
+    if pd.isna(value):
+        return REGULAR_SEASON
+    return str(value).upper()
 
 
 def _date_chunks(start: date, end: date, days: int):
@@ -407,6 +468,7 @@ def _aggregate_batters(df: pd.DataFrame) -> list[dict]:
             "season": int(grp["game_year"].iat[0]) if "game_year" in grp.columns else _resolve_season(),
             "game_date": pd.Timestamp(game_date).strftime("%Y-%m-%d"),
             "player_type": "batter",
+            "game_type": _game_type_for(grp),
             "team": team,
             "opponent": opp,
             "plate_appearances": pa,
@@ -497,6 +559,7 @@ def _aggregate_pitchers(df: pd.DataFrame) -> list[dict]:
             "season": int(grp["game_year"].iat[0]) if "game_year" in grp.columns else _resolve_season(),
             "game_date": pd.Timestamp(game_date).strftime("%Y-%m-%d"),
             "player_type": "pitcher",
+            "game_type": _game_type_for(grp),
             "team": team,
             "opponent": opp,
             "plate_appearances": bf,
@@ -548,11 +611,24 @@ def run(full: bool = False) -> None:
     # closes out the day that finished; today is tomorrow's job.
     end = min(datetime.now(UTC).date() - timedelta(days=1), SEASON_END)
 
+    allowed = _allowed_game_types()
+    allowed_label = ",".join(sorted(allowed))
+
+    # A regular-season-only run has nothing to find past the last regular-season
+    # day. Without this it would re-fetch every October week from Savant and
+    # discard all of it every single night, because `_latest_game_date` can
+    # never advance past a day we refuse to write.
+    if allowed == {REGULAR_SEASON}:
+        end = min(end, REGULAR_SEASON_END)
+
     if start > end:
         logger.info("Nothing to ingest: start=%s end=%s", start, end)
         return
 
-    logger.info("Ingesting game logs for season %s from %s to %s", season, start, end)
+    logger.info(
+        "Ingesting game logs for season %s from %s to %s (game types: %s)",
+        season, start, end, allowed_label,
+    )
 
     total_batter_rows = 0
     total_pitcher_rows = 0
@@ -567,6 +643,17 @@ def run(full: bool = False) -> None:
 
         if df is None or df.empty:
             logger.info("No rows for %s → %s", chunk_start, chunk_end)
+            continue
+
+        # Before aggregation, so both sides of the ball inherit one decision.
+        before = len(df)
+        df = _filter_game_types(df, allowed)
+        dropped = before - len(df)
+        if dropped:
+            logger.info("  dropped %d pitches outside %s", dropped, allowed_label)
+
+        if df.empty:
+            logger.info("No %s rows for %s → %s", allowed_label, chunk_start, chunk_end)
             continue
 
         batter_rows = _aggregate_batters(df)
