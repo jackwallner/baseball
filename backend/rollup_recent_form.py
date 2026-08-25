@@ -118,12 +118,12 @@ def _resolve_season() -> int:
 def _fetch_logs(client, season: int, since: date) -> list[dict]:
     """Page through every regular-season game log on or after `since`.
 
-    The game_type filter is belt and braces. `ingest_game_logs.py` already
-    declines to write anything but regular season, but these windows are the
-    one place a stray postseason row does real damage: a playoff club's newest
-    games are its playoff games, so a phase-blind "last 7 days" for anyone
-    still playing in October is entirely postseason while the board above it
-    still says otherwise.
+    The game_type filter is belt and braces. `ingest_game_logs.py` routes the
+    postseason to its own table, so nothing but regular season should be here
+    in the first place, but these windows are the one place a stray playoff row
+    does real damage: a playoff club's newest games are its playoff games, so a
+    phase-blind "last 7 days" for anyone still playing in October is entirely
+    postseason while the board above it still says otherwise.
     """
     rows: list[dict] = []
     page_size = 1000

@@ -51,15 +51,24 @@ SEASON_END = date(2026, 11, 5)
 # with no game_type filter of its own, so what we write is the only control we
 # have over what it shows.
 #
-# STATCAST_GAME_TYPES widens this when a build is ready to ask for a phase.
-# Until then the table stays regular season.
+# Regular season and postseason are both collected, but they are written to
+# different tables. See REGULAR_SEASON_TABLE / POSTSEASON_TABLE below. Spring
+# training is dropped outright: nothing in the app has ever wanted it.
 REGULAR_SEASON = "R"
 SPRING_TRAINING = "S"
 POSTSEASON_TYPES = ("F", "D", "L", "W")
 
-# Last day of the 2026 regular season. Only used to stop a regular-season-only
-# run from walking into October; see `run`.
-REGULAR_SEASON_END = date(2026, 9, 27)
+# Where each phase lands.
+#
+# The split is not organisational. A shipped build queries player_game_logs
+# with no game_type filter of its own, so a postseason row in that table is
+# immediately visible to an app already in users' hands, mislabelled as regular
+# season. A separate relation makes that impossible by construction instead of
+# by a flag someone has to remember not to flip, which is what lets the
+# pipeline start collecting the postseason well before a phase-aware release
+# exists to read it.
+REGULAR_SEASON_TABLE = "player_game_logs"
+POSTSEASON_TABLE = "player_postseason_game_logs"
 
 # Pull pitch-level data in chunks. Wider = fewer HTTP calls but more memory
 # and a higher chance of a Savant timeout. 7 days is a reasonable middle.
@@ -129,30 +138,60 @@ def _resolve_season() -> int:
 
 
 def _latest_game_date(client, season: int) -> Optional[date]:
-    """Return the max game_date already in the table for this season, or None."""
-    resp = (
-        client.table("player_game_logs")
-        .select("game_date")
-        .eq("season", season)
-        .order("game_date", desc=True)
-        .limit(1)
-        .execute()
-    )
-    if not resp.data:
-        return None
-    raw = resp.data[0]["game_date"]
-    return datetime.strptime(raw, "%Y-%m-%d").date()
+    """The newest game already stored for this season, across both phases.
+
+    Both tables, because this is what the incremental run starts from. Reading
+    the regular-season table alone would freeze the cursor on the last day of
+    September: every later night would re-pull October from Savant, write the
+    postseason rows, and still find the same stale maximum.
+    """
+    latest: Optional[date] = None
+    for table in (REGULAR_SEASON_TABLE, POSTSEASON_TABLE):
+        try:
+            resp = (
+                client.table(table)
+                .select("game_date")
+                .eq("season", season)
+                .order("game_date", desc=True)
+                .limit(1)
+                .execute()
+            )
+        except Exception:
+            # A table that doesn't exist yet is simply empty for our purposes.
+            logger.exception("Could not read latest game_date from %s", table)
+            continue
+        if not resp.data:
+            continue
+        seen = datetime.strptime(resp.data[0]["game_date"], "%Y-%m-%d").date()
+        if latest is None or seen > latest:
+            latest = seen
+    return latest
 
 
 def _allowed_game_types() -> set[str]:
-    """Which Statcast game types this run is allowed to store.
+    """Which Statcast game types this run stores at all.
 
-    Regular season only unless STATCAST_GAME_TYPES says otherwise, e.g.
-    "R,F,D,L,W" once a build can filter by phase for itself.
+    Regular season plus every postseason round. Spring training is excluded,
+    and STATCAST_GAME_TYPES can narrow or widen the set for a one-off run.
     """
-    raw = os.environ.get("STATCAST_GAME_TYPES", REGULAR_SEASON)
+    default = ",".join((REGULAR_SEASON,) + POSTSEASON_TYPES)
+    raw = os.environ.get("STATCAST_GAME_TYPES", default)
     codes = {code.strip().upper() for code in raw.split(",") if code.strip()}
     return codes or {REGULAR_SEASON}
+
+
+def _table_for_game_type(game_type: str) -> str:
+    """Which table a row belongs in. See POSTSEASON_TABLE for why they differ."""
+    return POSTSEASON_TABLE if game_type.upper() in POSTSEASON_TYPES else REGULAR_SEASON_TABLE
+
+
+def _partition_by_table(rows: list[dict]) -> dict[str, list[dict]]:
+    """Split aggregated rows by destination table, preserving order."""
+    partitioned: dict[str, list[dict]] = {}
+    for row in rows:
+        table = _table_for_game_type(row.get("game_type", REGULAR_SEASON))
+        partitioned.setdefault(table, []).append(row)
+    return partitioned
 
 
 def _filter_game_types(df: pd.DataFrame, allowed: set[str]) -> pd.DataFrame:
@@ -570,20 +609,29 @@ def _aggregate_pitchers(df: pd.DataFrame) -> list[dict]:
     return rows
 
 
-def _upsert(client, rows: list[dict]) -> None:
+def _upsert(client, rows: list[dict], table: str = REGULAR_SEASON_TABLE) -> None:
     if not rows:
         return
     batch_size = 200
     for i in range(0, len(rows), batch_size):
         batch = rows[i : i + batch_size]
         try:
-            client.table("player_game_logs").upsert(
+            client.table(table).upsert(
                 batch,
                 on_conflict="player_id,season,game_date,player_type",
             ).execute()
         except Exception:
-            logger.exception("Upsert failed for batch starting at %d", i)
+            logger.exception("Upsert into %s failed for batch starting at %d", table, i)
             raise
+
+
+def _upsert_partitioned(client, rows: list[dict]) -> dict[str, int]:
+    """Send each row to the table its phase belongs in."""
+    counts: dict[str, int] = {}
+    for table, table_rows in _partition_by_table(rows).items():
+        _upsert(client, table_rows, table)
+        counts[table] = len(table_rows)
+    return counts
 
 
 def run(full: bool = False) -> None:
@@ -614,13 +662,6 @@ def run(full: bool = False) -> None:
     allowed = _allowed_game_types()
     allowed_label = ",".join(sorted(allowed))
 
-    # A regular-season-only run has nothing to find past the last regular-season
-    # day. Without this it would re-fetch every October week from Savant and
-    # discard all of it every single night, because `_latest_game_date` can
-    # never advance past a day we refuse to write.
-    if allowed == {REGULAR_SEASON}:
-        end = min(end, REGULAR_SEASON_END)
-
     if start > end:
         logger.info("Nothing to ingest: start=%s end=%s", start, end)
         return
@@ -632,6 +673,7 @@ def run(full: bool = False) -> None:
 
     total_batter_rows = 0
     total_pitcher_rows = 0
+    total_by_table: dict[str, int] = {}
 
     for chunk_start, chunk_end in _date_chunks(start, end, CHUNK_DAYS):
         logger.info("Fetching %s → %s", chunk_start, chunk_end)
@@ -660,13 +702,21 @@ def run(full: bool = False) -> None:
         pitcher_rows = _aggregate_pitchers(df)
         logger.info("  batter rows=%d, pitcher rows=%d", len(batter_rows), len(pitcher_rows))
 
-        _upsert(client, batter_rows)
-        _upsert(client, pitcher_rows)
+        for counts in (
+            _upsert_partitioned(client, batter_rows),
+            _upsert_partitioned(client, pitcher_rows),
+        ):
+            for table, count in counts.items():
+                total_by_table[table] = total_by_table.get(table, 0) + count
+
         total_batter_rows += len(batter_rows)
         total_pitcher_rows += len(pitcher_rows)
 
     logger.info(
-        "Done. Total upserts — batter=%d, pitcher=%d", total_batter_rows, total_pitcher_rows
+        "Done. Total upserts: batter=%d, pitcher=%d (%s)",
+        total_batter_rows,
+        total_pitcher_rows,
+        ", ".join(f"{table}={count}" for table, count in sorted(total_by_table.items())) or "none",
     )
 
 
