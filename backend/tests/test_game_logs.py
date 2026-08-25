@@ -9,7 +9,12 @@ a plate appearance.
 import pandas as pd
 import pytest
 
-from ingest_game_logs import _aggregate_batters, _aggregate_pitchers
+from ingest_game_logs import (
+    _aggregate_batters,
+    _aggregate_pitchers,
+    _allowed_game_types,
+    _filter_game_types,
+)
 
 
 def _pitch(**overrides):
@@ -19,6 +24,7 @@ def _pitch(**overrides):
         "pitcher": 2,
         "game_date": pd.Timestamp("2026-07-18"),
         "game_year": 2026,
+        "game_type": "R",
         "home_team": "KC",
         "away_team": "DET",
         "inning_topbot": "Top",
@@ -320,3 +326,157 @@ class TestIngestWindow:
         # start == end == yesterday: the last known day is re-read once in case
         # it had late games, but nothing beyond it is touched.
         assert chunks == [("2026-07-27", "2026-07-27")]
+
+
+class TestGameTypeFilter:
+    """Postseason and spring pitches must never reach player_game_logs.
+
+    pybaseball 2.2.7's statcast() requests hfGT=R|PO|S, so every date-range
+    pull carries all three, and SEASON_END reaches past the World Series. A
+    postseason game is just a new game_date, so unfiltered rows upsert cleanly
+    and invisibly, and the Recent Form / Trends windows for any club still
+    playing in October become postseason-only under a regular-season heading.
+    """
+
+    def test_drops_postseason_and_spring_by_default(self):
+        df = _frame([
+            {"batter": 1, "events": "single", "game_type": "R"},
+            {"batter": 2, "events": "single", "game_type": "F"},
+            {"batter": 3, "events": "single", "game_type": "D"},
+            {"batter": 4, "events": "single", "game_type": "L"},
+            {"batter": 5, "events": "single", "game_type": "W"},
+            {"batter": 6, "events": "single", "game_type": "S"},
+        ])
+        kept = _filter_game_types(df, _allowed_game_types())
+        assert list(kept["batter"]) == [1]
+
+    def test_widening_lets_the_postseason_through(self, monkeypatch):
+        monkeypatch.setenv("STATCAST_GAME_TYPES", "R,F,D,L,W")
+        df = _frame([
+            {"batter": 1, "events": "single", "game_type": "R"},
+            {"batter": 2, "events": "single", "game_type": "W"},
+            {"batter": 3, "events": "single", "game_type": "S"},
+        ])
+        kept = _filter_game_types(df, _allowed_game_types())
+        assert sorted(kept["batter"]) == [1, 2]
+
+    def test_a_frame_without_the_column_is_left_alone(self):
+        """Legacy or hand-built frames aren't data we can classify, so we keep
+        them rather than silently dropping a whole chunk."""
+        df = _frame([{"batter": 1, "events": "single"}]).drop(columns=["game_type"])
+        kept = _filter_game_types(df, {"R"})
+        assert len(kept) == 1
+
+    def test_null_game_type_counts_as_regular_season(self):
+        df = _frame([{"batter": 1, "events": "single", "game_type": None}])
+        assert len(_filter_game_types(df, {"R"})) == 1
+
+    def test_allowed_defaults_to_regular_season_only(self, monkeypatch):
+        monkeypatch.delenv("STATCAST_GAME_TYPES", raising=False)
+        assert _allowed_game_types() == {"R"}
+
+    def test_blank_override_falls_back_to_regular_season(self, monkeypatch):
+        monkeypatch.setenv("STATCAST_GAME_TYPES", "  ,  ")
+        assert _allowed_game_types() == {"R"}
+
+    def test_override_is_case_and_space_insensitive(self, monkeypatch):
+        monkeypatch.setenv("STATCAST_GAME_TYPES", " r , w ")
+        assert _allowed_game_types() == {"R", "W"}
+
+
+class TestGameTypeOnRows:
+    """Rows carry their own phase, so nothing downstream has to infer it."""
+
+    def test_batter_rows_carry_game_type(self):
+        df = _frame([{"batter": 1, "events": "single", "game_type": "R"}])
+        rows = _aggregate_batters(df)
+        assert rows and all(row["game_type"] == "R" for row in rows)
+
+    def test_pitcher_rows_carry_game_type(self):
+        df = _frame([{"pitcher": 2, "events": "single", "game_type": "R"}])
+        rows = _aggregate_pitchers(df)
+        assert rows and all(row["game_type"] == "R" for row in rows)
+
+    def test_postseason_rows_are_labelled_when_widened(self):
+        df = _frame([{"batter": 1, "events": "single", "game_type": "W"}])
+        rows = _aggregate_batters(_filter_game_types(df, {"R", "W"}))
+        assert rows and rows[0]["game_type"] == "W"
+
+    def test_a_frame_without_the_column_still_aggregates(self):
+        df = _frame([{"batter": 1, "events": "single"}]).drop(columns=["game_type"])
+        rows = _aggregate_batters(df)
+        assert rows and rows[0]["game_type"] == "R"
+
+
+class TestOctoberRegression:
+    """The specific failure this all exists to prevent."""
+
+    def test_a_mixed_october_day_yields_only_regular_season_games(self):
+        """A late-season day can hold both: the last regular-season makeup game
+        and a Wild Card game. Only the first may be stored."""
+        df = _frame([
+            {"batter": 1, "events": "single", "game_date": pd.Timestamp("2026-09-28"),
+             "game_type": "R"},
+            {"batter": 1, "events": "home_run", "game_date": pd.Timestamp("2026-10-01"),
+             "game_type": "F"},
+            {"batter": 1, "events": "double", "game_date": pd.Timestamp("2026-10-08"),
+             "game_type": "D"},
+        ])
+        rows = _aggregate_batters(_filter_game_types(df, _allowed_game_types()))
+        assert [row["game_date"] for row in rows] == ["2026-09-28"]
+
+
+class TestOctoberWindowCap:
+    """A regular-season-only run must not walk into October.
+
+    SEASON_END reaches past the World Series, and `_latest_game_date` can never
+    advance past a day the ingest refuses to write. Without a cap the nightly
+    job would re-pull every October week from Savant and discard all of it,
+    forever.
+    """
+
+    def _window(self, monkeypatch, latest_in_db, now):
+        import ingest_game_logs as gl
+
+        captured: dict = {}
+        monkeypatch.setattr(gl, "create_client", lambda url, key: object())
+        monkeypatch.setattr(gl, "_latest_game_date", lambda client, season: latest_in_db)
+        monkeypatch.setattr(gl, "SUPABASE_URL", "https://example.supabase.co")
+        monkeypatch.setattr(gl, "SUPABASE_SERVICE_ROLE_KEY", "key")
+
+        class FakeDatetime(gl.datetime):
+            @classmethod
+            def now(cls, tz=None):
+                return now
+
+        monkeypatch.setattr(gl, "datetime", FakeDatetime)
+
+        def fake_statcast(start_dt, end_dt):
+            captured.setdefault("chunks", []).append((start_dt, end_dt))
+            return pd.DataFrame()
+
+        monkeypatch.setattr(gl, "statcast", fake_statcast)
+        gl.run()
+        return captured.get("chunks", [])
+
+    def test_stops_at_the_last_regular_season_day(self, monkeypatch):
+        from datetime import date, datetime as dt, timezone
+
+        monkeypatch.delenv("STATCAST_GAME_TYPES", raising=False)
+        chunks = self._window(
+            monkeypatch,
+            latest_in_db=date(2026, 9, 27),
+            now=dt(2026, 10, 20, 9, 0, tzinfo=timezone.utc),
+        )
+        assert chunks == [("2026-09-27", "2026-09-27")]
+
+    def test_widening_lets_the_run_reach_the_postseason(self, monkeypatch):
+        from datetime import date, datetime as dt, timezone
+
+        monkeypatch.setenv("STATCAST_GAME_TYPES", "R,F,D,L,W")
+        chunks = self._window(
+            monkeypatch,
+            latest_in_db=date(2026, 9, 27),
+            now=dt(2026, 10, 20, 9, 0, tzinfo=timezone.utc),
+        )
+        assert max(end for _, end in chunks) == "2026-10-19"
