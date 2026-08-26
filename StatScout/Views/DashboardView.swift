@@ -29,6 +29,7 @@ struct DashboardView: View {
                         }
                         postseasonSection
                     }
+                    postseasonReferenceNote
                     leaderboardSection
                     if !viewModel.players.isEmpty {
                         aboutFooter
@@ -355,6 +356,27 @@ struct DashboardView: View {
             LeaderboardTableHeader(sortDescending: viewModel.sortDescending, sortLabel: viewModel.currentSortMetric ?? viewModel.sortLabel)
         }
         .buttonStyle(.plain)
+    }
+
+    /// Says what the October bars are measured against, right above them.
+    ///
+    /// Savant publishes no postseason percentiles, so a reader who takes these
+    /// for Savant figures will go looking for a page that does not exist and
+    /// conclude the app is wrong. They are this season's regular-season curve
+    /// with a postseason value looked up on it, and the board should say so
+    /// rather than leave it to be inferred from a bar that looks identical to
+    /// every other bar in the app.
+    @ViewBuilder
+    private var postseasonReferenceNote: some View {
+        if viewModel.selectedPhase == .postseason {
+            Text(viewModel.postseasonReferenceNote)
+                .font(SavantType.micro)
+                .tracking(0.4)
+                .foregroundStyle(SavantPalette.inkTertiary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, SavantGeo.padPage)
+                .padding(.bottom, 6)
+        }
     }
 
     private var leaderboardSection: some View {

@@ -590,3 +590,83 @@ final class PostseasonBoardTests: XCTestCase {
         XCTAssertFalse(vm.postseasonPlayers.isEmpty)
     }
 }
+
+/// The Stats tab's boards all derive from one root, so the phase has to switch
+/// that root rather than each board separately.
+final class PostseasonLeaderboardTests: XCTestCase {
+    private func regular(_ id: Int) -> Player {
+        Player(
+            playerId: id, name: "Regular \(id)", team: "NYY", position: "CF",
+            handedness: "R/R", imageURL: nil, updatedAt: Date(),
+            season: StatScoutSeason.current,
+            metrics: [Metric(id: "m", label: "xwOBA", value: ".350", percentile: 70, category: .hitting)],
+            standardStats: [], games: []
+        )
+    }
+
+    private func postseason(_ id: Int) -> Player {
+        Player(
+            playerId: id, name: "October \(id)", team: "LAD", position: "CF",
+            handedness: "R/R", imageURL: nil, updatedAt: Date(),
+            season: StatScoutSeason.current,
+            metrics: [Metric(id: "post-batter-xwoba", label: "xwOBA", value: ".420", percentile: 95, category: .hitting)],
+            standardStats: [], games: []
+        )
+    }
+
+    @MainActor
+    private func loaded() -> DashboardViewModel {
+        var provider = MockProvider()
+        provider.postseasonPlayers = [postseason(99)]
+        let vm = DashboardViewModel(provider: provider)
+        vm.selectedSeason = StatScoutSeason.current
+        vm.playerHistories = [1: [regular(1)]]
+        vm.postseasonThrough = Date()
+        return vm
+    }
+
+    @MainActor
+    func testTheRegularSeasonBoardIsUnaffected() {
+        let vm = loaded()
+        XCTAssertEqual(vm.seasonPlayers.map(\.playerId), [1])
+    }
+
+    @MainActor
+    func testSwitchingPhaseSwitchesTheWholeBoard() async {
+        let vm = loaded()
+        await vm.loadPostseasonIfNeeded()
+        vm.selectPhase(.postseason)
+        XCTAssertEqual(vm.seasonPlayers.map(\.playerId), [99])
+    }
+
+    @MainActor
+    func testTheSortMenuFollowsThePostseasonPlayers() async {
+        /// availableSortMetrics reads seasonPlayers, so a board showing October
+        /// must not offer a metric only the regular season has.
+        let vm = loaded()
+        await vm.loadPostseasonIfNeeded()
+        vm.selectPhase(.postseason)
+        vm.selectedCategory = .hitting
+        XCTAssertEqual(vm.availableSortMetrics, ["xwOBA"])
+    }
+
+    @MainActor
+    func testLeavingTheSeasonRestoresTheRegularBoard() async {
+        let vm = loaded()
+        await vm.loadPostseasonIfNeeded()
+        vm.selectPhase(.postseason)
+        vm.selectSeason(2019)
+        XCTAssertEqual(vm.selectedPhase, .regular)
+    }
+
+    @MainActor
+    func testTheReferenceNoteNamesTheSeasonTheBarsUse() {
+        /// Savant publishes no postseason percentiles, so the board has to say
+        /// what these bars are measured against.
+        let vm = loaded()
+        XCTAssertEqual(
+            vm.postseasonReferenceNote,
+            "Percentiles vs. \(StatScoutSeason.current) regular season"
+        )
+    }
+}
