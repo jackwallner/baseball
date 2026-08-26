@@ -360,7 +360,7 @@ struct MockProvider: StatcastProviding, @unchecked Sendable {
         return players ?? []
     }
 
-    func fetchGameLogs(playerId: Int, season: Int) async throws -> [PlayerGameLog] {
+    func fetchGameLogs(playerId: Int, season: Int, phase: SeasonPhase) async throws -> [PlayerGameLog] {
         if let error { throw error }
         return []
     }
@@ -375,8 +375,82 @@ struct MockProvider: StatcastProviding, @unchecked Sendable {
         return recentForm
     }
 
+    var postseasonThrough: Date?
+
+    func fetchPostseasonThroughDate(season: Int) async throws -> Date? {
+        postseasonThrough
+    }
+
     func fetchDataThroughDate(season: Int) async throws -> Date? {
         if let error { throw error }
         return dataThrough
+    }
+}
+
+/// The postseason phase: an axis orthogonal to the season, gated on data rather
+/// than on the calendar.
+final class SeasonPhaseTests: XCTestCase {
+    func testPhaseLabelsNameTheSlateNotAnAdjective() {
+        XCTAssertEqual(SeasonPhase.regular.label, "Regular Season")
+        XCTAssertEqual(SeasonPhase.postseason.label, "Postseason")
+    }
+
+    func testSeasonLabelJoinsYearAndPhase() {
+        XCTAssertEqual(SeasonLabel.text(2026), "2026")
+        XCTAssertEqual(SeasonLabel.text(2026, phase: .postseason), "2026 Postseason")
+    }
+
+    func testPostseasonCarriesEveryStatcastRound() {
+        XCTAssertEqual(SeasonPhase.regular.statcastCodes, ["R"])
+        XCTAssertEqual(SeasonPhase.postseason.statcastCodes, ["F", "D", "L", "W"])
+    }
+
+    @MainActor
+    func testNoPhaseChoiceBeforeThePlayoffsHaveData() {
+        let vm = DashboardViewModel(provider: MockProvider())
+        vm.selectedSeason = StatScoutSeason.current
+        XCTAssertFalse(vm.postseasonAvailable)
+        XCTAssertFalse(vm.offersPhaseChoice)
+    }
+
+    @MainActor
+    func testPhaseChoiceAppearsOnceTheDataLands() {
+        let vm = DashboardViewModel(provider: MockProvider())
+        vm.selectedSeason = StatScoutSeason.current
+        vm.postseasonThrough = Date()
+        XCTAssertTrue(vm.offersPhaseChoice)
+    }
+
+    @MainActor
+    func testSelectingPostseasonIsRefusedWithoutData() {
+        /// The control is hidden in this state, but nothing else should be able
+        /// to put the boards on a phase that would render empty.
+        let vm = DashboardViewModel(provider: MockProvider())
+        vm.selectedSeason = StatScoutSeason.current
+        vm.selectPhase(.postseason)
+        XCTAssertEqual(vm.selectedPhase, .regular)
+    }
+
+    @MainActor
+    func testAPastSeasonHasNoPostseasonBoard() {
+        /// Only the season being played has a postseason the pipeline collects,
+        /// so walking back a year has to snap the phase with it.
+        let vm = DashboardViewModel(provider: MockProvider())
+        vm.selectedSeason = StatScoutSeason.current
+        vm.postseasonThrough = Date()
+        vm.selectPhase(.postseason)
+        XCTAssertEqual(vm.selectedPhase, .postseason)
+
+        vm.selectSeason(2019)
+        XCTAssertEqual(vm.selectedPhase, .regular)
+        XCTAssertFalse(vm.offersPhaseChoice)
+    }
+
+    @MainActor
+    func testReturningToTheCurrentSeasonDoesNotSilentlyRestorePostseason() {
+        let vm = DashboardViewModel(provider: MockProvider())
+        vm.postseasonThrough = Date()
+        vm.selectSeason(StatScoutSeason.current)
+        XCTAssertEqual(vm.selectedPhase, .regular)
     }
 }

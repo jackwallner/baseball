@@ -52,6 +52,74 @@ struct SeasonMenu<Trigger: View>: View {
     }
 }
 
+/// Season and season type in one menu, behind whatever trigger the caller draws.
+///
+/// Season type comes *first*, and that ordering is the whole reason one menu can
+/// carry both. The season list is twelve rows (2015 through the current year),
+/// taller than a menu shows at once, so with seasons on top the two phase rows
+/// sit below the fold: the control exists, scrolled to the bottom of a long
+/// list, and to anyone opening the menu the postseason simply isn't switchable.
+/// Two rows above a scrolling list cost the season picker nothing.
+///
+/// Use this anywhere a number on screen is phase-filtered. A screen whose every
+/// figure depends on `selectedPhase` but which only offers `SeasonMenu` is a
+/// screen with no way out of the phase it happens to be in.
+struct SeasonPhaseMenu<Trigger: View>: View {
+    let seasons: [Int]
+    let selectedSeason: Int
+    let selectedPhase: SeasonPhase
+    /// Hidden entirely until the pipeline actually holds postseason data, so
+    /// the control never offers a board it would draw empty.
+    let postseasonAvailable: Bool
+    let isLocked: (Int) -> Bool
+    let onSelectSeason: (Int) -> Void
+    let onSelectPhase: (SeasonPhase) -> Void
+    @ViewBuilder let label: () -> Trigger
+
+    var body: some View {
+        Menu {
+            if postseasonAvailable {
+                Section("Season type") {
+                    ForEach(SeasonPhase.allCases) { phase in
+                        Button {
+                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                            onSelectPhase(phase)
+                        } label: {
+                            if phase == selectedPhase {
+                                Label(phase.label, systemImage: "checkmark")
+                            } else {
+                                Text(phase.label)
+                            }
+                        }
+                    }
+                }
+            }
+            Section("Season") {
+                ForEach(seasons, id: \.self) { season in
+                    Button {
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                        onSelectSeason(season)
+                    } label: {
+                        if isLocked(season) {
+                            Label(SeasonLabel.text(season), systemImage: "crown.fill")
+                        } else if season == selectedSeason {
+                            Label(SeasonLabel.text(season), systemImage: "checkmark")
+                        } else {
+                            Text(SeasonLabel.text(season))
+                        }
+                    }
+                }
+            }
+        } label: {
+            label()
+        }
+        .menuOrder(.fixed)
+        .savantMenuAppearance()
+        .accessibilityLabel("Season and season type")
+        .accessibilityValue(SeasonLabel.text(selectedSeason, phase: selectedPhase))
+    }
+}
+
 extension View {
     /// Pins a `Menu` to the light popup the rest of the app draws.
     ///
