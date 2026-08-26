@@ -131,6 +131,19 @@ jobs:
           set -o pipefail
           python backend/ingest_postseason_stats.py 2>&1 | tee postseason_stats.log
 
+      # Where each postseason line would rank against this season's own
+      # regular-season curve. Runs after the stat lines it annotates, and is a
+      # no-op whenever there are no postseason logs.
+      - name: Rank postseason lines against the regular season
+        if: steps.guard.outputs.run_trends == 'true' || github.event_name == 'workflow_dispatch'
+        shell: bash
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          set -o pipefail
+          python backend/rollup_postseason_percentiles.py 2>&1 | tee postseason_percentiles.log
+
       # Success and stale look identical otherwise: every step can exit 0 while
       # Savant had nothing new to give, which is exactly how the app spent
       # 2026-07-29 showing "Through Jul 27" under a "last updated today" line.
