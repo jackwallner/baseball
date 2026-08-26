@@ -6,11 +6,11 @@ struct DashboardView: View {
     /// Set when this board is hosted by `StatsView`, which owns the choice of
     /// board and therefore has to be reachable from this board's own controls.
     var boardBindings: StatsBoardBindings? = nil
-    /// Set when a tab host can move the user to Trends. The seasonal card's
+    /// Set when a tab host can move the user to Trends. The postseason card's
     /// subscriber variant sends them there instead of pitching an upgrade, so
     /// without a route it has nothing to offer and stays hidden.
     var onOpenTrends: (() -> Void)? = nil
-    @AppStorage(StretchRunCampaign.storageKey) private var seenStretchRun = ""
+    @AppStorage(PostseasonCampaign.storageKey) private var seenPostseason = ""
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     @State private var showingAbout = false
     @State private var paywallTrigger: PaywallTrigger?
@@ -27,7 +27,7 @@ struct DashboardView: View {
                             searchRow
                             teamResults
                         }
-                        stretchRunSection
+                        postseasonSection
                     }
                     leaderboardSection
                     if !viewModel.players.isEmpty {
@@ -82,32 +82,35 @@ struct DashboardView: View {
         }
     }
 
-    /// The 2026 seasonal card. Inline in the scroll content, above the board,
-    /// and only outside an active search, where it would otherwise push the
-    /// team results the user is reading off the screen.
+    /// The postseason card. Inline in the scroll content, above the board, and
+    /// only outside an active search, where it would otherwise push the team
+    /// results the user is reading off the screen.
     @ViewBuilder
-    private var stretchRunSection: some View {
-        if !isActiveSearch, let creative = stretchRunDecision.creative {
-            StretchRunCard(
+    private var postseasonSection: some View {
+        if !isActiveSearch, let creative = postseasonDecision.creative {
+            PostseasonCard(
                 creative: creative,
-                onUpgrade: { paywallTrigger = .stretchRun },
-                onOpenTrends: { onOpenTrends?() },
-                onDismiss: { seenStretchRun = StretchRunCampaign.identifier }
+                onUpgrade: { paywallTrigger = .postseason },
+                onOpenPostseason: {
+                    viewModel.selectPhase(.postseason)
+                    onOpenTrends?()
+                },
+                onDismiss: { seenPostseason = PostseasonCampaign.identifier }
             )
         }
     }
 
-    private var stretchRunDecision: StretchRunDecision {
-        // The subscriber variant is only worth showing where Trends is one tap
-        // away, so a host that can't route there gets no card at all.
+    private var postseasonDecision: PostseasonDecision {
+        // The subscriber variant is only worth showing where the postseason
+        // boards are one tap away, so a host that can't route there gets no
+        // card at all.
         if store.isPro && onOpenTrends == nil { return .hidden }
-        return StretchRunCampaign.decision(
-            now: Date(),
+        return PostseasonCampaign.decision(
+            postseasonThrough: viewModel.postseasonThrough,
             hasCompletedOnboarding: hasCompletedOnboarding,
-            seenCampaign: seenStretchRun,
+            seenCampaign: seenPostseason,
             customerStateResolved: store.customerInfo != nil,
-            isPro: store.isPro,
-            forcePresentation: StretchRunCampaign.isForced
+            isPro: store.isPro
         )
     }
 

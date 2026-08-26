@@ -265,11 +265,16 @@ struct OnboardingCards: View {
                 // the trial named on the button can't be more conspicuous than
                 // the price, so this sits one type step above the button label
                 // and stays the largest pricing element on the page.
-                if let price = store.monthlyPackage?.priceLabel {
-                    Text(price)
-                        .font(SavantType.priceLead)
-                        .foregroundStyle(SavantPalette.ink)
-                }
+                //
+                // Fixed height, for the same reason the status line above it is
+                // reserved rather than inserted. `monthlyPackage` is nil until
+                // RevenueCat answers, so an unreserved slot appears late and
+                // pushes the red button down the screen at the exact moment a
+                // thumb is travelling toward it.
+                Text(store.monthlyPackage?.priceLabel ?? " ")
+                    .font(SavantType.priceLead)
+                    .foregroundStyle(SavantPalette.ink)
+                    .frame(height: 20)
             }
             .opacity(showsUpsellBlock ? 1 : 0)
             .allowsHitTesting(showsUpsellBlock)

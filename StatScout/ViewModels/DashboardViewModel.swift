@@ -216,8 +216,15 @@ final class DashboardViewModel {
     /// Fetch per-game logs for a single player. Powers the Recent Form card,
     /// the VM is just a passthrough so the card can stay UI-only and we don't
     /// have to thread the provider through every PlayerProfileView caller.
+    /// Game logs for the phase the boards are currently on.
+    ///
+    /// Phase is read here rather than passed in by each caller so a screen can
+    /// never fetch one slate while its heading names the other. Only the season
+    /// being played has a postseason, so any other year is regular season
+    /// whatever the picker last said.
     func fetchGameLogs(playerId: Int, season: Int) async throws -> [PlayerGameLog] {
-        try await provider.fetchGameLogs(playerId: playerId, season: season)
+        let phase = season == StatScoutSeason.current ? selectedPhase : .regular
+        return try await provider.fetchGameLogs(playerId: playerId, season: season, phase: phase)
     }
 
     /// Team-scoped game logs since `sinceDate`. The TeamRankingsCard caps at 30
