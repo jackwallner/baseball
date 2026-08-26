@@ -4,23 +4,34 @@ import XCTest
 final class StatScoutComprehensiveUITests: XCTestCase {
     var app: XCUIApplication!
 
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         continueAfterFailure = false
         app = XCUIApplication()
+        app.launchEnvironment["STATSCOUT_RESET_TEAM_FAVORITE"] = "1"
         app.launch()
+    }
+
+    private func openDashboardSearchField() -> XCUIElement {
+        // SwiftUI's TextField is exposed as a text field, not a UIKit search
+        // field. Querying the native element type keeps this reliable across
+        // iOS releases and still exercises the visible search control.
+        let searchField = app.textFields["dashboardSearchField"]
+        if !searchField.exists {
+            let searchButton = app.buttons["Search"]
+            XCTAssertTrue(searchButton.waitForExistence(timeout: 10), "Dashboard search button should exist")
+            searchButton.tap()
+        }
+        XCTAssertTrue(searchField.waitForExistence(timeout: 10), "Dashboard search field should exist")
+        return searchField
     }
 
     // MARK: - DashboardView Tests
 
     func testDashboardSearchField() throws {
-        // Test search field exists and is tappable
-        let searchField = app.searchFields["Search players or teams"]
-        guard searchField.waitForExistence(timeout: 5) else {
-            // If no search field, app might be showing empty state - that's okay
-            XCTExpectFailure("Search field should exist when app has data")
-            return
-        }
+        // Search is intentionally collapsed behind the magnifier until asked
+        // for, so test the complete discoverable interaction.
+        let searchField = openDashboardSearchField()
         searchField.tap()
         searchField.typeText("Judge")
 
@@ -30,8 +41,11 @@ final class StatScoutComprehensiveUITests: XCTestCase {
             XCTAssertTrue(judgeCell.exists, "Should show Aaron Judge in search results")
         }
 
-        // Test clear search
-        searchField.clearText()
+        // Test the visible clear affordance rather than simulating a burst of
+        // delete key events while SwiftUI is rerendering the bound field.
+        let clearButton = app.buttons["Clear search"]
+        XCTAssertTrue(clearButton.waitForExistence(timeout: 2), "Search should expose a clear button once text is entered")
+        clearButton.tap()
         XCTAssertEqual(searchField.value as? String, "", "Search field should be cleared")
     }
 
@@ -70,10 +84,9 @@ final class StatScoutComprehensiveUITests: XCTestCase {
     }
 
     func testDashboardEmptySearchState() throws {
-        let searchField = app.searchFields["Search players or teams"]
-        guard searchField.waitForExistence(timeout: 5) else {
-            return // Skip if no search field
-        }
+        let searchField = openDashboardSearchField()
+        XCTAssertTrue(searchField.waitForExistence(timeout: 2))
+        XCTAssertTrue(searchField.isHittable, "Dashboard search field should be tappable")
         searchField.tap()
         searchField.typeText("xyznonexistent")
 
@@ -135,7 +148,7 @@ final class StatScoutComprehensiveUITests: XCTestCase {
 
     func testPlayerProfileYearCompareTab() throws {
         // Navigate to a player profile with history
-        let searchField = app.searchFields["Search players or teams"]
+        let searchField = openDashboardSearchField()
         guard searchField.waitForExistence(timeout: 5) else {
             return
         }
@@ -166,7 +179,7 @@ final class StatScoutComprehensiveUITests: XCTestCase {
     }
 
     func testPlayerProfileYearCompareTabDisabledForNoHistory() throws {
-        let searchField = app.searchFields["Search players or teams"]
+        let searchField = openDashboardSearchField()
         guard searchField.waitForExistence(timeout: 5) else {
             return
         }
@@ -232,7 +245,7 @@ final class StatScoutComprehensiveUITests: XCTestCase {
 
     func testYearComparisonInitialLoad() throws {
         // Navigate to a player with history and open Year Compare
-        let searchField = app.searchFields["Search players or teams"]
+        let searchField = openDashboardSearchField()
         guard searchField.waitForExistence(timeout: 5) else {
             return
         }
@@ -260,7 +273,7 @@ final class StatScoutComprehensiveUITests: XCTestCase {
 
     func testYearComparisonMetricDisplay() throws {
         // Navigate to Year Compare
-        let searchField = app.searchFields["Search players or teams"]
+        let searchField = openDashboardSearchField()
         guard searchField.waitForExistence(timeout: 5) else {
             return
         }
@@ -286,7 +299,7 @@ final class StatScoutComprehensiveUITests: XCTestCase {
     }
 
     func testYearComparisonCategoryTabs() throws {
-        let searchField = app.searchFields["Search players or teams"]
+        let searchField = openDashboardSearchField()
         guard searchField.waitForExistence(timeout: 5) else {
             return
         }
@@ -319,7 +332,7 @@ final class StatScoutComprehensiveUITests: XCTestCase {
 
     func testYearComparisonNoOverlappingMetricsMessage() throws {
         // Navigate to Year Compare for a player
-        let searchField = app.searchFields["Search players or teams"]
+        let searchField = openDashboardSearchField()
         guard searchField.waitForExistence(timeout: 5) else {
             return
         }
@@ -441,7 +454,7 @@ final class StatScoutComprehensiveUITests: XCTestCase {
             XCTAssertTrue(app.staticTexts["Overall Percentile"].waitForExistence(timeout: 2), "Should be back at player profile")
 
             app.navigationBars.buttons.firstMatch.tap()
-            XCTAssertTrue(app.searchFields["Search players or teams"].waitForExistence(timeout: 2), "Should be back at dashboard")
+            XCTAssertTrue(app.buttons["Search"].waitForExistence(timeout: 2), "Should be back at dashboard")
         }
     }
 
@@ -449,7 +462,7 @@ final class StatScoutComprehensiveUITests: XCTestCase {
 
     func testAccessibilityLabels() throws {
         // Verify key elements have accessibility labels
-        let searchField = app.searchFields["Search players or teams"]
+        let searchField = openDashboardSearchField()
         XCTAssertTrue(searchField.exists, "Search field should have accessibility label")
 
         // Test VoiceOver navigation
@@ -486,7 +499,7 @@ final class StatScoutComprehensiveUITests: XCTestCase {
         teamsTab.tap()
 
         // Find team list and tap the star button on a team row
-        let starButton = app.buttons.matching(NSPredicate(format: "label CONTAINS 'star'")).element(boundBy: 0)
+        let starButton = app.buttons.matching(NSPredicate(format: "label CONTAINS 'favorite'")).element(boundBy: 0)
         guard starButton.waitForExistence(timeout: 5) else {
             return // No star buttons found
         }
@@ -506,7 +519,7 @@ final class StatScoutComprehensiveUITests: XCTestCase {
         teamsTab.tap()
 
         // Get first team row and tap its star button
-        let starButton = app.buttons.matching(NSPredicate(format: "label CONTAINS 'star'")).element(boundBy: 0)
+        let starButton = app.buttons.matching(NSPredicate(format: "label CONTAINS 'favorite'")).element(boundBy: 0)
         guard starButton.waitForExistence(timeout: 5) else {
             return
         }
@@ -530,7 +543,7 @@ final class StatScoutComprehensiveUITests: XCTestCase {
         teamsTab.tap()
 
         // First favorite a team by tapping star on first row
-        let starButton = app.buttons.matching(NSPredicate(format: "label CONTAINS 'star'")).element(boundBy: 0)
+        let starButton = app.buttons.matching(NSPredicate(format: "label CONTAINS 'favorite'")).element(boundBy: 0)
         guard starButton.waitForExistence(timeout: 5) else {
             return
         }
@@ -542,23 +555,15 @@ final class StatScoutComprehensiveUITests: XCTestCase {
             return
         }
 
-        // Remove favorite using the Remove button in favorites section
-        let removeButton = app.buttons["Remove"]
-        guard removeButton.waitForExistence(timeout: 2) else {
-            // Try finding by label containing star.slash
-            let altRemove = app.buttons.matching(NSPredicate(format: "label CONTAINS 'Remove'")).firstMatch
-            guard altRemove.waitForExistence(timeout: 2) else {
-                return
-            }
-            altRemove.tap()
-            XCTAssertTrue(altRemove.exists, "Remove button should exist")
-            return
-        }
+        // Remove favorite using the accessible action in the favorites section.
+        let removeButton = app.buttons["Remove favorite"]
+        XCTAssertTrue(removeButton.waitForExistence(timeout: 2), "Remove favorite button should exist")
         removeButton.tap()
 
-        // Verify FAVORITE TEAM section disappears (reverts to just "TEAMS")
-        let teamsHeader = app.staticTexts["TEAMS"]
-        XCTAssertTrue(teamsHeader.waitForExistence(timeout: 2), "Should show TEAMS header after removing favorite")
+        // Verify FAVORITE TEAM section disappears and the full list remains.
+        XCTAssertFalse(favoritesHeader.waitForExistence(timeout: 1), "Favorite section should disappear after removal")
+        let allTeamsHeader = app.staticTexts["ALL TEAMS"]
+        XCTAssertTrue(allTeamsHeader.waitForExistence(timeout: 2), "All teams should remain after removal")
     }
 
     func testTeamSearch() throws {
@@ -569,17 +574,16 @@ final class StatScoutComprehensiveUITests: XCTestCase {
         }
         teamsTab.tap()
 
-        // Find search field and enter text
-        let searchField = app.searchFields.firstMatch
-        guard searchField.waitForExistence(timeout: 5) else {
-            return
-        }
+        // SearchField is a SwiftUI TextField with a stable identifier.
+        let searchField = app.textFields["teamsSearchField"]
+        XCTAssertTrue(searchField.waitForExistence(timeout: 5), "Teams search field should exist")
         searchField.tap()
         searchField.typeText("Yankees")
 
-        // Verify filtered results
-        let yankeesText = app.staticTexts["New York Yankees"]
-        XCTAssertTrue(yankeesText.waitForExistence(timeout: 2), "Should find Yankees in search results")
+        // Verify the accessible team result, which has no room for a caption in
+        // the five-across grid.
+        let yankeesTeam = app.buttons["New York Yankees"]
+        XCTAssertTrue(yankeesTeam.waitForExistence(timeout: 2), "Should find Yankees in search results")
     }
 
     // MARK: - AboutView Tests
@@ -640,8 +644,10 @@ final class StatScoutComprehensiveUITests: XCTestCase {
         let startTime = Date()
 
         // Wait for dashboard to load
-        let searchField = app.searchFields["Search players or teams"]
-        XCTAssertTrue(searchField.waitForExistence(timeout: 10), "Dashboard should load within 10 seconds")
+        let playerRow = app.buttons.matching(
+            NSPredicate(format: "label MATCHES %@", "^[0-9]+,.*")
+        ).firstMatch
+        XCTAssertTrue(playerRow.waitForExistence(timeout: 10), "Dashboard should load within 10 seconds")
 
         let loadTime = Date().timeIntervalSince(startTime)
         XCTAssertLessThan(loadTime, 5.0, "Dashboard should load in less than 5 seconds")
@@ -675,11 +681,3 @@ final class StatScoutComprehensiveUITests: XCTestCase {
 }
 
 // MARK: - Helper Extensions
-
-extension XCUIElement {
-    func clearText() {
-        guard let stringValue = self.value as? String else { return }
-        let deleteString = String(repeating: XCUIKeyboardKey.delete.rawValue, count: stringValue.count)
-        self.typeText(deleteString)
-    }
-}

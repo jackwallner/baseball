@@ -4,11 +4,9 @@
 -- only by season, so an October row placed there would appear on a
 -- regular-season leaderboard in a build nobody can patch.
 --
--- Only standard stats live here. Baseball Savant publishes no postseason
--- percentile leaderboards, so there is deliberately no metrics column: a
--- percentile computed from a 60-plate-appearance playoff run would be a number
--- nobody could check us against, and the app's whole promise is that its
--- percentiles match Savant's.
+-- Standard stats are written first. A later nightly step adds Statcast metrics
+-- mapped onto the current regular-season percentile curves, because Baseball
+-- Savant publishes no postseason percentile leaderboards.
 
 create table if not exists public.player_postseason_stats (
   id bigint not null,

@@ -90,11 +90,40 @@ struct TeamView: View {
     }
 
     private var displaySeason: Int {
-        season ?? players.compactMap(\.season).max() ?? Calendar.current.component(.year, from: Date())
+        if let viewModel { return viewModel.selectedSeason }
+        return season ?? players.compactMap(\.season).max() ?? Calendar.current.component(.year, from: Date())
+    }
+
+    private var currentPlayers: [Player] {
+        viewModel?.players(forTeam: team) ?? players
+    }
+
+    private var currentPhase: SeasonPhase {
+        viewModel?.selectedPhase ?? .regular
+    }
+
+    private var isLoadingPostseason: Bool {
+        currentPhase == .postseason
+            && ((viewModel?.isLoadingPostseason == true) || viewModel?.postseasonLoadPending == true)
+            && currentPlayers.isEmpty
+    }
+
+    private var postseasonErrorMessage: String? {
+        guard currentPhase == .postseason else { return nil }
+        return viewModel?.postseasonErrorMessage
     }
 
     private var leaguePlayers: [Player] {
-        viewModel?.seasonPlayers ?? []
+        viewModel?.seasonPlayers ?? currentPlayers
+    }
+
+    private var advancedLeaguePlayers: [Player] {
+        guard let viewModel,
+              currentPhase == .postseason,
+              displaySeason == StatScoutSeason.current else {
+            return leaguePlayers
+        }
+        return viewModel.players(forSeason: displaySeason, phase: .regular)
     }
 
     private var sortMetric: (label: String, category: MetricCategory)? {
@@ -103,7 +132,7 @@ struct TeamView: View {
             return (userSortLabel, category)
         }
         for label in priorityMetrics(for: category) {
-            if players.contains(where: { p in p.metrics.contains { $0.label == label && $0.category == category } }) {
+            if currentPlayers.contains(where: { p in p.metrics.contains { $0.label == label && $0.category == category } }) {
                 return (label, category)
             }
         }
@@ -116,7 +145,7 @@ struct TeamView: View {
     /// column; the roster ranked on a metric it picked for you.
     private var availableSortLabels: [String] {
         guard let category = selectedCategory else { return [] }
-        let present = Set(players.flatMap { p in
+        let present = Set(currentPlayers.flatMap { p in
             p.metrics.filter { $0.category == category }.map(\.label)
         })
         let ordered = category.metricPriorityOrder.filter { present.contains($0) }
@@ -199,7 +228,7 @@ struct TeamView: View {
     }
 
     private var filteredPlayers: [Player] {
-        let bySearch = searchText.isEmpty ? players : players.filter {
+        let bySearch = searchText.isEmpty ? currentPlayers : currentPlayers.filter {
             $0.name.localizedCaseInsensitiveContains(searchText)
                 || $0.displayPosition.localizedCaseInsensitiveContains(searchText)
         }
@@ -283,13 +312,23 @@ struct TeamView: View {
                     .padding(.horizontal, 12)
                     .padding(.top, 12)
 
-                switch selectedTab {
-                case .advanced:
-                    advancedContent
-                case .standard:
-                    standardContent
-                case .roster:
-                    rosterContent
+                if isLoadingPostseason {
+                    postseasonLoadingState
+                } else if let error = postseasonErrorMessage, currentPlayers.isEmpty {
+                    postseasonErrorState(error)
+                } else if currentPhase == .postseason,
+                          viewModel?.postseasonLoadCompleted == true,
+                          currentPlayers.isEmpty {
+                    postseasonEmptyState
+                } else {
+                    switch selectedTab {
+                    case .advanced:
+                        advancedContent
+                    case .standard:
+                        standardContent
+                    case .roster:
+                        rosterContent
+                    }
                 }
 
                 // Lets content scroll under the floating tab bar so the last
@@ -373,8 +412,9 @@ struct TeamView: View {
             TeamRankingsCard(
                 team: team,
                 season: displaySeason,
-                players: players,
-                leaguePlayers: leaguePlayers,
+                players: currentPlayers,
+                leaguePlayers: advancedLeaguePlayers,
+                phase: currentPhase,
                 fetchTeamGameLogs: fetchTeamGameLogs,
                 onUpgradeTap: {
                     // Explicit tap, always answer it; the gate only caps
@@ -391,8 +431,9 @@ struct TeamView: View {
         TeamStandardCard(
             team: team,
             season: displaySeason,
-            players: players,
+            players: currentPlayers,
             leaguePlayers: leaguePlayers,
+            phase: currentPhase,
             fetchTeamGameLogs: fetchTeamGameLogs,
             onUpgradeTap: { showingTrial = true }
         )
@@ -434,7 +475,7 @@ struct TeamView: View {
                 .padding(.top, 8)
             }
 
-            if !players.isEmpty {
+            if !currentPlayers.isEmpty {
                 sortControlsRow
                 if isSearching || !searchText.isEmpty {
                     searchRow
@@ -619,7 +660,11 @@ struct TeamView: View {
 
     private var searchRow: some View {
         HStack(spacing: 8) {
-            SearchField(text: $searchText, focusOnAppear: true)
+            SearchField(
+                text: $searchText,
+                focusOnAppear: true,
+                accessibilityIdentifier: "teamRosterSearchField"
+            )
             Button("Cancel") {
                 withAnimation(.easeInOut(duration: 0.2)) {
                     isSearching = false
@@ -636,7 +681,9 @@ struct TeamView: View {
 
     private var rosterSection: some View {
         VStack(spacing: 0) {
-            if players.isEmpty {
+            if isLoadingPostseason {
+                postseasonLoadingState
+            } else if currentPlayers.isEmpty {
                 emptyStateView(
                     icon: "person.2.slash",
                     title: "No players tracked",
@@ -673,7 +720,11 @@ struct TeamView: View {
                 .buttonStyle(.plain)
 
                 ForEach(Array(filteredPlayers.enumerated()), id: \.element.id) { index, player in
-                    NavigationLink(value: player) {
+                    NavigationLink(value: PlayerRoute(
+                        player: player,
+                        phase: currentPhase,
+                        season: displaySeason
+                    )) {
                         LeaderboardTableRow(
                             rank: index + 1,
                             player: player,
@@ -705,6 +756,73 @@ struct TeamView: View {
             Text(description)
         }
         .padding(.vertical, 48)
+    }
+
+    private var postseasonLoadingState: some View {
+        VStack(spacing: 10) {
+            ProgressView()
+            Text("Loading postseason players…")
+                .font(SavantType.small)
+                .foregroundStyle(SavantPalette.inkSecondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 48)
+        .background(SavantPalette.surface)
+        .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
+        .overlay(
+            RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
+                .stroke(SavantPalette.hairline, lineWidth: 0.5)
+        )
+        .padding(.horizontal, 12)
+        .padding(.top, 12)
+    }
+
+    private func postseasonErrorState(_ message: String) -> some View {
+        ContentUnavailableView {
+            Label("Postseason data unavailable", systemImage: "exclamationmark.triangle")
+        } description: {
+            Text(message)
+        } actions: {
+            Button("Retry") {
+                Task { await viewModel?.reloadPostseason() }
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(SavantPalette.savantRed)
+        }
+        .padding(.vertical, 48)
+        .frame(maxWidth: .infinity)
+        .background(SavantPalette.surface)
+        .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
+        .overlay(
+            RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
+                .stroke(SavantPalette.hairline, lineWidth: 0.5)
+        )
+        .padding(.horizontal, 12)
+        .padding(.top, 12)
+    }
+
+    private var postseasonEmptyState: some View {
+        ContentUnavailableView {
+            Label("Postseason stats not ready", systemImage: "clock.arrow.circlepath")
+        } description: {
+            Text("The playoff games are in, but the latest player lines have not landed yet.")
+        } actions: {
+            Button("Refresh") {
+                Task { await viewModel?.reloadPostseason() }
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(SavantPalette.savantRed)
+        }
+        .padding(.vertical, 48)
+        .frame(maxWidth: .infinity)
+        .background(SavantPalette.surface)
+        .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
+        .overlay(
+            RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
+                .stroke(SavantPalette.hairline, lineWidth: 0.5)
+        )
+        .padding(.horizontal, 12)
+        .padding(.top, 12)
     }
 
     /// Team name in the nav title doubles as a switcher menu, tap to jump to

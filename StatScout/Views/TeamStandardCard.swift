@@ -18,6 +18,7 @@ struct TeamStandardCard: View {
     let players: [Player]
     /// Every player in the season, used to build the thirty team lines.
     let leaguePlayers: [Player]
+    let phase: SeasonPhase
     let fetchTeamGameLogs: ((String, Int, Date) async throws -> [PlayerGameLog])?
     let onUpgradeTap: () -> Void
 
@@ -113,7 +114,7 @@ struct TeamStandardCard: View {
             RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
                 .stroke(SavantPalette.hairline, lineWidth: 0.5)
         )
-        .task(id: "\(team)-\(season)-\(showingRecent)-\(store.isPro)") {
+        .task(id: "\(team)-\(season)-\(phase.rawValue)-\(showingRecent)-\(store.isPro)") {
             if showingRecent, store.isPro { await load() }
         }
     }

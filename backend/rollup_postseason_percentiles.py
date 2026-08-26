@@ -213,11 +213,26 @@ def build_metrics(
             # allowed do not collapse into one row.
             "id": f"post-{player_type}-{key}",
             "label": label,
-            "value": str(value),
+            "value": _format_metric_value(key, float(value)),
             "percentile": ranked,
             "category": CATEGORY_BY_TYPE[player_type],
         })
     return out
+
+
+def _format_metric_value(key: str, value: float) -> str:
+    """Keep postseason metric values readable and consistent with Savant rows."""
+    if key in {"xwoba", "xba", "xslg", "xiso", "opp_xwoba", "opp_xba", "opp_xslg"}:
+        return f"{value:.3f}"
+    if key.endswith("_pct"):
+        return f"{value:.1f}%"
+    if key in {"ev_avg", "ev_max", "opp_ev_avg", "opp_ev_max", "fb_velo_avg"}:
+        return f"{value:.1f} mph"
+    if key == "fb_spin_avg":
+        return f"{value:.0f} rpm"
+    if key == "swing_length":
+        return f"{value:.2f} ft"
+    return str(value)
 
 
 def _fetch_all(client, table: str, select: str, season: int) -> list[dict]:
@@ -249,7 +264,10 @@ def run() -> None:
         logger.info("No postseason game logs for %s yet; nothing to rank.", season)
         return
 
-    snapshots = _fetch_all(client, SNAPSHOTS_TABLE, "metrics", season)
+    # `build_curves` keeps batter and pitcher distributions separate. Omitting
+    # player_type here leaves every row unclassified and makes the rollup skip
+    # all percentile updates without raising an error.
+    snapshots = _fetch_all(client, SNAPSHOTS_TABLE, "player_type,metrics", season)
     curves = build_curves(snapshots)
     if not curves:
         logger.warning("No regular-season curves for %s; skipping.", season)

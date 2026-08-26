@@ -23,6 +23,9 @@ struct StandardStatsLeadersView: View {
     /// Set when arrived at by tapping a specific stat on a player profile, so
     /// the leaderboard opens on the stat that was tapped rather than AVG.
     var season: Int? = nil
+    /// Postseason rows can arrive before the percentile rollup, so standard
+    /// stats must use the roster role alone until those metrics exist.
+    var phase: SeasonPhase = .regular
     /// Present when this board is hosted by `StatsView`, which draws the shared
     /// View menu in this board's own control row.
     var boardBindings: StatsBoardBindings? = nil
@@ -31,6 +34,12 @@ struct StandardStatsLeadersView: View {
     /// picking 2019 from the drill-down's season pill shows "no players" for the
     /// second or two before the history lands, which reads as "no data".
     var isLoadingSeason: Bool = false
+    /// True while the current season's postseason roster is being fetched.
+    /// Kept separate so the empty state names the slate the user chose.
+    var isLoadingPostseason: Bool = false
+    var postseasonLoadCompleted: Bool = false
+    var postseasonErrorMessage: String?
+    var retryPostseason: (() async -> Void)?
 
     /// Available stats per category.
     var availableStats: [String] { StandardStatCatalog.stats(for: selectedCategory) }
@@ -67,21 +76,23 @@ struct StandardStatsLeadersView: View {
         // players (e.g. .366 on 42 AB whose only metric is Sprint Speed) ranked
         // above real regulars. `qualifiedSeasonPlayers` can't catch this: ingest
         // already prunes metric-less rows, so that gate passes everyone.
+        // Postseason is the deliberate exception: standard lines are useful on
+        // the first morning, before the separate percentile rollup has run.
         let type = player.playerType?.lowercased()
         switch selectedCategory {
         case .hitting:
             return type != "pitcher"
-                && player.metrics.contains { $0.category == .hitting }
+                && (phase == .postseason || player.metrics.contains { $0.category == .hitting })
         case .pitching:
             return (type == "pitcher" || type == "two_way")
-                && player.metrics.contains { $0.category == .pitching }
+                && (phase == .postseason || player.metrics.contains { $0.category == .pitching })
         case .fielding, .running:
             // The glove and the legs belong to position players, and the
             // qualification signal is still a hitting percentile: requiring a
             // *fielding* percentile would cut the board to the handful of
             // players Savant publishes OAA for.
             return type != "pitcher"
-                && player.metrics.contains { $0.category == .hitting }
+                && (phase == .postseason || player.metrics.contains { $0.category == .hitting })
         }
     }
 
@@ -136,7 +147,11 @@ struct StandardStatsLeadersView: View {
             return String(format: "%.1f%%", value)
         }
         guard let stats = player.standardStats,
-              let stat = stats.first(where: { $0.label == selectedStat }) else {
+              let stat = stats.stat(
+                  selectedStat,
+                  category: selectedCategory,
+                  playerType: player.playerType
+              ) else {
             return "-"
         }
         return stat.value
@@ -276,16 +291,57 @@ struct StandardStatsLeadersView: View {
             .buttonStyle(.plain)
 
             // Players
-            if sortedPlayers.isEmpty {
+            if let postseasonErrorMessage,
+               !isLoadingPostseason,
+               postseasonErrorMessage.isEmpty == false,
+               sortedPlayers.isEmpty {
+                ContentUnavailableView {
+                    Label("Postseason data unavailable", systemImage: "exclamationmark.triangle")
+                } description: {
+                    Text(postseasonErrorMessage)
+                } actions: {
+                    if let retryPostseason {
+                        Button("Retry") {
+                            Task { await retryPostseason() }
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(SavantPalette.savantRed)
+                    }
+                }
+                .padding(.vertical, 48)
+            } else if phase == .postseason,
+                      postseasonLoadCompleted,
+                      sortedPlayers.isEmpty {
+                ContentUnavailableView {
+                    Label("Postseason stats not ready", systemImage: "clock.arrow.circlepath")
+                } description: {
+                    Text("The playoff games are in, but the latest player lines have not landed yet.")
+                } actions: {
+                    if let retryPostseason {
+                        Button("Refresh") {
+                            Task { await retryPostseason() }
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(SavantPalette.savantRed)
+                    }
+                }
+                .padding(.vertical, 48)
+            } else if sortedPlayers.isEmpty {
                 ContentUnavailableView {
                     Label(
-                        isLoadingSeason ? "Loading season…" : "No data available",
-                        systemImage: isLoadingSeason ? "clock" : "chart.bar"
+                        isLoadingPostseason
+                            ? "Loading postseason…"
+                            : isLoadingSeason ? "Loading season…" : "No data available",
+                        systemImage: (isLoadingSeason || isLoadingPostseason) ? "clock" : "chart.bar"
                     )
                 } description: {
-                    Text(isLoadingSeason
-                         ? "Pulling \(season.map(String.init) ?? "this season")'s players."
-                         : "No players have \(selectedStat) data for this season.")
+                    if isLoadingPostseason {
+                        Text("Pulling the latest postseason players.")
+                    } else if isLoadingSeason {
+                        Text("Pulling \(season.map(String.init) ?? "this season")'s players.")
+                    } else {
+                        Text("No players have \(selectedStat) data for this season.")
+                    }
                 }
                 .padding(.vertical, 48)
                 .background(SavantPalette.surface)
@@ -304,7 +360,11 @@ struct StandardStatsLeadersView: View {
     }
 
     private func playerRow(rank: Int, player: Player) -> some View {
-        NavigationLink(value: player) {
+        NavigationLink(value: PlayerRoute(
+            player: player,
+            phase: phase,
+            season: season
+        )) {
             HStack(spacing: 0) {
                 // Rank
                 Text("\(rank)")
@@ -378,6 +438,7 @@ struct StandardStatsLeaderboardScreen: View {
     @State private var category: MetricCategory
     @State private var sortDescending: Bool
     @State private var season: Int
+    @State private var phase: SeasonPhase
     @State private var paywallTrigger: PaywallTrigger?
 
     init(
@@ -385,10 +446,12 @@ struct StandardStatsLeaderboardScreen: View {
         fallbackPlayers: [Player] = [],
         initialStat: String = "AVG",
         initialCategory: MetricCategory = .hitting,
-        initialSeason: Int
+        initialSeason: Int,
+        phase: SeasonPhase = .regular
     ) {
         self.viewModel = viewModel
         self.fallbackPlayers = fallbackPlayers
+        _phase = State(initialValue: phase)
         _stat = State(initialValue: initialStat)
         _category = State(initialValue: initialCategory)
         _season = State(initialValue: initialSeason)
@@ -398,8 +461,15 @@ struct StandardStatsLeaderboardScreen: View {
     }
 
     private var players: [Player] {
-        let roster = viewModel.players(forSeason: season)
+        let roster = viewModel.players(forSeason: season, phase: activePhase)
+        if activePhase == .postseason {
+            return roster
+        }
         return roster.isEmpty ? fallbackPlayers : roster
+    }
+
+    private var activePhase: SeasonPhase {
+        phase == .postseason && season == StatScoutSeason.current ? .postseason : .regular
     }
 
     var body: some View {
@@ -409,17 +479,34 @@ struct StandardStatsLeaderboardScreen: View {
             selectedCategory: $category,
             sortDescending: $sortDescending,
             season: season,
-            isLoadingSeason: players.isEmpty && viewModel.isHistoricalLoading
+            phase: activePhase,
+            isLoadingSeason: players.isEmpty && viewModel.isHistoricalLoading,
+            isLoadingPostseason: activePhase == .postseason
+                && (viewModel.isLoadingPostseason || viewModel.postseasonLoadPending)
+                && viewModel.postseasonPlayers.isEmpty,
+            postseasonLoadCompleted: activePhase == .postseason
+                && viewModel.postseasonLoadCompleted,
+            postseasonErrorMessage: activePhase == .postseason
+                ? viewModel.postseasonErrorMessage
+                : nil,
+            retryPostseason: activePhase == .postseason
+                ? { await viewModel.reloadPostseason() }
+                : nil
         )
         // String(), not the Int: interpolating a number into a
         // `LocalizedStringKey` runs it through the number formatter, which is
         // how this title read "2,026".
-        .navigationTitle("\(stat) · \(String(season))")
+        .navigationTitle(
+            activePhase == .postseason
+                ? "\(stat) · \(String(season)) Postseason"
+                : "\(stat) · \(String(season))"
+        )
         .navigationBarTitleDisplayMode(.inline)
         .modifier(DrillDownSeasonPill(
             viewModel: viewModel,
             season: $season,
-            paywallTrigger: $paywallTrigger
+            paywallTrigger: $paywallTrigger,
+            phase: $phase
         ))
         // Past seasons only exist once the history load has run.
         .task(id: season) {
@@ -440,23 +527,46 @@ struct DrillDownSeasonPill: ViewModifier {
     let viewModel: DashboardViewModel
     @Binding var season: Int
     @Binding var paywallTrigger: PaywallTrigger?
+    @Binding var phase: SeasonPhase
 
     private var pill: some View {
-        SeasonMenu(
+        SeasonPhaseMenu(
             seasons: viewModel.availableSeasons,
-            selected: season,
+            selectedSeason: season,
+            selectedPhase: activePhase,
+            postseasonAvailable: viewModel.postseasonAvailable
+                && season == StatScoutSeason.current,
             isLocked: { viewModel.isSeasonLocked($0) },
-            onSelect: { picked in
+            onSelectSeason: { picked in
                 if viewModel.isSeasonLocked(picked) {
                     paywallTrigger = .lockedSeason(picked)
                 } else {
                     season = picked
+                    if picked != StatScoutSeason.current { phase = .regular }
+                }
+            },
+            onSelectPhase: { picked in
+                guard picked == .regular
+                    || (season == StatScoutSeason.current && viewModel.postseasonAvailable)
+                else { return }
+                phase = picked
+                if picked == .postseason {
+                    Task { await viewModel.loadPostseasonIfNeeded() }
                 }
             }
         ) {
-            SavantNavPill(systemImage: "calendar", title: String(season))
+            SavantNavPill(
+                systemImage: "calendar",
+                title: activePhase == .postseason
+                    ? "\(season) POST"
+                    : String(season)
+            )
         }
         .accessibilityHint("Choose which season this leaderboard ranks")
+    }
+
+    private var activePhase: SeasonPhase {
+        phase == .postseason && season == StatScoutSeason.current ? .postseason : .regular
     }
 
     func body(content: Content) -> some View {

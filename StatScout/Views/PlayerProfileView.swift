@@ -31,7 +31,14 @@ struct PlayerProfileView: View {
     @EnvironmentObject private var store: StoreService
     let player: Player
     let history: [Player]
+    /// The slate represented by `player`. Postseason rows live outside the
+    /// regular-season history, so keeping this context prevents the profile
+    /// from silently replacing an October player with the regular-season row.
+    var phase: SeasonPhase = .regular
     var allPlayers: [Player] = []
+    /// The regular-season pool remains the percentile ruler while this profile
+    /// is showing a postseason row.
+    var regularSeasonPlayers: [Player] = []
     var isHistoricalLoading = false
     var hasLoadedHistorical = true
     var historicalLoadingMessage = "Loading past seasons…"
@@ -87,13 +94,25 @@ struct PlayerProfileView: View {
         selectedPercentileSeason ?? player.season
     }
 
+    private var activePhase: SeasonPhase {
+        phase == .postseason && activeSeason == StatScoutSeason.current
+            ? .postseason
+            : .regular
+    }
+
     private var displayedPlayer: Player {
         guard let season = activeSeason else { return player }
+        if activePhase == .postseason {
+            return player
+        }
         return history.first { $0.season == season } ?? player
     }
 
     private var seasonLabel: String {
-        activeSeason.map(String.init) ?? "-"
+        guard let season = activeSeason else { return "-" }
+        return activePhase == .postseason
+            ? "\(season) POST"
+            : String(season)
     }
 
     private var groupedMetrics: [(category: MetricCategory, metrics: [Metric])] {
@@ -102,6 +121,10 @@ struct PlayerProfileView: View {
             guard let m = grouped[cat], !m.isEmpty else { return nil }
             return (category: cat, metrics: m.sorted { cat.sortMetrics($0.label, $1.label) })
         }
+    }
+
+    private var percentileLeaguePlayers: [Player] {
+        regularSeasonPlayers.isEmpty ? allPlayers : regularSeasonPlayers
     }
 
     /// Players eligible for comparison: same player type (hitter↔hitter, pitcher↔pitcher),
@@ -187,7 +210,11 @@ struct PlayerProfileView: View {
         }
         .sheet(isPresented: $showingPlayerPicker) {
             PlayerPickerSheet(players: comparablePlayers) { selected in
-                comparisonRoute = ComparisonRoute(playerA: player, playerB: selected)
+                comparisonRoute = ComparisonRoute(
+                    playerA: player,
+                    playerB: selected,
+                    phase: activePhase
+                )
             }
         }
         // Sizing and the drag indicator belong to the sheet itself now, so every
@@ -199,6 +226,7 @@ struct PlayerProfileView: View {
             PlayerComparisonView(
                 playerA: route.playerA,
                 playerB: route.playerB,
+                phase: route.phase,
                 catalog: comparisonCatalog
             )
         }
@@ -529,7 +557,11 @@ struct PlayerProfileView: View {
             }
             .fixedSize()
         }
-        .accessibilityValue(seasonLabel)
+        .accessibilityValue(
+            activePhase == .postseason
+                ? "\(seasonLabel), Postseason"
+                : seasonLabel
+        )
     }
 
     /// Season / Recent / Both. Shown to everyone: a free user needs to see that
@@ -564,6 +596,10 @@ struct PlayerProfileView: View {
                     }
                 )
             )
+
+            if activePhase == .postseason {
+                PostseasonReferenceNote(referenceSeason: StatScoutSeason.current)
+            }
 
             // Recent mode only makes sense for the live season, the 7/15/30-day
             // window is anchored to today, so on a historical season it would
@@ -745,7 +781,12 @@ struct PlayerProfileView: View {
 
         switch effectiveFormDisplayMode {
         case .season:
-            NavigationLink(value: MetricRoute(label: metric.label, category: metric.category, season: activeSeason)) {
+            NavigationLink(value: MetricRoute(
+                label: metric.label,
+                category: metric.category,
+                phase: activePhase,
+                season: activeSeason
+            )) {
                 MetricBar(metric: metric)
                     .padding(.horizontal, SavantGeo.padCard)
                     .padding(.vertical, 12)
@@ -769,7 +810,12 @@ struct PlayerProfileView: View {
             } else if !metric.id.hasPrefix("recent-stub-") {
                 // No game-log data for this metric, fall back to the season bar
                 // so the recent view still shows every percentile bar.
-                NavigationLink(value: MetricRoute(label: metric.label, category: metric.category, season: activeSeason)) {
+                NavigationLink(value: MetricRoute(
+                    label: metric.label,
+                    category: metric.category,
+                    phase: activePhase,
+                    season: activeSeason
+                )) {
                     MetricBar(metric: metric)
                         .padding(.horizontal, SavantGeo.padCard)
                         .padding(.vertical, 12)
@@ -796,7 +842,12 @@ struct PlayerProfileView: View {
                         )
                 }
             } else {
-                NavigationLink(value: MetricRoute(label: metric.label, category: metric.category, season: activeSeason)) {
+                NavigationLink(value: MetricRoute(
+                    label: metric.label,
+                    category: metric.category,
+                    phase: activePhase,
+                    season: activeSeason
+                )) {
                     DualMetricBar(
                         season: metric,
                         recent: recentMetric,
@@ -833,7 +884,7 @@ struct PlayerProfileView: View {
     /// stay in step automatically instead of via a hand-kept parallel list.
     private func rebuildRecentCurves() {
         recentCurves = LeaguePercentileCurves(
-            players: allPlayers,
+            players: percentileLeaguePlayers,
             playerType: player.playerType ?? (isPitcher ? "pitcher" : "batter"),
             labels: Array(Set(recentSpecs.map(\.seasonLabel))),
             category: isPitcher ? .pitching : .hitting
@@ -1086,6 +1137,7 @@ struct PlayerProfileView: View {
             NavigationLink(value: StandardStatRoute(
                 stat: metric.label,
                 category: Self.standardCategory(for: metric.label, statCategory: metric.category),
+                phase: activePhase,
                 season: activeSeason
             )) {
                 Group {

@@ -5,9 +5,25 @@ struct TeamDestination: Hashable {
     let abbr: String
 }
 
+/// A player link carries the slate that produced it. A plain `Player` route
+/// works on regular-season screens, but it loses context when a pushed
+/// leaderboard switches to Postseason without changing the tab behind it.
+struct PlayerRoute: Hashable {
+    let player: Player
+    let phase: SeasonPhase
+    let season: Int?
+
+    init(player: Player, phase: SeasonPhase = .regular, season: Int? = nil) {
+        self.player = player
+        self.phase = phase
+        self.season = season
+    }
+}
+
 struct MetricRoute: Hashable {
     let label: String
     let category: MetricCategory
+    var phase: SeasonPhase = .regular
     /// Which season's leaderboard to open. The player profile has its own
     /// season selector, so a route from a 2024 profile has to carry 2024,
     /// otherwise tapping K% there opened the current-season leaderboard.
@@ -18,6 +34,7 @@ struct MetricRoute: Hashable {
 struct StandardStatRoute: Hashable {
     let stat: String
     let category: MetricCategory
+    var phase: SeasonPhase = .regular
     var season: Int? = nil
 }
 
@@ -198,7 +215,7 @@ struct RootTabView: View {
 
     private var statsTab: some View {
         NavigationStack {
-            StatsView(viewModel: viewModel, onOpenTrends: { selection = Tab.trends.rawValue })
+            StatsView(viewModel: viewModel)
                 .navigationTitle("Stats")
                 .navigationBarTitleDisplayMode(.inline)
                 .modifier(SavantNavBar())
@@ -406,30 +423,68 @@ struct PlayerProfileDestination: ViewModifier {
     func body(content: Content) -> some View {
         content
             .navigationDestination(for: Player.self) { player in
-                let history = viewModel.playerHistories[player.playerId] ?? []
-                let seasonPlayer = history.first { $0.season == viewModel.selectedSeason } ?? player
-                PlayerProfileView(
-                    player: seasonPlayer,
-                    history: history,
-                    allPlayers: viewModel.seasonPlayers,
-                    isHistoricalLoading: viewModel.isHistoricalLoading,
-                    hasLoadedHistorical: viewModel.hasLoadedHistorical,
-                    historicalLoadingMessage: viewModel.loadingMessage,
-                    historicalLoadingProgress: viewModel.loadingProgress,
-                    loadHistorical: { await viewModel.loadHistoricalIfNeeded() },
-                    fetchGameLogs: { id, season in
-                        try await viewModel.fetchGameLogs(playerId: id, season: season)
-                    },
-                    recentFormLookup: { id, window in
-                        viewModel.recentForm(for: id, window: window)
-                    },
-                    loadRecentForm: { window in
-                        await viewModel.loadRecentFormIfNeeded(window: window)
-                    },
-                    comparisonCatalog: ComparisonCatalog(viewModel: viewModel)
-                )
-                    .modifier(SavantNavBarPublic())
+                profileView(player: player)
             }
+            .navigationDestination(for: PlayerRoute.self) { route in
+                profileView(
+                    player: route.player,
+                    requestedPhase: route.phase,
+                    requestedSeason: route.season
+                )
+            }
+    }
+
+    @ViewBuilder
+    private func profileView(
+        player: Player,
+        requestedPhase: SeasonPhase? = nil,
+        requestedSeason: Int? = nil
+    ) -> some View {
+        let history = viewModel.playerHistories[player.playerId] ?? []
+        let inferredPostseason = viewModel.selectedPhase == .postseason
+            && viewModel.postseasonPlayers.contains { $0.id == player.id }
+        let profilePhase = requestedPhase ?? (inferredPostseason ? .postseason : .regular)
+        let profileSeason = requestedSeason
+            ?? (profilePhase == .postseason ? StatScoutSeason.current : viewModel.selectedSeason)
+        let activePhase: SeasonPhase = profilePhase == .postseason && profileSeason == StatScoutSeason.current
+            ? .postseason
+            : .regular
+        let seasonPlayer = activePhase == .postseason
+            ? player
+            : history.first { $0.season == profileSeason } ?? player
+
+        PlayerProfileView(
+            player: seasonPlayer,
+            history: history,
+            phase: activePhase,
+            allPlayers: viewModel.players(forSeason: profileSeason, phase: activePhase),
+            regularSeasonPlayers: viewModel.players(
+                forSeason: StatScoutSeason.current,
+                phase: .regular
+            ),
+            isHistoricalLoading: viewModel.isHistoricalLoading,
+            hasLoadedHistorical: viewModel.hasLoadedHistorical,
+            historicalLoadingMessage: viewModel.loadingMessage,
+            historicalLoadingProgress: viewModel.loadingProgress,
+            loadHistorical: { await viewModel.loadHistoricalIfNeeded() },
+            fetchGameLogs: { id, season in
+                // The profile can switch to a historical year. Let the view
+                // model resolve that year to regular season instead of pinning
+                // every request to the profile's opening phase.
+                let phase: SeasonPhase = activePhase == .postseason && season == StatScoutSeason.current
+                    ? .postseason
+                    : .regular
+                return try await viewModel.fetchGameLogs(playerId: id, season: season, phase: phase)
+            },
+            recentFormLookup: { id, window in
+                viewModel.recentForm(for: id, window: window)
+            },
+            loadRecentForm: { window in
+                await viewModel.loadRecentFormIfNeeded(window: window)
+            },
+            comparisonCatalog: ComparisonCatalog(viewModel: viewModel, phase: activePhase)
+        )
+            .modifier(SavantNavBarPublic())
     }
 }
 
@@ -456,7 +511,8 @@ private struct StandardDestinations: ViewModifier {
                     viewModel: viewModel,
                     metricLabel: route.label,
                     metricCategory: route.category,
-                    initialSeason: route.season ?? viewModel.selectedSeason
+                    initialSeason: route.season ?? viewModel.selectedSeason,
+                    phase: route.phase
                 )
                     .modifier(SavantNavBar())
             }
@@ -465,7 +521,8 @@ private struct StandardDestinations: ViewModifier {
                     viewModel: viewModel,
                     initialStat: route.stat,
                     initialCategory: route.category,
-                    initialSeason: route.season ?? viewModel.selectedSeason
+                    initialSeason: route.season ?? viewModel.selectedSeason,
+                    phase: route.phase
                 )
                     .modifier(SavantNavBar())
             }
@@ -473,7 +530,8 @@ private struct StandardDestinations: ViewModifier {
                 PlayerComparisonView(
                     playerA: route.playerA,
                     playerB: route.playerB,
-                    catalog: ComparisonCatalog(viewModel: viewModel)
+                    phase: route.phase,
+                    catalog: ComparisonCatalog(viewModel: viewModel, phase: route.phase)
                 )
                     .modifier(SavantNavBar())
             }

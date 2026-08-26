@@ -2,6 +2,6 @@ October is here, and StatScout follows the season into it.
 
 Every board can now be switched between Regular Season and Postseason from the season menu, on the Stats screen and on any team page. Postseason boards carry playoff standard lines and playoff game logs: who is actually producing in October, not who did it in June.
 
-The postseason option appears on its own once the playoffs begin, so there is nothing to turn on.
+The postseason option is visible in the season menu and becomes selectable as soon as the first playoff game is ingested, so there is nothing to turn on.
 
 Note that Statcast percentile rankings remain regular-season figures, matching Baseball Savant, which does not publish postseason percentiles.

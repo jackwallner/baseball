@@ -3,10 +3,9 @@
 -- no new model and no changes to Player's decoder (where handedness, metrics
 -- and games are all required keys).
 --
--- metrics stays empty and is expected to: Savant publishes no postseason
--- percentile leaderboards, so an empty array here is the honest answer rather
--- than a gap waiting to be filled. It is what makes the percentile board
--- correctly render nothing for October.
+-- metrics starts empty and is populated by the later postseason percentile
+-- rollup. Those values are regular-season curve lookups, not invented
+-- postseason leaderboard percentiles.
 
 alter table public.player_postseason_stats
   add column if not exists handedness text not null default '',

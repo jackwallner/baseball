@@ -35,7 +35,7 @@ struct PostseasonDecision: Equatable {
 enum PostseasonCampaign {
     /// Bumping this re-shows the card to everyone who dismissed the last one,
     /// which is what a new season needs and a redraw of the same one does not.
-    static let identifier = "postseason-2026"
+    static var identifier: String { "postseason-\(StatScoutSeason.current)" }
     static let storageKey = "lastSeenPostseasonCard"
 
     static func decision(

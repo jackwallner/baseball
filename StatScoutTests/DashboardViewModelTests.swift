@@ -365,7 +365,12 @@ struct MockProvider: StatcastProviding, @unchecked Sendable {
         return []
     }
 
-    func fetchTeamGameLogs(team: String, season: Int, sinceDate: Date) async throws -> [PlayerGameLog] {
+    func fetchTeamGameLogs(
+        team: String,
+        season: Int,
+        sinceDate: Date,
+        phase: SeasonPhase
+    ) async throws -> [PlayerGameLog] {
         if let error { throw error }
         return []
     }
@@ -382,9 +387,11 @@ struct MockProvider: StatcastProviding, @unchecked Sendable {
     }
 
     var postseasonPlayers: [Player] = []
+    var postseasonError: Error?
 
     func fetchPostseasonPlayers(season: Int) async throws -> [Player] {
-        postseasonPlayers
+        if let postseasonError { throw postseasonError }
+        return postseasonPlayers
     }
 
     func fetchDataThroughDate(season: Int) async throws -> Date? {
@@ -526,7 +533,7 @@ final class PostseasonCampaignTests: XCTestCase {
     }
 }
 
-/// Postseason standard lines, and the rule that percentiles never follow them.
+/// Postseason lines and the states the boards need to render honestly.
 final class PostseasonBoardTests: XCTestCase {
     private func player(_ id: Int, hr: String) -> Player {
         Player(
@@ -567,15 +574,26 @@ final class PostseasonBoardTests: XCTestCase {
     }
 
     @MainActor
-    func testPostseasonPlayersCarryNoPercentiles() async {
-        /// Not an oversight and not a loading state. Savant publishes no
-        /// postseason percentile leaderboards, so a postseason percentile would
-        /// be a number nobody could check the app against.
+    func testPostseasonPlayersCanRepresentRowsWithoutMetricData() async {
+        /// The API can return standard-only rows before the percentile rollup
+        /// has landed. Once the request completes, that is a real data state,
+        /// not a loading state.
         let vm = DashboardViewModel(provider: provider(with: [player(1, hr: "4")]))
         vm.postseasonThrough = Date()
 
         await vm.loadPostseasonIfNeeded()
         XCTAssertTrue(vm.postseasonPlayers.allSatisfy { $0.metrics.isEmpty })
+    }
+
+    @MainActor
+    func testAnEmptyPostseasonResponseIsMarkedCompleteForRefreshUi() async {
+        let vm = DashboardViewModel(provider: provider(with: []))
+        vm.postseasonThrough = Date()
+
+        await vm.loadPostseasonIfNeeded()
+
+        XCTAssertTrue(vm.postseasonLoadCompleted)
+        XCTAssertFalse(vm.postseasonLoadPending)
     }
 
     @MainActor
@@ -588,6 +606,22 @@ final class PostseasonBoardTests: XCTestCase {
         XCTAssertEqual(vm.selectedPhase, .postseason)
         await vm.loadPostseasonIfNeeded()
         XCTAssertFalse(vm.postseasonPlayers.isEmpty)
+    }
+
+    @MainActor
+    func testPostseasonLoadSurfacesARecoverableError() async {
+        var provider = MockProvider()
+        provider.postseasonError = URLError(.notConnectedToInternet)
+        let vm = DashboardViewModel(provider: provider)
+        vm.postseasonThrough = Date()
+
+        await vm.loadPostseasonIfNeeded()
+
+        XCTAssertFalse(vm.isLoadingPostseason)
+        XCTAssertEqual(
+            vm.postseasonErrorMessage,
+            "Couldn't load postseason data. Check your connection and try again."
+        )
     }
 }
 
@@ -651,6 +685,17 @@ final class PostseasonLeaderboardTests: XCTestCase {
     }
 
     @MainActor
+    func testASeasonRouteCanResolveThePostseasonRoster() async {
+        let vm = loaded()
+        await vm.loadPostseasonIfNeeded()
+
+        XCTAssertEqual(
+            vm.players(forSeason: StatScoutSeason.current, phase: .postseason).map(\.playerId),
+            [99]
+        )
+    }
+
+    @MainActor
     func testLeavingTheSeasonRestoresTheRegularBoard() async {
         let vm = loaded()
         await vm.loadPostseasonIfNeeded()
@@ -668,5 +713,9 @@ final class PostseasonLeaderboardTests: XCTestCase {
             vm.postseasonReferenceNote,
             "Percentiles vs. \(StatScoutSeason.current) regular season"
         )
+    }
+
+    func testTheCampaignIdentifierFollowsTheCurrentSeason() {
+        XCTAssertEqual(PostseasonCampaign.identifier, "postseason-\(StatScoutSeason.current)")
     }
 }

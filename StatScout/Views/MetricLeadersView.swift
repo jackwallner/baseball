@@ -5,6 +5,12 @@ typealias MetricLeaderEntry = (label: String, category: MetricCategory, best: (p
 struct MetricLeadersView: View {
     @EnvironmentObject private var store: StoreService
     let metrics: [MetricLeaderEntry]
+    var season: Int? = nil
+    var isLoading: Bool = false
+    var phase: SeasonPhase = .regular
+    var postseasonLoadCompleted: Bool = false
+    var errorMessage: String?
+    var retry: (() async -> Void)?
 
     private var groupedByCategory: [(MetricCategory, [MetricLeaderEntry])] {
         let grouped = Dictionary(grouping: metrics) { $0.category }
@@ -17,7 +23,49 @@ struct MetricLeadersView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
-                if metrics.isEmpty {
+                if phase == .postseason {
+                    PostseasonReferenceNote(referenceSeason: StatScoutSeason.current)
+                }
+                if isLoading {
+                    ContentUnavailableView {
+                        Label("Loading postseason…", systemImage: "clock")
+                    } description: {
+                        Text("Pulling the latest postseason metrics.")
+                    }
+                    .padding(.vertical, 48)
+                } else if let errorMessage, !errorMessage.isEmpty {
+                    ContentUnavailableView {
+                        Label("Postseason data unavailable", systemImage: "exclamationmark.triangle")
+                    } description: {
+                        Text(errorMessage)
+                    } actions: {
+                        if let retry {
+                            Button("Retry") {
+                                Task { await retry() }
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .tint(SavantPalette.savantRed)
+                        }
+                    }
+                    .padding(.vertical, 48)
+                } else if phase == .postseason,
+                          postseasonLoadCompleted,
+                          metrics.isEmpty {
+                    ContentUnavailableView {
+                        Label("Postseason stats not ready", systemImage: "clock.arrow.circlepath")
+                    } description: {
+                        Text("The playoff games are in, but the latest player lines have not landed yet.")
+                    } actions: {
+                        if let retry {
+                            Button("Refresh") {
+                                Task { await retry() }
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .tint(SavantPalette.savantRed)
+                        }
+                    }
+                    .padding(.vertical, 48)
+                } else if metrics.isEmpty {
                     ContentUnavailableView {
                         Label("No metric data", systemImage: "chart.bar")
                     } description: {
@@ -82,7 +130,11 @@ struct MetricLeadersView: View {
 
             ForEach(Array(group.1.enumerated()), id: \.offset) { index, item in
                 HStack(spacing: 8) {
-                    NavigationLink(value: MetricRoute(label: item.label, category: item.category)) {
+                    NavigationLink(value: MetricRoute(
+                        label: item.label,
+                        category: item.category,
+                        phase: phase
+                    )) {
                         HStack(spacing: 2) {
                             Text(item.label)
                                 .font(SavantType.smallBold)
@@ -96,7 +148,11 @@ struct MetricLeadersView: View {
                     .buttonStyle(.plain)
 
                     if let best = item.best {
-                        NavigationLink(value: best.player) {
+                        NavigationLink(value: PlayerRoute(
+                            player: best.player,
+                            phase: phase,
+                            season: season
+                        )) {
                             HStack(spacing: 6) {
                                 PlayerHeadshot(team: best.player.team, initials: best.player.initials, size: 24)
                                 VStack(alignment: .leading, spacing: 1) {
@@ -123,7 +179,11 @@ struct MetricLeadersView: View {
                     }
 
                     if let worst = item.worst {
-                        NavigationLink(value: worst.player) {
+                        NavigationLink(value: PlayerRoute(
+                            player: worst.player,
+                            phase: phase,
+                            season: season
+                        )) {
                             HStack(spacing: 6) {
                                 PlayerHeadshot(team: worst.player.team, initials: worst.player.initials, size: 24)
                                 VStack(alignment: .leading, spacing: 1) {

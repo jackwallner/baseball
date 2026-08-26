@@ -57,9 +57,8 @@ struct SeasonMenu<Trigger: View>: View {
 /// Season type comes *first*, and that ordering is the whole reason one menu can
 /// carry both. The season list is twelve rows (2015 through the current year),
 /// taller than a menu shows at once, so with seasons on top the two phase rows
-/// sit below the fold: the control exists, scrolled to the bottom of a long
-/// list, and to anyone opening the menu the postseason simply isn't switchable.
-/// Two rows above a scrolling list cost the season picker nothing.
+/// sit below the fold. Two rows above a scrolling list cost the season picker
+/// nothing.
 ///
 /// Use this anywhere a number on screen is phase-filtered. A screen whose every
 /// figure depends on `selectedPhase` but which only offers `SeasonMenu` is a
@@ -68,8 +67,9 @@ struct SeasonPhaseMenu<Trigger: View>: View {
     let seasons: [Int]
     let selectedSeason: Int
     let selectedPhase: SeasonPhase
-    /// Hidden entirely until the pipeline actually holds postseason data, so
-    /// the control never offers a board it would draw empty.
+    /// The postseason action stays visible before data lands, but is disabled
+    /// with an explanation. Hiding the only entry point made the submitted
+    /// feature impossible for a reviewer or a user to discover.
     let postseasonAvailable: Bool
     let isLocked: (Int) -> Bool
     let onSelectSeason: (Int) -> Void
@@ -78,9 +78,14 @@ struct SeasonPhaseMenu<Trigger: View>: View {
 
     var body: some View {
         Menu {
-            if postseasonAvailable {
-                Section("Season type") {
-                    ForEach(SeasonPhase.allCases) { phase in
+            Section("Season type") {
+                ForEach(SeasonPhase.allCases) { phase in
+                    if phase == .postseason && !postseasonAvailable {
+                        Button {} label: {
+                            Label("Postseason (after first playoff game)", systemImage: "calendar.badge.clock")
+                        }
+                        .disabled(true)
+                    } else {
                         Button {
                             UIImpactFeedbackGenerator(style: .light).impactOccurred()
                             onSelectPhase(phase)

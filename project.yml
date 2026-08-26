@@ -60,8 +60,6 @@ targets:
       path: StatScout/StatScout.entitlements
     dependencies:
       - package: RevenueCat
-      - sdk: XCTest.framework
-        weak: true
 
   StatScoutTests:
     type: bundle.unit-test

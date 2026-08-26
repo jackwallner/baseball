@@ -3,7 +3,8 @@ import SwiftUI
 struct ComparisonRoute: Hashable, Identifiable {
     let playerA: Player
     let playerB: Player
-    var id: String { "\(playerA.id)-vs-\(playerB.id)" }
+    var phase: SeasonPhase = .regular
+    var id: String { "\(playerA.id)-vs-\(playerB.id)-\(phase.rawValue)" }
 }
 
 /// Everything a comparison screen needs to swap a side out without owning the
@@ -43,11 +44,15 @@ struct ComparisonCatalog {
     }
 
     @MainActor
-    init(viewModel: DashboardViewModel) {
+    init(viewModel: DashboardViewModel, phase: SeasonPhase = .regular) {
         self.init(
             seasons: viewModel.availableSeasons,
-            roster: { viewModel.players(forSeason: $0).sorted { $0.name < $1.name } },
+            roster: { viewModel.players(forSeason: $0, phase: phase).sorted { $0.name < $1.name } },
             resolve: { player, season in
+                if phase == .postseason, season == StatScoutSeason.current {
+                    return viewModel.players(forSeason: season, phase: phase)
+                        .first { $0.playerId == player.playerId }
+                }
                 if player.season == season { return player }
                 return viewModel.playerHistories[player.playerId]?.first { $0.season == season }
             },
@@ -62,6 +67,7 @@ struct PlayerComparisonView: View {
     @EnvironmentObject private var store: StoreService
     let playerA: Player
     let playerB: Player
+    var phase: SeasonPhase = .regular
     /// Nil disables in-page swapping; the comparison is then whatever was
     /// pushed.
     var catalog: ComparisonCatalog? = nil
@@ -281,7 +287,11 @@ struct PlayerComparisonView: View {
             // The identity opens his page. A comparison is where you decide a
             // player is worth a closer look, and until now it was the one
             // screen in the app where his name wasn't a link.
-            NavigationLink(value: player) {
+            NavigationLink(value: PlayerRoute(
+                player: player,
+                phase: phase,
+                season: player.season
+            )) {
                 VStack(spacing: 6) {
                     PlayerHeadshot(team: player.team, initials: player.initials, size: 56)
                     Text(player.name)
