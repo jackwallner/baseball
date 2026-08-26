@@ -99,30 +99,32 @@ platform :ios do
           - Historical seasons, player comparisons, year-over-year tracking
           - Test with Sandbox account via RevenueCat
 
-          New in this version: a seasonal "stretch run" card on the Stats board.
-          It is merchandising only, shown between 2026-08-18 and 2026-09-30, and
-          it grants nothing. For a free user its button opens the same StatScout+
-          pitch reachable from the existing upgrade entry points. For a
-          subscriber it shows a benefit message whose button switches to the
-          Trends tab. There is no promo code, no discount, and no price quoted
-          anywhere in the card: all prices come from StoreKit.
+          New in this version: postseason data. Any board can be switched
+          between "Regular Season" and "Postseason" from the season menu on the
+          Stats and team screens. The postseason rows only appear once the
+          backend actually holds playoff data, so before the playoffs begin the
+          control is not shown at all.
 
-          Response to the 1.4.4 rejection:
+          Also new: a postseason card on the Stats board. It is merchandising
+          only and grants nothing. For a free user its button opens the same
+          StatScout+ pitch reachable from the existing upgrade entry points; for
+          a subscriber it switches the boards to the postseason. There is no
+          promo code, no discount, and no price quoted anywhere in the card: all
+          prices come from StoreKit.
 
-          2.1(b): both auto-renewable subscriptions
-          (com.jackwallner.baseball.pro.monthly and .yearly) have now been
-          submitted for review and are Waiting for Review alongside this build.
-          Each was carrying an unsubmitted en-US display-name change
-          ("StatScout Pro" to "StatScout+"), which is what left them out of the
-          previous review. Both carry an App Review screenshot.
+          3.1.2(c), carried forward from the 1.4.4 review: the total billed
+          amount is the most conspicuous pricing element in every purchase flow.
+          Each purchase button has the price directly above it, set larger and
+          heavier than any other pricing text on the screen, including the
+          free-trial wording on the button and the small print beneath it.
+          Onboarding shows "$5.99 / month" above its button; the trial sheet and
+          the plan sheet show the selected plan's price the same way. That
+          pricing slot is a fixed height, so it cannot move the purchase button
+          while StoreKit is still loading.
 
-          3.1.2(c): the total billed amount is now the most conspicuous
-          pricing element in every purchase flow. Each purchase button now has
-          the price directly above it, set larger and heavier than any other
-          pricing text on the screen, including the free-trial wording on the
-          button and the small print beneath it. Onboarding shows
-          "$5.99 / month" above its button; the trial sheet and the plan sheet
-          show the selected plan's price the same way.
+          2.1(b), also carried forward: both auto-renewable subscriptions
+          (com.jackwallner.baseball.pro.monthly and .yearly) are approved and
+          live.
 
           Known: Light mode only. No shadows. No accounts. No social features.
         NOTES
