@@ -104,3 +104,78 @@ def test_the_last_overnight_hour_still_writes_the_season_line(monkeypatch):
     run_season, run_trends, _ = refresh_guard.decide()
     assert run_season
     assert run_trends
+
+
+class _FakeQuery:
+    """Chainable stand-in for the supabase query builder."""
+
+    def __init__(self, rows):
+        self._rows = rows
+
+    def select(self, *_a, **_k):
+        return self
+
+    def eq(self, *_a, **_k):
+        return self
+
+    def order(self, *_a, **_k):
+        return self
+
+    def limit(self, *_a, **_k):
+        return self
+
+    def execute(self):
+        class Resp:
+            data = self._rows
+
+        return Resp()
+
+
+class _FakeClient:
+    def __init__(self, by_table):
+        self._by_table = by_table
+
+    def table(self, name):
+        value = self._by_table.get(name)
+        return _FakeQuery([{"game_date": value}] if value else [])
+
+
+def _client(monkeypatch, regular=None, postseason=None):
+    monkeypatch.setenv("SUPABASE_URL", "https://example.supabase.co")
+    monkeypatch.setenv("SUPABASE_SERVICE_ROLE_KEY", "service-role")
+    fake = _FakeClient({
+        "player_game_logs": regular,
+        "player_postseason_game_logs": postseason,
+    })
+    monkeypatch.setattr(refresh_guard, "create_client", lambda url, key: fake)
+
+
+class TestAlreadyIngestedSpansBothPhases:
+    """In October the night's work lands in the postseason table.
+
+    Reading only the regular-season one would answer "not ingested" every night
+    of the playoffs, so every cron attempt would re-run the full season
+    snapshot and this guard would stop guarding anything.
+    """
+
+    def test_a_playoff_game_counts_as_ingested(self, monkeypatch):
+        _client(monkeypatch, regular="2026-09-27", postseason="2026-10-14")
+        assert refresh_guard._already_ingested(2026, date(2026, 10, 14))
+
+    def test_a_playoff_day_not_yet_written_is_not_ingested(self, monkeypatch):
+        _client(monkeypatch, regular="2026-09-27", postseason="2026-10-13")
+        assert not refresh_guard._already_ingested(2026, date(2026, 10, 14))
+
+    def test_the_regular_season_table_alone_would_have_said_no(self, monkeypatch):
+        """The bug this guards against, stated directly."""
+        _client(monkeypatch, regular="2026-09-27", postseason=None)
+        assert not refresh_guard._already_ingested(2026, date(2026, 10, 14))
+
+    def test_in_season_behaviour_is_unchanged(self, monkeypatch):
+        _client(monkeypatch, regular="2026-07-27", postseason=None)
+        assert refresh_guard._already_ingested(2026, date(2026, 7, 27))
+        assert not refresh_guard._already_ingested(2026, date(2026, 7, 28))
+
+    def test_no_rows_anywhere_means_not_ingested(self, monkeypatch):
+        _client(monkeypatch)
+        assert not refresh_guard._already_ingested(2026, date(2026, 7, 27))

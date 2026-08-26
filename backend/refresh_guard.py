@@ -35,11 +35,14 @@ Env: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY.
 import logging
 import os
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
+from typing import Optional
 
 import requests
 from dotenv import load_dotenv
 from supabase import create_client
+
+from tables import GAME_LOG_TABLES
 
 load_dotenv()
 
@@ -89,17 +92,35 @@ def _already_ingested(season: int, day) -> bool:
         logger.error("Missing Supabase credentials; letting the run proceed.")
         return False
     client = create_client(url, key)
-    resp = (
-        client.table("player_game_logs")
-        .select("game_date")
-        .eq("season", season)
-        .order("game_date", desc=True)
-        .limit(1)
-        .execute()
-    )
-    if not resp.data:
+
+    # Both phases. In October the regular-season table stops at the last day of
+    # September and the night's real work lands in the postseason one, so
+    # asking only the first would answer "not ingested" every night of the
+    # playoffs. Every cron attempt would then re-run the full season snapshot,
+    # and this guard, whose entire job is one update per day, would stop
+    # guarding anything.
+    latest: Optional[date] = None
+    for table in GAME_LOG_TABLES:
+        try:
+            resp = (
+                client.table(table)
+                .select("game_date")
+                .eq("season", season)
+                .order("game_date", desc=True)
+                .limit(1)
+                .execute()
+            )
+        except Exception as exc:
+            logger.warning("Could not read %s (%s); ignoring it.", table, exc)
+            continue
+        if not resp.data:
+            continue
+        seen = datetime.strptime(resp.data[0]["game_date"], "%Y-%m-%d").date()
+        if latest is None or seen > latest:
+            latest = seen
+
+    if latest is None:
         return False
-    latest = datetime.strptime(resp.data[0]["game_date"], "%Y-%m-%d").date()
     return latest >= day
 
 

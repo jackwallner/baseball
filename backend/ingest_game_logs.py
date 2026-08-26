@@ -24,6 +24,14 @@ from dotenv import load_dotenv
 from pybaseball import statcast
 from supabase import create_client
 
+from tables import (
+    GAME_LOG_TABLES,
+    POSTSEASON_TABLE,
+    POSTSEASON_TYPES,
+    REGULAR_SEASON,
+    REGULAR_SEASON_TABLE,
+)
+
 load_dotenv()
 
 logger = logging.getLogger(__name__)
@@ -37,7 +45,10 @@ SUPABASE_SERVICE_ROLE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
 # the World Series. What actually gets stored is decided by game type below,
 # not by these bounds, which only cap how far a --full run reaches.
 SEASON_START = date(2026, 3, 20)
-SEASON_END = date(2026, 11, 5)
+# Past any plausible Game 7. A World Series that runs long (or slips on a rain
+# delay) must not fall outside the window and be lost: days with no games cost
+# nothing, because the refresh guard stops the run before it starts.
+SEASON_END = date(2026, 11, 15)
 
 # Statcast's own game_type codes. The date bound above was the only thing ever
 # holding spring training out, and it doesn't: pybaseball 2.2.7's statcast()
@@ -51,24 +62,9 @@ SEASON_END = date(2026, 11, 5)
 # with no game_type filter of its own, so what we write is the only control we
 # have over what it shows.
 #
-# Regular season and postseason are both collected, but they are written to
-# different tables. See REGULAR_SEASON_TABLE / POSTSEASON_TABLE below. Spring
-# training is dropped outright: nothing in the app has ever wanted it.
-REGULAR_SEASON = "R"
-SPRING_TRAINING = "S"
-POSTSEASON_TYPES = ("F", "D", "L", "W")
-
-# Where each phase lands.
-#
-# The split is not organisational. A shipped build queries player_game_logs
-# with no game_type filter of its own, so a postseason row in that table is
-# immediately visible to an app already in users' hands, mislabelled as regular
-# season. A separate relation makes that impossible by construction instead of
-# by a flag someone has to remember not to flip, which is what lets the
-# pipeline start collecting the postseason well before a phase-aware release
-# exists to read it.
-REGULAR_SEASON_TABLE = "player_game_logs"
-POSTSEASON_TABLE = "player_postseason_game_logs"
+# Regular season and postseason are both collected, but land in different
+# tables; see `tables` for why. Spring training is dropped outright: nothing in
+# the app has ever wanted it.
 
 # Pull pitch-level data in chunks. Wider = fewer HTTP calls but more memory
 # and a higher chance of a Savant timeout. 7 days is a reasonable middle.
@@ -146,7 +142,7 @@ def _latest_game_date(client, season: int) -> Optional[date]:
     postseason rows, and still find the same stale maximum.
     """
     latest: Optional[date] = None
-    for table in (REGULAR_SEASON_TABLE, POSTSEASON_TABLE):
+    for table in GAME_LOG_TABLES:
         try:
             resp = (
                 client.table(table)

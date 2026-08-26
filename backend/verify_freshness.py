@@ -30,6 +30,8 @@ import requests
 from dotenv import load_dotenv
 from supabase import create_client
 
+from tables import POSTSEASON_TABLE, REGULAR_SEASON_TABLE
+
 load_dotenv()
 
 logger = logging.getLogger(__name__)
@@ -93,14 +95,34 @@ def check() -> tuple[bool, str]:
         return True, "Missing Supabase credentials; skipping the freshness check."
 
     client = create_client(url, key)
-    logs_through = _max_date(client, "player_game_logs", "game_date", season)
+
+    # Game logs are checked across both phases, because in October the newest
+    # game we hold is a playoff game and it lives in the postseason table.
+    regular_through = _max_date(client, REGULAR_SEASON_TABLE, "game_date", season)
+    post_through = _max_date(client, POSTSEASON_TABLE, "game_date", season)
+    logs_through = max((d for d in (regular_through, post_through) if d), default=None)
+
     trends_through = _max_date(client, "player_recent_form", "as_of", season)
+
+    # The rolling windows are regular-season windows by design, so once the
+    # playoffs begin they correctly stop moving, and holding them to
+    # "yesterday" would report a frozen-by-design number as stale every night
+    # of October and open an issue for it.
+    #
+    # The relaxation is deliberately narrow: it applies only once a postseason
+    # game is newer than any regular-season one, which is the only situation in
+    # which the windows are *supposed* to be behind. In season, a lagging
+    # rollup is still a lagging rollup and still fails.
+    postseason_underway = post_through is not None and (
+        regular_through is None or post_through > regular_through
+    )
+    trends_expected = regular_through if postseason_underway and regular_through else yesterday
 
     gaps = []
     if logs_through is None or logs_through < yesterday:
         gaps.append(f"game logs reach {logs_through}, expected {yesterday}")
-    if trends_through is None or trends_through < yesterday:
-        gaps.append(f"recent-form windows reach {trends_through}, expected {yesterday}")
+    if trends_through is None or trends_through < trends_expected:
+        gaps.append(f"recent-form windows reach {trends_through}, expected {trends_expected}")
 
     if gaps:
         return False, "Data is behind: " + "; ".join(gaps)

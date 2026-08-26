@@ -19,14 +19,22 @@ def frozen_now(monkeypatch):
     monkeypatch.setattr(verify_freshness, "datetime", FakeDatetime)
 
 
-def _tables(monkeypatch, logs, trends):
+def _tables(monkeypatch, logs, trends, postseason=None):
+    """Stub the three dates check() reads: regular-season logs, the rolling
+    windows, and (once October arrives) the postseason logs."""
     monkeypatch.setenv("SUPABASE_URL", "https://example.supabase.co")
     monkeypatch.setenv("SUPABASE_SERVICE_ROLE_KEY", "service-role")
     monkeypatch.setattr(verify_freshness, "create_client", lambda url, key: object())
+
+    by_table = {
+        "player_game_logs": logs,
+        "player_postseason_game_logs": postseason,
+        "player_recent_form": trends,
+    }
     monkeypatch.setattr(
         verify_freshness,
         "_max_date",
-        lambda client, table, column, season: logs if table == "player_game_logs" else trends,
+        lambda client, table, column, season: by_table[table],
     )
 
 
@@ -87,3 +95,59 @@ def test_only_the_final_attempt_fails_the_run(monkeypatch, frozen_now, capsys):
     with pytest.raises(SystemExit) as exit_info:
         verify_freshness.main()
     assert exit_info.value.code == 1
+
+
+def test_october_does_not_call_frozen_windows_stale(monkeypatch):
+    """The playoffs are on and the rolling windows have correctly stopped.
+
+    Recent Form is a regular-season board, so its as_of stays on the last day
+    of the regular season all October. Holding it to "yesterday" would fail the
+    nightly run and open an issue every single night of the postseason.
+    """
+
+    class FakeDatetime(verify_freshness.datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return datetime(2026, 10, 15, 12, 0, tzinfo=timezone.utc)
+
+    monkeypatch.setattr(verify_freshness, "datetime", FakeDatetime)
+    monkeypatch.setattr(verify_freshness, "_finished_games", lambda day: 2)
+    _tables(
+        monkeypatch,
+        logs=date(2026, 9, 27),
+        trends=date(2026, 9, 27),
+        postseason=date(2026, 10, 14),
+    )
+    is_fresh, message = verify_freshness.check()
+    assert is_fresh, message
+
+
+def test_october_still_catches_a_postseason_ingest_that_stalled(monkeypatch):
+    """Relaxing the windows must not relax the game logs."""
+
+    class FakeDatetime(verify_freshness.datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return datetime(2026, 10, 15, 12, 0, tzinfo=timezone.utc)
+
+    monkeypatch.setattr(verify_freshness, "datetime", FakeDatetime)
+    monkeypatch.setattr(verify_freshness, "_finished_games", lambda day: 2)
+    _tables(
+        monkeypatch,
+        logs=date(2026, 9, 27),
+        trends=date(2026, 9, 27),
+        postseason=date(2026, 10, 11),
+    )
+    is_fresh, message = verify_freshness.check()
+    assert not is_fresh
+    assert "game logs reach 2026-10-11" in message
+
+
+def test_in_season_a_lagging_rollup_still_fails(monkeypatch, frozen_now):
+    """The October relaxation must not leak into the regular season: logs
+    current, rollup behind, still stale."""
+    monkeypatch.setattr(verify_freshness, "_finished_games", lambda day: 15)
+    _tables(monkeypatch, logs=date(2026, 7, 28), trends=date(2026, 7, 27))
+    is_fresh, message = verify_freshness.check()
+    assert not is_fresh
+    assert "recent-form windows reach 2026-07-27" in message
