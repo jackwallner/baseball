@@ -65,6 +65,13 @@ struct StatsView: View {
         .background(SavantPalette.canvas)
         // A category the standard board has no stats for would otherwise leave
         // the board ranking by a stat that isn't in its own menu.
+        // Percentiles do not exist for the postseason, so the boards that rank
+        // by one have nothing to draw. Rather than show an empty leaderboard
+        // under a Postseason pill, October lands on the standard line, which is
+        // the board that actually has October numbers.
+        .onChange(of: viewModel.selectedPhase) { _, phase in
+            if phase == .postseason, board != .standard { board = .standard }
+        }
         .onChange(of: viewModel.selectedCategory) { _, _ in
             guard !StandardStatCatalog.stats(for: category).contains(standardStat) else { return }
             standardStat = StandardStatCatalog.defaultStat(for: category)
@@ -92,6 +99,14 @@ struct StatsView: View {
     /// The standard board reads the same qualifier and position filter as the
     /// advanced one, so switching vocabularies doesn't silently widen the pool.
     private var standardBoardPlayers: [Player] {
+        // The postseason has its own rows, and no qualifier: a five-game series
+        // is not a sample you can hold to 3.1 PA per team game, and gating it
+        // that way would empty the board of the players everyone came to see.
+        if viewModel.selectedPhase == .postseason {
+            let players = viewModel.postseasonPlayers
+            guard viewModel.positionFilterApplies, viewModel.positionFilter != .all else { return players }
+            return players.filter { viewModel.positionFilter.matches($0) }
+        }
         let players = viewModel.qualifiedSeasonPlayers
         guard viewModel.positionFilterApplies, viewModel.positionFilter != .all else { return players }
         return players.filter { viewModel.positionFilter.matches($0) }

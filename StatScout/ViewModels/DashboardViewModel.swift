@@ -54,6 +54,24 @@ final class DashboardViewModel {
 
     var postseasonAvailable: Bool { postseasonThrough != nil }
 
+    /// Postseason standard lines, loaded on demand the first time the phase is
+    /// switched. Empty `metrics` is not a loading state: Savant publishes no
+    /// postseason percentile leaderboards, so these players will never have a
+    /// percentile and the boards that rank by one must not offer October.
+    var postseasonPlayers: [Player] = []
+    var isLoadingPostseason = false
+    private var hasLoadedPostseason = false
+
+    func loadPostseasonIfNeeded() async {
+        guard postseasonAvailable, !hasLoadedPostseason, !isLoadingPostseason else { return }
+        isLoadingPostseason = true
+        defer { isLoadingPostseason = false }
+        if let players = try? await provider.fetchPostseasonPlayers(season: StatScoutSeason.current) {
+            postseasonPlayers = players
+            hasLoadedPostseason = true
+        }
+    }
+
     /// True when a phase control should appear at all: the postseason exists and
     /// we're looking at the season that has one.
     var offersPhaseChoice: Bool {
@@ -70,6 +88,9 @@ final class DashboardViewModel {
     func selectPhase(_ phase: SeasonPhase) {
         guard phase == .regular || offersPhaseChoice else { return }
         selectedPhase = phase
+        if phase == .postseason {
+            Task { await loadPostseasonIfNeeded() }
+        }
     }
 
     // User-selected sort metric per category. Overrides the auto-priority pick when present

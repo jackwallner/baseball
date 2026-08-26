@@ -381,6 +381,12 @@ struct MockProvider: StatcastProviding, @unchecked Sendable {
         postseasonThrough
     }
 
+    var postseasonPlayers: [Player] = []
+
+    func fetchPostseasonPlayers(season: Int) async throws -> [Player] {
+        postseasonPlayers
+    }
+
     func fetchDataThroughDate(season: Int) async throws -> Date? {
         if let error { throw error }
         return dataThrough
@@ -517,5 +523,70 @@ final class PostseasonCampaignTests: XCTestCase {
         XCTAssertTrue(
             decide(postseasonThrough: landed, seenCampaign: "postseason-2025").shouldPresent
         )
+    }
+}
+
+/// Postseason standard lines, and the rule that percentiles never follow them.
+final class PostseasonBoardTests: XCTestCase {
+    private func player(_ id: Int, hr: String) -> Player {
+        Player(
+            playerId: id, name: "A", team: "LAD", position: "CF", handedness: "R/R",
+            imageURL: nil, updatedAt: Date(), season: StatScoutSeason.current,
+            metrics: [],
+            standardStats: [StandardStat(id: "std-hit-HR", label: "HR", value: hr)],
+            games: []
+        )
+    }
+
+    /// MockProvider is a value type, so the roster has to be set before the view
+    /// model takes its copy.
+    private func provider(with players: [Player]) -> MockProvider {
+        var provider = MockProvider()
+        provider.postseasonPlayers = players
+        return provider
+    }
+
+    @MainActor
+    func testPostseasonPlayersLoadWhenThePhaseIsPicked() async {
+        let vm = DashboardViewModel(provider: provider(with: [player(1, hr: "4")]))
+        vm.selectedSeason = StatScoutSeason.current
+        vm.postseasonThrough = Date()
+
+        await vm.loadPostseasonIfNeeded()
+        XCTAssertEqual(vm.postseasonPlayers.count, 1)
+        XCTAssertEqual(vm.postseasonPlayers.first?.standardStats?.first?.value, "4")
+    }
+
+    @MainActor
+    func testNothingLoadsBeforeTheresPostseasonData() async {
+        let vm = DashboardViewModel(provider: provider(with: [player(1, hr: "4")]))
+        vm.postseasonThrough = nil
+
+        await vm.loadPostseasonIfNeeded()
+        XCTAssertTrue(vm.postseasonPlayers.isEmpty)
+    }
+
+    @MainActor
+    func testPostseasonPlayersCarryNoPercentiles() async {
+        /// Not an oversight and not a loading state. Savant publishes no
+        /// postseason percentile leaderboards, so a postseason percentile would
+        /// be a number nobody could check the app against.
+        let vm = DashboardViewModel(provider: provider(with: [player(1, hr: "4")]))
+        vm.postseasonThrough = Date()
+
+        await vm.loadPostseasonIfNeeded()
+        XCTAssertTrue(vm.postseasonPlayers.allSatisfy { $0.metrics.isEmpty })
+    }
+
+    @MainActor
+    func testSelectingPostseasonKicksOffTheLoad() async {
+        let vm = DashboardViewModel(provider: provider(with: [player(1, hr: "4")]))
+        vm.selectedSeason = StatScoutSeason.current
+        vm.postseasonThrough = Date()
+
+        vm.selectPhase(.postseason)
+        XCTAssertEqual(vm.selectedPhase, .postseason)
+        await vm.loadPostseasonIfNeeded()
+        XCTAssertFalse(vm.postseasonPlayers.isEmpty)
     }
 }
