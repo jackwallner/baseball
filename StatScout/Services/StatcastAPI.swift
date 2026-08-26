@@ -33,6 +33,11 @@ protocol StatcastProviding: Sendable {
     /// day once, overnight, so the first Wild Card game isn't readable until
     /// the following morning.
     func fetchPostseasonThroughDate(season: Int) async throws -> Date?
+    /// Postseason standard lines. Percentiles are absent by design: Savant
+    /// publishes no postseason percentile leaderboards, so these players carry
+    /// an empty `metrics` array and the percentile board correctly shows
+    /// nothing for October.
+    func fetchPostseasonPlayers(season: Int) async throws -> [Player]
 }
 
 extension StatcastProviding {
@@ -249,6 +254,39 @@ struct StatcastAPI: StatcastProviding {
         return Date.fromPostgresDate(raw)
     }
 
+    func fetchPostseasonPlayers(season: Int) async throws -> [Player] {
+        var all: [Player] = []
+        let pageSize = 1000
+        var offset = 0
+        while true {
+            let endpoint = baseURL
+                .appending(path: "rest/v1/player_postseason_stats")
+                .appending(queryItems: [
+                    URLQueryItem(name: "select", value: "*"),
+                    URLQueryItem(name: "season", value: "eq.\(season)"),
+                    URLQueryItem(name: "order", value: "id.asc"),
+                    URLQueryItem(name: "limit", value: String(pageSize)),
+                    URLQueryItem(name: "offset", value: String(offset)),
+                ])
+            var request = URLRequest(url: endpoint, cachePolicy: .reloadIgnoringLocalCacheData)
+            request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+            request.setValue(apiKey, forHTTPHeaderField: "apikey")
+            request.setValue("application/json", forHTTPHeaderField: "Accept")
+
+            let (data, response) = try await URLSession.shared.data(for: request)
+            guard let httpResponse = response as? HTTPURLResponse,
+                  200..<300 ~= httpResponse.statusCode || httpResponse.statusCode == 206 else {
+                throw URLError(.badServerResponse)
+            }
+
+            let rows = try JSONDecoder.statScout.decode([Lenient<Player>].self, from: data)
+            all.append(contentsOf: rows.compactMap(\.value))
+            if rows.count < pageSize { break }
+            offset += pageSize
+        }
+        return all
+    }
+
     private func fetchPlayers(seasonFilter: String) async throws -> [Player] {
         var all: [Player] = []
         let pageSize = 1000
@@ -336,6 +374,10 @@ struct PreviewStatcastAPI: StatcastProviding {
 
     func fetchPostseasonThroughDate(season: Int) async throws -> Date? {
         nil
+    }
+
+    func fetchPostseasonPlayers(season: Int) async throws -> [Player] {
+        []
     }
 }
 #endif

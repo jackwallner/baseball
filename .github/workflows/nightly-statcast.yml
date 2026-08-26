@@ -117,6 +117,20 @@ jobs:
           set -o pipefail
           python backend/rollup_recent_form.py 2>&1 | tee recent_form_rollup.log
 
+      # Postseason standard lines, for whoever is still playing. A no-op for
+      # most of the year: the script finds no postseason game logs and returns
+      # without touching anything. Runs on the trends gate rather than the
+      # season one because it follows the game-log ingest that feeds it.
+      - name: Ingest postseason standard stats
+        if: steps.guard.outputs.run_trends == 'true' || github.event_name == 'workflow_dispatch'
+        shell: bash
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          set -o pipefail
+          python backend/ingest_postseason_stats.py 2>&1 | tee postseason_stats.log
+
       # Success and stale look identical otherwise: every step can exit 0 while
       # Savant had nothing new to give, which is exactly how the app spent
       # 2026-07-29 showing "Through Jul 27" under a "last updated today" line.
