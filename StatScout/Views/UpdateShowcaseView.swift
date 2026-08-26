@@ -41,12 +41,23 @@ struct UpdateShowcaseView: View {
     let onFinish: () -> Void
 
     @State private var page = 0
+    /// Same story as onboarding: the iPad compatibility window and an iPhone SE
+    /// both hand this view ~620pt, and a fixed 38pt headline over a fixed-size
+    /// card overflows that, which SwiftUI resolves by truncating the headline.
+    @State private var availableHeight: CGFloat = 0
+
+    private var isCompactHeight: Bool { availableHeight > 0 && availableHeight < 720 }
 
     private let pageCount = 3
 
     var body: some View {
         ZStack {
             SavantPalette.canvas.ignoresSafeArea()
+                .background(GeometryReader { geo in
+                    Color.clear
+                        .onAppear { availableHeight = geo.size.height }
+                        .onChange(of: geo.size.height) { _, height in availableHeight = height }
+                })
 
             VStack(spacing: 0) {
                 header
@@ -113,7 +124,7 @@ struct UpdateShowcaseView: View {
         }
         .padding(.horizontal, 20)
         .padding(.top, 8)
-        .frame(height: 56)
+        .frame(height: isCompactHeight ? 48 : 56)
     }
 
     private func showcasePage(
@@ -122,34 +133,40 @@ struct UpdateShowcaseView: View {
         detail: String,
         visual: AnyView
     ) -> some View {
-        VStack(spacing: 18) {
-            VStack(spacing: 8) {
-                Text(eyebrow)
-                    .font(SavantType.micro)
-                    .tracking(1.2)
-                    .foregroundStyle(SavantPalette.savantRed)
+        ScrollView(.vertical, showsIndicators: false) {
+            VStack(spacing: isCompactHeight ? 12 : 18) {
+                VStack(spacing: 8) {
+                    Text(eyebrow)
+                        .font(SavantType.micro)
+                        .tracking(1.2)
+                        .foregroundStyle(SavantPalette.savantRed)
 
-                Text(title)
-                    .font(SavantFont.condensed(38, weight: .black))
-                    .foregroundStyle(SavantPalette.ink)
-                    .multilineTextAlignment(.center)
-                    .lineSpacing(-2)
+                    Text(title)
+                        .font(SavantFont.condensed(isCompactHeight ? 30 : 38, weight: .black))
+                        .foregroundStyle(SavantPalette.ink)
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(-2)
+                        // Without this the headline gives up both of its lines
+                        // and truncates to "Who's hot…" on a short canvas.
+                        .fixedSize(horizontal: false, vertical: true)
 
-                Text(detail)
-                    .font(SavantType.body)
-                    .foregroundStyle(SavantPalette.inkSecondary)
-                    .multilineTextAlignment(.center)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(.horizontal, 16)
+                    Text(detail)
+                        .font(SavantType.body)
+                        .foregroundStyle(SavantPalette.inkSecondary)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.horizontal, 16)
+                }
+
+                visual
+                    .frame(maxWidth: .infinity)
             }
-
-            visual
-                .frame(maxWidth: .infinity)
-
-            Spacer(minLength: 0)
+            .padding(.horizontal, 20)
+            .padding(.top, 14)
+            .padding(.bottom, 8)
+            .frame(maxWidth: .infinity)
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 14)
+        .scrollBounceBehavior(.basedOnSize)
     }
 
     private var footer: some View {
