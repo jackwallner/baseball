@@ -19,12 +19,27 @@ protocol StatcastProviding: Sendable {
     func fetchPlayers() async throws -> [Player]
     func fetchHistoricalPlayers() async throws -> [Player]
     func fetchCurrentPlayers() async throws -> [Player]
-    func fetchGameLogs(playerId: Int, season: Int) async throws -> [PlayerGameLog]
+    func fetchGameLogs(playerId: Int, season: Int, phase: SeasonPhase) async throws -> [PlayerGameLog]
     func fetchTeamGameLogs(team: String, season: Int, sinceDate: Date) async throws -> [PlayerGameLog]
     func fetchRecentForm(season: Int, windowDays: Int) async throws -> [RecentForm]
     /// The last game day the pipeline has actually closed out. See
     /// `DashboardViewModel.dataThrough` for why a write timestamp isn't enough.
     func fetchDataThroughDate(season: Int) async throws -> Date?
+    /// The newest postseason game the pipeline holds for a season, or nil if the
+    /// playoffs haven't started (or haven't been ingested yet).
+    ///
+    /// This is what wakes the postseason card. A calendar date would fire it
+    /// while the boards behind it were still empty: the pipeline closes out a
+    /// day once, overnight, so the first Wild Card game isn't readable until
+    /// the following morning.
+    func fetchPostseasonThroughDate(season: Int) async throws -> Date?
+}
+
+extension StatcastProviding {
+    /// Regular season is what every existing caller means.
+    func fetchGameLogs(playerId: Int, season: Int) async throws -> [PlayerGameLog] {
+        try await fetchGameLogs(playerId: playerId, season: season, phase: .regular)
+    }
 }
 
 struct StatcastAPI: StatcastProviding {
@@ -50,9 +65,18 @@ struct StatcastAPI: StatcastProviding {
         try await fetchPlayers(seasonFilter: "eq.\(StatScoutSeason.current)")
     }
 
-    func fetchGameLogs(playerId: Int, season: Int) async throws -> [PlayerGameLog] {
+    /// The two phases live in different tables, which is what keeps a playoff
+    /// game out of a regular-season window on builds that predate this one.
+    private func gameLogTable(for phase: SeasonPhase) -> String {
+        switch phase {
+        case .regular:    return "player_game_logs"
+        case .postseason: return "player_postseason_game_logs"
+        }
+    }
+
+    func fetchGameLogs(playerId: Int, season: Int, phase: SeasonPhase) async throws -> [PlayerGameLog] {
         let endpoint = baseURL
-            .appending(path: "rest/v1/player_game_logs")
+            .appending(path: "rest/v1/\(gameLogTable(for: phase))")
             .appending(queryItems: [
                 URLQueryItem(name: "select", value: "*"),
                 URLQueryItem(name: "player_id", value: "eq.\(playerId)"),
@@ -192,6 +216,39 @@ struct StatcastAPI: StatcastProviding {
         return Date.fromPostgresDate(raw)
     }
 
+    func fetchPostseasonThroughDate(season: Int) async throws -> Date? {
+        struct Row: Decodable {
+            let gameDate: String?
+
+            enum CodingKeys: String, CodingKey {
+                case gameDate = "game_date"
+            }
+        }
+
+        let endpoint = baseURL
+            .appending(path: "rest/v1/player_postseason_game_logs")
+            .appending(queryItems: [
+                URLQueryItem(name: "select", value: "game_date"),
+                URLQueryItem(name: "season", value: "eq.\(season)"),
+                URLQueryItem(name: "order", value: "game_date.desc"),
+                URLQueryItem(name: "limit", value: "1"),
+            ])
+        var request = URLRequest(url: endpoint, cachePolicy: .reloadIgnoringLocalCacheData)
+        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        request.setValue(apiKey, forHTTPHeaderField: "apikey")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse,
+              200..<300 ~= httpResponse.statusCode || httpResponse.statusCode == 206 else {
+            throw URLError(.badServerResponse)
+        }
+
+        let rows = try JSONDecoder().decode([Row].self, from: data)
+        guard let raw = rows.first?.gameDate else { return nil }
+        return Date.fromPostgresDate(raw)
+    }
+
     private func fetchPlayers(seasonFilter: String) async throws -> [Player] {
         var all: [Player] = []
         let pageSize = 1000
@@ -261,7 +318,7 @@ struct PreviewStatcastAPI: StatcastProviding {
         SampleData.players.filter { ($0.season ?? 0) >= StatScoutSeason.current }
     }
 
-    func fetchGameLogs(playerId: Int, season: Int) async throws -> [PlayerGameLog] {
+    func fetchGameLogs(playerId: Int, season: Int, phase: SeasonPhase) async throws -> [PlayerGameLog] {
         []
     }
 
@@ -274,6 +331,10 @@ struct PreviewStatcastAPI: StatcastProviding {
     }
 
     func fetchDataThroughDate(season: Int) async throws -> Date? {
+        nil
+    }
+
+    func fetchPostseasonThroughDate(season: Int) async throws -> Date? {
         nil
     }
 }

@@ -35,6 +35,43 @@ final class DashboardViewModel {
             }
         }
     }
+    /// Which slate the phase-aware boards are showing.
+    ///
+    /// Orthogonal to `selectedSeason`, and it never survives leaving the current
+    /// season: only the season being played has a postseason the pipeline is
+    /// collecting, so landing on a past year has to snap back to the regular
+    /// season rather than render an empty playoff board.
+    var selectedPhase: SeasonPhase = .regular
+
+    /// The newest postseason game the backend holds, or nil when the playoffs
+    /// haven't started (or last night's run hasn't landed them yet).
+    ///
+    /// Everything postseason keys off this rather than off the calendar. The
+    /// pipeline closes out a day once, overnight, so a date-triggered control
+    /// would offer a board that is still empty for most of the first day of the
+    /// playoffs, which is the one day it most wants to be right.
+    var postseasonThrough: Date?
+
+    var postseasonAvailable: Bool { postseasonThrough != nil }
+
+    /// True when a phase control should appear at all: the postseason exists and
+    /// we're looking at the season that has one.
+    var offersPhaseChoice: Bool {
+        postseasonAvailable && selectedSeason == StatScoutSeason.current
+    }
+
+    /// Push a season change through the phase rules. Anything that sets
+    /// `selectedSeason` for the user should go through here.
+    func selectSeason(_ season: Int) {
+        selectedSeason = season
+        if season != StatScoutSeason.current { selectedPhase = .regular }
+    }
+
+    func selectPhase(_ phase: SeasonPhase) {
+        guard phase == .regular || offersPhaseChoice else { return }
+        selectedPhase = phase
+    }
+
     // User-selected sort metric per category. Overrides the auto-priority pick when present
     // and still valid for the current season's data.
     var userSortMetricByCategory: [MetricCategory: String] = [:]
@@ -901,6 +938,13 @@ final class DashboardViewModel {
                 await refreshCachedRecentFormWindows()
             }
         }
+
+        // Same treatment: one row, after first paint, and a failure just leaves
+        // the postseason out rather than failing the load.
+        postseasonThrough = try? await provider.fetchPostseasonThroughDate(
+            season: StatScoutSeason.current
+        )
+        if !offersPhaseChoice { selectedPhase = .regular }
     }
 
     func loadHistoricalIfNeeded() async {

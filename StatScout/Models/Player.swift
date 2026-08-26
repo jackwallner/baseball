@@ -122,6 +122,50 @@ struct Player: Identifiable, Codable, Hashable, Sendable {
     }
 }
 
+/// Which half of the calendar a number describes.
+///
+/// Orthogonal to the season, deliberately. Modelling the postseason as an extra
+/// entry in the year list would have broken year-over-year comparison, the
+/// `earliest...current` range the season menus are built from, the free-tier
+/// gate, and the two-tier cache partition, all to express something that is not
+/// a year.
+enum SeasonPhase: String, Codable, CaseIterable, Identifiable, Hashable, Sendable {
+    case regular = "R"
+    case postseason = "P"
+
+    var id: String { rawValue }
+
+    /// One name everywhere. "Regular" alone is an adjective with no noun, and
+    /// in a nav pill "2026 · Regular" reads as though it were describing the
+    /// year rather than the slate.
+    var label: String {
+        switch self {
+        case .regular:    return "Regular Season"
+        case .postseason: return "Postseason"
+        }
+    }
+
+    /// Statcast's per-round codes, which is how the backend stores them: F wild
+    /// card, D division series, L league championship, W world series.
+    var statcastCodes: [String] {
+        switch self {
+        case .regular:    return ["R"]
+        case .postseason: return ["F", "D", "L", "W"]
+        }
+    }
+}
+
+/// How a season reads in the UI, in one place, so the phase can never be
+/// spelled two ways across a menu, a nav pill and a page title.
+enum SeasonLabel {
+    static func text(_ season: Int) -> String { String(season) }
+
+    /// Longer form for prose and subtitles ("2026 Postseason").
+    static func text(_ season: Int, phase: SeasonPhase) -> String {
+        "\(season) \(phase.label)"
+    }
+}
+
 struct Metric: Identifiable, Codable, Hashable, Sendable {
     let id: String
     let label: String
