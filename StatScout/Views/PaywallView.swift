@@ -27,11 +27,11 @@ enum PaywallTrigger: Identifiable, Hashable {
     case recentForm
     /// Best & Worst, reached from the Stats tab's View menu.
     case bestWorst
-    /// Seasonal late-summer pitch, opened from the dashboard's stretch-run
-    /// card. Sells the same product on the calendar's urgency, with no offer
-    /// code and no seasonal price attached: it lands on the ordinary one-tap
-    /// yearly CTA like every other contextual pitch.
-    case stretchRun
+    /// Postseason pitch, opened from the dashboard's postseason card. Sells
+    /// the same product on October's urgency, with no offer code and no
+    /// seasonal price attached: it lands on the ordinary one-tap yearly CTA
+    /// like every other contextual pitch.
+    case postseason
 
     var icon: String {
         switch self {
@@ -48,7 +48,7 @@ enum PaywallTrigger: Identifiable, Hashable {
         case .playerScouting:    return "binoculars.fill"
         case .recentForm:        return "flame.fill"
         case .bestWorst:         return "arrow.up.arrow.down"
-        case .stretchRun:        return "figure.baseball"
+        case .postseason:        return "trophy.fill"
         }
     }
 
@@ -67,7 +67,7 @@ enum PaywallTrigger: Identifiable, Hashable {
         case .playerScouting:    return "Full Player Scouting"
         case .recentForm:        return "Recent Form"
         case .bestWorst:         return "Best & Worst"
-        case .stretchRun:        return "Scout the Stretch Run"
+        case .postseason:        return "Scout the Postseason"
         }
     }
 
@@ -99,8 +99,8 @@ enum PaywallTrigger: Identifiable, Hashable {
             return "Every player's last 7 / 15 / 30 day form. Catch hot streaks and slumps before the season totals catch up."
         case .bestWorst:
             return "The league leader and the league trailer on every Statcast metric, side by side, in one board."
-        case .stretchRun:
-            return "The race is tightening. Catch who's heating up, test the matchups that decide games, and put today's run beside every season since 2015."
+        case .postseason:
+            return "Every playoff game, tracked the way the regular season is. Playoff game logs, live form, and the matchups that decide the series."
         }
     }
 
@@ -120,7 +120,7 @@ enum PaywallTrigger: Identifiable, Hashable {
         case .playerScouting:    return "statscout_paywall_player_scouting"
         case .recentForm:        return "statscout_paywall_recent_form"
         case .bestWorst:         return "statscout_paywall_best_worst"
-        case .stretchRun:        return "statscout_paywall_stretch_run"
+        case .postseason:        return "statscout_paywall_postseason"
         }
     }
 
@@ -369,11 +369,13 @@ struct PaywallView: View {
             // Billed amount for the selected plan, directly above the purchase
             // point. Apple 3.1.2(c): nothing else in this flow, the trial copy
             // on the button included, may be more conspicuous than this.
-            if let price = selectedPackage?.priceLabel {
-                Text(price)
-                    .font(SavantType.priceLead)
-                    .foregroundStyle(SavantPalette.ink)
-            }
+            //
+            // Reserved height so switching plans, or waiting on the products to
+            // load, never walks the purchase button up and down the screen.
+            Text(selectedPackage?.priceLabel ?? " ")
+                .font(SavantType.priceLead)
+                .foregroundStyle(SavantPalette.ink)
+                .frame(height: 20)
 
             Button(action: startPurchase) {
                 ZStack {

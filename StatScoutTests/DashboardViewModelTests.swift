@@ -454,3 +454,68 @@ final class SeasonPhaseTests: XCTestCase {
         XCTAssertEqual(vm.selectedPhase, .regular)
     }
 }
+
+/// The postseason card's gate. Every rule here is a way the card could show up
+/// at a moment that makes it wrong rather than merely early.
+final class PostseasonCampaignTests: XCTestCase {
+    private let landed = Date()
+
+    private func decide(
+        postseasonThrough: Date? = nil,
+        hasCompletedOnboarding: Bool = true,
+        seenCampaign: String = "",
+        customerStateResolved: Bool = true,
+        isPro: Bool = false
+    ) -> PostseasonDecision {
+        PostseasonCampaign.decision(
+            postseasonThrough: postseasonThrough,
+            hasCompletedOnboarding: hasCompletedOnboarding,
+            seenCampaign: seenCampaign,
+            customerStateResolved: customerStateResolved,
+            isPro: isPro
+        )
+    }
+
+    func testHiddenUntilThePlayoffDataActuallyLands() {
+        /// The whole reason this replaced a compiled calendar window: the
+        /// pipeline closes out a day once, overnight, so on the afternoon of
+        /// the first Wild Card game there is still nothing to show.
+        XCTAssertFalse(decide(postseasonThrough: nil).shouldPresent)
+    }
+
+    func testShowsOnceTheDataLands() {
+        XCTAssertEqual(decide(postseasonThrough: landed).creative, .upgrade)
+    }
+
+    func testSubscribersGetTheAnnouncementNotThePitch() {
+        XCTAssertEqual(decide(postseasonThrough: landed, isPro: true).creative, .pro)
+    }
+
+    func testHiddenBeforeTheCustomerStateResolves() {
+        /// Rendering early flashes an upgrade pitch at someone who already pays.
+        XCTAssertFalse(
+            decide(postseasonThrough: landed, customerStateResolved: false).shouldPresent
+        )
+    }
+
+    func testHiddenDuringOnboarding() {
+        XCTAssertFalse(
+            decide(postseasonThrough: landed, hasCompletedOnboarding: false).shouldPresent
+        )
+    }
+
+    func testStaysDismissedOnceDismissed() {
+        XCTAssertFalse(
+            decide(postseasonThrough: landed, seenCampaign: PostseasonCampaign.identifier)
+                .shouldPresent
+        )
+    }
+
+    func testADifferentCampaignIdDoesNotCountAsDismissed() {
+        /// Bumping the identifier is how a new season re-shows the card to
+        /// people who dismissed the last one.
+        XCTAssertTrue(
+            decide(postseasonThrough: landed, seenCampaign: "postseason-2025").shouldPresent
+        )
+    }
+}

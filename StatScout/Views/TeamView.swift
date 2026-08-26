@@ -750,19 +750,30 @@ struct TeamView: View {
 
     /// The same pill + menu the Stats and Teams tabs use.
     private func navSeasonMenu(viewModel: DashboardViewModel) -> some View {
-        SeasonMenu(
+        // Phase lives here too, not only on the Stats tab. The Teams tab pushes
+        // straight into a club on first visit, so a team page that could not
+        // change phase would be the only Teams screen most sessions ever saw.
+        SeasonPhaseMenu(
             seasons: viewModel.availableSeasons,
-            selected: viewModel.selectedSeason,
+            selectedSeason: viewModel.selectedSeason,
+            selectedPhase: viewModel.selectedPhase,
+            postseasonAvailable: viewModel.offersPhaseChoice,
             isLocked: { viewModel.isSeasonLocked($0) },
-            onSelect: { season in
+            onSelectSeason: { season in
                 if viewModel.isSeasonLocked(season) {
                     trialTrigger = .lockedSeason(season)
                 } else {
-                    viewModel.selectedSeason = season
+                    viewModel.selectSeason(season)
                 }
-            }
+            },
+            onSelectPhase: { viewModel.selectPhase($0) }
         ) {
-            SavantNavPill(systemImage: "calendar", title: String(viewModel.selectedSeason))
+            SavantNavPill(
+                systemImage: "calendar",
+                title: viewModel.selectedPhase == .postseason
+                    ? "\(viewModel.selectedSeason) POST"
+                    : String(viewModel.selectedSeason)
+            )
         }
     }
 

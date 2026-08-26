@@ -107,19 +107,22 @@ struct StatsView: View {
     // Compact season selector for the leading toolbar slot. Sits on the navy
     // nav bar, so it reads as a red pill with the year only.
     private var seasonMenu: some View {
-        SeasonMenu(
+        SeasonPhaseMenu(
             seasons: viewModel.availableSeasons,
-            selected: viewModel.selectedSeason,
+            selectedSeason: viewModel.selectedSeason,
+            selectedPhase: viewModel.selectedPhase,
+            postseasonAvailable: viewModel.offersPhaseChoice,
             isLocked: { viewModel.isSeasonLocked($0) },
-            onSelect: { season in
+            onSelectSeason: { season in
                 if viewModel.isSeasonLocked(season) {
                     // Explicit tap on a locked year, always answer it; the
                     // gate only caps automatic pop-ups.
                     paywallTrigger = .lockedSeason(season)
                 } else {
-                    viewModel.selectedSeason = season
+                    viewModel.selectSeason(season)
                 }
-            }
+            },
+            onSelectPhase: { viewModel.selectPhase($0) }
         ) {
             // No calendar glyph here: this bar also carries the title, the gear
             // and the upgrade CTA, and on a 375pt phone the glyph is what

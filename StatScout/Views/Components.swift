@@ -705,12 +705,16 @@ struct PlusDirectCTA: View {
             // it has to outweigh every other pricing element in the flow, trial
             // copy on the button included, so it sits one type step above the
             // CTA label and nothing else here is allowed to grow past it.
-            if let price = store.yearlyPackage?.priceLabel {
-                Text(price)
-                    .font(SavantType.priceLead)
-                    .foregroundStyle(SavantPalette.ink)
-                    .multilineTextAlignment(.center)
-            }
+            //
+            // Fixed height on purpose. `yearlyPackage` is nil until the `.task`
+            // below finishes fetching, which on a first presentation is always
+            // after this sheet has drawn, so an unreserved slot appears late
+            // and shifts the purchase button out from under a moving thumb.
+            Text(store.yearlyPackage?.priceLabel ?? " ")
+                .font(SavantType.priceLead)
+                .foregroundStyle(SavantPalette.ink)
+                .multilineTextAlignment(.center)
+                .frame(height: 20)
 
             Button(action: buy) {
                 label
