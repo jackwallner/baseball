@@ -15,15 +15,11 @@ one. It is complete before the first playoff pitch, so the curve is final, and
 it shares the run environment: ball, parks and rules that a previous season's
 curve would silently import differently.
 
-Two things this is careful about:
-
-  * Only metrics that stabilise inside a playoff sample are ranked. Exit
-    velocity, hard-hit rate and whiff rate settle in tens of batted balls or a
-    hundred pitches, which a deep run provides. xwOBA and the other expected
-    stats need several hundred plate appearances and would render luck as a
-    confident coloured bar.
-  * A minimum sample, so a reliever with three clean innings does not arrive
-    in the 99th percentile.
+Every metric is ranked and every player is ranked. The postseason is a small
+sample by construction, and gating on sample size would empty the board of the
+players the board exists for: a team that goes out in the wild-card round
+contributes three games or nothing at all. The samples are what they are, and a
+reader who has opened a postseason board knows that.
 
 Env: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY.
 """
@@ -52,36 +48,51 @@ SUPABASE_SERVICE_ROLE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
 SNAPSHOTS_TABLE = "player_snapshots"
 STATS_TABLE = "player_postseason_stats"
 
-# Metric label in player_snapshots -> key in the aggregated postseason line.
+# Metric label in player_snapshots -> key in the aggregated postseason line,
+# per side of the ball.
 #
-# Descriptive only. Every entry here describes what a player did to the ball or
-# to a pitch, and settles quickly. The expected-stat family (xwOBA, xBA, xSLG,
-# xISO, xERA) is deliberately absent: those are outcome estimates that need
-# several hundred plate appearances, and October never supplies one.
-RANKABLE: dict[str, str] = {
+# The split is not cosmetic. A pitcher's xwOBA is the xwOBA he allowed, and his
+# percentile runs the other way: 0.325 allowed sits at the 31st percentile,
+# where a hitter posting 0.325 sits far higher. One merged curve would rank
+# every pitcher as though he were batting.
+BATTER_METRICS: dict[str, str] = {
+    "xwOBA": "xwoba",
+    "xBA": "xba",
+    "xSLG": "xslg",
+    "xISO": "xiso",
+    "Barrel%": "barrel_pct",
+    "Hard-Hit%": "hardhit_pct",
     "EV": "ev_avg",
     "Max EV": "ev_max",
-    "Hard-Hit%": "hardhit_pct",
-    "Barrel%": "barrel_pct",
+    "Whiff%": "whiff_pct",
+    "Chase%": "chase_pct",
+    "K%": "k_pct",
+    "BB%": "bb_pct",
+    "Bat Speed": "bat_speed",
+}
+
+PITCHER_METRICS: dict[str, str] = {
+    "xwOBA": "opp_xwoba",
+    "xBA": "opp_xba",
+    "xSLG": "opp_xslg",
+    "Barrel%": "opp_barrel_pct",
+    "Hard-Hit%": "opp_hardhit_pct",
+    "Avg EV Against": "opp_ev_avg",
+    "Max EV Against": "opp_ev_max",
     "Whiff%": "whiff_pct",
     "Chase%": "chase_pct",
     "K%": "k_pct",
     "BB%": "bb_pct",
     "Fastball Velo": "fb_velo_avg",
     "Fastball Spin": "fb_spin_avg",
-    "Bat Speed": "bat_speed",
-    "Avg EV Against": "opp_ev_avg",
-    "Max EV Against": "opp_ev_max",
 }
 
-# Below these a percentile is noise wearing a number's clothes. Batted-ball
-# metrics are gated on batted balls, plate-discipline ones on pitches seen.
-MIN_BATTED_BALLS = 25
-MIN_PITCHES = 100
-BATTED_BALL_METRICS = {
-    "ev_avg", "ev_max", "hardhit_pct", "barrel_pct",
-    "opp_ev_avg", "opp_ev_max",
+METRICS_BY_TYPE: dict[str, dict[str, str]] = {
+    "batter": BATTER_METRICS,
+    "pitcher": PITCHER_METRICS,
 }
+
+CATEGORY_BY_TYPE = {"batter": "hitting", "pitcher": "pitching"}
 
 
 def _resolve_season() -> int:
@@ -113,32 +124,40 @@ def _numeric(raw: Any) -> Optional[float]:
         return None
 
 
-def build_curves(snapshots: list[dict]) -> dict[str, list[tuple[float, int]]]:
-    """One sorted (value, percentile) curve per rankable metric.
+def build_curves(snapshots: list[dict]) -> dict[tuple[str, str], list[tuple[float, int]]]:
+    """One sorted (value, percentile) curve per side of the ball and metric.
 
     This is Savant's own mapping, read back off the season's leaderboard rather
-    than recomputed, which is what keeps the postseason bar answerable to a
-    page the user can open.
+    than recomputed, which is what keeps the postseason bar answerable to a page
+    the user can open.
+
+    Keyed by player type because the two sides disagree about which direction is
+    good: a pitcher's curve falls as the value rises. Two-way players are left
+    out of the curves entirely rather than counted on a side they only half
+    belong to; they are still ranked, once per side, against everyone else's.
     """
-    pairs: dict[str, list[tuple[float, int]]] = {}
+    pairs: dict[tuple[str, str], list[tuple[float, int]]] = {}
     for row in snapshots:
+        player_type = row.get("player_type")
+        metric_map = METRICS_BY_TYPE.get(player_type)
+        if metric_map is None:
+            continue
         for metric in row.get("metrics") or []:
             label = metric.get("label")
-            if label not in RANKABLE:
+            if label not in metric_map:
                 continue
             value = _numeric(metric.get("value"))
             percentile = metric.get("percentile")
             if value is None or percentile is None:
                 continue
-            pairs.setdefault(RANKABLE[label], []).append((value, int(percentile)))
+            pairs.setdefault((player_type, metric_map[label]), []).append(
+                (value, int(percentile))
+            )
 
-    curves: dict[str, list[tuple[float, int]]] = {}
-    for key, points in pairs.items():
-        # Two players can share a value and differ by a point of percentile;
-        # sorting by value then percentile keeps the curve monotonic enough to
-        # interpolate without the order flapping run to run.
-        curves[key] = sorted(points)
-    return curves
+    # Two players can share a value and differ by a point of percentile;
+    # sorting by value then percentile keeps the curve monotonic enough to
+    # interpolate without the order flapping run to run.
+    return {key: sorted(points) for key, points in pairs.items()}
 
 
 def percentile_for(curve: list[tuple[float, int]], value: float) -> Optional[int]:
@@ -165,35 +184,38 @@ def percentile_for(curve: list[tuple[float, int]], value: float) -> Optional[int
     return int(round(low_p + ratio * (high_p - low_p)))
 
 
-def _meets_sample(key: str, batted_balls: int, pitches: int) -> bool:
-    if key in BATTED_BALL_METRICS:
-        return batted_balls >= MIN_BATTED_BALLS
-    return pitches >= MIN_PITCHES
-
-
 def build_metrics(
     line: dict[str, Any],
-    curves: dict[str, list[tuple[float, int]]],
-    batted_balls: int,
-    pitches: int,
+    curves: dict[tuple[str, str], list[tuple[float, int]]],
+    player_type: str,
 ) -> list[dict[str, Any]]:
-    """The metric rows one postseason player earns, sample gates applied."""
+    """Every metric this side has a value for, ranked against its own curve.
+
+    No sample gate. The postseason is a small sample by construction, and a
+    threshold would empty the board of the players it exists for: a wild-card
+    exit is three games, and a metric hidden for everyone but the two teams
+    still playing in late October is a metric nobody sees.
+    """
+    metric_map = METRICS_BY_TYPE.get(player_type)
+    if metric_map is None:
+        return []
+
     out: list[dict[str, Any]] = []
-    for label, key in RANKABLE.items():
+    for label, key in metric_map.items():
         value = line.get(key)
         if value is None:
             continue
-        if not _meets_sample(key, batted_balls, pitches):
-            continue
-        ranked = percentile_for(curves.get(key, []), float(value))
+        ranked = percentile_for(curves.get((player_type, key), []), float(value))
         if ranked is None:
             continue
         out.append({
-            "id": f"post-{key}",
+            # Namespaced by side, so a two-way player's xwOBA posted and xwOBA
+            # allowed do not collapse into one row.
+            "id": f"post-{player_type}-{key}",
             "label": label,
             "value": str(value),
             "percentile": ranked,
-            "category": "hitting",
+            "category": CATEGORY_BY_TYPE[player_type],
         })
     return out
 
@@ -234,18 +256,22 @@ def run() -> None:
         return
     logger.info("Built %d regular-season curves", len(curves))
 
-    by_player: dict[int, list[dict]] = {}
+    # Keyed by side as well as player, because a two-way player has separate
+    # batter and pitcher rows and collapsing them would aggregate the balls he
+    # hit together with the balls he gave up.
+    by_side: dict[tuple[int, str], list[dict]] = {}
     for row in logs:
-        by_player.setdefault(row["player_id"], []).append(row)
+        by_side.setdefault((row["player_id"], row.get("player_type") or "batter"), []).append(row)
+
+    metrics_by_player: dict[int, list[dict]] = {}
+    for (player_id, player_type), side_logs in by_side.items():
+        line = _aggregate(side_logs)
+        metrics = build_metrics(line, curves, player_type)
+        if metrics:
+            metrics_by_player.setdefault(player_id, []).extend(metrics)
 
     updates = 0
-    for player_id, player_logs in by_player.items():
-        line = _aggregate(player_logs)
-        batted_balls = sum(r.get("batted_ball_events") or 0 for r in player_logs)
-        pitches = int(line.get("_pitches") or 0)
-        metrics = build_metrics(line, curves, batted_balls, pitches)
-        if not metrics:
-            continue
+    for player_id, metrics in metrics_by_player.items():
         try:
             client.table(STATS_TABLE).update({"metrics": metrics}) \
                 .eq("id", player_id).eq("season", season).execute()
