@@ -1,3 +1,7 @@
-The stretch run is on. A new seasonal card on the Stats board points you at the tools that matter most for the final push: the Trends board, recent form, head-to-head matchups, and team scouting.
+October is here, and StatScout follows the season into it.
 
-Already subscribed? The card takes you straight to Trends instead of selling you something you already have.
+Every board can now be switched between Regular Season and Postseason from the season menu, on the Stats screen and on any team page. Postseason boards carry playoff standard lines and playoff game logs: who is actually producing in October, not who did it in June.
+
+The postseason option appears on its own once the playoffs begin, so there is nothing to turn on.
+
+Note that Statcast percentile rankings remain regular-season figures, matching Baseball Savant, which does not publish postseason percentiles.
