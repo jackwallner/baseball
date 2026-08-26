@@ -6,10 +6,6 @@ struct DashboardView: View {
     /// Set when this board is hosted by `StatsView`, which owns the choice of
     /// board and therefore has to be reachable from this board's own controls.
     var boardBindings: StatsBoardBindings? = nil
-    /// Set when a tab host can move the user to Trends. The postseason card's
-    /// subscriber variant sends them there instead of pitching an upgrade, so
-    /// without a route it has nothing to offer and stays hidden.
-    var onOpenTrends: (() -> Void)? = nil
     @AppStorage(PostseasonCampaign.storageKey) private var seenPostseason = ""
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     @State private var showingAbout = false
@@ -94,7 +90,6 @@ struct DashboardView: View {
                 onUpgrade: { paywallTrigger = .postseason },
                 onOpenPostseason: {
                     viewModel.selectPhase(.postseason)
-                    onOpenTrends?()
                 },
                 onDismiss: { seenPostseason = PostseasonCampaign.identifier }
             )
@@ -102,10 +97,10 @@ struct DashboardView: View {
     }
 
     private var postseasonDecision: PostseasonDecision {
-        // The subscriber variant is only worth showing where the postseason
-        // boards are one tap away, so a host that can't route there gets no
-        // card at all.
-        if store.isPro && onOpenTrends == nil { return .hidden }
+        // The subscriber variant is only useful on the hosted Stats screen,
+        // where the phase-aware board is one tap away. A standalone dashboard
+        // has no phase control or board switcher to land on.
+        if store.isPro && boardBindings == nil { return .hidden }
         return PostseasonCampaign.decision(
             postseasonThrough: viewModel.postseasonThrough,
             hasCompletedOnboarding: hasCompletedOnboarding,
@@ -152,7 +147,9 @@ struct DashboardView: View {
     // while data is refreshing, so the header never reserves empty space.
     private var unifiedControlBar: some View {
         VStack(spacing: 8) {
-            if (viewModel.isLoading || viewModel.isHistoricalLoading) && !viewModel.players.isEmpty {
+            if (viewModel.isLoading || viewModel.isHistoricalLoading)
+                && !viewModel.players.isEmpty
+                && !isActiveSearch {
                 loadingStatusBar
                     .transition(.move(edge: .top).combined(with: .opacity))
             }
@@ -275,7 +272,11 @@ struct DashboardView: View {
 
     private var searchRow: some View {
         HStack(spacing: 8) {
-            SearchField(text: $viewModel.searchText, focusOnAppear: true)
+            SearchField(
+                text: $viewModel.searchText,
+                focusOnAppear: true,
+                accessibilityIdentifier: "dashboardSearchField"
+            )
             Button("Cancel") {
                 withAnimation(.easeInOut(duration: 0.2)) {
                     isSearching = false
@@ -369,19 +370,55 @@ struct DashboardView: View {
     @ViewBuilder
     private var postseasonReferenceNote: some View {
         if viewModel.selectedPhase == .postseason {
-            Text(viewModel.postseasonReferenceNote)
-                .font(SavantType.micro)
-                .tracking(0.4)
-                .foregroundStyle(SavantPalette.inkTertiary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, SavantGeo.padPage)
-                .padding(.bottom, 6)
+            PostseasonReferenceNote(referenceSeason: StatScoutSeason.current)
         }
     }
 
     private var leaderboardSection: some View {
         VStack(spacing: 0) {
-            if viewModel.leaderboard.isEmpty && !viewModel.searchText.isEmpty {
+            if viewModel.selectedPhase == .postseason,
+               (viewModel.isLoadingPostseason || viewModel.postseasonLoadPending),
+               viewModel.postseasonPlayers.isEmpty {
+                ContentUnavailableView {
+                    Label("Loading postseason…", systemImage: "clock")
+                } description: {
+                    Text("Pulling the latest postseason players.")
+                }
+                .padding(.vertical, 24)
+                .frame(minHeight: 200)
+            } else if viewModel.selectedPhase == .postseason,
+                      let errorMessage = viewModel.postseasonErrorMessage,
+                      viewModel.postseasonPlayers.isEmpty {
+                ContentUnavailableView {
+                    Label("Postseason data unavailable", systemImage: "exclamationmark.triangle")
+                } description: {
+                    Text(errorMessage)
+                } actions: {
+                    Button("Retry") {
+                        Task { await viewModel.reloadPostseason() }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(SavantPalette.savantRed)
+                }
+                .padding(.vertical, 24)
+                .frame(minHeight: 200)
+            } else if viewModel.selectedPhase == .postseason,
+                      viewModel.postseasonLoadCompleted,
+                      viewModel.postseasonPlayers.isEmpty {
+                ContentUnavailableView {
+                    Label("Postseason stats not ready", systemImage: "clock.arrow.circlepath")
+                } description: {
+                    Text("The playoff games are in, but the latest player lines have not landed yet.")
+                } actions: {
+                    Button("Refresh") {
+                        Task { await viewModel.reloadPostseason() }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(SavantPalette.savantRed)
+                }
+                .padding(.vertical, 24)
+                .frame(minHeight: 200)
+            } else if viewModel.leaderboard.isEmpty && !viewModel.searchText.isEmpty {
                 ContentUnavailableView {
                     Label("No players found", systemImage: "magnifyingglass")
                 } description: {
@@ -408,9 +445,13 @@ struct DashboardView: View {
                 ContentUnavailableView {
                     Label(noCategoryData ? "No players in category" : "No players yet", systemImage: "baseball")
                 } description: {
-                    Text(noCategoryData
-                         ? "No players match the selected category for the \(String(viewModel.selectedSeason)) season."
-                         : "No player data is available for the \(String(viewModel.selectedSeason)) season.")
+                    if noCategoryData {
+                        Text("No players match the selected category for the \(String(viewModel.selectedSeason)) season.")
+                    } else if viewModel.selectedPhase == .postseason {
+                        Text("No postseason player data is available yet.")
+                    } else {
+                        Text("No player data is available for the \(String(viewModel.selectedSeason)) season.")
+                    }
                 }
                 .padding(.vertical, 24)
                 .frame(minHeight: 200)
@@ -419,7 +460,11 @@ struct DashboardView: View {
                 let sortMetric = viewModel.currentSortMetricForDisplay
                 LazyVStack(spacing: 0) {
                     ForEach(Array(viewModel.leaderboard.enumerated()), id: \.element.id) { index, player in
-                        NavigationLink(value: player) {
+                        NavigationLink(value: PlayerRoute(
+                            player: player,
+                            phase: viewModel.selectedPhase,
+                            season: viewModel.selectedSeason
+                        )) {
                             LeaderboardTableRow(
                                 rank: index + 1,
                                 player: player,

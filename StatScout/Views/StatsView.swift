@@ -23,9 +23,6 @@ struct StatsBoardBindings {
 /// the lazy-load behavior the old per-tab guards had.
 struct StatsView: View {
     let viewModel: DashboardViewModel
-    /// Passed through to the advanced board, whose seasonal card sends
-    /// subscribers to Trends. Absent when this view isn't inside the tab host.
-    var onOpenTrends: (() -> Void)? = nil
     @EnvironmentObject private var store: StoreService
 
     @State private var board: StatsBoard = .advanced
@@ -47,15 +44,27 @@ struct StatsView: View {
         VStack(spacing: 0) {
             switch board {
             case .advanced:
-                DashboardView(viewModel: viewModel, boardBindings: bindings, onOpenTrends: onOpenTrends)
+                DashboardView(viewModel: viewModel, boardBindings: bindings)
             case .standard:
                 StandardStatsLeadersView(
                     players: standardBoardPlayers,
                     selectedStat: $standardStat,
                     selectedCategory: categoryBinding,
                     sortDescending: $standardSortDescending,
+                    phase: viewModel.selectedPhase,
                     boardBindings: bindings,
-                    viewModel: viewModel
+                    viewModel: viewModel,
+                    isLoadingPostseason: viewModel.selectedPhase == .postseason
+                        && (viewModel.isLoadingPostseason || viewModel.postseasonLoadPending)
+                        && viewModel.postseasonPlayers.isEmpty,
+                    postseasonLoadCompleted: viewModel.selectedPhase == .postseason
+                        && viewModel.postseasonLoadCompleted,
+                    postseasonErrorMessage: viewModel.selectedPhase == .postseason
+                        ? viewModel.postseasonErrorMessage
+                        : nil,
+                    retryPostseason: viewModel.selectedPhase == .postseason
+                        ? { await viewModel.reloadPostseason() }
+                        : nil
                 )
             case .bestWorst:
                 BestWorstBoard(viewModel: viewModel, bindings: bindings)
@@ -98,7 +107,7 @@ struct StatsView: View {
         // postseason rows so the board still fills on the first morning of the
         // playoffs, before the nightly rollup has ranked anybody.
         if viewModel.selectedPhase == .postseason {
-            let players = viewModel.postseasonPlayers
+            let players = viewModel.seasonPlayers
             guard viewModel.positionFilterApplies, viewModel.positionFilter != .all else { return players }
             return players.filter { viewModel.positionFilter.matches($0) }
         }
@@ -137,7 +146,11 @@ struct StatsView: View {
             // No calendar glyph here: this bar also carries the title, the gear
             // and the upgrade CTA, and on a 375pt phone the glyph is what
             // pushes "Stats" into an ellipsis.
-            SavantNavPill(title: String(viewModel.selectedSeason))
+            SavantNavPill(
+                title: viewModel.selectedPhase == .postseason
+                    ? "\(viewModel.selectedSeason) POST"
+                    : String(viewModel.selectedSeason)
+            )
         }
         .accessibilityHint("Choose which season's stats to view")
     }
@@ -168,10 +181,40 @@ private struct BestWorstBoard: View {
             .padding(.top, 8)
 
             if store.isPro {
-                MetricLeadersView(metrics: viewModel.allMetrics)
+                MetricLeadersView(
+                    metrics: viewModel.allMetrics,
+                    season: viewModel.selectedSeason,
+                    isLoading: viewModel.selectedPhase == .postseason
+                        && (viewModel.isLoadingPostseason || viewModel.postseasonLoadPending)
+                        && viewModel.postseasonPlayers.isEmpty,
+                    phase: viewModel.selectedPhase,
+                    postseasonLoadCompleted: viewModel.selectedPhase == .postseason
+                        && viewModel.postseasonLoadCompleted,
+                    errorMessage: viewModel.selectedPhase == .postseason
+                        ? viewModel.postseasonErrorMessage
+                        : nil,
+                    retry: viewModel.selectedPhase == .postseason
+                        ? { await viewModel.reloadPostseason() }
+                        : nil
+                )
             } else {
                 ZStack(alignment: .bottom) {
-                    MetricLeadersView(metrics: viewModel.allMetrics)
+                    MetricLeadersView(
+                        metrics: viewModel.allMetrics,
+                        season: viewModel.selectedSeason,
+                        isLoading: viewModel.selectedPhase == .postseason
+                            && (viewModel.isLoadingPostseason || viewModel.postseasonLoadPending)
+                            && viewModel.postseasonPlayers.isEmpty,
+                        phase: viewModel.selectedPhase,
+                        postseasonLoadCompleted: viewModel.selectedPhase == .postseason
+                            && viewModel.postseasonLoadCompleted,
+                        errorMessage: viewModel.selectedPhase == .postseason
+                            ? viewModel.postseasonErrorMessage
+                            : nil,
+                        retry: viewModel.selectedPhase == .postseason
+                            ? { await viewModel.reloadPostseason() }
+                            : nil
+                    )
                         .blur(radius: 8)
                         .allowsHitTesting(false)
                     BlurGateUnlock(

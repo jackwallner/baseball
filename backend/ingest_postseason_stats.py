@@ -1,10 +1,10 @@
-"""Postseason standard stat lines for everyone still playing.
+"""Postseason stat lines for everyone still playing.
 
-The percentile boards stop at the regular season, because Baseball Savant
-publishes no postseason percentile leaderboards and the app's promise is that
-its percentiles match Savant's. Standard stats have no such limit: the MLB
-Stats API serves a postseason split directly, so the postseason boards can
-carry a real AVG/HR/ERA line even though they can never carry a percentile.
+The MLB Stats API supplies the real postseason standard line directly, and the
+following percentile rollup maps Statcast values onto the current regular
+season curve because Baseball Savant publishes no postseason percentile
+leaderboards. Keeping the two steps separate lets the standard board render as
+soon as the line lands, before percentile enrichment completes.
 
 Writes to player_postseason_stats, never to player_snapshots, for the same
 reason the postseason game logs have their own table: the shipped app reads
@@ -132,6 +132,62 @@ def _fetch_group(player_ids: list[int], season: int, group: str) -> dict[int, di
     return out
 
 
+def _fetch_fielding_group(player_ids: list[int], season: int) -> dict[int, dict]:
+    """Fetch and total postseason fielding splits across positions."""
+    out: dict[int, dict] = {}
+    params = {
+        "personIds": ",".join(str(p) for p in player_ids),
+        "hydrate": (
+            f"stats(type=season,season={season},group=fielding,"
+            f"gameType={POSTSEASON_GAME_TYPE})"
+        ),
+    }
+    try:
+        resp = requests.get(PEOPLE_URL, params=params, timeout=30)
+        resp.raise_for_status()
+        payload = resp.json()
+    except Exception:
+        logger.exception("people lookup failed for fielding batch")
+        return out
+
+    for person in payload.get("people", []):
+        pid = person.get("id")
+        if pid is None:
+            continue
+
+        totals = {"e": 0, "a": 0, "po": 0, "dp": 0, "gf": 0}
+        found = False
+        for stat_group in person.get("stats", []):
+            group_data = stat_group.get("group", {})
+            if not isinstance(group_data, dict) or group_data.get("displayName") != "fielding":
+                continue
+            for split in stat_group.get("splits", []):
+                stat = split.get("stat", {})
+                if not stat:
+                    continue
+                position = (split.get("position") or {}).get("abbreviation")
+                if position == "DH":
+                    continue
+                found = True
+                totals["e"] += int(stat.get("errors", 0) or 0)
+                totals["a"] += int(stat.get("assists", 0) or 0)
+                totals["po"] += int(stat.get("putOuts", 0) or 0)
+                totals["dp"] += int(stat.get("doublePlays", 0) or 0)
+                totals["gf"] += int(stat.get("games", 0) or 0)
+
+        if found:
+            chances = totals["po"] + totals["a"] + totals["e"]
+            totals["fpct"] = (
+                f"{(totals['po'] + totals['a']) / chances:.3f}" if chances else ""
+            )
+            out[pid] = {
+                "name": person.get("fullName") or "",
+                "position": (person.get("primaryPosition") or {}).get("abbreviation") or "",
+                "stats": totals,
+            }
+    return out
+
+
 def _hitting_fields(stat: dict) -> dict[str, Any]:
     return {
         "avg": stat.get("avg", ""), "obp": stat.get("obp", ""),
@@ -162,15 +218,28 @@ def _pitching_fields(stat: dict) -> dict[str, Any]:
     }
 
 
-def build_rows(season: int, roster: dict[int, str], hitting: dict, pitching: dict) -> list[dict]:
-    """Assemble one upsertable row per player who has any postseason line."""
+def build_rows(
+    season: int,
+    roster: dict[int, str],
+    hitting: dict,
+    pitching: dict,
+    fielding: Optional[dict] = None,
+) -> list[dict]:
+    """Assemble one upsertable row per player who has any postseason line.
+
+    This ingest step intentionally leaves ``metrics`` to the enrichment step;
+    standard stats are immediately usable while the percentile rollup runs.
+    """
     rows: list[dict] = []
+    fielding = fielding or {}
     for pid, team in sorted(roster.items()):
         hit = hitting.get(pid) or {}
         pit = pitching.get(pid) or {}
+        fld = fielding.get(pid) or {}
         hit_stat = hit.get("stat")
         pit_stat = pit.get("stat")
-        if not hit_stat and not pit_stat:
+        field_stats = fld.get("stats") or {}
+        if not hit_stat and not pit_stat and not field_stats:
             continue
 
         if hit_stat and pit_stat:
@@ -185,13 +254,14 @@ def build_rows(season: int, roster: dict[int, str], hitting: dict, pitching: dic
             merged.update(_hitting_fields(hit_stat))
         if pit_stat:
             merged.update(_pitching_fields(pit_stat))
+        merged.update(field_stats)
 
         rows.append({
             "id": pid,
             "season": season,
-            "name": hit.get("name") or pit.get("name") or "",
+            "name": hit.get("name") or pit.get("name") or fld.get("name") or "",
             "team": team,
-            "position": hit.get("position") or pit.get("position") or "",
+            "position": hit.get("position") or pit.get("position") or fld.get("position") or "",
             "player_type": player_type,
             "standard_stats": _build_standard_stats_from_mlb(merged),
         })
@@ -223,12 +293,14 @@ def run() -> None:
     ids = sorted(roster)
     hitting: dict[int, dict] = {}
     pitching: dict[int, dict] = {}
+    fielding: dict[int, dict] = {}
     for i in range(0, len(ids), BATCH):
         batch = ids[i:i + BATCH]
         hitting.update(_fetch_group(batch, season, "hitting"))
         pitching.update(_fetch_group(batch, season, "pitching"))
+        fielding.update(_fetch_fielding_group(batch, season))
 
-    rows = build_rows(season, roster, hitting, pitching)
+    rows = build_rows(season, roster, hitting, pitching, fielding)
     _upsert(client, rows)
     logger.info("Done. Upserted %d postseason stat lines.", len(rows))
 

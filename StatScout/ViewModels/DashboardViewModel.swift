@@ -54,22 +54,48 @@ final class DashboardViewModel {
 
     var postseasonAvailable: Bool { postseasonThrough != nil }
 
-    /// Postseason standard lines, loaded on demand the first time the phase is
-    /// switched. Empty `metrics` is not a loading state: Savant publishes no
-    /// postseason percentile leaderboards, so these players will never have a
-    /// percentile and the boards that rank by one must not offer October.
+    /// Postseason player lines, loaded on demand the first time the phase is
+    /// switched. The backend maps percentile bars to the current regular-season
+    /// curves because Savant publishes no postseason percentile leaderboards.
+    /// An empty result after a successful request is a real no-data state.
     var postseasonPlayers: [Player] = []
     var isLoadingPostseason = false
+    var postseasonErrorMessage: String?
     private var hasLoadedPostseason = false
+
+    /// A successful empty response is different from a request that has not
+    /// completed. The former needs an actionable refresh state on the boards,
+    /// because the game log can land before the MLB standard line does.
+    var postseasonLoadCompleted: Bool { hasLoadedPostseason }
+
+    /// Covers the short interval between selecting Postseason and the task
+    /// starting, as well as the request itself, so the UI never flashes a
+    /// generic "no data" message for a phase the user just selected.
+    var postseasonLoadPending: Bool {
+        postseasonAvailable && !hasLoadedPostseason && postseasonErrorMessage == nil
+    }
 
     func loadPostseasonIfNeeded() async {
         guard postseasonAvailable, !hasLoadedPostseason, !isLoadingPostseason else { return }
         isLoadingPostseason = true
+        postseasonErrorMessage = nil
         defer { isLoadingPostseason = false }
-        if let players = try? await provider.fetchPostseasonPlayers(season: StatScoutSeason.current) {
+        do {
+            let players = try await provider.fetchPostseasonPlayers(season: StatScoutSeason.current)
             postseasonPlayers = players
             hasLoadedPostseason = true
+        } catch {
+            if !isTaskCancellation(error) {
+                postseasonErrorMessage = "Couldn't load postseason data. Check your connection and try again."
+            }
         }
+    }
+
+    func reloadPostseason() async {
+        guard postseasonAvailable else { return }
+        hasLoadedPostseason = false
+        postseasonErrorMessage = nil
+        await loadPostseasonIfNeeded()
     }
 
     /// True when a phase control should appear at all: the postseason exists and
@@ -243,16 +269,31 @@ final class DashboardViewModel {
     /// never fetch one slate while its heading names the other. Only the season
     /// being played has a postseason, so any other year is regular season
     /// whatever the picker last said.
-    func fetchGameLogs(playerId: Int, season: Int) async throws -> [PlayerGameLog] {
-        let phase = season == StatScoutSeason.current ? selectedPhase : .regular
+    func fetchGameLogs(
+        playerId: Int,
+        season: Int,
+        phase requestedPhase: SeasonPhase? = nil
+    ) async throws -> [PlayerGameLog] {
+        let phase = requestedPhase ?? (season == StatScoutSeason.current ? selectedPhase : .regular)
         return try await provider.fetchGameLogs(playerId: playerId, season: season, phase: phase)
     }
 
     /// Team-scoped game logs since `sinceDate`. The TeamRankingsCard caps at 30
     /// days so we don't pull the whole season for an aggregate we only ever
     /// slice into 7/15/30 day windows.
-    func fetchTeamGameLogs(team: String, season: Int, sinceDate: Date) async throws -> [PlayerGameLog] {
-        try await provider.fetchTeamGameLogs(team: team, season: season, sinceDate: sinceDate)
+    func fetchTeamGameLogs(
+        team: String,
+        season: Int,
+        sinceDate: Date,
+        phase requestedPhase: SeasonPhase? = nil
+    ) async throws -> [PlayerGameLog] {
+        let phase = requestedPhase ?? (season == StatScoutSeason.current ? selectedPhase : .regular)
+        return try await provider.fetchTeamGameLogs(
+            team: team,
+            season: season,
+            sinceDate: sinceDate,
+            phase: phase
+        )
     }
 
     init(provider: StatcastProviding, cache: PlayerCaching? = nil) {
@@ -287,8 +328,8 @@ final class DashboardViewModel {
         // and the standard line all derive from this, so switching the source
         // here is what makes the whole Stats tab phase-aware at once rather
         // than in four places that could disagree.
-        if selectedPhase == .postseason {
-            return postseasonPlayers
+        if selectedPhase == .postseason && selectedSeason == StatScoutSeason.current {
+            return uniquePlayers(postseasonPlayers)
         }
         let allSeasonPlayers = playerHistories.values.flatMap { $0 }.filter { $0.season == selectedSeason }
         var seenIds = Set<Int>()
@@ -456,10 +497,17 @@ final class DashboardViewModel {
     /// Unique players for an arbitrary season, not just the selected one.
     /// Drill-down leaderboards opened from a player profile need the season
     /// that profile is showing, which can differ from `selectedSeason`.
-    func players(forSeason season: Int) -> [Player] {
+    func players(forSeason season: Int, phase: SeasonPhase = .regular) -> [Player] {
+        if phase == .postseason && season == StatScoutSeason.current {
+            return uniquePlayers(postseasonPlayers)
+        }
         let all = playerHistories.values.flatMap { $0 }.filter { $0.season == season }
+        return uniquePlayers(all)
+    }
+
+    private func uniquePlayers(_ players: [Player]) -> [Player] {
         var seen = Set<Int>()
-        return all.filter { seen.insert($0.playerId).inserted }
+        return players.filter { seen.insert($0.playerId).inserted }
     }
 
     /// Position filter for the hitter / fielder / runner boards.
@@ -988,6 +1036,9 @@ final class DashboardViewModel {
             season: StatScoutSeason.current
         )
         if !offersPhaseChoice { selectedPhase = .regular }
+        if offersPhaseChoice, selectedPhase == .postseason {
+            await reloadPostseason()
+        }
     }
 
     func loadHistoricalIfNeeded() async {

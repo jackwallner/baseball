@@ -1,106 +1,62 @@
 import XCTest
 
+@MainActor
 final class SeasonPickerUITests: XCTestCase {
     var app: XCUIApplication!
 
-    override func setUpWithError() throws {
+    override func setUp() async throws {
+        try await super.setUp()
         continueAfterFailure = false
         app = XCUIApplication()
+        app.launchEnvironment["FORCE_PRO"] = "1"
         app.launch()
     }
 
+    private func seasonPicker() -> XCUIElement {
+        let picker = app.buttons.matching(
+            NSPredicate(format: "label BEGINSWITH %@", "Season and season type")
+        ).firstMatch
+        XCTAssertTrue(picker.waitForExistence(timeout: 15), "Season picker should appear")
+        return picker
+    }
+
     func testSeasonPickerShowsCorrectYears() throws {
-        // Wait for app to load data
-        let leaderboard = app.staticTexts["LEADERBOARD"]
-        XCTAssertTrue(leaderboard.waitForExistence(timeout: 10), "Leaderboard should appear")
+        let picker = seasonPicker()
+        picker.tap()
 
-        // Find the year picker (should show current year like "2026")
-        let currentYear = Calendar.current.component(.year, from: Date())
-        let yearButton = app.buttons.containing(.staticText, identifier: String(currentYear)).firstMatch
+        XCTAssertTrue(app.buttons["Regular Season"].waitForExistence(timeout: 2), "Regular season should be available")
+        let postseasonOption = app.buttons["Postseason"]
+        let prePlayoffOption = app.buttons["Postseason (after first playoff game)"]
+        XCTAssertTrue(
+            postseasonOption.exists || prePlayoffOption.exists,
+            "Postseason should be discoverable from the season menu"
+        )
 
-        // If not found by text, try finding by partial match
-        let yearPicker = app.buttons.element(boundBy: 0) // First button in nav area
-
-        // Take screenshot of initial state
-        let screenshot1 = XCUIScreen.main.screenshot()
-        let attachment1 = XCTAttachment(screenshot: screenshot1)
-        attachment1.name = "01_Initial_State"
-        attachment1.lifetime = .keepAlways
-        add(attachment1)
-
-        // Tap the year picker to open menu
-        if yearButton.exists {
-            yearButton.tap()
-        } else {
-            // Try tapping at coordinates where year picker should be
-            let coordinate = app.coordinate(withNormalizedOffset: CGVector(dx: 0.8, dy: 0.15))
-            coordinate.tap()
+        for year in StatScoutSeasonYears.all {
+            XCTAssertTrue(app.buttons[year].exists, "Season menu should list \(year)")
         }
-
-        // Wait for menu to open
-        sleep(2)
-
-        // Take screenshot of menu open
-        let screenshot2 = XCUIScreen.main.screenshot()
-        let attachment2 = XCTAttachment(screenshot: screenshot2)
-        attachment2.name = "02_Menu_Open"
-        attachment2.lifetime = .keepAlways
-        add(attachment2)
-
-        // Verify year format - check for years in menu
-        // Years should be 2015-2026 range
-        var foundYears: [String] = []
-        for year in 2015...2026 {
-            let yearString = String(year)
-            if app.buttons[yearString].exists || app.staticTexts[yearString].exists {
-                foundYears.append(yearString)
-            }
-        }
-
-        print("Found years: \(foundYears)")
-        XCTAssertGreaterThan(foundYears.count, 0, "Should find at least one year in the picker")
-
-        // Check for comma in year format (should NOT have comma)
-        let commaYearPattern = app.staticTexts.containing(NSPredicate(format: "label CONTAINS ','"))
-        XCTAssertEqual(commaYearPattern.count, 0, "Year format should not contain comma")
     }
 
     func testSelectDifferentYear() throws {
-        // Wait for data to load
-        sleep(5)
+        let picker = seasonPicker()
+        picker.tap()
 
-        // Take initial screenshot
-        let screenshot1 = XCUIScreen.main.screenshot()
-        let attachment1 = XCTAttachment(screenshot: screenshot1)
-        attachment1.name = "03_Before_Year_Change"
-        attachment1.lifetime = .keepAlways
-        add(attachment1)
+        let targetYear = "2025"
+        let targetButton = app.buttons[targetYear]
+        XCTAssertTrue(targetButton.waitForExistence(timeout: 2), "Target season should be listed")
+        targetButton.tap()
 
-        // Tap year picker
-        let coordinate = app.coordinate(withNormalizedOffset: CGVector(dx: 0.8, dy: 0.15))
-        coordinate.tap()
-        sleep(2)
-
-        // Try to select 2024
-        let year2024Button = app.buttons["2024"]
-        if year2024Button.exists {
-            year2024Button.tap()
-        } else {
-            // Tap at approximate location of 2024 in menu
-            let menuCoordinate = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.4))
-            menuCoordinate.tap()
-        }
-
-        sleep(3)
-
-        // Take screenshot after year change
-        let screenshot2 = XCUIScreen.main.screenshot()
-        let attachment2 = XCTAttachment(screenshot: screenshot2)
-        attachment2.name = "04_After_Year_Change"
-        attachment2.lifetime = .keepAlways
-        add(attachment2)
-
-        // Verify app didn't crash and still shows leaderboard
-        XCTAssertTrue(app.staticTexts["LEADERBOARD"].exists, "Leaderboard should still exist after year change")
+        let updatedPicker = seasonPicker()
+        let accessibilityValue = updatedPicker.value as? String ?? ""
+        XCTAssertTrue(
+            updatedPicker.label.contains(targetYear)
+                || accessibilityValue.contains(targetYear)
+                || app.staticTexts[targetYear].exists,
+            "Season picker should show the selected season"
+        )
     }
+}
+
+private enum StatScoutSeasonYears {
+    static let all = (2015...2026).map(String.init)
 }

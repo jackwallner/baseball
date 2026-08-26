@@ -7,6 +7,11 @@ struct StatScoutApp: App {
     @StateObject private var store = StoreService.shared
 
     init() {
+        #if DEBUG
+        if ProcessInfo.processInfo.environment["STATSCOUT_RESET_TEAM_FAVORITE"] == "1" {
+            UserDefaults.standard.removeObject(forKey: "favoriteTeam")
+        }
+        #endif
         ReviewPromptTracker.recordAppLaunch()
         guard let urlString = Self.configValue(for: "SUPABASE_URL"),
               let url = URL(string: urlString),

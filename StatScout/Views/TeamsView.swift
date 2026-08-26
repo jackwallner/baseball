@@ -48,14 +48,17 @@ struct TeamsView: View {
     ]
 
     private var filteredTeams: [String] {
-        let teams = searchText.isEmpty ? viewModel.teamsWithData : viewModel.teamsWithData.filter {
-            teamFullName($0).localizedCaseInsensitiveContains(searchText) ||
-            $0.localizedCaseInsensitiveContains(searchText)
+        let teams = searchText.isEmpty ? activeTeams : activeTeams.filter {
+            teamMatchesQuery($0, query: searchText)
         }
         // Plain alphabetical by full team name, the old score-based ordering was
         // confusing and the score itself was a mislabeled percentile. The
         // favorite is lifted into its own pinned section above the grid.
         return teams.sorted { teamFullName($0).localizedCompare(teamFullName($1)) == .orderedAscending }
+    }
+
+    private var activeTeams: [String] {
+        Set(viewModel.seasonPlayers.map { normalizedTeamAbbreviation($0.team) }).sorted()
     }
 
     /// The favorite, shown only when not actively searching so search results
@@ -72,7 +75,10 @@ struct TeamsView: View {
     }
 
     private var isInitiallyLoading: Bool {
-        viewModel.isLoading && viewModel.teamsWithData.isEmpty
+        (viewModel.isLoading && activeTeams.isEmpty)
+            || (viewModel.selectedPhase == .postseason
+                && (viewModel.isLoadingPostseason || viewModel.postseasonLoadPending)
+                && activeTeams.isEmpty)
     }
 
     var body: some View {
@@ -119,7 +125,8 @@ struct TeamsView: View {
     private func autoEnterFavoriteIfNeeded() {
         guard !didAutoEnterFavorite,
               let favorite = teamsViewModel.favoriteTeam,
-              path.isEmpty else { return }
+              path.isEmpty,
+              activeTeams.contains(normalizedTeamAbbreviation(favorite)) else { return }
         didAutoEnterFavorite = true
         path.append(TeamDestination(abbr: favorite))
     }
@@ -160,20 +167,29 @@ struct TeamsView: View {
     // calendar + year, sitting on the navy bar. Replaces the old in-content
     // season header card so Teams and Stats read the same.
     private var seasonMenu: some View {
-        SeasonMenu(
+        SeasonPhaseMenu(
             seasons: viewModel.availableSeasons,
-            selected: viewModel.selectedSeason,
+            selectedSeason: viewModel.selectedSeason,
+            selectedPhase: viewModel.selectedPhase,
+            postseasonAvailable: viewModel.offersPhaseChoice,
             isLocked: { viewModel.isSeasonLocked($0) },
-            onSelect: { season in
+            onSelectSeason: { season in
                 if viewModel.isSeasonLocked(season) {
                     lockedSeasonTrigger = .lockedSeason(season)
                 } else {
-                    viewModel.selectedSeason = season
+                    viewModel.selectSeason(season)
                 }
-            }
+            },
+            onSelectPhase: { viewModel.selectPhase($0) }
         ) {
-            SavantNavPill(systemImage: "calendar", title: String(viewModel.selectedSeason))
+            SavantNavPill(
+                systemImage: "calendar",
+                title: viewModel.selectedPhase == .postseason
+                    ? "\(viewModel.selectedSeason) POST"
+                    : String(viewModel.selectedSeason)
+            )
         }
+        .accessibilityHint("Choose which season's teams to view")
     }
 
     /// Logo grid replaces the old single-column list of rows. Each tile is a
@@ -181,7 +197,7 @@ struct TeamsView: View {
     /// favorites, and a long-press toggle so the row stays one-tap-to-navigate.
     private var allTeamsSection: some View {
         VStack(spacing: 0) {
-            SearchField(text: $searchText)
+            SearchField(text: $searchText, accessibilityIdentifier: "teamsSearchField")
                 .padding(.horizontal, 12)
                 .padding(.bottom, 12)
 
@@ -227,13 +243,43 @@ struct TeamsView: View {
             .padding(.horizontal, 16)
             .padding(.bottom, 8)
 
-            if filteredTeams.isEmpty {
-                let noDataForSeason = searchText.isEmpty && viewModel.teamsWithData.isEmpty
+            if viewModel.selectedPhase == .postseason,
+               let error = viewModel.postseasonErrorMessage,
+               activeTeams.isEmpty {
+                ContentUnavailableView {
+                    Label("Postseason data unavailable", systemImage: "exclamationmark.triangle")
+                } description: {
+                    Text(error)
+                } actions: {
+                    Button("Retry") {
+                        Task { await viewModel.reloadPostseason() }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(SavantPalette.savantRed)
+                }
+                .padding(.vertical, 48)
+            } else if viewModel.selectedPhase == .postseason,
+                      viewModel.postseasonLoadCompleted,
+                      activeTeams.isEmpty {
+                ContentUnavailableView {
+                    Label("Postseason teams not ready", systemImage: "clock.arrow.circlepath")
+                } description: {
+                    Text("The playoff games are in, but the latest team lines have not landed yet.")
+                } actions: {
+                    Button("Refresh") {
+                        Task { await viewModel.reloadPostseason() }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(SavantPalette.savantRed)
+                }
+                .padding(.vertical, 48)
+            } else if filteredTeams.isEmpty {
+                let noDataForSeason = searchText.isEmpty && activeTeams.isEmpty
                 ContentUnavailableView {
                     Label(noDataForSeason ? "No teams available" : "No teams found", systemImage: "magnifyingglass")
                 } description: {
                     Text(noDataForSeason
-                         ? "No teams have player data for the \(String(viewModel.selectedSeason)) season. Try selecting a different season from the Leaders tab."
+                         ? "No teams have player data for the \(String(viewModel.selectedSeason)) \(viewModel.selectedPhase.label.lowercased())."
                          : "Try a different search term.")
                 }
                 .padding(.vertical, 48)
@@ -257,17 +303,20 @@ struct TeamsView: View {
     private var divisionGrid: some View {
         VStack(spacing: 10) {
             ForEach(Self.divisions, id: \.name) { division in
-                VStack(spacing: 6) {
-                    HStack {
-                        Text(division.name.uppercased())
-                            .font(SavantType.micro)
-                            .tracking(0.6)
-                            .foregroundStyle(SavantPalette.inkTertiary)
-                        Spacer()
-                    }
-                    HStack(spacing: 8) {
-                        ForEach(division.teams, id: \.self) { abbr in
-                            teamDot(abbr)
+                let teams = division.teams.filter { gridTeams.contains($0) }
+                if !teams.isEmpty {
+                    VStack(spacing: 6) {
+                        HStack {
+                            Text(division.name.uppercased())
+                                .font(SavantType.micro)
+                                .tracking(0.6)
+                                .foregroundStyle(SavantPalette.inkTertiary)
+                            Spacer()
+                        }
+                        HStack(spacing: 8) {
+                            ForEach(teams, id: \.self) { abbr in
+                                teamDot(abbr)
+                            }
                         }
                     }
                 }
@@ -282,26 +331,41 @@ struct TeamsView: View {
     /// there isn't room, and the cap colors plus abbreviation are how people
     /// recognise a club anyway.
     private func teamDot(_ abbr: String) -> some View {
-        NavigationLink(value: TeamDestination(abbr: abbr)) {
-            // The disk already carries the abbreviation, so no caption beneath,
-            // it printed the same three letters twice and ate the vertical room
-            // the six division rows need.
-            VStack(spacing: 4) {
-                ZStack(alignment: .topTrailing) {
+        ZStack(alignment: .topTrailing) {
+            NavigationLink(value: TeamDestination(abbr: abbr)) {
+                // The disk already carries the abbreviation, so no caption beneath,
+                // it printed the same three letters twice and ate the vertical room
+                // the six division rows need.
+                VStack(spacing: 4) {
                     TeamAbbrDisk(abbr: abbr)
-                    if teamsViewModel.isFavorite(abbr) {
-                        Image(systemName: "star.fill")
-                            .font(.system(size: 9, weight: .bold))
-                            .foregroundStyle(Color.yellow)
-                            .padding(2)
-                            .background(SavantPalette.surface, in: Circle())
-                            .offset(x: 3, y: -3)
-                    }
                 }
+                .frame(maxWidth: .infinity)
             }
-            .frame(maxWidth: .infinity)
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("team-\(abbr)")
+            .accessibilityLabel(teamDisplayName(abbr))
+            .accessibilityHint("View team details")
+
+            Button {
+                if teamsViewModel.isFavorite(abbr) {
+                    teamsViewModel.removeFavorite()
+                } else {
+                    teamsViewModel.setFavorite(abbr)
+                }
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            } label: {
+                Image(systemName: teamsViewModel.isFavorite(abbr) ? "star.fill" : "star")
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundStyle(teamsViewModel.isFavorite(abbr) ? Color.yellow : SavantPalette.inkTertiary)
+                    .frame(width: 24, height: 24)
+                    .background(SavantPalette.surface, in: Circle())
+                    .overlay(Circle().stroke(SavantPalette.hairline, lineWidth: 0.5))
+            }
+            .buttonStyle(.borderless)
+            .accessibilityLabel(teamsViewModel.isFavorite(abbr) ? "Remove favorite" : "Set as favorite")
+            .offset(x: 4, y: -4)
         }
-        .buttonStyle(.plain)
+        .accessibilityElement(children: .contain)
         .contextMenu {
             Button {
                 if teamsViewModel.isFavorite(abbr) {
@@ -315,7 +379,6 @@ struct TeamsView: View {
                       systemImage: teamsViewModel.isFavorite(abbr) ? "star.slash" : "star.fill")
             }
         }
-        .accessibilityLabel(teamFullName(abbr))
     }
 }
 

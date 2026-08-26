@@ -20,7 +20,12 @@ protocol StatcastProviding: Sendable {
     func fetchHistoricalPlayers() async throws -> [Player]
     func fetchCurrentPlayers() async throws -> [Player]
     func fetchGameLogs(playerId: Int, season: Int, phase: SeasonPhase) async throws -> [PlayerGameLog]
-    func fetchTeamGameLogs(team: String, season: Int, sinceDate: Date) async throws -> [PlayerGameLog]
+    func fetchTeamGameLogs(
+        team: String,
+        season: Int,
+        sinceDate: Date,
+        phase: SeasonPhase
+    ) async throws -> [PlayerGameLog]
     func fetchRecentForm(season: Int, windowDays: Int) async throws -> [RecentForm]
     /// The last game day the pipeline has actually closed out. See
     /// `DashboardViewModel.dataThrough` for why a write timestamp isn't enough.
@@ -33,10 +38,9 @@ protocol StatcastProviding: Sendable {
     /// day once, overnight, so the first Wild Card game isn't readable until
     /// the following morning.
     func fetchPostseasonThroughDate(season: Int) async throws -> Date?
-    /// Postseason standard lines. Percentiles are absent by design: Savant
-    /// publishes no postseason percentile leaderboards, so these players carry
-    /// an empty `metrics` array and the percentile board correctly shows
-    /// nothing for October.
+    /// Postseason player lines, including percentile bars mapped to the current
+    /// regular-season curves. Savant does not publish postseason percentile
+    /// leaderboards, so the UI must identify the reference season.
     func fetchPostseasonPlayers(season: Int) async throws -> [Player]
 }
 
@@ -44,6 +48,10 @@ extension StatcastProviding {
     /// Regular season is what every existing caller means.
     func fetchGameLogs(playerId: Int, season: Int) async throws -> [PlayerGameLog] {
         try await fetchGameLogs(playerId: playerId, season: season, phase: .regular)
+    }
+
+    func fetchTeamGameLogs(team: String, season: Int, sinceDate: Date) async throws -> [PlayerGameLog] {
+        try await fetchTeamGameLogs(team: team, season: season, sinceDate: sinceDate, phase: .regular)
     }
 }
 
@@ -103,7 +111,12 @@ struct StatcastAPI: StatcastProviding {
         return rows.compactMap(\.value)
     }
 
-    func fetchTeamGameLogs(team: String, season: Int, sinceDate: Date) async throws -> [PlayerGameLog] {
+    func fetchTeamGameLogs(
+        team: String,
+        season: Int,
+        sinceDate: Date,
+        phase: SeasonPhase
+    ) async throws -> [PlayerGameLog] {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
         formatter.timeZone = TimeZone(identifier: "America/New_York")
@@ -114,7 +127,7 @@ struct StatcastAPI: StatcastProviding {
         var offset = 0
         while true {
             let endpoint = baseURL
-                .appending(path: "rest/v1/player_game_logs")
+                .appending(path: "rest/v1/\(gameLogTable(for: phase))")
                 .appending(queryItems: [
                     URLQueryItem(name: "select", value: "*"),
                     URLQueryItem(name: "team", value: "eq.\(team)"),
@@ -360,7 +373,12 @@ struct PreviewStatcastAPI: StatcastProviding {
         []
     }
 
-    func fetchTeamGameLogs(team: String, season: Int, sinceDate: Date) async throws -> [PlayerGameLog] {
+    func fetchTeamGameLogs(
+        team: String,
+        season: Int,
+        sinceDate: Date,
+        phase: SeasonPhase
+    ) async throws -> [PlayerGameLog] {
         []
     }
 

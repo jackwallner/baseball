@@ -171,6 +171,31 @@ struct MetricBar: View {
     }
 }
 
+/// The postseason metric bars use the current regular-season curve because
+/// Savant does not publish postseason percentile leaderboards. Keep this note
+/// attached to every postseason surface that draws those bars, not just the
+/// home board where the user first learned the convention.
+struct PostseasonReferenceNote: View {
+    let referenceSeason: Int
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 6) {
+            Image(systemName: "info.circle")
+            Text("Percentiles vs. \(referenceSeason) regular season")
+        }
+        .font(SavantType.micro)
+        .tracking(0.2)
+        .foregroundStyle(SavantPalette.inkTertiary)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, SavantGeo.padPage)
+        .padding(.bottom, 6)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(
+            "Postseason percentiles are measured against the \(referenceSeason) regular season"
+        )
+    }
+}
+
 /// Season + recent percentile bars stacked in one row, same Savant layout,
 /// with a compact recent track under the season bar when both are available.
 struct DualMetricBar: View {
@@ -208,6 +233,7 @@ struct DualMetricBar: View {
 struct SearchField: View {
     @Binding var text: String
     var focusOnAppear: Bool = false
+    var accessibilityIdentifier: String = "searchField"
     @FocusState private var isFocused: Bool
 
     var body: some View {
@@ -222,14 +248,29 @@ struct SearchField: View {
                         .allowsHitTesting(false)
                 }
                 TextField("", text: $text)
+                    .frame(maxWidth: .infinity, minHeight: 36, alignment: .leading)
                     .textInputAutocapitalization(.never)
                     .foregroundStyle(SavantPalette.ink)
                     .focused($isFocused)
+                    .accessibilityLabel("Search players or teams")
+                    .accessibilityHint("Search by player or team name")
+                    .accessibilityIdentifier(accessibilityIdentifier)
+            }
+            if !text.isEmpty {
+                Button {
+                    text = ""
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundStyle(SavantPalette.inkSecondary)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Clear search")
             }
         }
         .onAppear {
             if focusOnAppear {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { isFocused = true }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { isFocused = true }
             }
         }
         .padding(.horizontal, 12)

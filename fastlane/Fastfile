@@ -101,9 +101,10 @@ platform :ios do
 
           New in this version: postseason data. Any board can be switched
           between "Regular Season" and "Postseason" from the season menu on the
-          Stats and team screens. The postseason rows only appear once the
-          backend actually holds playoff data, so before the playoffs begin the
-          control is not shown at all.
+          Stats and team screens. Before the first playoff game is ingested,
+          the menu keeps a visible but disabled "Postseason (after first playoff
+          game)" item so the feature is discoverable. Once playoff data lands,
+          it becomes selectable and the rows appear.
 
           Also new: a postseason card on the Stats board. It is merchandising
           only and grants nothing. For a free user its button opens the same

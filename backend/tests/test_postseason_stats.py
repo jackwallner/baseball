@@ -50,6 +50,21 @@ class TestBuildRows:
         labels = {s["label"] for s in rows[0]["standard_stats"]}
         assert {"ERA", "WHIP", "SO"} <= labels
 
+    def test_a_fielder_gets_a_fielding_line(self):
+        rows = ps.build_rows(
+            2026,
+            {4: "SEA"},
+            {},
+            {},
+            {4: {"name": "Fielder, A", "position": "SS", "stats": {
+                "e": 1, "a": 18, "po": 12, "dp": 4, "gf": 3, "fpct": "0.968"
+            }}},
+        )
+        assert rows[0]["player_type"] == "batter"
+        labels = {s["label"]: s["value"] for s in rows[0]["standard_stats"]}
+        assert labels["E"] == "1"
+        assert labels["FLD%"] == "0.968"
+
     def test_a_two_way_player_keeps_both_lines_apart(self):
         """The bug this namespacing exists for: batting H and hits allowed are
         both labelled H, and only the category tells them apart."""
@@ -73,9 +88,8 @@ class TestBuildRows:
         rows = ps.build_rows(2026, {1: "LAD"}, {1: _person(stat=_hit())}, {})
         assert rows[0]["season"] == 2026
 
-    def test_no_percentiles_are_ever_emitted(self):
-        """Savant publishes none for the postseason, so a row must not imply
-        one exists."""
+    def test_ingest_leaves_percentiles_for_the_enrichment_step(self):
+        """Standard rows land before the separate curve-based enrichment."""
         rows = ps.build_rows(2026, {1: "LAD"}, {1: _person(stat=_hit())}, {})
         assert "metrics" not in rows[0]
 

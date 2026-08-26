@@ -387,7 +387,11 @@ struct HotColdView: View {
         let then = form.priorMetrics[metric.key]
 
         if let player {
-            NavigationLink(value: player) {
+            NavigationLink(value: PlayerRoute(
+                player: player,
+                phase: .regular,
+                season: form.season
+            )) {
                 rowContent(
                     form: form,
                     player: player,

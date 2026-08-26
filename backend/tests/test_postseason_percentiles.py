@@ -4,6 +4,8 @@ Not a percentile we invented: the curve is read back off player_snapshots, so
 every bar is answerable to a Savant page the user can open.
 """
 
+from types import SimpleNamespace
+
 import rollup_postseason_percentiles as pp
 
 
@@ -98,11 +100,20 @@ class TestBuildMetrics:
         out = pp.build_metrics({"ev_avg": 94.0}, self.curves, "batter")
         assert len(out) == 1
         assert out[0]["label"] == "EV"
+        assert out[0]["value"] == "94.0 mph"
 
     def test_expected_stats_come_through(self):
         out = pp.build_metrics({"xwoba": 0.400}, self.curves, "batter")
         assert [m["label"] for m in out] == ["xwOBA"]
         assert out[0]["percentile"] == 95
+        assert out[0]["value"] == "0.400"
+
+    def test_rate_values_keep_their_units(self):
+        curves = {
+            ("batter", "k_pct"): [(10.0, 10), (30.0, 90)],
+        }
+        out = pp.build_metrics({"k_pct": 25.0}, curves, "batter")
+        assert out[0]["value"] == "25.0%"
 
     def test_a_pitcher_is_ranked_on_the_pitcher_curve(self):
         out = pp.build_metrics({"opp_xwoba": 0.250}, self.curves, "pitcher")
@@ -122,3 +133,50 @@ class TestBuildMetrics:
 
     def test_an_unknown_side_ranks_nothing(self):
         assert pp.build_metrics({"ev_avg": 94.0}, self.curves, "two_way") == []
+
+
+def test_run_fetches_player_type_before_building_regular_season_curves(monkeypatch):
+    selections = []
+    updates = []
+
+    class Query:
+        def __init__(self, table):
+            self.table = table
+
+        def select(self, value):
+            selections.append((self.table, value))
+            return self
+
+        def eq(self, *_args):
+            return self
+
+        def range(self, *_args):
+            return self
+
+        def update(self, payload):
+            updates.append(payload)
+            return self
+
+        def execute(self):
+            if self.table == pp.POSTSEASON_TABLE:
+                return SimpleNamespace(data=[{
+                    "player_id": 1,
+                    "player_type": "batter",
+                    "plate_appearances": 3,
+                    "metrics": {"ev_avg": 94.0, "_bbe": 3},
+                }])
+            if self.table == pp.SNAPSHOTS_TABLE:
+                return SimpleNamespace(data=[_snapshot("batter", [("EV", "90.0 mph", 50)])])
+            return SimpleNamespace(data=[])
+
+    class Client:
+        def table(self, name):
+            return Query(name)
+
+    monkeypatch.setattr(pp, "_client", lambda: Client())
+    monkeypatch.setattr(pp, "_resolve_season", lambda: 2026)
+
+    pp.run()
+
+    assert (pp.SNAPSHOTS_TABLE, "player_type,metrics") in selections
+    assert updates

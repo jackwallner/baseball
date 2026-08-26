@@ -22,6 +22,7 @@ struct TeamRankingsCard: View {
     /// on the same ruler as individual players' bars. Filtered per side at
     /// curve-build time.
     let leaguePlayers: [Player]
+    let phase: SeasonPhase
     let fetchTeamGameLogs: ((String, Int, Date) async throws -> [PlayerGameLog])?
     let onUpgradeTap: () -> Void
 
@@ -66,6 +67,10 @@ struct TeamRankingsCard: View {
                 trailing: store.isPro ? nil : AnyView(proBadge)
             )
 
+            if phase == .postseason {
+                PostseasonReferenceNote(referenceSeason: StatScoutSeason.current)
+            }
+
             // Side and mode used to share one row, split in proportion to how
             // many options each held. Even sized correctly, five capsules in a
             // strip read as one control with five choices: "Hitting / Pitching /
@@ -95,11 +100,13 @@ struct TeamRankingsCard: View {
             RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
                 .stroke(SavantPalette.hairline, lineWidth: 0.5)
         )
-        .task(id: "\(team)-\(season)-\(mode.rawValue)-\(store.isPro)") {
+        .task(id: "\(team)-\(season)-\(phase.rawValue)-\(mode.rawValue)-\(store.isPro)") {
             if mode.usesRecent, store.isPro { await load() }
         }
         .onAppear { rebuildCurves() }
+        .onChange(of: players.count) { _, _ in rebuildCurves() }
         .onChange(of: leaguePlayers.count) { _, _ in rebuildCurves() }
+        .onChange(of: phase) { _, _ in rebuildCurves() }
     }
 
     private var proBadge: some View {
@@ -213,7 +220,11 @@ struct TeamRankingsCard: View {
 
             VStack(spacing: 0) {
                 ForEach(Array(rows.enumerated()), id: \.element.id) { index, metric in
-                    NavigationLink(value: MetricRoute(label: metric.label, category: metric.category)) {
+                    NavigationLink(value: MetricRoute(
+                        label: metric.label,
+                        category: metric.category,
+                        phase: phase
+                    )) {
                         MetricBar(metric: metric)
                             .padding(.horizontal, SavantGeo.padCard)
                             .padding(.vertical, 12)
