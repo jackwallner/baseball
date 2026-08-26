@@ -7,12 +7,14 @@ every bar is answerable to a Savant page the user can open.
 import rollup_postseason_percentiles as pp
 
 
-def _snapshot(pairs):
-    """One player's metrics rows, as (label, value, percentile)."""
-    return {"metrics": [
-        {"label": label, "value": value, "percentile": pct}
-        for label, value, pct in pairs
-    ]}
+def _snapshot(player_type, pairs):
+    return {
+        "player_type": player_type,
+        "metrics": [
+            {"label": label, "value": value, "percentile": pct}
+            for label, value, pct in pairs
+        ],
+    }
 
 
 class TestNumericParsing:
@@ -22,31 +24,42 @@ class TestNumericParsing:
         assert pp._numeric("2,350 rpm") == 2350.0
 
     def test_a_blank_value_is_not_a_zero(self):
-        """The backend emits empty value strings for some rows, and treating
-        those as 0.0 would drag the bottom of every curve to the floor."""
+        """Treating an empty value string as 0.0 would drag the bottom of every
+        curve to the floor."""
         assert pp._numeric("") is None
         assert pp._numeric(None) is None
         assert pp._numeric("  ") is None
 
 
 class TestCurves:
-    def test_builds_one_sorted_curve_per_rankable_metric(self):
-        snaps = [
-            _snapshot([("EV", "88.0 mph", 10), ("xwOBA", ".310", 50)]),
-            _snapshot([("EV", "94.0 mph", 90)]),
-        ]
-        curves = pp.build_curves(snaps)
-        assert curves["ev_avg"] == [(88.0, 10), (94.0, 90)]
+    def test_builds_a_curve_per_side_and_metric(self):
+        curves = pp.build_curves([
+            _snapshot("batter", [("EV", "88.0 mph", 10)]),
+            _snapshot("batter", [("EV", "94.0 mph", 90)]),
+        ])
+        assert curves[("batter", "ev_avg")] == [(88.0, 10), (94.0, 90)]
 
-    def test_expected_stats_are_never_ranked(self):
-        """xwOBA needs hundreds of plate appearances. October never has them,
-        so it must not acquire a curve at all."""
-        curves = pp.build_curves([_snapshot([("xwOBA", ".310", 50)])])
-        assert curves == {}
+    def test_pitchers_and_batters_never_share_a_curve(self):
+        """A pitcher's xwOBA is the xwOBA he allowed and his percentile runs the
+        other way. One merged curve would rank every pitcher as if batting."""
+        curves = pp.build_curves([
+            _snapshot("batter", [("xwOBA", "0.400", 95)]),
+            _snapshot("pitcher", [("xwOBA", "0.325", 31)]),
+        ])
+        assert curves[("batter", "xwoba")] == [(0.400, 95)]
+        assert curves[("pitcher", "opp_xwoba")] == [(0.325, 31)]
+
+    def test_expected_stats_are_ranked_like_everything_else(self):
+        """The postseason is a small sample throughout; xwOBA is not singled
+        out for it."""
+        curves = pp.build_curves([_snapshot("batter", [("xwOBA", "0.310", 50)])])
+        assert ("batter", "xwoba") in curves
+
+    def test_two_way_players_do_not_pollute_either_curve(self):
+        assert pp.build_curves([_snapshot("two_way", [("EV", "94.0 mph", 90)])]) == {}
 
     def test_rows_with_no_value_are_skipped(self):
-        curves = pp.build_curves([_snapshot([("EV", "", 40)])])
-        assert curves == {}
+        assert pp.build_curves([_snapshot("batter", [("EV", "", 40)])]) == {}
 
 
 class TestLookup:
@@ -59,35 +72,53 @@ class TestLookup:
         assert pp.percentile_for(self.curve, 90.0) == 50
 
     def test_clamps_rather_than_extrapolating(self):
-        """A postseason value past anything a qualified regular managed lands on
-        the end of the curve; the distribution has nothing further to say."""
         assert pp.percentile_for(self.curve, 120.0) == 95
         assert pp.percentile_for(self.curve, 40.0) == 5
+
+    def test_a_descending_pitcher_curve_reads_correctly(self):
+        """Lower allowed is better, so the curve falls as the value rises."""
+        descending = [(0.250, 90), (0.325, 31), (0.400, 5)]
+        assert pp.percentile_for(descending, 0.250) == 90
+        assert pp.percentile_for(descending, 0.400) == 5
 
     def test_an_empty_curve_yields_nothing(self):
         assert pp.percentile_for([], 90.0) is None
 
 
-class TestSampleGate:
-    curves = {"ev_avg": [(85.0, 5), (95.0, 95)], "whiff_pct": [(20.0, 90), (30.0, 10)]}
+class TestBuildMetrics:
+    curves = {
+        ("batter", "ev_avg"): [(85.0, 5), (95.0, 95)],
+        ("batter", "xwoba"): [(0.250, 5), (0.400, 95)],
+        ("pitcher", "opp_xwoba"): [(0.250, 95), (0.400, 5)],
+    }
 
-    def test_a_thin_batted_ball_sample_is_not_ranked(self):
-        """A three-game exit is not a distribution, and a coloured bar would
-        claim otherwise."""
-        out = pp.build_metrics({"ev_avg": 94.0}, self.curves, batted_balls=4, pitches=500)
-        assert out == []
-
-    def test_a_deep_run_is_ranked(self):
-        out = pp.build_metrics({"ev_avg": 94.0}, self.curves, batted_balls=40, pitches=500)
+    def test_a_three_game_sample_is_still_ranked(self):
+        """No sample gate, by decision. A wild-card exit is three games, and a
+        metric hidden for everyone but the last two teams is one nobody sees."""
+        out = pp.build_metrics({"ev_avg": 94.0}, self.curves, "batter")
         assert len(out) == 1
         assert out[0]["label"] == "EV"
-        assert 5 <= out[0]["percentile"] <= 95
 
-    def test_plate_discipline_gates_on_pitches_not_batted_balls(self):
-        thin = pp.build_metrics({"whiff_pct": 22.0}, self.curves, batted_balls=0, pitches=20)
-        deep = pp.build_metrics({"whiff_pct": 22.0}, self.curves, batted_balls=0, pitches=400)
-        assert thin == []
-        assert len(deep) == 1
+    def test_expected_stats_come_through(self):
+        out = pp.build_metrics({"xwoba": 0.400}, self.curves, "batter")
+        assert [m["label"] for m in out] == ["xwOBA"]
+        assert out[0]["percentile"] == 95
+
+    def test_a_pitcher_is_ranked_on_the_pitcher_curve(self):
+        out = pp.build_metrics({"opp_xwoba": 0.250}, self.curves, "pitcher")
+        assert out[0]["percentile"] == 95
+        assert out[0]["category"] == "pitching"
+
+    def test_the_two_sides_of_a_two_way_player_stay_apart(self):
+        """Same label, two rows, and only the id and category tell them
+        apart."""
+        batting = pp.build_metrics({"xwoba": 0.400}, self.curves, "batter")
+        pitching = pp.build_metrics({"opp_xwoba": 0.250}, self.curves, "pitcher")
+        assert batting[0]["label"] == pitching[0]["label"] == "xwOBA"
+        assert batting[0]["id"] != pitching[0]["id"]
 
     def test_a_metric_absent_from_the_line_is_skipped(self):
-        assert pp.build_metrics({}, self.curves, batted_balls=99, pitches=999) == []
+        assert pp.build_metrics({}, self.curves, "batter") == []
+
+    def test_an_unknown_side_ranks_nothing(self):
+        assert pp.build_metrics({"ev_avg": 94.0}, self.curves, "two_way") == []
