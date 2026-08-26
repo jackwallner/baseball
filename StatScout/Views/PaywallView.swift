@@ -155,6 +155,13 @@ struct PaywallView: View {
     @State private var restoreMessage: String?
     @State private var isRestoring = false
     @State private var hasDismissed = false
+    /// Height of the canvas the paywall was given. An iPhone-only app gets a
+    /// 375x622pt compatibility window on iPad, and an iPhone SE is no taller,
+    /// so the hero has to give room back or the plan cards and the purchase
+    /// button start two screens below the fold.
+    @State private var availableHeight: CGFloat = 0
+
+    private var isCompactHeight: Bool { availableHeight > 0 && availableHeight < 720 }
 
     init(trigger: PaywallTrigger = .upgrade) {
         self.trigger = trigger
@@ -163,6 +170,11 @@ struct PaywallView: View {
     var body: some View {
         ZStack {
             SavantPalette.canvas.ignoresSafeArea()
+                .background(GeometryReader { geo in
+                    Color.clear
+                        .onAppear { availableHeight = geo.size.height }
+                        .onChange(of: geo.size.height) { _, height in availableHeight = height }
+                })
 
             if store.isLoadingProducts && store.products.isEmpty {
                 loadingState
@@ -262,9 +274,9 @@ struct PaywallView: View {
                 ZStack {
                     Circle()
                         .fill(.white.opacity(0.12))
-                        .frame(width: 70, height: 70)
+                        .frame(width: isCompactHeight ? 54 : 70, height: isCompactHeight ? 54 : 70)
                     Image(systemName: trigger.icon)
-                        .font(.system(size: 30, weight: .semibold))
+                        .font(.system(size: isCompactHeight ? 24 : 30, weight: .semibold))
                         .foregroundStyle(.white)
                 }
 
@@ -288,8 +300,8 @@ struct PaywallView: View {
                     .minimumScaleFactor(0.9)
                     .padding(.horizontal, 22)
             }
-            .padding(.top, 64)
-            .padding(.bottom, 22)
+            .padding(.top, isCompactHeight ? 40 : 64)
+            .padding(.bottom, isCompactHeight ? 14 : 22)
             .frame(maxWidth: .infinity)
         }
         .fixedSize(horizontal: false, vertical: true)
@@ -512,10 +524,11 @@ struct PaywallView: View {
                     // no error occurred, tell the user instead of going silent.
                     restoreMessage = "Purchase pending approval. StatScout+ unlocks automatically once it's approved."
                 case .cancelled:
-                    errorMessage = "Purchase cancelled. Tap again to continue."
+                    // Dismissing Apple's sheet is a choice, not a failure.
+                    errorMessage = nil
                 }
             } catch {
-                errorMessage = store.lastError ?? "Couldn't complete the purchase. Please try again."
+                errorMessage = StoreService.purchaseFailureMessage(for: error)
             }
         }
     }

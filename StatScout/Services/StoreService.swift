@@ -478,21 +478,46 @@ final class StoreService: NSObject, ObservableObject {
         Task { await fetchProducts() }
     }
 
+    /// Loads the offering, retrying a couple of times before giving up.
+    ///
+    /// App Review runs behind a VPN on a cold device, which is exactly the
+    /// shape of network where a single `offerings()` call times out. One
+    /// failure used to leave `products` empty for the rest of the session, and
+    /// every CTA in the app then had nothing to sell: the tap fell through to
+    /// the plan picker's error state, which reads as "the purchase errored".
     func fetchProducts() async {
         guard configureIfNeeded() else { return }
         isLoadingProducts = true
         defer { isLoadingProducts = false }
-        do {
-            let offerings = try await Purchases.shared.offerings()
-            let offering = offerings.paywallOffering
-            currentOffering = offering
-            products = offering?.sortedPackages ?? []
-            lastError = nil
-            await refreshIntroEligibility()
-        } catch {
-            logger.error("Product fetch failed: \(String(describing: error), privacy: .public)")
-            lastError = "Couldn't load subscription options. Check your connection and try again."
+        var attempt = 0
+        while attempt < 3 {
+            do {
+                let offerings = try await Purchases.shared.offerings()
+                let offering = offerings.paywallOffering
+                currentOffering = offering
+                products = offering?.sortedPackages ?? []
+                lastError = nil
+                await refreshIntroEligibility()
+                return
+            } catch {
+                attempt += 1
+                logger.error("Product fetch failed (attempt \(attempt, privacy: .public)): \(String(describing: error), privacy: .public)")
+                if attempt < 3 {
+                    try? await Task.sleep(nanoseconds: UInt64(attempt) * 700_000_000)
+                }
+            }
         }
+        lastError = "Couldn't load subscription options. Check your connection and try again."
+    }
+
+    /// Guarantees the offering is loaded before a CTA transacts, so a tap on a
+    /// priced button buys that plan instead of bouncing to the plan picker.
+    /// Returns true when something is actually purchasable afterwards.
+    @discardableResult
+    func ensureProductsLoaded() async -> Bool {
+        if !products.isEmpty { return true }
+        await fetchProducts()
+        return !products.isEmpty
     }
 
     @discardableResult
@@ -500,18 +525,79 @@ final class StoreService: NSObject, ObservableObject {
         guard configureIfNeeded() else {
             throw StoreServiceError.purchasesUnavailableInSimulator
         }
+        // A purchase must never inherit a message from an earlier, unrelated
+        // failure. `lastError` is the shared status line every surface reads,
+        // so a stale "Couldn't load subscription options" from a cold launch
+        // would otherwise surface as the *purchase's* error the moment a
+        // transaction takes any other path than success.
+        lastError = nil
         purchaseInFlight = true
         defer { purchaseInFlight = false }
 
-        let result = try await Purchases.shared.purchase(package: product)
-        apply(customerInfo: result.customerInfo)
-        if result.userCancelled {
-            return .cancelled
-        } else if result.customerInfo.hasProEntitlement {
-            return .purchased
-        } else {
-            return .pending
+        do {
+            let result = try await Purchases.shared.purchase(package: product)
+            apply(customerInfo: result.customerInfo)
+            if result.userCancelled {
+                return .cancelled
+            } else if result.customerInfo.hasProEntitlement {
+                return .purchased
+            } else {
+                return .pending
+            }
+        } catch {
+            // RevenueCat reports a cancelled sheet as a thrown error in some
+            // StoreKit paths, not just via `userCancelled`. Cancelling is a
+            // normal outcome, never an error to show the user.
+            if let rcError = error as? RevenueCat.ErrorCode, rcError == .purchaseCancelledError {
+                return .cancelled
+            }
+            let nsError = error as NSError
+            if nsError.domain == RevenueCat.ErrorCode.errorDomain,
+               let code = RevenueCat.ErrorCode(rawValue: nsError.code) {
+                switch code {
+                case .purchaseCancelledError:
+                    return .cancelled
+                case .paymentPendingError:
+                    return .pending
+                case .productAlreadyPurchasedError, .receiptAlreadyInUseError:
+                    // Already entitled on this Apple ID: settle it as a restore
+                    // rather than telling the buyer their purchase failed.
+                    await updateCustomerProductStatus(fetchPolicy: .fetchCurrent)
+                    return isPro ? .purchased : .pending
+                default:
+                    break
+                }
+            }
+            logger.error("Purchase failed: \(String(describing: error), privacy: .public)")
+            lastError = Self.purchaseFailureMessage(for: error)
+            throw error
         }
+    }
+
+    /// Human-readable, purchase-specific failure copy. Never generic enough to
+    /// read as "the app is broken", and never borrowed from another operation.
+    nonisolated static func purchaseFailureMessage(for error: Error) -> String {
+        let nsError = error as NSError
+        if nsError.domain == RevenueCat.ErrorCode.errorDomain,
+           let code = RevenueCat.ErrorCode(rawValue: nsError.code) {
+            switch code {
+            case .networkError, .offlineConnectionError:
+                return "Couldn't reach the App Store. Check your connection and try again."
+            case .storeProblemError:
+                return "The App Store is temporarily unavailable. Please try again in a moment."
+            case .purchaseNotAllowedError:
+                return "Purchases are turned off for this device. Check Screen Time › Content & Privacy Restrictions."
+            case .purchaseInvalidError:
+                return "This Apple ID can't complete the purchase. Try again, or use a different Apple ID."
+            case .productNotAvailableForPurchaseError:
+                return "StatScout+ isn't available for purchase on this account's App Store region right now."
+            case .ineligibleError:
+                return "That offer isn't available on this Apple ID. Tap again to subscribe at the regular price."
+            default:
+                break
+            }
+        }
+        return "Couldn't complete the purchase. Please try again."
     }
 
     /// The single conversion path behind every pitch in the app.
@@ -523,8 +609,8 @@ final class StoreService: NSObject, ObservableObject {
     /// only from a deliberate "See all plans" link, or as the fallback when the
     /// offering failed to load and there is genuinely nothing to buy.
     func purchaseYearlyDirect() async -> DirectPurchaseOutcome {
-        if yearlyPackage == nil, currentOffering == nil {
-            await fetchProducts()
+        if yearlyPackage == nil {
+            await ensureProductsLoaded()
         }
         guard let yearly = yearlyPackage else { return .needsPlanPicker }
         do {
@@ -537,7 +623,7 @@ final class StoreService: NSObject, ObservableObject {
                 return .cancelled
             }
         } catch {
-            return .failed(lastError ?? "Couldn't complete the purchase. Please try again.")
+            return .failed(Self.purchaseFailureMessage(for: error))
         }
     }
 

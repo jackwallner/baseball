@@ -848,7 +848,8 @@ struct PlusDirectCTA: View {
                 // Ask-to-Buy / deferred payment: not unlocked, not an error.
                 statusMessage = "Purchase pending approval. StatScout+ unlocks automatically once it's approved."
             case .cancelled:
-                statusMessage = "Purchase cancelled. Tap again to continue."
+                // Backing out of Apple's sheet is not an error to report.
+                statusMessage = nil
             case .failed(let message):
                 statusMessage = message
             case .needsPlanPicker:

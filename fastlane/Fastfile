@@ -88,12 +88,13 @@ platform :ios do
           StatScout is a read-only baseball statistics viewer with no user accounts or sign-in.
 
           Core flow:
-          1. Launch app — new users see onboarding; returning users land on leaderboard
-          2. Scroll leaderboard of ~800+ players with percentile rankings
-          3. Tap player for profile with visual metric bars, standard stats, and year compare
+          1. Launch app — new users see onboarding; returning users land on the Stats board
+          2. Scroll the leaderboard of ~800+ players with percentile rankings
+          3. Tap a player for a profile with visual metric bars, standard stats, and year compare
           4. Filter by Hitting, Pitching, Fielding, Running categories
-          5. Browse Teams tab for team rosters
-          6. Metrics tab shows best/worst performers per category
+          5. Trends tab ranks the league by recent form; Teams tab browses rosters;
+             Compare stacks two players head-to-head
+          6. The Stats tab's View menu holds Leaders and Best & Worst per metric
 
           StatScout+ features (IAP via RevenueCat):
           - Historical seasons, player comparisons, year-over-year tracking
@@ -125,7 +126,30 @@ platform :ios do
 
           2.1(b), also carried forward: both auto-renewable subscriptions
           (com.jackwallner.baseball.pro.monthly and .yearly) are approved and
-          live.
+          live, as is the non-consumable com.jackwallner.baseball.pro.
+
+          Guideline 4, from the 1.5.0 review on iPad Air 11-inch (M4): fixed.
+          StatScout is an iPhone app, so on iPad it runs in the iPhone
+          compatibility window, which is 375x622pt — around 140pt shorter than
+          the iPhone the onboarding flow had been laid out for. The flow now
+          measures the height it is actually given and sizes itself to it, so
+          every heading, every line of body copy and all four bullets are
+          visible on each page at that window size, with nothing truncated,
+          clipped or overlapped. The paging dots moved out of the card and into
+          the header, where they can no longer sit on top of a bullet. The same
+          fix covers iPhone SE, which has the same short canvas.
+
+          Guideline 2.1(b), the purchase error from the 1.5.0 review: fixed.
+          Two things could put a red message under a purchase button. Dismissing
+          Apple's confirm sheet was reported as "Purchase cancelled", which
+          reads as a failure rather than a choice — cancelling is now silent. A
+          genuine failure showed whatever message was last set by any store
+          operation, including a product-load failure from launch, so a purchase
+          could inherit an unrelated "couldn't load subscription options" line;
+          purchase failures now carry their own StoreKit-specific copy. The
+          offering also retries on a slow or VPN'd network, and a CTA tapped
+          before products finish loading now loads them and buys, instead of
+          falling through to the plan picker's error state.
 
           Known: Light mode only. No shadows. No accounts. No social features.
         NOTES
