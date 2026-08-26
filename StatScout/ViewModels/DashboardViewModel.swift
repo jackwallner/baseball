@@ -283,9 +283,24 @@ final class DashboardViewModel {
     // Returns empty when the selected season has no data so callers render an empty state
     // instead of falling back to a stale "latest snapshot" set.
     var seasonPlayers: [Player] {
+        // One root for every board: the leaderboard, the sort menu, best/worst
+        // and the standard line all derive from this, so switching the source
+        // here is what makes the whole Stats tab phase-aware at once rather
+        // than in four places that could disagree.
+        if selectedPhase == .postseason {
+            return postseasonPlayers
+        }
         let allSeasonPlayers = playerHistories.values.flatMap { $0 }.filter { $0.season == selectedSeason }
         var seenIds = Set<Int>()
         return allSeasonPlayers.filter { seenIds.insert($0.playerId).inserted }
+    }
+
+    /// What the postseason percentile bars are measured against, for the header
+    /// that has to say so. The bars are not Savant postseason figures, which do
+    /// not exist: they are this season's regular-season curve, with an October
+    /// value looked up on it.
+    var postseasonReferenceNote: String {
+        "Percentiles vs. \(StatScoutSeason.current) regular season"
     }
 
     // MARK: - Recent form
