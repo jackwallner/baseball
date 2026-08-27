@@ -82,13 +82,13 @@ platform :ios do
         first_name: "Jack",
         last_name: "Wallner",
         email: "jackwallner@gmail.com",
-        demo_user: "N/A — no login, no account system",
+        demo_user: "N/A (no login, no account system)",
         demo_password: "",
         notes: <<~NOTES
           StatScout is a read-only baseball statistics viewer with no user accounts or sign-in.
 
           Core flow:
-          1. Launch app — new users see onboarding; returning users land on the Stats board
+          1. Launch app. New users see onboarding; returning users land on the Stats board
           2. Scroll the leaderboard of ~800+ players with percentile rankings
           3. Tap a player for a profile with visual metric bars, standard stats, and year compare
           4. Filter by Hitting, Pitching, Fielding, Running categories
@@ -130,7 +130,7 @@ platform :ios do
 
           Guideline 4, from the 1.5.0 review on iPad Air 11-inch (M4): fixed.
           StatScout is an iPhone app, so on iPad it runs in the iPhone
-          compatibility window, which is 375x622pt — around 140pt shorter than
+          compatibility window, which is 375x622pt, around 140pt shorter than
           the iPhone the onboarding flow had been laid out for. The flow now
           measures the height it is actually given and sizes itself to it, so
           every heading, every line of body copy and all four bullets are
@@ -142,7 +142,7 @@ platform :ios do
           Guideline 2.1(b), the purchase error from the 1.5.0 review: fixed.
           Two things could put a red message under a purchase button. Dismissing
           Apple's confirm sheet was reported as "Purchase cancelled", which
-          reads as a failure rather than a choice — cancelling is now silent. A
+          reads as a failure rather than a choice, and cancelling is now silent. A
           genuine failure showed whatever message was last set by any store
           operation, including a product-load failure from launch, so a purchase
           could inherit an unrelated "couldn't load subscription options" line;
