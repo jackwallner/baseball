@@ -15,8 +15,19 @@ enum RevenueCatConfig {
     #else
     static let apiKey = "appl_qNlZGCCfGWBTsvcxlqYSNCtRupx"
     #endif
-    static let proEntitlement = "StatScout Pro"
-    static let fallbackEntitlement = "pro"
+    /// The entitlement identifier RevenueCat actually returns in
+    /// `customerInfo.entitlements.active`, verified against the dashboard.
+    /// It is the entitlement's lookup key, not its display name ("StatScout+").
+    ///
+    /// This was wrong for a long time and nothing looked broken, because
+    /// `hasProEntitlement` falls back to product ownership and the three App
+    /// Store product ids do match. Anything that grants the entitlement
+    /// *without* one of those exact product ids (an offer code, a manual grant
+    /// from the dashboard, a renamed or newly added product) unlocked nothing.
+    static let proEntitlement = "Baseball Savvy StatScout Pro"
+    /// Historic/alternate identifiers, kept so a dashboard rename cannot lock
+    /// existing subscribers out mid-flight.
+    static let legacyEntitlements = ["StatScout Pro", "pro"]
 }
 
 enum StatScoutSeason {
@@ -222,7 +233,13 @@ extension CustomerInfo {
     var hasProEntitlement: Bool {
         let active = entitlements.active
         if active[RevenueCatConfig.proEntitlement]?.isActive == true
-            || active[RevenueCatConfig.fallbackEntitlement]?.isActive == true {
+            || RevenueCatConfig.legacyEntitlements.contains(where: { active[$0]?.isActive == true }) {
+            return true
+        }
+        // This project has exactly one entitlement, so any active one is Pro.
+        // Named lookups above stay first for intent; this catches a dashboard
+        // rename without shipping a build.
+        if active.values.contains(where: { $0.isActive }) {
             return true
         }
         // Belt-and-suspenders: if the entitlement mapping on the dashboard is
@@ -539,11 +556,18 @@ final class StoreService: NSObject, ObservableObject {
             apply(customerInfo: result.customerInfo)
             if result.userCancelled {
                 return .cancelled
-            } else if result.customerInfo.hasProEntitlement {
-                return .purchased
-            } else {
-                return .pending
             }
+            if result.customerInfo.hasProEntitlement {
+                return .purchased
+            }
+            // The purchase went through but the entitlement is not in the
+            // customer info we were handed. That is what a genuinely deferred
+            // (Ask to Buy) purchase looks like, and it is also what a race
+            // against RevenueCat's backend looks like. Ask once, authoritatively,
+            // before telling a buyer their purchase is pending: calling a
+            // completed purchase "pending" leaves them paid and locked out.
+            await updateCustomerProductStatus(fetchPolicy: .fetchCurrent)
+            return isPro ? .purchased : .pending
         } catch {
             // RevenueCat reports a cancelled sheet as a thrown error in some
             // StoreKit paths, not just via `userCancelled`. Cancelling is a
