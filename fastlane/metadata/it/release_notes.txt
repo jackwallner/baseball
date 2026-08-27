@@ -1,3 +1,7 @@
-La volata finale della stagione è iniziata. Una nuova scheda stagionale nella bacheca statistiche ti porta agli strumenti che contano di più adesso: la bacheca dei trend, la forma recente, i confronti diretti e l'analisi delle squadre.
+StatScout ora segue la stagione fino ai playoff.
 
-Sei già abbonato? La scheda ti porta direttamente ai Trend invece di venderti qualcosa che hai già.
+Ogni tabellone si può passare da stagione regolare a playoff dal menu della stagione, sia nella schermata delle statistiche sia nella pagina di qualsiasi squadra. I tabelloni dei playoff contengono le statistiche classiche e i tabellini delle partite di playoff: chi produce a ottobre, non chi lo ha fatto a giugno.
+
+L'opzione playoff si trova nel menu della stagione e diventa selezionabile appena viene giocata la prima partita di playoff, quindi non c'è nulla da attivare.
+
+Nota che i percentili Statcast restano valori di stagione regolare, come su Baseball Savant, che non pubblica percentili dei playoff.

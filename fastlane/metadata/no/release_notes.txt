@@ -1,3 +1,7 @@
-Sesongens innspurt er i gang. Et nytt sesongkort på statistikktavlen peker deg mot verktøyene som betyr mest nå: trendtavlen, form den siste tiden, direkte sammenligninger og laganalyse.
+StatScout følger nå sesongen helt inn i sluttspillet.
 
-Allerede abonnent? Kortet tar deg rett til Trender i stedet for å selge deg noe du allerede har.
+Alle tavler kan byttes mellom grunnserie og sluttspill fra sesongmenyen, både på statistikkskjermen og på siden til et hvilket som helst lag. Sluttspilltavlene inneholder de vanlige tallene og kamplogger fra sluttspillet: hvem som leverer i oktober, ikke hvem som gjorde det i juni.
+
+Sluttspillvalget ligger i sesongmenyen og blir mulig å velge så snart den første sluttspillkampen er spilt, så det er ingenting å slå på.
+
+Merk at Statcast-persentilene fortsatt er tall fra grunnserien, akkurat som hos Baseball Savant, som ikke publiserer persentiler for sluttspillet.

@@ -1,3 +1,7 @@
-Der Saisonendspurt läuft. Eine neue Saisonkarte auf der Statistiktafel führt dich zu den Werkzeugen, die jetzt zählen: die Trends-Tafel, die aktuelle Form, direkte Vergleiche und die Team-Analyse.
+StatScout folgt der Saison jetzt bis in die Playoffs.
 
-Schon Abonnent? Die Karte bringt dich direkt zu den Trends, statt dir etwas zu verkaufen, das du längst hast.
+Jede Tafel lässt sich im Saisonmenü zwischen Hauptrunde und Playoffs umschalten, auf der Statistikansicht und auf jeder Teamseite. Die Playoff-Tafeln enthalten die klassischen Werte und die Spielprotokolle der Playoffs: wer im Oktober liefert, nicht wer es im Juni getan hat.
+
+Die Playoff-Option steht im Saisonmenü und wird auswählbar, sobald das erste Playoff-Spiel gespielt ist. Du musst also nichts aktivieren.
+
+Beachte, dass die Statcast-Perzentile weiterhin Werte der Hauptrunde sind, genau wie bei Baseball Savant, das keine Playoff-Perzentile veröffentlicht.

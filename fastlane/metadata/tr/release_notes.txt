@@ -1,3 +1,7 @@
-Sezonun son düzlüğü başladı. İstatistik panosundaki yeni sezon kartı sizi şu anda en çok işe yarayan araçlara götürüyor: trend panosu, son dönem formu, birebir karşılaştırmalar ve takım analizi.
+StatScout artık sezonu playofflara kadar takip ediyor.
 
-Zaten aboneyseniz kart, size zaten sahip olduğunuz bir şeyi satmak yerine doğrudan Trendler ekranını açar.
+İstatistik ekranında ve herhangi bir takım sayfasında, sezon menüsünden her tabloyu normal sezon ile playoff arasında değiştirebilirsin. Playoff tabloları playoffun standart istatistiklerini ve maç kayıtlarını taşır: haziranda kimin yaptığını değil, ekimde kimin üretim yaptığını.
+
+Playoff seçeneği sezon menüsünde duruyor ve ilk playoff maçı oynanır oynanmaz seçilebilir hale geliyor, yani açılacak bir şey yok.
+
+Statcast yüzdelik sıralamalarının normal sezon rakamları olarak kaldığını unutma; playoff yüzdelikleri yayımlamayan Baseball Savant ile aynı.

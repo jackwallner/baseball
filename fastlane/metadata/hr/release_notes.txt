@@ -1,3 +1,7 @@
-Završnica sezone je počela. Nova sezonska kartica na ploči statistike vodi vas do alata koji sada najviše znače: ploča trendova, nedavna forma, izravne usporedbe i analiza momčadi.
+StatScout sada prati sezonu sve do doigravanja.
 
-Već ste pretplaćeni? Kartica vas vodi ravno na Trendove umjesto da vam nudi nešto što već imate.
+Svaka se ploča iz izbornika sezone može prebaciti između regularnog dijela i doigravanja, i na zaslonu statistike i na stranici bilo koje momčadi. Ploče doigravanja donose klasične brojke i zapise pojedinih utakmica doigravanja: tko donosi rezultat u listopadu, a ne tko je to činio u lipnju.
+
+Opcija doigravanja nalazi se u izborniku sezone i postaje dostupna čim se odigra prva utakmica doigravanja, pa nema se što uključivati.
+
+Napominjemo da Statcast percentili ostaju brojke regularnog dijela sezone, jednako kao na Baseball Savantu, koji ne objavljuje percentile doigravanja.

@@ -1,3 +1,7 @@
-Le sprint final de la saison est commencé. Une nouvelle carte saisonnière dans le tableau des statistiques vous dirige vers les outils les plus utiles en ce moment : le tableau des tendances, la forme récente, les duels et l'analyse d'équipe.
+StatScout suit maintenant la saison jusqu'en séries éliminatoires.
 
-Déjà abonné? La carte vous amène directement aux Tendances au lieu de vous vendre ce que vous avez déjà.
+N'importe quel tableau peut passer de la saison régulière aux séries à partir du menu de saison, dans l'écran des statistiques comme sur la page de n'importe quelle équipe. Les tableaux des séries contiennent les statistiques classiques et les sommaires de match des séries : qui produit en octobre, pas qui l'a fait en juin.
+
+L'option des séries se trouve dans le menu de saison et devient sélectionnable dès le premier match des séries, donc il n'y a rien à activer.
+
+À noter que les centiles Statcast restent des chiffres de saison régulière, comme sur Baseball Savant, qui ne publie pas de centiles pour les séries.

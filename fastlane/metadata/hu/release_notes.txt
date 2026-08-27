@@ -1,3 +1,7 @@
-Elkezdődött a szezon hajrája. A statisztikai táblán megjelenő új szezonális kártya azokhoz az eszközökhöz visz, amelyek most a legfontosabbak: trendtábla, aktuális forma, közvetlen összehasonlítások és csapatelemzés.
+A StatScout mostantól a rájátszásig követi a szezont.
 
-Már előfizető? A kártya egyenesen a Trendekhez visz, ahelyett hogy olyasmit kínálna, ami már megvan.
+Bármelyik tábla átváltható alapszakasz és rájátszás között a szezonmenüből, a statisztikák képernyőn és bármelyik csapat oldalán is. A rájátszástáblák a megszokott mutatókat és a rájátszás mérkőzésnaplóit hozzák: ki teljesít októberben, nem az, ki tette ezt júniusban.
+
+A rájátszás lehetőség a szezonmenüben van, és az első lejátszott rájátszásmérkőzés után azonnal választhatóvá válik, tehát nincs mit bekapcsolni.
+
+Fontos: a Statcast percentilisek továbbra is alapszakaszbeli értékek, ugyanúgy, mint a Baseball Savanton, amely nem tesz közzé rájátszás-percentiliseket.

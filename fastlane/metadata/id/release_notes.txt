@@ -1,3 +1,7 @@
-Putaran akhir musim sudah dimulai. Kartu musiman baru di papan statistik mengarahkan Anda ke fitur yang paling penting saat ini: papan tren, performa terkini, perbandingan langsung, dan analisis tim.
+StatScout kini mengikuti musim sampai ke babak playoff.
 
-Sudah berlangganan? Kartu ini langsung membawa Anda ke Tren, bukan menawarkan sesuatu yang sudah Anda miliki.
+Setiap papan bisa dialihkan antara Musim Reguler dan Postseason lewat menu musim, di layar statistik maupun di halaman tim mana pun. Papan postseason memuat statistik standar dan catatan pertandingan playoff: siapa yang tampil di Oktober, bukan siapa yang melakukannya di Juni.
+
+Opsi postseason ada di menu musim dan bisa dipilih begitu pertandingan playoff pertama dimainkan, jadi tidak ada yang perlu diaktifkan.
+
+Perlu dicatat, peringkat persentil Statcast tetap angka musim reguler, sama seperti Baseball Savant, yang tidak memublikasikan persentil postseason.

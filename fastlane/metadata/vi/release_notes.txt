@@ -1,3 +1,7 @@
-Chặng nước rút của mùa giải đã bắt đầu. Thẻ theo mùa mới trên bảng thống kê đưa bạn đến những công cụ quan trọng nhất lúc này: bảng xu hướng, phong độ gần đây, so sánh trực tiếp và phân tích đội bóng.
+StatScout giờ theo mùa giải tới tận vòng playoff.
 
-Đã đăng ký rồi? Thẻ sẽ đưa bạn thẳng tới Xu hướng thay vì mời mua thứ bạn đã có.
+Bạn có thể chuyển bất kỳ bảng nào giữa mùa giải chính và hậu mùa giải từ menu mùa giải, ở màn hình thống kê cũng như trên trang của bất kỳ đội nào. Các bảng hậu mùa giải mang theo những chỉ số quen thuộc và nhật ký từng trận playoff: ai đang làm được ở tháng 10, chứ không phải ai đã làm được hồi tháng 6.
+
+Tùy chọn hậu mùa giải nằm sẵn trong menu mùa giải và có thể chọn ngay khi trận playoff đầu tiên diễn ra, nên không có gì phải bật.
+
+Lưu ý rằng thứ hạng phần trăm của Statcast vẫn là số liệu mùa giải chính, giống như Baseball Savant, nơi không công bố phần trăm cho hậu mùa giải.

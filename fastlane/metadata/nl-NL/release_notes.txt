@@ -1,3 +1,7 @@
-De eindsprint van het seizoen is begonnen. Een nieuwe seizoenskaart op het statistiekenbord wijst je de weg naar wat nu het meeste oplevert: het trendbord, recente vorm, onderlinge vergelijkingen en teamanalyse.
+StatScout volgt het seizoen nu tot in de play-offs.
 
-Al geabonneerd? De kaart brengt je meteen naar Trends in plaats van je iets te verkopen dat je al hebt.
+Elk overzicht is via het seizoensmenu om te schakelen tussen reguliere seizoen en play-offs, zowel op het statistiekenscherm als op de pagina van elk team. De play-offoverzichten bevatten de gewone cijfers en de wedstrijdlogs van de play-offs: wie het in oktober waarmaakt, niet wie dat in juni deed.
+
+De play-offoptie staat in het seizoensmenu en wordt selecteerbaar zodra de eerste play-offwedstrijd is gespeeld, dus je hoeft niets aan te zetten.
+
+Let op: de Statcast-percentielen blijven cijfers uit het reguliere seizoen, net als bij Baseball Savant, dat geen play-offpercentielen publiceert.

@@ -1,3 +1,7 @@
-Začel se je zaključek sezone. Nova sezonska kartica na plošči s statistiko vas usmeri k orodjem, ki zdaj štejejo največ: plošča trendov, zadnja forma, neposredne primerjave in analiza ekip.
+StatScout zdaj spremlja sezono vse do končnice.
 
-Ste že naročeni? Kartica vas popelje naravnost na Trende, namesto da bi vam prodajala nekaj, kar že imate.
+Vsako tablo lahko v meniju sezone preklopiš med rednim delom in končnico, tako na zaslonu s statistiko kot na strani katere koli ekipe. Table končnice vsebujejo običajne številke in zapise tekem končnice: kdo dostavlja oktobra, ne kdo je to počel junija.
+
+Možnost končnice je v meniju sezone in postane izbirna takoj, ko je odigrana prva tekma končnice, zato ni ničesar za vklop.
+
+Upoštevaj, da percentili Statcast ostajajo številke rednega dela sezone, enako kot na Baseball Savantu, ki percentilov končnice ne objavlja.
