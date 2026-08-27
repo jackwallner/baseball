@@ -1,3 +1,7 @@
-L'esprint final de la temporada ja és aquí. Una nova targeta de temporada al tauler d'estadístiques et porta a les eines més importants d'aquest tram: el tauler de tendències, la forma recent, els duels directes i l'anàlisi d'equips.
+StatScout ara segueix la temporada fins als playoffs.
 
-Ja hi estàs subscrit? La targeta et porta directament a Tendències en comptes d'oferir-te una cosa que ja tens.
+Qualsevol tauler es pot canviar entre Temporada regular i Postemporada des del menú de temporada, a la pantalla d'estadístiques i a la pàgina de qualsevol equip. Els taulers de postemporada porten les estadístiques clàssiques i els registres de partit dels playoffs: qui rendeix a l'octubre, no qui ho va fer al juny.
+
+L'opció de postemporada és al menú de temporada i es pot seleccionar tan bon punt es juga el primer partit de playoff, així que no cal activar res.
+
+Tingues en compte que els percentils de Statcast continuen sent xifres de temporada regular, igual que a Baseball Savant, que no publica percentils de postemporada.

@@ -1,3 +1,7 @@
-A început finalul de sezon. Un nou card sezonier pe tabloul de statistici te duce la instrumentele care contează cel mai mult acum: tabloul de tendințe, forma recentă, comparațiile directe și analiza echipelor.
+StatScout urmărește acum sezonul până în playoff.
 
-Ai deja abonament? Cardul te duce direct la Tendințe, în loc să îți vândă ceva ce ai deja.
+Orice tablou poate fi comutat între sezonul regulat și playoff din meniul de sezon, atât pe ecranul de statistici, cât și pe pagina oricărei echipe. Tablourile de playoff conțin statisticile obișnuite și rapoartele meciurilor din playoff: cine produce în octombrie, nu cine a făcut-o în iunie.
+
+Opțiunea de playoff se află în meniul de sezon și devine selectabilă imediat ce se joacă primul meci din playoff, așa că nu trebuie activat nimic.
+
+Reține că percentilele Statcast rămân cifre din sezonul regulat, la fel ca pe Baseball Savant, care nu publică percentile pentru playoff.

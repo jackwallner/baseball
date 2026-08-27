@@ -1,3 +1,7 @@
-Kauden loppukiri on käynnissä. Tilastonäkymän uusi kausikortti vie sinut työkaluihin, joilla on nyt eniten merkitystä: trendinäkymä, viimeaikainen vire, kaksinkamppailut ja joukkueanalyysi.
+StatScout seuraa kautta nyt myös pudotuspeleihin.
 
-Onko tilaus jo voimassa? Kortti vie sinut suoraan Trendeihin sen sijaan, että kauppaisi jotain, mikä sinulla jo on.
+Minkä tahansa näkymän voi vaihtaa runkosarjan ja pudotuspelien välillä kausivalikosta, sekä tilastonäkymässä että jokaisen joukkueen sivulla. Pudotuspelinäkymissä ovat pudotuspelien perusluvut ja ottelukohtaiset tiedot: kuka tuottaa lokakuussa, ei se, kuka teki sen kesäkuussa.
+
+Pudotuspelivalinta on kausivalikossa ja muuttuu valittavaksi heti ensimmäisen pudotuspeliottelun jälkeen, joten mitään ei tarvitse ottaa käyttöön.
+
+Huomaa, että Statcastin persentiilit ovat edelleen runkosarjan lukuja, kuten Baseball Savantissa, joka ei julkaise pudotuspelien persentiilejä.

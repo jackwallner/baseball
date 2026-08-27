@@ -1,3 +1,7 @@
-Le sprint final de la saison est lancé. Une nouvelle carte saisonnière dans le tableau des statistiques vous oriente vers les outils qui comptent le plus en ce moment : le tableau des tendances, la forme récente, les duels et l'analyse d'équipe.
+StatScout suit désormais la saison jusqu'aux playoffs.
 
-Déjà abonné ? La carte vous emmène directement aux Tendances au lieu de vous vendre ce que vous avez déjà.
+N'importe quel tableau peut basculer entre saison régulière et playoffs depuis le menu de saison, sur l'écran des statistiques comme sur la page de n'importe quelle équipe. Les tableaux de playoffs contiennent les statistiques classiques et les feuilles de match des playoffs : qui produit en octobre, pas qui l'a fait en juin.
+
+L'option playoffs figure dans le menu de saison et devient sélectionnable dès le premier match de playoffs joué, il n'y a donc rien à activer.
+
+À noter que les centiles Statcast restent des chiffres de saison régulière, comme sur Baseball Savant, qui ne publie pas de centiles de playoffs.

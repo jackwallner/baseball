@@ -1,3 +1,7 @@
-Pusingan akhir musim telah bermula. Kad bermusim baharu pada papan statistik membawa anda ke alat yang paling penting sekarang: papan aliran, prestasi terkini, perbandingan bersemuka dan analisis pasukan.
+StatScout kini mengikuti musim sehingga ke playoff.
 
-Sudah melanggan? Kad ini terus membawa anda ke Aliran, bukan menawarkan sesuatu yang anda sudah miliki.
+Mana-mana papan boleh ditukar antara Musim Biasa dan Pascamusim daripada menu musim, pada skrin statistik dan pada halaman mana-mana pasukan. Papan pascamusim membawa statistik biasa dan log perlawanan playoff: siapa yang menyumbang pada bulan Oktober, bukan siapa yang melakukannya pada bulan Jun.
+
+Pilihan pascamusim berada dalam menu musim dan boleh dipilih sebaik sahaja perlawanan playoff pertama dimainkan, jadi tiada apa-apa yang perlu dihidupkan.
+
+Ambil perhatian bahawa kedudukan persentil Statcast kekal angka musim biasa, sama seperti Baseball Savant, yang tidak menerbitkan persentil pascamusim.

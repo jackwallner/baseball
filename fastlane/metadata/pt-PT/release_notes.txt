@@ -1,3 +1,7 @@
-A reta final da época já começou. Um novo cartão sazonal no painel de estatísticas leva-o às ferramentas que mais contam agora: o painel de tendências, a forma recente, os confrontos diretos e a análise de equipas.
+O StatScout acompanha agora a época até aos playoffs.
 
-Já é subscritor? O cartão leva-o diretamente às Tendências em vez de lhe vender algo que já tem.
+Qualquer painel pode alternar entre época regular e pós-época no menu de época, no ecrã de estatísticas e na página de qualquer equipa. Os painéis de pós-época trazem as estatísticas habituais e os registos de jogo dos playoffs: quem está a produzir em outubro, não quem o fez em junho.
+
+A opção de pós-época está no menu de época e fica selecionável assim que o primeiro jogo de playoff for disputado, por isso não há nada para ativar.
+
+Note que os percentis do Statcast continuam a ser números de época regular, tal como no Baseball Savant, que não publica percentis de pós-época.

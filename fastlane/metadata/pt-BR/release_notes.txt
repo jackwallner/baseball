@@ -1,3 +1,7 @@
-A reta final da temporada começou. Um novo card sazonal no painel de estatísticas leva você às ferramentas que mais importam agora: o painel de tendências, a forma recente, os confrontos diretos e a análise de times.
+O StatScout agora acompanha a temporada até os playoffs.
 
-Já é assinante? O card leva você direto para Tendências em vez de vender algo que você já tem.
+Qualquer painel pode alternar entre temporada regular e pós-temporada pelo menu de temporada, na tela de estatísticas e na página de qualquer time. Os painéis de pós-temporada trazem as estatísticas de sempre e os registros de jogo dos playoffs: quem está produzindo em outubro, não quem fez isso em junho.
+
+A opção de pós-temporada fica no menu de temporada e pode ser selecionada assim que o primeiro jogo de playoff acontecer, então não há nada para ativar.
+
+Vale lembrar que os percentis do Statcast continuam sendo números de temporada regular, igual ao Baseball Savant, que não publica percentis de pós-temporada.

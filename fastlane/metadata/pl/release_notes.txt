@@ -1,3 +1,7 @@
-Rozpoczęła się końcówka sezonu. Nowa sezonowa karta na tablicy statystyk kieruje Cię do narzędzi, które teraz liczą się najbardziej: tablicy trendów, ostatniej formy, bezpośrednich porównań i analizy drużyn.
+StatScout śledzi teraz sezon aż do fazy play-off.
 
-Masz już subskrypcję? Karta przenosi Cię prosto do Trendów, zamiast sprzedawać coś, co już masz.
+Każdą tablicę można przełączyć między sezonem zasadniczym a play-offami z menu sezonu, zarówno na ekranie statystyk, jak i na stronie dowolnej drużyny. Tablice play-off zawierają zwykłe statystyki i zapisy meczów play-off: kto dowozi w październiku, a nie kto robił to w czerwcu.
+
+Opcja play-off znajduje się w menu sezonu i staje się dostępna, gdy tylko zostanie rozegrany pierwszy mecz play-off, więc nie trzeba niczego włączać.
+
+Pamiętaj, że percentyle Statcast pozostają wartościami z sezonu zasadniczego, tak samo jak w Baseball Savant, który nie publikuje percentyli z play-offów.

@@ -1,3 +1,7 @@
-Závěrečná fáze sezóny je tady. Nová sezónní karta na přehledu statistik vás nasměruje k nástrojům, které teď rozhodují: přehled trendů, aktuální forma, vzájemná srovnání a skauting týmů.
+StatScout teď sleduje sezonu až do play off.
 
-Už máte předplatné? Karta vás pošle rovnou na Trendy místo toho, aby vám nabízela něco, co už máte.
+Každý přehled lze v nabídce sezony přepnout mezi základní částí a play off, a to na obrazovce statistik i na stránce libovolného týmu. Přehledy pro play off nesou klasické statistiky a záznamy jednotlivých zápasů play off: kdo se prosazuje v říjnu, ne kdo to dokázal v červnu.
+
+Volba play off je v nabídce sezony a zpřístupní se hned po prvním odehraném zápase play off, takže není co zapínat.
+
+Percentilová hodnocení Statcast zůstávají čísly ze základní části, stejně jako na Baseball Savant, který percentily pro play off nezveřejňuje.

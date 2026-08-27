@@ -1,3 +1,7 @@
-La recta final de la temporada ya llegó. Una nueva tarjeta de temporada en el tablero de estadísticas te lleva a las herramientas que más importan ahora: el tablero de tendencias, la forma reciente, los duelos directos y el análisis de equipos.
+StatScout ahora sigue la temporada hasta los playoffs.
 
-¿Ya tienes suscripción? La tarjeta te lleva directo a Tendencias en lugar de venderte algo que ya tienes.
+Cualquier tablero se puede cambiar entre Temporada regular y Postemporada desde el menú de temporada, en la pantalla de estadísticas y en la página de cualquier equipo. Los tableros de postemporada traen las estadísticas de siempre y los registros de juego de los playoffs: quién está produciendo en octubre, no quién lo hizo en junio.
+
+La opción de postemporada está en el menú de temporada y se puede elegir en cuanto se juega el primer partido de playoffs, así que no hay nada que activar.
+
+Ten en cuenta que los percentiles de Statcast siguen siendo cifras de temporada regular, igual que en Baseball Savant, que no publica percentiles de postemporada.
