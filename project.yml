@@ -27,7 +27,7 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.jackwallner.baseball
         PRODUCT_NAME: "Baseball Savvy StatScout"
         MARKETING_VERSION: "1.5.1"
-        CURRENT_PROJECT_VERSION: "180"
+        CURRENT_PROJECT_VERSION: "181"
         GENERATE_INFOPLIST_FILE: NO
         INFOPLIST_FILE: StatScout/Info.plist
         CODE_SIGN_ENTITLEMENTS: StatScout/StatScout.entitlements
