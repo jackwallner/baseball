@@ -35,11 +35,16 @@ final class PaywallFunnelUITests: XCTestCase {
         )
         confirm.tap()
 
-        // `setAttributes` only queues; RevenueCat flushes it on backgrounding.
-        // Without this the attributes sit in the queue and the read-back looks
-        // like a failure.
-        sleep(8)
-        XCUIDevice.shared.press(.home)
+        // `setAttributes` only queues. A purchase flushes it on its own, because
+        // RevenueCat folds pending attributes into the receipt POST, but
+        // backgrounding is the guaranteed trigger so it is done too when the app
+        // is still alive. It is not always: some apps finish the purchase and
+        // the runner has already let go of them, and that is not a failure of
+        // what this test is checking.
         sleep(10)
+        if app.state == .runningForeground {
+            XCUIDevice.shared.press(.home)
+            sleep(10)
+        }
     }
 }
