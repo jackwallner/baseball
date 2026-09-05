@@ -5,6 +5,9 @@ workflows:
     instance_type: mac_mini_m2
     environment:
       xcode: latest
+      vars:
+        SUPABASE_URL: https://example.invalid
+        SUPABASE_ANON_KEY: simulator-placeholder
     scripts:
       - name: Build unsigned iOS simulator app
         script: |
