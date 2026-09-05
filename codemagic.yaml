@@ -9,6 +9,11 @@ workflows:
         SUPABASE_URL: https://example.invalid
         SUPABASE_ANON_KEY: simulator-placeholder
     scripts:
+      - name: Generate Xcode project
+        script: |
+          set -euo pipefail
+          if ! command -v xcodegen >/dev/null 2>&1; then brew install xcodegen; fi
+          xcodegen generate
       - name: Build unsigned iOS simulator app
         script: |
           set -euo pipefail
