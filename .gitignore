@@ -27,3 +27,6 @@ video_frames/
 
 # Claude Code runtime
 .claude/scheduled_tasks.lock
+
+# App Review contact phone stays local (never in a public repo)
+fastlane/metadata*/review_information/phone_number.txt
