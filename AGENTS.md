@@ -1,4 +1,4 @@
-# Baseball — Project Guide
+# Baseball Project Guide
 
 StatScout: Statcast percentiles / player-comparison app (iOS). XcodeGen
 project/scheme: `StatScout`, sim lease owner `baseball`.
@@ -24,4 +24,4 @@ Unlike the other apps, StatScout is backed by a Supabase Statcast dataset fed by
 
 ---
 Shared iOS conventions (build, simulator, release scripts, ASC key, review funnel, signing, gotchas):
-always-loaded global CLAUDE.md + the `ios-dev` skill.
+the global agent rules + the `ios-dev` skill.
