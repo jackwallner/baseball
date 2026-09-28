@@ -216,19 +216,19 @@ The app has one centralized RevenueCat purchase layer. It does not have a
 second native StoreKit purchase manager, a seasonal offering selector, or
 offer-code redemption plumbing.
 
-- RevenueCat is the SPM dependency in [project.yml](project.yml#L2-L5).
+- RevenueCat is the SPM dependency in [project.yml](../../project.yml#L2-L5).
 - Startup calls StoreService.shared.start() in
-  [StatScoutApp.swift](StatScout/StatScoutApp.swift#L1-L24).
+  [StatScoutApp.swift](../../StatScout/StatScoutApp.swift#L1-L24).
 - Product identifiers are centralized in
-  [StoreService.swift](StatScout/Services/StoreService.swift#L5-L9).
+  [StoreService.swift](../../StatScout/Services/StoreService.swift#L5-L9).
 - The existing products are monthly, yearly, and lifetime. All unlock the
   existing StatScout+ entitlement.
 - The normal purchase path is Purchases.shared.purchase(package:) in
-  [StoreService.swift](StatScout/Services/StoreService.swift#L498-L516).
+  [StoreService.swift](../../StatScout/Services/StoreService.swift#L498-L516).
 - RevenueCat customer updates arrive through the existing delegate in
-  [StoreService.swift](StatScout/Services/StoreService.swift#L612-L618).
+  [StoreService.swift](../../StatScout/Services/StoreService.swift#L612-L618).
 - The app already refreshes customer information when returning to the
-  foreground in [StatScoutApp.swift](StatScout/StatScoutApp.swift#L39-L55).
+  foreground in [StatScoutApp.swift](../../StatScout/StatScoutApp.swift#L39-L55).
 
 This means the seasonal campaign should extend the existing store layer. It
 should not introduce StoreKit purchase code that can race RevenueCat or create
@@ -238,8 +238,8 @@ a second entitlement path.
 
 The active app does not hardcode the current price. It reads localized prices
 from RevenueCat's StoreProduct and calculates annual monthly equivalents and
-savings in [StoreService.swift](StatScout/Services/StoreService.swift#L136-L184)
-and [StoreService.swift](StatScout/Services/StoreService.swift#L398-L420).
+savings in [StoreService.swift](../../StatScout/Services/StoreService.swift#L136-L184)
+and [StoreService.swift](../../StatScout/Services/StoreService.swift#L398-L420).
 That is the correct foundation for a promotion.
 
 The live US prices, read from the App Store Connect API on August 18, 2026,
@@ -292,13 +292,13 @@ native:
 
 | Surface | Existing location | Recommended campaign use |
 |---|---|---|
-| Full plan picker | [PaywallView.swift](StatScout/Views/PaywallView.swift#L134-L176) | Add a seasonal banner and offer-code CTA while retaining all normal plans |
+| Full plan picker | [PaywallView.swift](../../StatScout/Views/PaywallView.swift#L134-L176) | Add a seasonal banner and offer-code CTA while retaining all normal plans |
 | Direct yearly CTA | PlusDirectCTA in Components.swift | Keep for standard price and trial purchases; do not pretend it applies the code |
 | Feature-gated teaser | BlurGateUnlock in Components.swift | Add seasonal copy to Trends, recent form, compare, and team scouting entry points |
-| One-time update sheet | [UpdateShowcaseView.swift](StatScout/Views/UpdateShowcaseView.swift#L8-L36) | Keep the existing product-update campaign separate, or add a dedicated seasonal campaign mode |
+| One-time update sheet | [UpdateShowcaseView.swift](../../StatScout/Views/UpdateShowcaseView.swift#L8-L36) | Keep the existing product-update campaign separate, or add a dedicated seasonal campaign mode |
 | Toolbar upgrade | RootTabView.swift | Open the normal seasonal paywall entry point without repeated automatic prompts |
 | Settings upgrade | SettingsView.swift | Provide a persistent, explicit route to the offer and standard plans |
-| RevenueCat impressions | PaywallTrigger in [PaywallView.swift](StatScout/Views/PaywallView.swift#L4-L115) | Add stretchRun with a stable impression ID |
+| RevenueCat impressions | PaywallTrigger in [PaywallView.swift](../../StatScout/Views/PaywallView.swift#L4-L115) | Add stretchRun with a stable impression ID |
 
 The current PaywallGate limits contextual paywalls to two presentations per
 trigger per session. The campaign should use a one-time update/card decision
@@ -309,7 +309,7 @@ and explicit user action, not a new paywall on every player profile.
 The app has current player snapshots, game logs, recent form, and data coverage
 dates. It does not have standings, games-back, playoff probability, postseason
 rosters, or a playoff data model. StatScoutSeason.current is also hardcoded to
-2026 in [StoreService.swift](StatScout/Services/StoreService.swift#L21-L34).
+2026 in [StoreService.swift](../../StatScout/Services/StoreService.swift#L21-L34).
 
 That is not a blocker for a generic Stretch Run campaign. It is a blocker for
 claims such as:
