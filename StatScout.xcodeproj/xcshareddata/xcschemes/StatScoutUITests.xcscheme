@@ -21,6 +21,20 @@
                ReferencedContainer = "container:StatScout.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "NO"
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
+            buildForAnalyzing = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "DC4BFEC196200B1709D13E28"
+               BuildableName = "StatScoutUITests.xctest"
+               BlueprintName = "StatScoutUITests"
+               ReferencedContainer = "container:StatScout.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction
@@ -44,9 +58,9 @@
             parallelizable = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "A70825F3E0922BC569026978"
-               BuildableName = "StatScoutTests.xctest"
-               BlueprintName = "StatScoutTests"
+               BlueprintIdentifier = "DC4BFEC196200B1709D13E28"
+               BuildableName = "StatScoutUITests.xctest"
+               BlueprintName = "StatScoutUITests"
                ReferencedContainer = "container:StatScout.xcodeproj">
             </BuildableReference>
          </TestableReference>
@@ -93,8 +107,6 @@
             ReferencedContainer = "container:StatScout.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
-      <CommandLineArguments>
-      </CommandLineArguments>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">

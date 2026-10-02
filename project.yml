@@ -86,6 +86,20 @@ targets:
         TEST_TARGET_NAME: StatScout
 
 schemes:
+  # UI tests are slow, so they get their own scheme and stay out of the
+  # default `xcodebuild test -scheme StatScout` run.
+  StatScoutUITests:
+    build:
+      targets:
+        StatScout: all
+        StatScoutUITests: [test]
+    test:
+      config: Debug
+      targets:
+        - StatScoutUITests
+    run:
+      config: Debug
+
   StatScout:
     build:
       targets:
@@ -96,7 +110,6 @@ schemes:
       config: Debug
       targets:
         - StatScoutTests
-        - StatScoutUITests
     profile:
       config: Release
     analyze:
