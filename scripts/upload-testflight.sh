@@ -50,6 +50,6 @@ xcodebuild -exportArchive \
   -exportPath "$STAGING" \
   -exportOptionsPlist "$PLIST" \
   -allowProvisioningUpdates \
-  "${AUTH[@]}"
+  ${AUTH[@]+"${AUTH[@]}"}
 
 echo "If upload succeeded, check App Store Connect → TestFlight for \"Processing\"."
