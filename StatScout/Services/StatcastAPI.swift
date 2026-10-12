@@ -111,6 +111,18 @@ struct StatcastAPI: StatcastProviding {
         return rows.compactMap(\.value)
     }
 
+    /// Every code a club's game logs may be filed under.
+    ///
+    /// The game logs take MLB's own codes (ATH, AZ) while the snapshots, and so
+    /// the app, say OAK and ARI. Asking for the app's spelling alone came back
+    /// empty, so the A's and the D-backs had no team form at all.
+    static func gameLogTeamCodes(_ team: String) -> [String] {
+        let normalized = normalizedTeamAbbreviation(team)
+        let codes = [normalized] + teamAliasSpellings(normalized).filter { $0.count <= 3 }.sorted()
+        var seen = Set<String>()
+        return codes.filter { seen.insert($0).inserted }
+    }
+
     func fetchTeamGameLogs(
         team: String,
         season: Int,
@@ -130,10 +142,12 @@ struct StatcastAPI: StatcastProviding {
                 .appending(path: "rest/v1/\(gameLogTable(for: phase))")
                 .appending(queryItems: [
                     URLQueryItem(name: "select", value: "*"),
-                    URLQueryItem(name: "team", value: "eq.\(team)"),
+                    URLQueryItem(name: "team", value: "in.(\(Self.gameLogTeamCodes(team).joined(separator: ",")))"),
                     URLQueryItem(name: "season", value: "eq.\(season)"),
                     URLQueryItem(name: "game_date", value: "gte.\(sinceString)"),
-                    URLQueryItem(name: "order", value: "game_date.desc"),
+                    // game_date alone isn't unique, and a page boundary that
+                    // falls inside one date could skip or repeat rows.
+                    URLQueryItem(name: "order", value: "game_date.desc,player_id.asc,player_type.asc"),
                     URLQueryItem(name: "limit", value: String(pageSize)),
                     URLQueryItem(name: "offset", value: String(offset)),
                 ])

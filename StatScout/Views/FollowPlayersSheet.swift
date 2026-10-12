@@ -153,7 +153,7 @@ struct FollowPlayersSheet: View {
                         .font(SavantType.bodyBold)
                         .foregroundStyle(SavantPalette.ink)
                         .lineLimit(1)
-                    Text("\(player.team) · \(player.position)")
+                    Text("\(displayTeamAbbr(player.team)) · \(player.displayPosition)")
                         .font(SavantType.micro)
                         .tracking(0.3)
                         .foregroundStyle(SavantPalette.inkTertiary)

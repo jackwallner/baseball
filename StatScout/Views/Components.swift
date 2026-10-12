@@ -97,6 +97,9 @@ func displayTeamAbbr(_ abbr: String) -> String {
     if trimmed.isEmpty || trimmed == "TBD" || trimmed == "—" || trimmed == "-" {
         return "FA"
     }
+    // The pipeline keys the A's as OAK across every season so their history
+    // stays one club; since the move they go by ATH everywhere fans look.
+    if trimmed == "OAK" || trimmed == "ATH" { return "ATH" }
     return abbr
 }
 
@@ -106,7 +109,16 @@ struct MetricBar: View {
     let metric: Metric
     var showValue: Bool = true
 
+    /// Value for a stat with no ranking behind it (a league pool too small to
+    /// place it on). Drawn as an empty track: a 0 in a blue circle reads as
+    /// "worst in baseball", which is what a postseason home-run total used to
+    /// show.
+    static let unranked = -1
+
+    private var isRanked: Bool { metric.percentile != Self.unranked }
+
     private var accessibilityLabel: String {
+        guard isRanked else { return "\(metric.label): \(metric.value), not ranked" }
         let valueText = metric.value.isEmpty ? "\(metric.percentile)th percentile" : "\(metric.value), \(metric.percentile)th percentile"
         return "\(metric.label): \(valueText)"
     }
@@ -132,24 +144,27 @@ struct MetricBar: View {
                         .fill(SavantPalette.hairline)
                         .frame(height: 10)
 
-                    // Fill
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(SavantPalette.color(forPercentile: percentileValue))
-                        .frame(width: offset, height: 10)
-
-                    // Percentile circle
-                    ZStack {
-                        Circle()
+                    if isRanked {
+                        // Fill
+                        RoundedRectangle(cornerRadius: 4)
                             .fill(SavantPalette.color(forPercentile: percentileValue))
-                            .frame(width: circleSize, height: circleSize)
+                            .frame(width: offset, height: 10)
 
-                        Text("\(percentileValue)")
-                            .font(SavantFont.mono(11, weight: .bold))
-                            .foregroundStyle(percentileValue >= 35 && percentileValue <= 75 ? SavantPalette.ink : .white)
-                            .shadow(color: percentileValue >= 35 && percentileValue <= 75 ? Color.clear : Color.black.opacity(0.3), radius: 1, x: 0, y: 0.5)
+                        // Percentile circle
+                        ZStack {
+                            Circle()
+                                .fill(SavantPalette.color(forPercentile: percentileValue))
+                                .frame(width: circleSize, height: circleSize)
+
+                            Text("\(percentileValue)")
+                                .font(SavantFont.mono(11, weight: .bold))
+                                .foregroundStyle(percentileValue >= 35 && percentileValue <= 75 ? SavantPalette.ink : .white)
+                                .shadow(color: percentileValue >= 35 && percentileValue <= 75 ? Color.clear : Color.black.opacity(0.3), radius: 1, x: 0, y: 0.5)
+                        }
+                        .position(x: offset, y: 14)
                     }
-                    .position(x: offset, y: 14)
                 }
+                .frame(maxHeight: .infinity)
             }
             .frame(height: 28)
 
@@ -177,11 +192,15 @@ struct MetricBar: View {
 /// home board where the user first learned the convention.
 struct PostseasonReferenceNote: View {
     let referenceSeason: Int
+    /// Set on ranked boards, which hide players below MLB's qualifier.
+    var showsQualifier = false
 
     var body: some View {
         HStack(alignment: .top, spacing: 6) {
             Image(systemName: "info.circle")
-            Text("Percentiles vs. \(referenceSeason) regular season")
+            Text(showsQualifier
+                 ? "Percentiles vs. \(String(referenceSeason)) regular season. Ranks players with 3.1 PA or 1 IP per team game."
+                 : "Percentiles vs. \(String(referenceSeason)) regular season")
         }
         .font(SavantType.micro)
         .tracking(0.2)

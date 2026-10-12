@@ -14,7 +14,9 @@ private func displayTeamFullName(_ abbr: String) -> String {
     if trimmed.isEmpty || trimmed == "TBD" || trimmed == "—" || trimmed == "-" {
         return "Free Agent"
     }
-    return teamFullName(abbr)
+    // "Los Angeles Dodgers", not "Los Angeles (NL)": the league suffix is for
+    // telling two cities apart in a list, and a fan names a club by nickname.
+    return teamDisplayName(abbr)
 }
 
 // MARK: - Module 1: Player Identity Strip
@@ -70,12 +72,12 @@ struct TeamIdentityStrip: View {
                 Circle()
                     .fill(MLBTeamColor.color(normalizedTeam))
                     .frame(width: 56, height: 56)
-                Text(normalizedTeam)
+                Text(displayTeamAbbr(normalizedTeam))
                     .font(SavantType.statLarge)
                     .foregroundStyle(.white)
             }
             VStack(alignment: .leading, spacing: 4) {
-                Text(teamFullName(normalizedTeam))
+                Text(teamDisplayName(normalizedTeam))
                     .font(SavantType.playerName)
                     .foregroundStyle(SavantPalette.inkOnDark)
                     .lineLimit(1).minimumScaleFactor(0.7)

@@ -443,7 +443,7 @@ struct TeamGridTile: View {
                     .fill(MLBTeamColor.color(abbr))
                     .frame(width: 64, height: 64)
                     .shadow(color: Color.black.opacity(0.08), radius: 4, y: 2)
-                Text(abbr)
+                Text(displayTeamAbbr(abbr))
                     .font(SavantFont.condensed(20, weight: .black))
                     .foregroundStyle(.white)
             }
@@ -490,7 +490,7 @@ struct FavoriteTeamCard: View {
                             .fill(MLBTeamColor.color(abbr))
                             .frame(width: 52, height: 52)
                             .shadow(color: Color.black.opacity(0.08), radius: 4, y: 2)
-                        Text(abbr)
+                        Text(displayTeamAbbr(abbr))
                             .font(SavantFont.condensed(18, weight: .black))
                             .foregroundStyle(.white)
                     }
@@ -554,7 +554,7 @@ struct TeamRowContent: View {
                 .fill(MLBTeamColor.color(abbr))
                 .frame(width: 36, height: 36)
                 .overlay(
-                    Text(abbr)
+                    Text(displayTeamAbbr(abbr))
                         .font(SavantType.smallBold)
                         .foregroundStyle(.white)
                 )
@@ -566,7 +566,7 @@ struct TeamRowContent: View {
                     .foregroundStyle(SavantPalette.ink)
                     .lineLimit(1)
 
-                Text(abbr)
+                Text(displayTeamAbbr(abbr))
                     .font(SavantType.small)
                     .foregroundStyle(SavantPalette.inkTertiary)
             }
@@ -595,7 +595,7 @@ struct TeamTile: View {
                 Circle()
                     .fill(MLBTeamColor.color(abbr))
                     .frame(width: 44, height: 44)
-                Text(abbr)
+                Text(displayTeamAbbr(abbr))
                     .font(SavantType.statSmall)
                     .foregroundStyle(.white)
 

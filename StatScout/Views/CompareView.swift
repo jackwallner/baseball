@@ -885,7 +885,7 @@ struct ComparePlayerPicker: View {
                             Text(player.name)
                                 .font(SavantType.bodyBold)
                                 .foregroundStyle(SavantPalette.ink)
-                            Text("\(player.team) · \(player.displayPosition)")
+                            Text("\(displayTeamAbbr(player.team)) · \(player.displayPosition)")
                                 .font(SavantType.small)
                                 .foregroundStyle(SavantPalette.inkTertiary)
                         }

@@ -2,8 +2,10 @@ import SwiftUI
 
 /// Which version of the postseason card a given customer should see.
 enum PostseasonCreative: Equatable {
-    /// Free or lapsed: the pitch, routed to the ordinary one-tap yearly CTA.
-    /// No discount, no offer code, no price in the copy.
+    /// Free or lapsed. The postseason boards themselves are free, so the card
+    /// opens them; it used to open a paywall instead, which told a fan who
+    /// tapped "Scout the postseason" that playoff stats cost money when the
+    /// season pill would have shown them for nothing.
     case upgrade
     /// Already subscribed: an announcement that the postseason boards exist,
     /// which opens them instead of selling something already owned.
@@ -61,7 +63,6 @@ enum PostseasonCampaign {
 /// it opens actually appears.
 struct PostseasonCard: View {
     let creative: PostseasonCreative
-    let onUpgrade: () -> Void
     let onOpenPostseason: () -> Void
     let onDismiss: () -> Void
 
@@ -80,7 +81,7 @@ struct PostseasonCard: View {
                 .fixedSize(horizontal: false, vertical: true)
 
             HStack(spacing: 12) {
-                Button(action: creative == .pro ? onOpenPostseason : onUpgrade) {
+                Button(action: onOpenPostseason) {
                     Text(ctaLabel)
                         .font(SavantType.micro)
                         .tracking(0.4)
@@ -147,22 +148,17 @@ struct PostseasonCard: View {
         }
     }
 
-    private var ctaLabel: String {
-        switch creative {
-        case .upgrade: return "SCOUT THE POSTSEASON"
-        case .pro:     return "SEE THE POSTSEASON"
-        }
-    }
+    private var ctaLabel: String { "SEE THE POSTSEASON" }
 }
 
 #if DEBUG
 #Preview("Upgrade") {
-    PostseasonCard(creative: .upgrade, onUpgrade: {}, onOpenPostseason: {}, onDismiss: {})
+    PostseasonCard(creative: .upgrade, onOpenPostseason: {}, onDismiss: {})
         .background(SavantPalette.canvas)
 }
 
 #Preview("Pro") {
-    PostseasonCard(creative: .pro, onUpgrade: {}, onOpenPostseason: {}, onDismiss: {})
+    PostseasonCard(creative: .pro, onOpenPostseason: {}, onDismiss: {})
         .background(SavantPalette.canvas)
 }
 #endif

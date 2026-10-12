@@ -832,7 +832,7 @@ struct TeamView: View {
             ForEach(allTeams, id: \.self) { abbr in
                 NavigationLink(value: TeamDestination(abbr: abbr)) {
                     HStack {
-                        Text(teamFullName(abbr))
+                        Text(teamDisplayName(abbr))
                         if abbr == team {
                             Image(systemName: "checkmark")
                         }
@@ -841,9 +841,11 @@ struct TeamView: View {
             }
         } label: {
             HStack(spacing: 4) {
-                Text(teamFullName(team))
+                Text(teamDisplayName(team))
                     .font(SavantType.bodyBold)
                     .foregroundStyle(.white)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
                 Image(systemName: "chevron.down")
                     .font(.system(size: 11, weight: .bold))
                     .foregroundStyle(.white.opacity(0.85))
@@ -852,7 +854,7 @@ struct TeamView: View {
         .menuOrder(.fixed)
         .savantMenuAppearance()
         .accessibilityLabel("Team")
-        .accessibilityValue(teamFullName(team))
+        .accessibilityValue(teamDisplayName(team))
         .accessibilityHint("Switch to another team")
     }
 

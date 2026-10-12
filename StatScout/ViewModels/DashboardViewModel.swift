@@ -58,7 +58,12 @@ final class DashboardViewModel {
     /// switched. The backend maps percentile bars to the current regular-season
     /// curves because Savant publishes no postseason percentile leaderboards.
     /// An empty result after a successful request is a real no-data state.
-    var postseasonPlayers: [Player] = []
+    var postseasonPlayers: [Player] = [] {
+        didSet { postseasonQualifier = PostseasonQualifier(players: postseasonPlayers) }
+    }
+    /// Built once per postseason load rather than per row: the club game
+    /// counts it holds are a league-wide fact.
+    private(set) var postseasonQualifier = PostseasonQualifier(players: [])
     var isLoadingPostseason = false
     var postseasonErrorMessage: String?
     private var hasLoadedPostseason = false
@@ -288,10 +293,21 @@ final class DashboardViewModel {
         phase requestedPhase: SeasonPhase? = nil
     ) async throws -> [PlayerGameLog] {
         let phase = requestedPhase ?? (season == StatScoutSeason.current ? selectedPhase : .regular)
+        // Callers ask for "the last N days" measured from today, and the cards
+        // then anchor their windows on the newest game they get back. Once the
+        // slate stops (the regular season ends, an off day, a late Savant
+        // drop) today runs ahead of the data, so slide the lower bound back by
+        // the gap, or by November the request would ask for October games of a
+        // season that ended in September and the card would come back empty.
+        let anchor = phase == .postseason ? postseasonThrough : dataThrough
+        var since = sinceDate
+        if season == StatScoutSeason.current, let anchor, anchor < .now {
+            since = sinceDate.addingTimeInterval(-Date.now.timeIntervalSince(anchor))
+        }
         return try await provider.fetchTeamGameLogs(
             team: team,
             season: season,
-            sinceDate: sinceDate,
+            sinceDate: since,
             phase: phase
         )
     }
@@ -461,10 +477,16 @@ final class DashboardViewModel {
                 // the newest year with data). Dropping a stale answer is better
                 // than caching last year's board under this year's key.
                 guard season == self.selectedSeason else { return }
+                // Only the windows built on the newest anchor date. The rollup
+                // used to leave a player's last window behind when he stopped
+                // playing, so a July "last 7 days" could rank on a board headed
+                // "Through Sep 27".
+                let newest = rows.compactMap(\.asOf).max()
+                let current = rows.filter { newest == nil || $0.asOf == newest }
                 // A two-way player has a row per side; the leaderboard keys by
                 // player, so keep whichever side has the larger sample.
                 var byPlayer: [Int: RecentForm] = [:]
-                for row in rows {
+                for row in current {
                     if let existing = byPlayer[row.playerId],
                        existing.plateAppearances >= row.plateAppearances { continue }
                     byPlayer[row.playerId] = row
@@ -666,11 +688,22 @@ final class DashboardViewModel {
     var minPlateAppearances: Int { qualifierLevel.minPA }
     var minInningsPitched: Double { qualifierLevel.minIP }
 
+    /// True when the boards are reading the postseason slate.
+    var isPostseasonActive: Bool {
+        selectedPhase == .postseason && selectedSeason == StatScoutSeason.current
+    }
+
     func isQualified(_ player: Player, for category: MetricCategory?) -> Bool {
         switch qualifierLevel {
         case .all:
             return true
         case .qualified:
+            // Every October player carries a percentile (they're looked up on
+            // the regular-season curve with no sample gate), so "has one" is
+            // no qualifier at all there. MLB's per-club rule stands in.
+            if isPostseasonActive {
+                return postseasonQualifier.qualifies(player, for: category ?? .hitting)
+            }
             // Savant only assigns percentiles to players who meet its qualification thresholds,
             // so "has a percentile in this category" is the authoritative signal.
             if let category {
@@ -701,7 +734,7 @@ final class DashboardViewModel {
 
     private func ipValue(in stats: [StandardStat]) -> Double {
         guard let stat = stats.first(where: { Self.ipLabels.contains($0.label.uppercased()) }) else { return 0 }
-        return Double(stat.value.trimmingCharacters(in: .whitespaces)) ?? 0
+        return PostseasonQualifier.innings(Double(stat.value.trimmingCharacters(in: .whitespaces)) ?? 0)
     }
 
     private static let paLabels: Set<String> = ["PA", "AB"]

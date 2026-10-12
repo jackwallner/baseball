@@ -40,6 +40,22 @@ struct StandardStatsLeadersView: View {
     var postseasonLoadCompleted: Bool = false
     var postseasonErrorMessage: String?
     var retryPostseason: (() async -> Void)?
+    /// Playing-time gate for the rate boards, set on the postseason slate.
+    ///
+    /// The regular-season pool is already gated by its Savant percentiles, but
+    /// in October every player who stepped on the field is in the pool, which
+    /// is how a 1-for-1 pinch hitter came to lead the AVG board at 1.000.
+    /// Counting boards stay open: a cameo can't fake an RBI lead.
+    var rateQualifier: ((Player, MetricCategory) -> Bool)? = nil
+
+    /// Boards whose value is a rate, and so need a playing-time qualifier.
+    static let rateStats: Set<String> = [
+        "AVG", "OBP", "SLG", "OPS", "ERA", "WHIP", "K/9", "BB/9",
+    ]
+
+    private var appliesRateQualifier: Bool {
+        rateQualifier != nil && Self.rateStats.contains(selectedStat)
+    }
 
     /// Available stats per category.
     var availableStats: [String] { StandardStatCatalog.stats(for: selectedCategory) }
@@ -53,6 +69,10 @@ struct StandardStatsLeadersView: View {
         players.filter { player in
             guard let stats = player.standardStats else { return false }
             guard matchesPlayerType(player: player) else { return false }
+            if appliesRateQualifier, let rateQualifier,
+               !rateQualifier(player, selectedCategory == .pitching ? .pitching : .hitting) {
+                return false
+            }
             // A fielding line with no chances is a DH's empty glove, not a
             // perfect one.
             if selectedCategory == .fielding, chances(in: stats, of: player) <= 0 { return false }
@@ -165,7 +185,20 @@ struct StandardStatsLeadersView: View {
                 leadersList
                     .padding(.horizontal, 12)
                     .padding(.top, 8)
-                    .padding(.bottom, 12)
+                if appliesRateQualifier, phase == .postseason {
+                    // A board that quietly drops players has to say so, or a
+                    // missing name reads as missing data.
+                    Text(selectedCategory == .pitching
+                         ? "\(selectedStat) ranks pitchers with 1 IP per team game."
+                         : "\(selectedStat) ranks hitters with 3.1 PA per team game.")
+                        .font(SavantType.micro)
+                        .tracking(0.2)
+                        .foregroundStyle(SavantPalette.inkTertiary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 16)
+                        .padding(.top, 8)
+                }
+                Color.clear.frame(height: 12)
                 // Lets the last row scroll through the floating tab bar.
                 Color.clear.frame(height: 88)
             }
@@ -491,6 +524,9 @@ struct StandardStatsLeaderboardScreen: View {
                 : nil,
             retryPostseason: activePhase == .postseason
                 ? { await viewModel.reloadPostseason() }
+                : nil,
+            rateQualifier: activePhase == .postseason
+                ? { [qualifier = viewModel.postseasonQualifier] in qualifier.qualifies($0, for: $1) }
                 : nil
         )
         // String(), not the Int: interpolating a number into a

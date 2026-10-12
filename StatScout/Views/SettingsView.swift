@@ -4,6 +4,10 @@ struct AboutView: View {
     @EnvironmentObject private var store: StoreService
     let lastUpdated: Date?
     var dataThrough: Date?
+    /// Newest playoff game held, once the postseason is under way. The
+    /// regular-season line stops moving in late September, and on its own it
+    /// told an October user the data was two weeks stale.
+    var postseasonThrough: Date?
     var onRequestReview: (() -> Void)?
     @State private var paywallTrigger: PaywallTrigger?
 
@@ -166,14 +170,23 @@ struct AboutView: View {
     /// contradicting itself. Saying which games are in makes the pair readable.
     private var gamesThroughText: String {
         guard let dataThrough else { return "-" }
-        let stamp = dataThrough.formatted(.dateTime.month(.abbreviated).day())
+        // Once the playoffs have games in, the regular season is finished and
+        // its last day is a final, not an age.
+        if postseasonThrough != nil {
+            return "\(dataThrough.formatted(.dateTime.month(.abbreviated).day())) (regular season final)"
+        }
+        return Self.coverageText(dataThrough)
+    }
+
+    static func coverageText(_ date: Date) -> String {
+        let stamp = date.formatted(.dateTime.month(.abbreviated).day())
         let calendar = Calendar.current
         // Only reachable if a day got ingested while it was still being played,
         // which the pipeline is built not to do. Saying so beats a bare "today",
         // which would read as a complete day.
-        if calendar.isDateInToday(dataThrough) { return "\(stamp) (today, still in progress)" }
-        if calendar.isDateInYesterday(dataThrough) { return "\(stamp) (yesterday)" }
-        let days = calendar.dateComponents([.day], from: dataThrough, to: .now).day ?? 0
+        if calendar.isDateInToday(date) { return "\(stamp) (today, still in progress)" }
+        if calendar.isDateInYesterday(date) { return "\(stamp) (yesterday)" }
+        let days = calendar.dateComponents([.day], from: date, to: .now).day ?? 0
         return "\(stamp) (\(days) days ago)"
     }
 
@@ -191,6 +204,14 @@ struct AboutView: View {
                 title: "Games Through",
                 subtitle: gamesThroughText
             )
+            if let postseasonThrough {
+                Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline)
+                row(
+                    icon: "trophy",
+                    title: "Postseason Through",
+                    subtitle: Self.coverageText(postseasonThrough)
+                )
+            }
             Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline)
             row(
                 icon: "clock.arrow.circlepath",

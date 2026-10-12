@@ -256,13 +256,19 @@ struct StatsViewMenu: View {
                     UIImpactFeedbackGenerator(style: .light).impactOccurred()
                 } label: {
                     if level == viewModel.qualifierLevel {
-                        Label("\(level.rawValue) · \(level.description)", systemImage: "checkmark")
+                        Label("\(level.rawValue) · \(caption(for: level))", systemImage: "checkmark")
                     } else {
-                        Text("\(level.rawValue) · \(level.description)")
+                        Text("\(level.rawValue) · \(caption(for: level))")
                     }
                 }
             }
         }
+    }
+
+    /// Savant publishes no postseason qualifier, so October boards use MLB's.
+    private func caption(for level: DashboardViewModel.QualifierLevel) -> String {
+        guard level == .qualified, viewModel.isPostseasonActive else { return level.description }
+        return "3.1 PA / 1 IP per team game"
     }
 
     // MARK: - Board

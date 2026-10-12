@@ -52,6 +52,7 @@ struct DashboardView: View {
                 AboutView(
                     lastUpdated: viewModel.lastUpdated,
                     dataThrough: viewModel.dataThrough,
+                    postseasonThrough: viewModel.postseasonThrough,
                     onRequestReview: {
                         showingAbout = false
                         Task { @MainActor in
@@ -84,12 +85,16 @@ struct DashboardView: View {
     /// results the user is reading off the screen.
     @ViewBuilder
     private var postseasonSection: some View {
-        if !isActiveSearch, let creative = postseasonDecision.creative {
+        // Hidden once the board is already on the postseason: a card offering
+        // to show you the screen you're reading is noise.
+        if !isActiveSearch, viewModel.selectedPhase != .postseason,
+           let creative = postseasonDecision.creative {
             PostseasonCard(
                 creative: creative,
-                onUpgrade: { paywallTrigger = .postseason },
                 onOpenPostseason: {
                     viewModel.selectPhase(.postseason)
+                    // It did its job; switching back shouldn't bring it back.
+                    seenPostseason = PostseasonCampaign.identifier
                 },
                 onDismiss: { seenPostseason = PostseasonCampaign.identifier }
             )
@@ -97,10 +102,10 @@ struct DashboardView: View {
     }
 
     private var postseasonDecision: PostseasonDecision {
-        // The subscriber variant is only useful on the hosted Stats screen,
-        // where the phase-aware board is one tap away. A standalone dashboard
-        // has no phase control or board switcher to land on.
-        if store.isPro && boardBindings == nil { return .hidden }
+        // Only useful on the hosted Stats screen, where the phase-aware board
+        // is one tap away. A standalone dashboard has no phase control or
+        // board switcher to land on.
+        if boardBindings == nil { return .hidden }
         return PostseasonCampaign.decision(
             postseasonThrough: viewModel.postseasonThrough,
             hasCompletedOnboarding: hasCompletedOnboarding,
@@ -314,7 +319,7 @@ struct DashboardView: View {
                                 Circle()
                                     .fill(MLBTeamColor.color(team))
                                     .frame(width: 28, height: 28)
-                                Text(team)
+                                Text(displayTeamAbbr(team))
                                     .font(SavantFont.condensed(10, weight: .bold))
                                     .foregroundStyle(.white)
                             }
@@ -370,7 +375,11 @@ struct DashboardView: View {
     @ViewBuilder
     private var postseasonReferenceNote: some View {
         if viewModel.selectedPhase == .postseason {
-            PostseasonReferenceNote(referenceSeason: StatScoutSeason.current)
+            PostseasonReferenceNote(
+                referenceSeason: StatScoutSeason.current,
+                showsQualifier: viewModel.qualifierLevel == .qualified
+            )
+            .padding(.top, 8)
         }
     }
 

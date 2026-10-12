@@ -64,6 +64,10 @@ struct StatsView: View {
                         : nil,
                     retryPostseason: viewModel.selectedPhase == .postseason
                         ? { await viewModel.reloadPostseason() }
+                        : nil,
+                    rateQualifier: viewModel.selectedPhase == .postseason
+                        && viewModel.qualifierLevel == .qualified
+                        ? { [qualifier = viewModel.postseasonQualifier] in qualifier.qualifies($0, for: $1) }
                         : nil
                 )
             case .bestWorst:

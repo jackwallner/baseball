@@ -167,7 +167,8 @@ private let teamAliases: [String: String] = [
     "LOS ANGELES ANGELS": "LAA", "ANAHEIM ANGELS": "LAA", "LOS ANGELES DODGERS": "LAD",
     "MIAMI MARLINS": "MIA", "MILWAUKEE BREWERS": "MIL", "MINNESOTA TWINS": "MIN",
     "NEW YORK METS": "NYM", "NEW YORK YANKEES": "NYY", "ATHLETICS": "OAK",
-    "OAKLAND ATHLETICS": "OAK", "ATH": "OAK", "PHILADELPHIA PHILLIES": "PHI",
+    "OAKLAND ATHLETICS": "OAK", "SACRAMENTO ATHLETICS": "OAK", "ATH": "OAK",
+    "PHILADELPHIA PHILLIES": "PHI",
     "PITTSBURGH PIRATES": "PIT", "SAN DIEGO PADRES": "SD", "SDP": "SD",
     "SEATTLE MARINERS": "SEA", "SAN FRANCISCO GIANTS": "SF", "SFG": "SF",
     "ST. LOUIS CARDINALS": "STL", "ST LOUIS CARDINALS": "STL", "TAMPA BAY RAYS": "TB",
@@ -194,7 +195,7 @@ func teamFullName(_ abbr: String) -> String {
         "DET":"Detroit","HOU":"Houston","KC":"Kansas City",
         "LAA":"Los Angeles (AL)","LAD":"Los Angeles (NL)","MIA":"Miami",
         "MIL":"Milwaukee","MIN":"Minnesota","NYM":"New York (NL)",
-        "NYY":"New York (AL)","OAK":"Oakland","PHI":"Philadelphia",
+        "NYY":"New York (AL)","OAK":"Athletics","PHI":"Philadelphia",
         "PIT":"Pittsburgh","SD":"San Diego","SEA":"Seattle",
         "SF":"San Francisco","STL":"St. Louis","TB":"Tampa Bay",
         "TEX":"Texas","TOR":"Toronto","WSH":"Washington"
@@ -230,7 +231,9 @@ func teamDisplayName(_ abbr: String) -> String {
         .replacingOccurrences(of: " (AL)", with: "")
         .replacingOccurrences(of: " (NL)", with: "")
     let nickname = teamNickname(normalized)
-    return nickname == normalized ? city : "\(city) \(nickname)"
+    // The A's have played as just "Athletics" since leaving Oakland.
+    if nickname == normalized || nickname == city { return city }
+    return "\(city) \(nickname)"
 }
 
 /// Everything a user might type and mean one club.

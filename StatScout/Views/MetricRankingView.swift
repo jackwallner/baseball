@@ -48,7 +48,7 @@ struct MetricRankingView: View {
         ScrollView {
             VStack(spacing: 0) {
                 if phase == .postseason {
-                    PostseasonReferenceNote(referenceSeason: StatScoutSeason.current)
+                    PostseasonReferenceNote(referenceSeason: StatScoutSeason.current, showsQualifier: true)
                 }
                 SavantSectionBar(
                     title: "\(metricLabel) · \(metricCategory.rawValue)",
@@ -162,11 +162,20 @@ struct MetricRankingScreen: View {
         phase == .postseason && season == StatScoutSeason.current ? .postseason : .regular
     }
 
+    /// October rows all carry a percentile, so the pool needs MLB's playing-time
+    /// rule or a one-PA cameo leads the board.
+    private var rankedPool: [Player] {
+        let pool = viewModel.players(forSeason: season, phase: activePhase)
+        guard activePhase == .postseason else { return pool }
+        let qualifier = viewModel.postseasonQualifier
+        return pool.filter { qualifier.qualifies($0, for: metricCategory) }
+    }
+
     var body: some View {
         MetricRankingView(
             metricLabel: metricLabel,
             metricCategory: metricCategory,
-            players: viewModel.players(forSeason: season, phase: activePhase),
+            players: rankedPool,
             season: season,
             phase: activePhase
         )

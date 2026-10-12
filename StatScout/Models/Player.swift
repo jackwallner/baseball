@@ -174,6 +174,32 @@ struct Metric: Identifiable, Codable, Hashable, Sendable {
     let category: MetricCategory
 }
 
+/// Baseball writes a three-place rate without its leading zero: a .282
+/// hitter, a .442 xwOBA, a .985 fielding percentage. The feed sends "0.282",
+/// which read as a spreadsheet to anyone who follows the game. Every value
+/// in that shape is a rate printed this way (AVG, OBP, SLG, OPS, FLD%, xBA,
+/// xSLG, xISO, xwOBA); ERA and WHIP use two places and keep their zero.
+enum BaseballNumberStyle {
+    static func display(_ raw: String) -> String {
+        guard raw.count == 5, raw.hasPrefix("0."),
+              raw.dropFirst(2).allSatisfy(\.isNumber) else { return raw }
+        return String(raw.dropFirst())
+    }
+}
+
+extension Metric {
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(
+            id: try c.decode(String.self, forKey: .id),
+            label: try c.decode(String.self, forKey: .label),
+            value: BaseballNumberStyle.display(try c.decode(String.self, forKey: .value)),
+            percentile: try c.decode(Int.self, forKey: .percentile),
+            category: try c.decode(MetricCategory.self, forKey: .category)
+        )
+    }
+}
+
 struct StandardStat: Identifiable, Codable, Hashable, Sendable {
     let id: String
     let label: String
@@ -189,6 +215,14 @@ struct StandardStat: Identifiable, Codable, Hashable, Sendable {
         self.label = label
         self.value = value
         self.category = category
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(String.self, forKey: .id)
+        label = try c.decode(String.self, forKey: .label)
+        value = BaseballNumberStyle.display(try c.decode(String.self, forKey: .value))
+        category = try c.decodeIfPresent(MetricCategory.self, forKey: .category)
     }
 
     /// Best available category. Falls back to the label for legacy rows: the
@@ -336,6 +370,8 @@ extension Player {
     /// label so we never show "TBD" next to real stats.
     var displayPosition: String {
         let trimmed = position.trimmingCharacters(in: .whitespaces).uppercased()
+        // Some feeds spell the position out; every other row is a code.
+        if trimmed == "PITCHER" { return "P" }
         if !trimmed.isEmpty && trimmed != "TBD" && trimmed != "—" && trimmed != "-" {
             return position
         }

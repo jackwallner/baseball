@@ -48,6 +48,11 @@ struct PlayerProfileView: View {
     /// Pre-aggregated rolling window for this player, when one is loaded.
     var recentFormLookup: ((Int, RecentWindow) -> RecentForm?)?
     var loadRecentForm: ((RecentWindow) async -> Void)?
+    /// The last game day the slate's data covers. The rolling window ends here
+    /// rather than on today's date: measured from the clock, every window came
+    /// up empty once the regular season ended, so all of October read "No
+    /// games in the last 15 days" for players who had played two weeks before.
+    var recentAnchor: Date? = nil
     /// Lets a comparison pushed from here swap either side out in place.
     var comparisonCatalog: ComparisonCatalog?
     @State private var showPercentileInfo = false
@@ -115,8 +120,28 @@ struct PlayerProfileView: View {
             : String(season)
     }
 
+    /// True when an October line is too short to place on a percentile curve.
+    /// Ten plate appearances is not a sample, and drawing a 1st-percentile bar
+    /// across the board for a bench bat says more than the numbers can.
+    private func isBelowPostseasonQualifier(_ category: MetricCategory) -> Bool {
+        guard activePhase == .postseason else { return false }
+        return !PostseasonQualifier(players: allPlayers)
+            .qualifies(displayedPlayer, for: category == .pitching ? .pitching : .hitting)
+    }
+
     private var groupedMetrics: [(category: MetricCategory, metrics: [Metric])] {
-        let grouped = Dictionary(grouping: displayedPlayer.metrics) { $0.category }
+        let unrankedSides = Set(MetricCategory.allCases.filter(isBelowPostseasonQualifier))
+        let metrics = displayedPlayer.metrics.map { metric in
+            guard unrankedSides.contains(metric.category) else { return metric }
+            return Metric(
+                id: metric.id,
+                label: metric.label,
+                value: metric.value,
+                percentile: MetricBar.unranked,
+                category: metric.category
+            )
+        }
+        let grouped = Dictionary(grouping: metrics) { $0.category }
         return MetricCategory.allCases.compactMap { cat in
             guard let m = grouped[cat], !m.isEmpty else { return nil }
             return (category: cat, metrics: m.sorted { cat.sortMetrics($0.label, $1.label) })
@@ -599,6 +624,15 @@ struct PlayerProfileView: View {
 
             if activePhase == .postseason {
                 PostseasonReferenceNote(referenceSeason: StatScoutSeason.current)
+                if groupedMetrics.contains(where: { $0.metrics.contains { $0.percentile == MetricBar.unranked } }) {
+                    Text("Not ranked yet: below 3.1 PA or 1 IP per team game this postseason.")
+                        .font(SavantType.micro)
+                        .tracking(0.2)
+                        .foregroundStyle(SavantPalette.inkTertiary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, SavantGeo.padPage)
+                        .padding(.bottom, 6)
+                }
             }
 
             // Recent mode only makes sense for the live season, the 7/15/30-day
@@ -627,7 +661,7 @@ struct PlayerProfileView: View {
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
                 } else if recentWindow == nil {
-                    Text("No games in the last \(recentWindowDays) days")
+                    Text(recentEmptyMessage)
                         .font(SavantType.small)
                         .foregroundStyle(SavantPalette.inkSecondary)
                         .frame(maxWidth: .infinity)
@@ -688,10 +722,29 @@ struct PlayerProfileView: View {
     }
 
     private var recentWindow: RecentFormWindow? {
-        let cutoff = Calendar.current.date(byAdding: .day, value: -recentWindowDays, to: .now) ?? .now
+        // Start of day, as the team card and the backend rollup count it, so
+        // the hour the profile is opened can't decide whether a game is in.
+        let calendar = Calendar.current
+        let anchor = min(recentAnchor ?? .now, .now)
+        let cutoff = calendar.date(
+            byAdding: .day,
+            value: -(recentWindowDays - 1),
+            to: calendar.startOfDay(for: anchor)
+        ) ?? anchor
         let windowLogs = recentLogs.filter { $0.gameDate >= cutoff }
         guard !windowLogs.isEmpty else { return nil }
         return RecentFormWindow.build(label: "Last \(recentWindowDays)", days: recentWindowDays, logs: windowLogs)
+    }
+
+    /// Names the end date once the data stops short of today, so an empty
+    /// window after the season reads as "nothing then", not "nothing lately".
+    private var recentEmptyMessage: String {
+        guard let anchor = recentAnchor,
+              !Calendar.current.isDate(anchor, inSameDayAs: .now),
+              anchor < .now else {
+            return "No games in the last \(recentWindowDays) days"
+        }
+        return "No games in the \(recentWindowDays) days through \(anchor.formatted(.dateTime.month(.abbreviated).day()))"
     }
 
     private var recentWindowPicker: some View {
@@ -874,7 +927,7 @@ struct PlayerProfileView: View {
         return Metric(
             id: "recent-\(spec.key)",
             label: seasonMetric.label,
-            value: String(format: spec.format, v),
+            value: BaseballNumberStyle.display(String(format: spec.format, v)),
             percentile: pct,
             category: seasonMetric.category
         )
@@ -960,14 +1013,24 @@ struct PlayerProfileView: View {
         // Fielding and running stats belong to position players and are gated
         // on a hitting percentile, matching the leaders board.
         let qualifyingCategory: MetricCategory = category == .pitching ? .pitching : .hitting
+        let isPostseason = activePhase == .postseason
+        // A playoff total depends on how far the club has gone, so ranking one
+        // club's five games against another's ten says nothing about the
+        // player. October rates are ranked within MLB's qualified pool.
+        if isPostseason, StandardStatPercentileRules.countingStats.contains(key) { return nil }
+        let postseasonQualifier = isPostseason ? PostseasonQualifier(players: allPlayers) : nil
         let values: [Double] = allPlayers.compactMap { other in
             let otherType = other.playerType?.lowercased()
             let sideMatches = qualifyingCategory == .pitching
                 ? (otherType == "pitcher" || otherType == "two_way")
                 : otherType != "pitcher"
             guard sideMatches else { return nil }
-            guard StandardStatPercentileRules.qualifies(other, label: key, category: category) else { return nil }
-            guard other.metrics.contains(where: { $0.category == qualifyingCategory }) else { return nil }
+            if let postseasonQualifier {
+                guard postseasonQualifier.qualifies(other, for: qualifyingCategory) else { return nil }
+            } else {
+                guard StandardStatPercentileRules.qualifies(other, label: key, category: category) else { return nil }
+                guard other.metrics.contains(where: { $0.category == qualifyingCategory }) else { return nil }
+            }
             // Match on category too: a two-way player has an "H" on each line.
             guard let stat = other.standardStats?.first(where: {
                 $0.label.uppercased() == key
@@ -1006,7 +1069,7 @@ struct PlayerProfileView: View {
                     id: "std-\(category.rawValue)-\(stat.label)",
                     label: stat.label.uppercased(),
                     value: stat.value,
-                    percentile: pct ?? 0,
+                    percentile: pct ?? MetricBar.unranked,
                     category: category
                 )
             }
@@ -1033,7 +1096,7 @@ struct PlayerProfileView: View {
               let value = standardRecentForm?.metrics[key] else { return nil }
         let isRate = ["AVG", "OBP", "SLG", "OPS"].contains(seasonMetric.label)
         let text = isRate
-            ? String(format: "%.3f", value)
+            ? BaseballNumberStyle.display(String(format: "%.3f", value))
             : String(format: "%.0f", value)
         return Metric(
             id: "std-recent-\(seasonMetric.label)",
@@ -1043,7 +1106,7 @@ struct PlayerProfileView: View {
                 label: seasonMetric.label,
                 category: seasonMetric.category,
                 value: value
-            ) ?? 0,
+            ) ?? MetricBar.unranked,
             category: seasonMetric.category
         )
     }
@@ -1059,7 +1122,9 @@ struct PlayerProfileView: View {
 
             // Recent only means something on the live season, the window is
             // anchored to today, so on a past season it would always be empty.
-            if isCurrentSeasonActive {
+            // Nor on a postseason line: the traditional windows come from the
+            // regular-season rollup, so they'd sit under an October heading.
+            if isCurrentSeasonActive, activePhase == .regular {
                 standardModePicker
                 if effectiveStandardMode != .season {
                     standardWindowPicker
@@ -1096,7 +1161,7 @@ struct PlayerProfileView: View {
     }
 
     private var effectiveStandardMode: FormDisplayMode {
-        (store.isPro && isCurrentSeasonActive) ? standardMode : .season
+        (store.isPro && isCurrentSeasonActive && activePhase == .regular) ? standardMode : .season
     }
 
     private var standardModePicker: some View {
@@ -1180,24 +1245,24 @@ struct PercentileInfoSheet: View {
                         .font(SavantType.playerName)
                         .foregroundStyle(SavantPalette.ink)
 
-                    Text("Percentile rankings compare a player to others at the same position. A 90th percentile means the player ranks in the top 10% of the league for that metric.")
+                    Text("Percentile rankings compare a player to every qualified hitter or pitcher in MLB, not just one position. A 90th percentile means the player ranks better than 90% of the league on that metric, and the 50th is league average. For pitchers the scale is flipped where less is better, so a low xwOBA allowed still reads as a high percentile.")
                         .font(SavantType.body)
                         .foregroundStyle(SavantPalette.inkSecondary)
 
                     VStack(alignment: .leading, spacing: 8) {
-                        Label("Elite (75–100): Red bars", systemImage: "flame.fill")
+                        Label("Redder bars: better than average", systemImage: "flame.fill")
                             .font(SavantType.bodyBold)
                             .foregroundStyle(SavantPalette.pctlHot)
-                        Label("Average (25–75): Gray bars", systemImage: "minus")
+                        Label("Gray bars: around average", systemImage: "minus")
                             .font(SavantType.bodyBold)
                             .foregroundStyle(SavantPalette.inkSecondary)
-                        Label("Below Average (0–25): Blue bars", systemImage: "snowflake")
+                        Label("Bluer bars: worse than average", systemImage: "snowflake")
                             .font(SavantType.bodyBold)
                             .foregroundStyle(SavantPalette.pctlCold)
                     }
                     .padding(.vertical, 8)
 
-                    Text("Data refreshes nightly from public baseball percentile leaderboards. Not all metrics are available for every player due to qualifying thresholds.")
+                    Text("Data refreshes nightly from public Statcast percentile leaderboards. A metric is missing when the player hasn't reached its qualifying threshold. Postseason bars place October numbers on the regular-season scale, because no postseason percentiles are published.")
                         .font(SavantType.small)
                         .foregroundStyle(SavantPalette.inkTertiary)
                 }
@@ -1237,7 +1302,7 @@ private struct PlayerPickerSheet: View {
                             Text(player.name)
                                 .font(SavantType.bodyBold)
                                 .foregroundStyle(SavantPalette.ink)
-                            Text("\(player.team) · \(player.displayPosition)")
+                            Text("\(displayTeamAbbr(player.team)) · \(player.displayPosition)")
                                 .font(SavantType.small)
                                 .foregroundStyle(SavantPalette.inkTertiary)
                         }

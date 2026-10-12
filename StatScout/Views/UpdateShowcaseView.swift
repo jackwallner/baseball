@@ -334,7 +334,7 @@ private struct ComparisonShowcaseGraphic: View {
                 .font(SavantType.smallBold)
                 .foregroundStyle(SavantPalette.ink)
                 .lineLimit(1)
-            Text(team)
+            Text(displayTeamAbbr(team))
                 .font(SavantType.micro)
                 .foregroundStyle(SavantPalette.inkTertiary)
         }

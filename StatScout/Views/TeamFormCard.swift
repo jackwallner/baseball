@@ -297,7 +297,7 @@ struct TeamRankingsCard: View {
             return String(format: "%.1f mph", v)
         }
         // Rate stats, xwOBA, xBA, xSLG, xISO and the traditional slash line.
-        if v < 10 { return String(format: "%.3f", v) }
+        if v < 10 { return BaseballNumberStyle.display(String(format: "%.3f", v)) }
         return String(format: "%.1f", v)
     }
 
@@ -572,7 +572,7 @@ struct TeamRankingsCard: View {
         return Metric(
             id: "team-recent-\(spec.key)",
             label: label,
-            value: String(format: spec.format, v),
+            value: BaseballNumberStyle.display(String(format: spec.format, v)),
             percentile: pct,
             category: side.category
         )

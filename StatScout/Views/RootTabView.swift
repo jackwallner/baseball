@@ -219,7 +219,7 @@ struct RootTabView: View {
                 .navigationTitle("Stats")
                 .navigationBarTitleDisplayMode(.inline)
                 .modifier(SavantNavBar())
-                .modifier(HomeTabToolbar(lastUpdated: viewModel.lastUpdated, dataThrough: viewModel.dataThrough))
+                .modifier(HomeTabToolbar(lastUpdated: viewModel.lastUpdated, dataThrough: viewModel.dataThrough, postseasonThrough: viewModel.postseasonThrough))
                 .modifier(StandardDestinations(viewModel: viewModel))
         }
     }
@@ -230,7 +230,7 @@ struct RootTabView: View {
                 .navigationTitle("Trends")
                 .navigationBarTitleDisplayMode(.inline)
                 .modifier(SavantNavBar())
-                .modifier(HomeTabToolbar(lastUpdated: viewModel.lastUpdated, dataThrough: viewModel.dataThrough))
+                .modifier(HomeTabToolbar(lastUpdated: viewModel.lastUpdated, dataThrough: viewModel.dataThrough, postseasonThrough: viewModel.postseasonThrough))
                 .modifier(StandardDestinations(viewModel: viewModel))
         }
     }
@@ -241,7 +241,7 @@ struct RootTabView: View {
                 .navigationTitle("Teams")
                 .navigationBarTitleDisplayMode(.inline)
                 .modifier(SavantNavBar())
-                .modifier(HomeTabToolbar(lastUpdated: viewModel.lastUpdated, dataThrough: viewModel.dataThrough))
+                .modifier(HomeTabToolbar(lastUpdated: viewModel.lastUpdated, dataThrough: viewModel.dataThrough, postseasonThrough: viewModel.postseasonThrough))
                 .modifier(StandardDestinations(viewModel: viewModel))
         }
     }
@@ -255,7 +255,7 @@ struct RootTabView: View {
                 .navigationTitle("Compare")
                 .navigationBarTitleDisplayMode(.inline)
                 .modifier(SavantNavBar())
-                .modifier(HomeTabToolbar(lastUpdated: viewModel.lastUpdated, dataThrough: viewModel.dataThrough))
+                .modifier(HomeTabToolbar(lastUpdated: viewModel.lastUpdated, dataThrough: viewModel.dataThrough, postseasonThrough: viewModel.postseasonThrough))
         }
     }
 
@@ -315,6 +315,7 @@ private struct HomeTabToolbar: ViewModifier {
     @EnvironmentObject private var store: StoreService
     let lastUpdated: Date?
     let dataThrough: Date?
+    let postseasonThrough: Date?
     /// Owned per tab, not shared. All three tabs stay alive in the ZStack, so a
     /// single shared flag would push Settings onto all three stacks at once.
     @State private var showingSettings = false
@@ -371,6 +372,7 @@ private struct HomeTabToolbar: ViewModifier {
                 AboutView(
                     lastUpdated: lastUpdated,
                     dataThrough: dataThrough,
+                    postseasonThrough: postseasonThrough,
                     onRequestReview: {
                         showingSettings = false
                         Task { @MainActor in
@@ -482,6 +484,9 @@ struct PlayerProfileDestination: ViewModifier {
             loadRecentForm: { window in
                 await viewModel.loadRecentFormIfNeeded(window: window)
             },
+            recentAnchor: activePhase == .postseason
+                ? viewModel.postseasonThrough
+                : viewModel.dataThrough,
             comparisonCatalog: ComparisonCatalog(viewModel: viewModel, phase: activePhase)
         )
             .modifier(SavantNavBarPublic())

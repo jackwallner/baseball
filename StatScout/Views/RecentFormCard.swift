@@ -277,7 +277,7 @@ struct RecentFormCard: View {
             return Metric(
                 id: spec.key,
                 label: spec.label,
-                value: String(format: spec.format, v),
+                value: BaseballNumberStyle.display(String(format: spec.format, v)),
                 percentile: pct,
                 category: category
             )

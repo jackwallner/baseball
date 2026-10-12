@@ -173,7 +173,10 @@ struct HotColdView: View {
     private var captionText: String {
         var parts: [String] = []
         if let asOf = viewModel.recentFormAsOf {
-            parts.append("Through \(asOf.formatted(.dateTime.month(.abbreviated).day()))")
+            let through = "through \(asOf.formatted(.dateTime.month(.abbreviated).day()))"
+            // In October the windows still close on the last regular-season
+            // day, which reads as a stale board unless it says so.
+            parts.append(viewModel.offersPhaseChoice ? "Regular season \(through)" : "T" + through.dropFirst())
         }
         parts.append("calendar days, not games")
         parts.append("G is games played in the window")
