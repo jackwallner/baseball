@@ -7,19 +7,18 @@ on:
     # mid-afternoon folds half-played games into the season line.
     #
     # So the season snapshot only ever runs inside the overnight window, and
-    # `refresh_guard.py` makes all but the first attempt a no-op. The repeated
-    # attempts exist because a GitHub cron is not a promise: they routinely land
-    # one to three hours late and are sometimes dropped altogether, which is
-    # what left the app reading two days stale. Several shots means one lands.
+    # `refresh_guard.py` makes all but the first attempt a no-op.
+    #
+    # Backup only. The primary cadence is the self-booked refresh-timer chain
+    # (`backend/refresh_slots.py` holds the same slots): GitHub's cron landed
+    # three to four hours late through October 2026 and, after these lines were
+    # edited on 2026-10-12, skipped eight hours outright. The crons restart a
+    # broken chain.
     #
     # West-coast games finish around 06:00 UTC and Savant publishes an hour or
-    # two later, so 07:00 is the earliest with any chance of data. 10:00 UTC is
-    # 3am PT, which keeps the last attempt inside the "done by 4am PT" budget
-    # even when it fires late.
-    #
-    # Minute 23, not 0: GitHub queues top-of-the-hour schedules behind
-    # everyone else's, and in October 2026 the 07:00 attempt was landing
-    # around 13:30 UTC, after the season window had already closed.
+    # two later, so 07:23 is the first overnight attempt and 10:23 (3am PT) the
+    # last. Minute 23, not 0: GitHub queues top-of-the-hour schedules behind
+    # everyone else's.
     - cron: "23 7 * * *"
     - cron: "23 8 * * *"
     - cron: "23 9 * * *"
@@ -36,6 +35,10 @@ on:
     - cron: "23 20 * * *"
   workflow_dispatch:
     inputs:
+      planned:
+        description: "Started by the refresh timer; let the guard decide instead of forcing"
+        type: boolean
+        default: false
       full_game_log_reingest:
         description: "Re-ingest per-game logs from season start (needed after a metric-set change)"
         type: boolean
@@ -48,8 +51,36 @@ on:
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
+# A cron and a timer can land together; the second waits and finds the night
+# already closed out.
+concurrency:
+  group: mlb-data-refresh
+  cancel-in-progress: false
+
 jobs:
+  # Stdlib only, on the runner's own python3, so a timer hop that lands outside
+  # every slot costs a checkout and nothing else.
+  plan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      wait_seconds: ${{ steps.slots.outputs.wait_seconds }}
+      attempt: ${{ steps.slots.outputs.attempt }}
+      final_attempt: ${{ steps.slots.outputs.final_attempt }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Book the next attempt
+        id: slots
+        run: python3 backend/refresh_slots.py --github-output "$GITHUB_OUTPUT"
+
   ingest:
+    needs: plan
+    # A hand dispatch always runs. A timer wake-up runs only when it is one of
+    # the slots; otherwise it is a hop across the long overnight gap.
+    if: github.event_name == 'schedule' || !inputs.planned || needs.plan.outputs.attempt == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -57,6 +88,9 @@ jobs:
     # The nightly incremental path finishes in ~4 minutes. A full game-log
     # re-ingest walks the whole season in 7-day chunks and needs far longer.
     timeout-minutes: 90
+    env:
+      # Only a hand dispatch forces the steps past the guard.
+      FORCED: ${{ github.event_name == 'workflow_dispatch' && !inputs.planned }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -74,7 +108,7 @@ jobs:
       - name: Run tests
         run: PYTHONPATH=backend python -m pytest backend/tests
 
-      # Every step below is gated on this. A manual dispatch always runs, so
+      # Every step below is gated on this. A hand dispatch always runs, so
       # there's still a way to force a refresh.
       - name: Decide whether tonight's refresh still has work
         id: guard
@@ -84,7 +118,7 @@ jobs:
         run: python backend/refresh_guard.py
 
       - name: Run ingestion (with actual values)
-        if: (steps.guard.outputs.run == 'true' || github.event_name == 'workflow_dispatch') && !inputs.trends_only
+        if: (steps.guard.outputs.run == 'true' || env.FORCED == 'true') && !inputs.trends_only
         shell: bash
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -95,7 +129,7 @@ jobs:
           python backend/ingest.py 2>&1 | tee ingestion.log
 
       - name: Run per-game ingestion (Recent Form data)
-        if: steps.guard.outputs.run_trends == 'true' || github.event_name == 'workflow_dispatch'
+        if: steps.guard.outputs.run_trends == 'true' || env.FORCED == 'true'
         shell: bash
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -112,7 +146,7 @@ jobs:
           fi
 
       - name: Roll up rolling windows (7/15/30 day)
-        if: steps.guard.outputs.run_trends == 'true' || github.event_name == 'workflow_dispatch'
+        if: steps.guard.outputs.run_trends == 'true' || env.FORCED == 'true'
         shell: bash
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -126,7 +160,7 @@ jobs:
       # without touching anything. Runs on the trends gate rather than the
       # season one because it follows the game-log ingest that feeds it.
       - name: Ingest postseason standard stats
-        if: steps.guard.outputs.run_trends == 'true' || github.event_name == 'workflow_dispatch'
+        if: steps.guard.outputs.run_trends == 'true' || env.FORCED == 'true'
         shell: bash
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -139,7 +173,7 @@ jobs:
       # regular-season curve. Runs after the stat lines it annotates, and is a
       # no-op whenever there are no postseason logs.
       - name: Rank postseason lines against the regular season
-        if: steps.guard.outputs.run_trends == 'true' || github.event_name == 'workflow_dispatch'
+        if: steps.guard.outputs.run_trends == 'true' || env.FORCED == 'true'
         shell: bash
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -154,11 +188,11 @@ jobs:
       # Early attempts only warn (being too early is the expected case); the
       # last attempt of the day fails, which opens the issue below.
       - name: Verify the data actually moved
-        if: github.event_name == 'schedule'
+        if: env.FORCED != 'true'
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          FINAL_ATTEMPT: ${{ github.event.schedule == '23 20 * * *' }}
+          FINAL_ATTEMPT: ${{ needs.plan.outputs.final_attempt }}
         run: python backend/verify_freshness.py
 
       - name: Upload artifacts on failure
@@ -178,9 +212,41 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            github.rest.issues.create({
+            // The chain and a backup cron can both fail the same evening; one
+            // open issue is enough.
+            const title = 'Nightly Statcast refresh failed or fell behind'
+            const open = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner, repo: context.repo.repo, state: 'open'
+            })
+            if (open.some(issue => issue.title === title)) return
+            await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: 'Nightly Statcast refresh failed or fell behind',
+              title,
               body: ':warning: The nightly Statcast refresh failed, or finished a full day of attempts without closing out yesterday (see the freshness check) — check [run logs](https://github.com/' + context.repo.owner + '/' + context.repo.repo + '/actions/runs/' + context.runId + ')'
             })
+
+  # Book the next attempt. Runs whether or not this one ingested or failed, so
+  # the chain survives a bad night; the backup crons restart a broken chain.
+  schedule-next:
+    needs: [plan, ingest]
+    if: always() && needs.plan.outputs.wait_seconds != ''
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
+    steps:
+      - name: Start the refresh timer
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WAIT: ${{ needs.plan.outputs.wait_seconds }}
+        run: |
+          # One GitHub API 504 here used to end the chain until a backup cron fired.
+          for attempt in 1 2 3 4 5; do
+            if gh workflow run refresh-timer.yml --repo "$GITHUB_REPOSITORY" -f wait_seconds="$WAIT"; then
+              exit 0
+            fi
+            echo "Dispatch attempt $attempt failed; retrying in $((attempt * 30))s"
+            sleep $((attempt * 30))
+          done
+          exit 1
