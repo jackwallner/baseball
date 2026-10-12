@@ -37,10 +37,19 @@ echo "Uploading archive via App Store Connect (local Xcode session)..."
 echo "  archive: $ARCHIVE"
 echo "  plist:   $PLIST"
 
+# The Xcode account session expires without warning ("App Store Connect access
+# for YXG4MP6W39 is required"). The shared ASC API key doesn't, so use it when
+# ~/.baseball_credentials provides one.
+AUTH=()
+if [[ -n "${ASC_KEY_PATH:-}" && -n "${ASC_API_KEY_ID:-}" && -n "${ASC_ISSUER_ID:-}" ]]; then
+  AUTH=(-authenticationKeyPath "$ASC_KEY_PATH" -authenticationKeyID "$ASC_API_KEY_ID" -authenticationKeyIssuerID "$ASC_ISSUER_ID")
+fi
+
 xcodebuild -exportArchive \
   -archivePath "$ARCHIVE" \
   -exportPath "$STAGING" \
   -exportOptionsPlist "$PLIST" \
-  -allowProvisioningUpdates
+  -allowProvisioningUpdates \
+  "${AUTH[@]}"
 
 echo "If upload succeeded, check App Store Connect → TestFlight for \"Processing\"."
