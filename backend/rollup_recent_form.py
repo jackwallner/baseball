@@ -364,8 +364,15 @@ def run(season: Optional[int] = None) -> None:
 
     # The longest window needs its own span plus the equal-length window before
     # it, so pull twice the widest window (with a little slack for off-days).
+    # Measured back from the newest game, not from today: once the regular
+    # season ends the clock keeps moving and the data doesn't, and a lookback
+    # from today would start building windows out of a sliver of September.
     lookback = max(WINDOW_DAYS) * 2 + 5
-    since = date.today() - timedelta(days=lookback)
+    latest = _latest_game_date(client, season)
+    if latest is None:
+        logger.warning("No game logs for %d — nothing to roll up.", season)
+        return
+    since = latest - timedelta(days=lookback)
 
     logger.info("Fetching game logs for %d since %s…", season, since)
     logs = _fetch_logs(client, season, since)
@@ -385,7 +392,34 @@ def run(season: Optional[int] = None) -> None:
     logger.info("Built %d recent-form rows", len(rows))
 
     _upsert(client, rows)
+    _delete_stale(client, season, as_of)
     logger.info("Done.")
+
+
+def _latest_game_date(client, season: int) -> Optional[date]:
+    resp = (
+        client.table("player_game_logs")
+        .select("game_date")
+        .eq("season", season)
+        .eq("game_type", REGULAR_SEASON)
+        .order("game_date", desc=True)
+        .limit(1)
+        .execute()
+    )
+    rows = resp.data or []
+    return date.fromisoformat(rows[0]["game_date"]) if rows else None
+
+
+def _delete_stale(client, season: int, as_of: date) -> None:
+    """Drop windows left over from an earlier anchor date.
+
+    Upserting only ever adds or replaces, so a player who stopped playing kept
+    the last window he had: a July "last 7 days" sat on the board under a
+    "Through Sep 27" header, a thousand rows of them by season's end.
+    """
+    client.table("player_recent_form").delete().eq("season", season).lt(
+        "as_of", as_of.isoformat()
+    ).execute()
 
 
 def _parse_args() -> argparse.Namespace:

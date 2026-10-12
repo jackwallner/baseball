@@ -1332,6 +1332,67 @@ def build_snapshot_rows(season: int) -> list[dict]:
     return snapshots
 
 
+def _season_total_splits(splits: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """The splits that describe a player's whole season.
+
+    A player who changed clubs comes back with one split per club plus a
+    combined split that carries ``numTeams`` and no ``team``. Reading every
+    split let the last club's line overwrite the season (Gausman showed his
+    Toronto numbers on the Cubs) and, for fielding, counted every chance twice.
+    A one-club player has only the per-club splits, which are already the
+    season.
+    """
+    combined = [s for s in splits if "team" not in s and s.get("numTeams")]
+    return combined or splits
+
+
+def _is_quality_start(stat: dict[str, Any]) -> bool:
+    """Six or more innings and three or fewer earned runs, in a start."""
+    if int(stat.get("gamesStarted", 0) or 0) != 1:
+        return False
+    try:
+        innings = float(stat.get("inningsPitched", "0") or 0)
+    except (TypeError, ValueError):
+        return False
+    return innings >= 6 and int(stat.get("earnedRuns", 99) or 0) <= 3
+
+
+def _fetch_quality_starts(pitcher_ids: list[int], season: int) -> dict[int, int]:
+    """Quality starts per pitcher, counted from each start in the game log.
+
+    MLB's season line has no quality-start field, so reading one off it gave
+    every pitcher in the league 0 QS.
+    """
+    quality_starts: dict[int, int] = {}
+    batch_size = 50
+    for i in range(0, len(pitcher_ids), batch_size):
+        batch = pitcher_ids[i:i + batch_size]
+        try:
+            resp = requests.get(
+                "https://statsapi.mlb.com/api/v1/people",
+                params={
+                    "personIds": ",".join(str(pid) for pid in batch),
+                    "hydrate": f"stats(type=gameLog,season={season},group=pitching)",
+                },
+                timeout=60,
+            )
+            resp.raise_for_status()
+        except Exception:
+            logger.exception("Failed to fetch pitching game logs for batch %d", i // batch_size)
+            continue
+        for person in resp.json().get("people", []):
+            pid = person.get("id")
+            if not pid:
+                continue
+            count = 0
+            for stat_group in person.get("stats", []):
+                for split in stat_group.get("splits", []):
+                    if _is_quality_start(split.get("stat", {})):
+                        count += 1
+            quality_starts[pid] = count
+    return quality_starts
+
+
 def _fetch_mlb_standard_stats(player_ids: list[int], season: int) -> dict[int, dict[str, Any]]:
     """Fetch standard stats from MLB Stats API."""
     stats_by_player: dict[int, dict[str, Any]] = {}
@@ -1360,7 +1421,7 @@ def _fetch_mlb_standard_stats(player_ids: list[int], season: int) -> dict[int, d
                 for stat_group in stats_list:
                     group_data = stat_group.get("group", {})
                     if isinstance(group_data, dict) and group_data.get("displayName") == "hitting":
-                        for split in stat_group.get("splits", []):
+                        for split in _season_total_splits(stat_group.get("splits", [])):
                             stat = split.get("stat", {})
                             if stat:
                                 stats_by_player[pid] = {
@@ -1405,7 +1466,7 @@ def _fetch_mlb_standard_stats(player_ids: list[int], season: int) -> dict[int, d
                 for stat_group in stats_list:
                     group_data = stat_group.get("group", {})
                     if isinstance(group_data, dict) and group_data.get("displayName") == "pitching":
-                        for split in stat_group.get("splits", []):
+                        for split in _season_total_splits(stat_group.get("splits", [])):
                             stat = split.get("stat", {})
                             if stat:
                                 existing = stats_by_player.get(pid, {})
@@ -1433,7 +1494,6 @@ def _fetch_mlb_standard_stats(player_ids: list[int], season: int) -> dict[int, d
                                     "k9": stat.get("strikeoutsPer9Inn", ""),
                                     "bb9": stat.get("walksPer9Inn", ""),
                                     "kbb": stat.get("strikeoutWalkRatio", ""),
-                                    "qs": stat.get("qualityStarts", 0),
                                     "g": stat.get("gamesPlayed", 0),
                                     "gs": stat.get("gamesStarted", 0),
                                     "bf": stat.get("battersFaced", 0),
@@ -1474,7 +1534,7 @@ def _fetch_mlb_standard_stats(player_ids: list[int], season: int) -> dict[int, d
                     group_data = stat_group.get("group", {})
                     if not (isinstance(group_data, dict) and group_data.get("displayName") == "fielding"):
                         continue
-                    for split in stat_group.get("splits", []):
+                    for split in _season_total_splits(stat_group.get("splits", [])):
                         stat = split.get("stat", {})
                         if not stat:
                             continue
@@ -1508,6 +1568,14 @@ def _fetch_mlb_standard_stats(player_ids: list[int], season: int) -> dict[int, d
         except Exception:
             logger.exception("Failed to fetch MLB fielding stats for batch %d", i // batch_size)
             continue
+
+    starters = [pid for pid, stats in stats_by_player.items() if int(stats.get("gs", 0) or 0) > 0]
+    quality_starts = _fetch_quality_starts(starters, season)
+    for pid, stats in stats_by_player.items():
+        # A batch that failed to load leaves QS off the line rather than
+        # claiming zero.
+        if "gs" in stats and (pid in quality_starts or int(stats.get("gs", 0) or 0) == 0):
+            stats["qs"] = quality_starts.get(pid, 0)
 
     logger.info("Fetched MLB standard stats for %d players", len(stats_by_player))
     return stats_by_player

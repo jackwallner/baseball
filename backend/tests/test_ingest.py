@@ -644,3 +644,29 @@ class TestPitcherPlateDiscipline:
         # One whiff on three swings; one chase on two pitches outside.
         assert row["whiff_percent"] == pytest.approx(33.3, abs=0.1)
         assert row["chase_percent"] == pytest.approx(50.0)
+
+
+def test_traded_player_reads_the_combined_season_split():
+    from ingest import _season_total_splits
+
+    combined = {"numTeams": 2, "stat": {"inningsPitched": "177.2"}}
+    toronto = {"team": {"id": 141}, "stat": {"inningsPitched": "127.1"}}
+    chicago = {"team": {"id": 112}, "stat": {"inningsPitched": "50.1"}}
+    assert _season_total_splits([combined, toronto, chicago]) == [combined]
+
+
+def test_one_club_player_keeps_every_split():
+    from ingest import _season_total_splits
+
+    first_base = {"team": {"id": 136}, "position": {"abbreviation": "1B"}, "stat": {}}
+    left_field = {"team": {"id": 136}, "position": {"abbreviation": "LF"}, "stat": {}}
+    assert _season_total_splits([first_base, left_field]) == [first_base, left_field]
+
+
+def test_quality_start_needs_a_start_six_innings_and_three_earned_runs():
+    from ingest import _is_quality_start
+
+    assert _is_quality_start({"gamesStarted": 1, "inningsPitched": "6.0", "earnedRuns": 3})
+    assert not _is_quality_start({"gamesStarted": 1, "inningsPitched": "5.2", "earnedRuns": 0})
+    assert not _is_quality_start({"gamesStarted": 1, "inningsPitched": "7.0", "earnedRuns": 4})
+    assert not _is_quality_start({"gamesStarted": 0, "inningsPitched": "6.0", "earnedRuns": 0})
