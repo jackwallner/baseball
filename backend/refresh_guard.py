@@ -54,6 +54,12 @@ MLB_SCHEDULE_URL = "https://statsapi.mlb.com/api/v1/schedule"
 # inside the overnight window. 13:00 UTC is 6am PT, which leaves room for a cron
 # that fires up to three hours late and still lands before anyone is reading.
 SEASON_WINDOW_END_HOUR_UTC = 13
+# And it opens no earlier than 06:00 UTC (11pm PT), once the West Coast slate
+# is final. Checking only the end hour let an evening cron that GitHub fired
+# four hours late (00:03 UTC on 2026-10-08, 5pm PT) count as "overnight": it
+# rewrote the season line while that day's games were still being played, and
+# "yesterday" in UTC was still today in every US time zone.
+SEASON_WINDOW_START_HOUR_UTC = 6
 # A game that hasn't finished isn't in Savant's export yet, so it can't be
 # what we're waiting to ingest.
 FINAL_STATES = {"Final", "Game Over", "Completed Early"}
@@ -136,6 +142,14 @@ def decide() -> tuple[bool, bool, str]:
 
     if _already_ingested(season, yesterday):
         return False, False, f"{yesterday} is already ingested; tonight's refresh is done."
+
+    if now.hour < SEASON_WINDOW_START_HOUR_UTC:
+        return (
+            False,
+            False,
+            f"It is {now.hour:02d}:00 UTC, before the overnight window opens at "
+            f"{SEASON_WINDOW_START_HOUR_UTC:02d}:00: US games may still be in progress.",
+        )
 
     in_window = now.hour < SEASON_WINDOW_END_HOUR_UTC
     if not in_window:

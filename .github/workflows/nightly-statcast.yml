@@ -16,10 +16,14 @@ on:
     # two later, so 07:00 is the earliest with any chance of data. 10:00 UTC is
     # 3am PT, which keeps the last attempt inside the "done by 4am PT" budget
     # even when it fires late.
-    - cron: "0 7 * * *"
-    - cron: "0 8 * * *"
-    - cron: "0 9 * * *"
-    - cron: "0 10 * * *"
+    #
+    # Minute 23, not 0: GitHub queues top-of-the-hour schedules behind
+    # everyone else's, and in October 2026 the 07:00 attempt was landing
+    # around 13:30 UTC, after the season window had already closed.
+    - cron: "23 7 * * *"
+    - cron: "23 8 * * *"
+    - cron: "23 9 * * *"
+    - cron: "23 10 * * *"
     # Daytime sweeps for the Trends board only. Savant is not always done by
     # 3am PT: on 2026-07-29 the 28th still wasn't published when the last
     # overnight attempt ran, so the app spent the whole day saying "Through Jul
@@ -27,9 +31,9 @@ on:
     # does appear. They can't disturb the all-day-still season line, because the
     # guard only clears `run` inside the overnight window and the game-log
     # ingest never reaches past yesterday.
-    - cron: "0 14 * * *"
-    - cron: "0 17 * * *"
-    - cron: "0 20 * * *"
+    - cron: "23 14 * * *"
+    - cron: "23 17 * * *"
+    - cron: "23 20 * * *"
   workflow_dispatch:
     inputs:
       full_game_log_reingest:
@@ -154,7 +158,7 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          FINAL_ATTEMPT: ${{ github.event.schedule == '0 20 * * *' }}
+          FINAL_ATTEMPT: ${{ github.event.schedule == '23 20 * * *' }}
         run: python backend/verify_freshness.py
 
       - name: Upload artifacts on failure

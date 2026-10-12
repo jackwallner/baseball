@@ -106,6 +106,17 @@ def test_the_last_overnight_hour_still_writes_the_season_line(monkeypatch):
     assert run_trends
 
 
+def test_an_evening_cron_fired_late_writes_nothing(monkeypatch):
+    # 00:03 UTC is 5pm PT: "yesterday" in UTC is still today in the US, and its
+    # games are being played. Neither the season line nor the trends may move.
+    _freeze(monkeypatch, hour=0)
+    monkeypatch.setattr(refresh_guard, "_games_played", lambda day: 1)
+    monkeypatch.setattr(refresh_guard, "_already_ingested", lambda season, day: False)
+    run_season, run_trends, _ = refresh_guard.decide()
+    assert not run_season
+    assert not run_trends
+
+
 class _FakeQuery:
     """Chainable stand-in for the supabase query builder."""
 
