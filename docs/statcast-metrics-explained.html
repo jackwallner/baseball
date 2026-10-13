@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" sizes="256x256" href="images/icon_256.png">
+<link rel="apple-touch-icon" href="images/icon_256.png">
+<title>What Is xwOBA? Barrel Rate, Hard-Hit % and Sprint Speed</title>
+<meta name="description" content="What xwOBA, barrel rate, hard-hit rate and sprint speed mean, with the exact Statcast definitions and what a good number looks like in a 2025 MLB season.">
+<link rel="canonical" href="https://jackwallner.com/ios/baseball/statcast-metrics-explained.html">
+<meta property="og:title" content="What Is xwOBA? Barrel Rate, Hard-Hit % and Sprint Speed">
+<meta property="og:description" content="What xwOBA, barrel rate, hard-hit rate and sprint speed mean, with the exact Statcast definitions and what a good number looks like in a 2025 MLB season.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://jackwallner.com/ios/baseball/statcast-metrics-explained.html">
+<meta property="og:image" content="https://jackwallner.github.io/baseball/images/01_leaderboard.png">
+<meta property="og:site_name" content="Jack Wallner">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="What Is xwOBA? Barrel Rate, Hard-Hit % and Sprint Speed">
+<meta name="twitter:description" content="What xwOBA, barrel rate, hard-hit rate and sprint speed mean, with the exact Statcast definitions and what a good number looks like in a 2025 MLB season.">
+<meta name="twitter:image" content="https://jackwallner.github.io/baseball/images/01_leaderboard.png">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      "@id": "https://jackwallner.com/ios/baseball/statcast-metrics-explained.html#article",
+      "headline": "What is xwOBA? Barrel rate, hard-hit rate and sprint speed explained",
+      "description": "What xwOBA, barrel rate, hard-hit rate and sprint speed mean, with the exact Statcast definitions and what a good number looks like in a 2025 MLB season.",
+      "author": {
+        "@type": "Person",
+        "name": "Jack Wallner",
+        "url": "https://jackwallner.com/"
+      },
+      "publisher": {
+        "@type": "Person",
+        "name": "Jack Wallner",
+        "url": "https://jackwallner.com/"
+      },
+      "datePublished": "2026-10-12",
+      "dateModified": "2026-10-12",
+      "mainEntityOfPage": "https://jackwallner.com/ios/baseball/statcast-metrics-explained.html",
+      "image": "https://jackwallner.github.io/baseball/images/01_leaderboard.png",
+      "about": {
+        "@type": "Thing",
+        "name": "Statcast metrics: xwOBA, barrel rate, hard-hit rate and sprint speed"
+      },
+      "isPartOf": {
+        "@type": "MobileApplication",
+        "@id": "https://jackwallner.com/ios/baseball/#app",
+        "name": "Baseball Savvy StatScout",
+        "url": "https://jackwallner.com/ios/baseball/"
+      }
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://jackwallner.com/ios/baseball/statcast-metrics-explained.html#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is xwOBA in baseball?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "xwOBA is expected weighted on-base average. It estimates a hitter's on-base value from the exit velocity and launch angle of his batted balls, and since 2019 also his sprint speed on weakly hit balls, instead of from the results those balls actually got."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is a good barrel rate?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "In 2025, the median qualified hitter had a barrel rate of 9.0 percent. About 14.4 percent put a hitter in the top tenth, and the best mark was Aaron Judge at 24.7 percent."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What counts as a hard-hit ball?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Statcast calls any batted ball with an exit velocity of 95 mph or higher hard-hit. Hard-hit rate is the percentage of a hitter's batted balls that reach that speed."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is a good sprint speed?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Sprint speed is measured in feet per second in a runner's fastest one-second window. In 2025 the median was 27.5 ft/s and the 90th percentile was 29.0 ft/s. A run of 30 ft/s or faster is called a bolt."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is xwOBA better than batting average?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "For judging a hitter's contact, usually yes. xwOBA counts extra-base hits and walks, and it removes defense and ballpark luck from batted balls. It is not a prediction of future results by itself."
+          }
+        }
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://jackwallner.com/ios/baseball/statcast-metrics-explained.html#breadcrumb",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Jack Wallner",
+          "item": "https://jackwallner.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "iOS apps",
+          "item": "https://jackwallner.com/ios/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Baseball Savvy StatScout",
+          "item": "https://jackwallner.com/ios/baseball/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "name": "Statcast metrics explained",
+          "item": "https://jackwallner.com/ios/baseball/statcast-metrics-explained.html"
+        }
+      ]
+    }
+  ]
+}
+</script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif; color: #1d1d1f; background: #fafafa; -webkit-font-smoothing: antialiased; line-height: 1.7; }
+nav { padding: 16px 0; border-bottom: 1px solid rgba(0,0,0,0.08); background: #fafafa; position: sticky; top: 0; z-index: 10; }
+nav .container { display: flex; align-items: center; justify-content: space-between; max-width: 980px; }
+.nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: #1d1d1f; }
+.nav-brand img { width: 32px; height: 32px; border-radius: 7px; }
+.nav-brand span { font-size: 15px; font-weight: 600; }
+.nav-link { font-size: 14px; text-decoration: none; background: #1d1d1f; color: #fff; padding: 8px 18px; border-radius: 980px; font-weight: 500; }
+.container { max-width: 720px; margin: 0 auto; padding: 0 24px; }
+article { padding: 56px 0 72px; }
+article h1 { font-size: 36px; font-weight: 700; letter-spacing: -1px; line-height: 1.15; margin-bottom: 12px; }
+.meta { font-size: 14px; color: #86868b; margin-bottom: 28px; }
+.answer { font-size: 19px; line-height: 1.55; border-left: 4px solid #d32f2f; padding: 4px 0 4px 18px; margin-bottom: 36px; }
+article h2 { font-size: 24px; font-weight: 600; letter-spacing: -0.3px; line-height: 1.25; margin: 40px 0 12px; }
+article h3 { font-size: 18px; font-weight: 600; margin: 24px 0 6px; }
+article p { font-size: 17px; margin-bottom: 18px; }
+article ul, article ol { margin: 0 0 20px 24px; font-size: 17px; }
+article li { margin-bottom: 8px; }
+article a { color: #b71c1c; }
+.formula { background: #f5f5f7; border-radius: 12px; padding: 16px 20px; margin: 0 0 20px; font-size: 16px; font-family: ui-monospace, "SF Mono", Menlo, monospace; overflow-x: auto; }
+.tablewrap { overflow-x: auto; margin: 0 0 24px; }
+table { border-collapse: collapse; width: 100%; font-size: 15px; }
+th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid rgba(0,0,0,0.08); vertical-align: top; }
+th { font-weight: 600; background: #f5f5f7; }
+.note { font-size: 14px; color: #6e6e73; }
+.faq details { border-bottom: 1px solid rgba(0,0,0,0.08); padding: 14px 0; }
+.faq summary { font-size: 17px; font-weight: 600; cursor: pointer; }
+.faq details p { font-size: 16px; color: #6e6e73; margin: 10px 0 0; }
+.sources li { font-size: 15px; margin-bottom: 6px; }
+.sources a { word-break: break-word; }
+footer { text-align: center; padding: 20px 24px; font-size: 12px; color: #86868b; border-top: 1px solid rgba(0,0,0,0.08); }
+footer a { color: #86868b; text-decoration: none; margin: 0 10px; }
+@media (max-width: 768px) { article h1 { font-size: 28px; } article { padding: 36px 0 56px; } .answer { font-size: 18px; } }
+</style>
+</head>
+<body>
+<nav>
+<div class="container">
+<a class="nav-brand" href="./"><img src="images/icon_256.png" alt="StatScout"><span>StatScout</span></a>
+<a class="nav-link" href="https://apps.apple.com/us/app/baseball-savvy-statscout/id6763945657">Download</a>
+</div>
+</nav>
+<article>
+<div class="container">
+<h1>What is xwOBA? Barrel rate, hard-hit rate and sprint speed explained</h1>
+<p class="meta">By Jack Wallner. Updated October 12, 2026.</p>
+<p class="answer">xwOBA is the on-base value a hitter should have earned from the quality of his contact, built from exit velocity and launch angle instead of what actually happened. Barrel rate, hard-hit rate and sprint speed are the three Statcast numbers that most often explain it: how often a hitter squares the ball up, how often he hits it 95 mph or harder, and how fast he runs.</p>
+
+<h2>xwOBA: what the contact deserved</h2>
+<p>wOBA (weighted on-base average) is on-base percentage that counts a double for more than a single and a home run for more than a double. xwOBA, or expected wOBA, keeps the same formula but replaces the actual outcome of each batted ball with the outcome that similar batted balls usually produce. According to the MLB glossary, every ball in play gets a single, double, triple and home run probability based on comparable batted balls since Statcast went league-wide in 2015, using exit velocity and launch angle. Since 2019, topped or weakly hit balls also factor in the hitter's seasonal sprint speed. Walks, strikeouts and hit-by-pitches stay real.</p>
+<p>The point is to remove defense and luck. A hitter controls how hard and at what angle he hits the ball, but not whether a fielder is standing there. The glossary's example is Marcell Ozuna in 2018: a .327 wOBA, but a .359 xwOBA based on his contact.</p>
+<p>A 2025 example: Salvador Perez posted a .311 wOBA against a .357 xwOBA, a 46-point gap in his favor on contact quality. Nick Kurtz went the other way, with a .419 wOBA against a .372 xwOBA. When xwOBA is well above wOBA, the results lagged the contact. When it is well below, the results ran ahead of it.</p>
+
+<h2>Barrel rate: how often the ball is squared up</h2>
+<p>A barrel is a batted ball whose exit velocity and launch angle together have historically produced at least a .500 batting average and a 1.500 slugging percentage. The minimum is 98 mph. At 98 mph the launch angle has to fall between 26 and 30 degrees. Each extra mph widens the window, until at 116 mph anything from 8 to 50 degrees counts. Barrel rate is barrels divided by batted ball events.</p>
+
+<h2>Hard-hit rate: the share at 95 mph or more</h2>
+<p>Statcast calls a ball hard-hit at 95 mph or harder, and hard-hit rate is the percentage of a hitter's batted balls that reach that line. MLB's glossary picks 95 because that is where exit velocity starts to pay off: in 2018, hard-hit balls hit .524 with a 1.047 slugging percentage, and everything softer hit .219 with a .259 slugging percentage. Unlike barrel rate, hard-hit rate ignores launch angle, so a 100 mph ground ball counts the same as a 100 mph line drive.</p>
+
+<h2>Sprint speed: feet per second in the fastest second</h2>
+<p>Sprint speed is how many feet per second a player covers in his fastest one-second window. It uses two kinds of runs: runs of two bases or more on non-homers, and home-to-first runs on topped or weakly hit balls. The best runs, roughly two-thirds, are averaged. Any single run of 30 ft/sec or faster is called a bolt.</p>
+
+<h2>What a good number looks like</h2>
+<p>I pulled the 2025 leaderboards from Baseball Savant as CSV downloads and calculated the spread. The hitting rows cover the 251 hitters on Savant's default qualified filter. Sprint speed covers 579 players with at least 10 competitive runs.</p>
+<div class="tablewrap"><table>
+<thead><tr><th>Metric (2025)</th><th>Weak (10th pct.)</th><th>Typical (median)</th><th>Strong (90th pct.)</th><th>Best</th></tr></thead>
+<tbody>
+<tr><td>xwOBA</td><td>.289</td><td>.323</td><td>.365</td><td>.457 (Aaron Judge)</td></tr>
+<tr><td>Barrel rate</td><td>3.6%</td><td>9.0%</td><td>14.4%</td><td>24.7% (Aaron Judge)</td></tr>
+<tr><td>Hard-hit rate</td><td>30.9%</td><td>43.4%</td><td>50.6%</td><td>59.6% (Kyle Schwarber)</td></tr>
+<tr><td>Sprint speed</td><td>25.5 ft/s</td><td>27.5 ft/s</td><td>29.0 ft/s</td><td>30.3 ft/s (Trea Turner)</td></tr>
+</tbody></table></div>
+<p class="note">Barrel rate here is barrels per batted ball event. Percentiles are linear interpolations on the downloaded rows, so Savant's own displayed percentiles can differ slightly.</p>
+<p>Read them as a range, not a grade. A hitter at .323 xwOBA is roughly an average qualified bat. Past .365 he is in the top tenth. Barrel rate needs the right launch angle and hard-hit rate does not, so a hitter can rank high in one and low in the other. A high hard-hit rate with a low barrel rate means a lot of hard contact at angles that do not produce extra bases.</p>
+
+<h2>Putting them together</h2>
+<p>xwOBA is the summary. Barrel rate and hard-hit rate are the two main contact-quality inputs behind it, and sprint speed adds the part of the game that fielders cannot take away. When a player's xwOBA looks different from his batting line, check barrel rate and hard-hit rate first to see where the gap comes from.</p>
+
+<h2>How StatScout helps</h2>
+<p><a href="./">Baseball Savvy StatScout</a> is an independent iPhone app, not affiliated with MLB, that shows each of these metrics as a 0 to 100 percentile bar for every qualified player: xwOBA, Barrel%, Hard-Hit% and Sprint Speed, plus leaderboards that refresh nightly. Percentiles answer the "what is good" question directly, so you do not need to memorize the table above.</p>
+<h2>Frequently asked questions</h2>
+<div class="faq">
+<details><summary>What is xwOBA in baseball?</summary><p>xwOBA is expected weighted on-base average. It estimates a hitter&#x27;s on-base value from the exit velocity and launch angle of his batted balls, and since 2019 also his sprint speed on weakly hit balls, instead of from the results those balls actually got.</p></details>
+<details><summary>What is a good barrel rate?</summary><p>In 2025, the median qualified hitter had a barrel rate of 9.0 percent. About 14.4 percent put a hitter in the top tenth, and the best mark was Aaron Judge at 24.7 percent.</p></details>
+<details><summary>What counts as a hard-hit ball?</summary><p>Statcast calls any batted ball with an exit velocity of 95 mph or higher hard-hit. Hard-hit rate is the percentage of a hitter&#x27;s batted balls that reach that speed.</p></details>
+<details><summary>What is a good sprint speed?</summary><p>Sprint speed is measured in feet per second in a runner&#x27;s fastest one-second window. In 2025 the median was 27.5 ft/s and the 90th percentile was 29.0 ft/s. A run of 30 ft/s or faster is called a bolt.</p></details>
+<details><summary>Is xwOBA better than batting average?</summary><p>For judging a hitter&#x27;s contact, usually yes. xwOBA counts extra-base hits and walks, and it removes defense and ballpark luck from batted balls. It is not a prediction of future results by itself.</p></details>
+</div>
+<h2>Sources</h2>
+<ol class="sources">
+<li><a href="https://www.mlb.com/glossary/statcast/expected-woba" rel="noopener">MLB Glossary: Expected Weighted On-base Average (xwOBA)</a></li>
+<li><a href="https://www.mlb.com/glossary/statcast/barrel" rel="noopener">MLB Glossary: Barrel</a></li>
+<li><a href="https://www.mlb.com/glossary/statcast/hard-hit-rate" rel="noopener">MLB Glossary: Hard-hit Rate</a></li>
+<li><a href="https://www.mlb.com/glossary/statcast/sprint-speed" rel="noopener">MLB Glossary: Sprint Speed</a></li>
+<li><a href="https://baseballsavant.mlb.com/leaderboard/expected_statistics" rel="noopener">Baseball Savant: Expected Statistics leaderboard</a></li>
+</ol>
+</div>
+</article>
+<footer>
+<div>&copy; 2026 Jack Wallner</div>
+<div><a href="./">StatScout</a><a href="https://jackwallner.com/ios/">More apps by Jack Wallner</a><a href="support.html">Support</a><a href="privacy-policy.html">Privacy</a></div>
+</footer>
+</body>
+</html>
