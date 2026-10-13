@@ -84,9 +84,13 @@ AVD is temporary and holds only our debug app.
   (base plans `monthly`/`yearly`, offer `free-trial-7d`, new customers who
   never had any subscription) and one-time `com.jackwallner.baseball.pro`
   (purchase option `lifetime`, backwards compatible). Nothing sent for review.
-- RevenueCat's Play app has no service account credentials yet, so Play
-  purchases cannot validate. Jack must upload the RevenueCat service account
-  JSON in the RevenueCat app settings before any billing test.
+- The fleet service account JSON (`~/.config/google-play/mahj-service-account.json`)
+  is the RevenueCat Play credential (attached 2026-10-13 via API v2
+  `POST /projects/proje8aeddd9/apps/app94f43f7fc0` with
+  `play_store.play_service_account_credentials_json`, sent through
+  `rc api ... --body @-`; no dashboard upload needed). Store state reads `ok`
+  for both subscriptions; RevenueCat's store-state tool does not support
+  Play one-time products.
 - Screenshot captures use the QA build on Pro (`--ez onboarded true --ez
   forcePro true --ei tab <n>`) with System UI demo mode. The emulator is slow;
   wait for content before capturing.

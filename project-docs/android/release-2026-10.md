@@ -56,8 +56,9 @@ Play products.
 
 The app displays localized Play prices and actual trial eligibility. Pending
 and cancelled transactions do not grant access. Purchase and restore
-verification is blocked until the RevenueCat service account JSON is uploaded
-to the RevenueCat Play app (it currently reports missing store credentials).
+verification needs a licence tester. The service account JSON was attached to
+the RevenueCat Play app on 2026-10-13 through API v2, and RevenueCat now reads
+both subscriptions' Play store state.
 
 ## Console staging
 
@@ -77,7 +78,7 @@ RevenueCat, encrypted in transit, deletion by email, nothing shared), target
 audience 13 and over, six listing screenshots and the feature graphic.
 Publishing overview lists these as changes not yet sent for review.
 
-Remaining: upload the RevenueCat service account JSON, add a licence tester and
+Remaining: add a licence tester and
 run the no-charge purchase and restore test, check the pre-launch report, then
 create the production release. The final Send for review action belongs to
 Jack.
