@@ -41,6 +41,8 @@ class DashboardViewModel(private val context: Context, val provider: StatcastPro
     fun start() {
         if (started) return
         started = true
+        // Covers the cache read too, so screens show a spinner rather than an empty state.
+        loading = true
         refreshJob = scope.launch {
             withContext(Dispatchers.IO) { runCatching { currentCache.readText().let { (Json.parseToJsonElement(it) as JsonArray).decodeRows(Player::fromJson) } }.getOrNull() }?.let(::merge)
             refreshNow()

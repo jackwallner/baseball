@@ -9,7 +9,7 @@ paths:
 # StatScout Android
 
 - Kotlin and Compose port in `android/`, package `com.jackwallner.baseball`.
-  Play name: Baseball Savvy StatScout. Version 1.5.3, first versionCode 1.
+  Play name: Baseball Savvy StatScout. Version 1.5.3, versionCode 3.
 - Follow `android-dev`. Football's Android port supplied the Gradle, billing,
   navigation, and paywall foundation; baseball's iOS models and feeds are the
   source of truth. Do not reintroduce football data, teams, or product IDs.
@@ -77,6 +77,16 @@ AVD is temporary and holds only our debug app.
 - Android-specific policy pages: `docs/android-privacy.html` and
   `docs/android-terms.html`. Listing copy lives in
   `android/play-assets/metadata/android/en-US/`.
-- Play creation form is prepared; package availability verified 2026-10-12.
-  Export declaration approval is pending. No release has been uploaded or
-  submitted. Update this state after each verified Console milestone.
+- Play state, verified 2026-10-13: versionCode 3 (1.5.3) active on internal
+  testing (tester list "IM Iron Splits internal testers"). App content, Data
+  safety, target audience (13+), listing, six screenshots and feature graphic
+  are saved. Play products are active: monthly and yearly subscriptions
+  (base plans `monthly`/`yearly`, offer `free-trial-7d`, new customers who
+  never had any subscription) and one-time `com.jackwallner.baseball.pro`
+  (purchase option `lifetime`, backwards compatible). Nothing sent for review.
+- RevenueCat's Play app has no service account credentials yet, so Play
+  purchases cannot validate. Jack must upload the RevenueCat service account
+  JSON in the RevenueCat app settings before any billing test.
+- Screenshot captures use the QA build on Pro (`--ez onboarded true --ez
+  forcePro true --ei tab <n>`) with System UI demo mode. The emulator is slow;
+  wait for content before capturing.

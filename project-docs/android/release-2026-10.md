@@ -23,9 +23,14 @@ streams one player-season at a time to stay within a 192 MB Android heap.
 - MacBook Pro API 36 emulator: four original Debug and four QA flows passed.
 - Extended manual testing exposed a history-loading memory crash after those
   short tests. Version code 2 streams the history archive and adds a complete
-  history-loading instrumentation regression. Final regression results pending.
-- Release lint, APK and AAB builds passed before the streaming correction.
-  The corrected release is being rebuilt and revalidated.
+  history-loading instrumentation regression.
+- Version code 3 (2026-10-13): Teams lists only the 30 clubs (a stray `TBD`
+  group ranked first), screens show a spinner instead of an empty state while
+  the cache loads, Trends hides "Through Not available" before data arrives,
+  and comparisons show the percentile alone when the feed omits a raw value.
+- Version code 3 on the Pro API 36 emulator: Debug connected 5/5, QA connected
+  5/5 (v2 code), unit tests 18/18, release lint has no errors, AAB signed with
+  the upload key.
 - Upload key is external to the repository with an encrypted PKCS12 backup.
   Production credentials and signing material were not copied to Pro.
 
@@ -43,9 +48,16 @@ Planned US prices, approximately 20% below current iOS:
 | `com.jackwallner.baseball.pro.yearly` | `yearly` | $7.99/year | 7 days, eligible accounts |
 | `com.jackwallner.baseball.pro` | One-time | $15.99 | None |
 
+All three Play products were created and activated on 2026-10-13 at these
+prices, with Play's converted local prices. The trial offer `free-trial-7d`
+targets accounts that never had any subscription in the app. RevenueCat's
+`android` offering maps `$rc_monthly`, `$rc_annual` and `$rc_lifetime` to the
+Play products.
+
 The app displays localized Play prices and actual trial eligibility. Pending
-and cancelled transactions do not grant access. Actual Play purchase and
-restore verification are pending catalog activation and the internal release.
+and cancelled transactions do not grant access. Purchase and restore
+verification is blocked until the RevenueCat service account JSON is uploaded
+to the RevenueCat Play app (it currently reports missing store credentials).
 
 ## Console staging
 
@@ -59,7 +71,13 @@ read-only app information, automatically included quality information,
 financial data, orders/subscriptions, store presence, and its automatically
 included policy permission. No production release or administrator permission.
 
-Reviewer instructions, content rating, target audience, Data Safety, artwork,
-Play products, internal-track billing proof, pre-launch report, and production
-staging are still being completed. Nothing has been submitted for production
-review. The final Send for review action belongs to Jack.
+Completed on 2026-10-13: version code 3 rolled out to internal testing,
+Data safety (purchase history, app interactions and device IDs collected via
+RevenueCat, encrypted in transit, deletion by email, nothing shared), target
+audience 13 and over, six listing screenshots and the feature graphic.
+Publishing overview lists these as changes not yet sent for review.
+
+Remaining: upload the RevenueCat service account JSON, add a licence tester and
+run the no-charge purchase and restore test, check the pre-launch report, then
+create the production release. The final Send for review action belongs to
+Jack.

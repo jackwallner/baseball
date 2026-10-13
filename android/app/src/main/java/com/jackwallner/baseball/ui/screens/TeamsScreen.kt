@@ -24,7 +24,7 @@ fun TeamsScreen() {
     val navigator = LocalNavigator.current
     var query by remember { mutableStateOf("") }
     var category by remember { mutableStateOf(MetricCategory.HITTING) }
-    val clubs = vm.seasonPlayers.groupBy { normalizedTeamAbbreviation(it.team) }.filter { (team, _) -> query.isBlank() || teamMatchesQuery(team, query) }
+    val clubs = vm.seasonPlayers.groupBy { normalizedTeamAbbreviation(it.team) }.filter { (team, _) -> team in teamNicknames && (query.isBlank() || teamMatchesQuery(team, query)) }
         .toList().sortedByDescending { (_, players) -> players.mapNotNull { it.percentile(category) }.takeIf { it.isNotEmpty() }?.average() ?: 0.0 }
     Column {
         SeasonControls()

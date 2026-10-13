@@ -116,7 +116,7 @@ private fun ComparisonBody(a: Player, b: Player) {
                 items(labels) { label ->
                     val left = a.metrics.firstOrNull { it.label == label && it.category == category }
                     val right = b.metrics.firstOrNull { it.label == label && it.category == category }
-                    ComparisonRow(label, left?.let { "${it.value} · ${it.percentile}" } ?: "N/A", right?.let { "${it.value} · ${it.percentile}" } ?: "N/A", (left?.percentile ?: -1).compareTo(right?.percentile ?: -1))
+                    ComparisonRow(label, left?.comparisonCell() ?: "N/A", right?.comparisonCell() ?: "N/A", (left?.percentile ?: -1).compareTo(right?.percentile ?: -1))
                 }
                 item { SectionBar("Standard ${category.raw}") }
                 val stats = (a.standardStats.orEmpty().filter { it.resolvedCategory(a.playerType) == category } + b.standardStats.orEmpty().filter { it.resolvedCategory(b.playerType) == category }).map { it.label }.distinct()
@@ -181,3 +181,6 @@ fun TeamComparisonScreen(teamA: String, teamB: String, seasonA: Int, seasonB: In
         }
     }
 }
+
+/** The feed sometimes ships a percentile without its raw value; show the percentile alone then. */
+private fun Metric.comparisonCell() = if (value.isBlank() || value == "\u2014") percentile.ordinal else "$value · $percentile"

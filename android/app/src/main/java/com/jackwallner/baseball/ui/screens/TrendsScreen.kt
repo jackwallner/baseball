@@ -72,7 +72,8 @@ fun TrendsScreen() {
             FilterChip(!rising, { rising = false }, label = { Text("Cooling off", style = SavantType.smallBold) })
             FilterChip(following, { following = !following }, label = { Text("Following", style = SavantType.smallBold) })
         }
-        Text("Through ${dayLabel(forms.mapNotNull { it.asOf }.maxOrNull())} · ${qualifier.minimum(pitcher, days)}+ ${if (pitcher) "BF" else "PA"}", style = SavantType.small, color = SavantPalette.inkSecondary, modifier = Modifier.padding(16.dp))
+        val through = forms.mapNotNull { it.asOf }.maxOrNull()?.let { "Through ${dayLabel(it)} · " } ?: ""
+        Text("$through${qualifier.minimum(pitcher, days)}+ ${if (pitcher) "BF" else "PA"}", style = SavantType.small, color = SavantPalette.inkSecondary, modifier = Modifier.padding(16.dp))
         SectionBar(if (rising) "Heating up" else "Cooling off", selected.label)
         LazyColumn(Modifier.weight(1f).testTag("trends-list")) {
             if (loading) item { LoadingRow() }
