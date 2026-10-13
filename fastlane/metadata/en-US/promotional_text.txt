@@ -1,1 +1,1 @@
-Postseason baseball is here. Size up every playoff team and player with nightly Statcast percentiles, 7/15/30-day form, and head-to-head matchups.
+Statcast percentile bars for every MLB player: exit velocity, xwOBA, sprint speed, outs above average and more, updated nightly in season. Follow players free.
