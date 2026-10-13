@@ -52,14 +52,7 @@ struct DashboardView: View {
                 AboutView(
                     lastUpdated: viewModel.lastUpdated,
                     dataThrough: viewModel.dataThrough,
-                    postseasonThrough: viewModel.postseasonThrough,
-                    onRequestReview: {
-                        showingAbout = false
-                        Task { @MainActor in
-                            try? await Task.sleep(nanoseconds: 400_000_000)
-                            ReviewPromptCoordinator.shared.requestEnjoymentPrompt()
-                        }
-                    }
+                    postseasonThrough: viewModel.postseasonThrough
                 )
                     .navigationTitle("About")
                     .navigationBarTitleDisplayMode(.inline)

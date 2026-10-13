@@ -8,7 +8,6 @@ struct AboutView: View {
     /// regular-season line stops moving in late September, and on its own it
     /// told an October user the data was two weeks stale.
     var postseasonThrough: Date?
-    var onRequestReview: (() -> Void)?
     @State private var paywallTrigger: PaywallTrigger?
 
     private var version: String {
@@ -21,7 +20,7 @@ struct AboutView: View {
         // Ordered by what people open Settings to do. Subscription status and
         // Restore first (the reason a paying user is here at all), then the
         // support and privacy links, then the explanatory cards. "What is
-        // StatScout" was reading first and pushing Contact Support to the very
+        // StatScout" was reading first and pushing the support rows to the very
         // bottom of a scroll, which is the one place a stuck user shouldn't
         // have to go looking.
         ScrollView {
@@ -230,30 +229,16 @@ struct AboutView: View {
     private var linkCard: some View {
         VStack(spacing: 0) {
             SavantSectionBar(title: "SUPPORT & PRIVACY")
+            // Two separate rows with no rating question in front of either
+            // (App Review 5.6.1). The rate row deep-links to the review page;
+            // requestReview() from a button may show nothing.
             Button {
-                if let onRequestReview {
-                    onRequestReview()
-                } else {
-                    ReviewPromptCoordinator.shared.requestEnjoymentPrompt()
-                }
+                ReviewPromptTracker.markOpenedWriteReview()
+                UIApplication.shared.open(AppStoreReviewLinks.writeReviewURL)
             } label: {
                 row(
                     icon: "star.fill",
-                    title: "Rate or Send Feedback",
-                    subtitle: "Help StatScout grow, or tell us what to improve."
-                )
-            }
-            .buttonStyle(.plain)
-
-            Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline)
-
-            // Always-works fallback: the native rating sheet is rate-limited and
-            // may show nothing, so keep a direct write-review link for users who
-            // explicitly want to leave a review.
-            Link(destination: AppStoreReviewLinks.writeReviewURL) {
-                row(
-                    icon: "square.and.pencil",
-                    title: "Rate on the App Store",
+                    title: "Rate StatScout",
                     subtitle: "Opens the App Store to write a review."
                 )
             }
@@ -261,19 +246,20 @@ struct AboutView: View {
 
             Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline)
 
-            if let supportURL = URL(string: "https://jackwallner.github.io/baseball/support.html") {
-                Link(destination: supportURL) {
-                    row(
-                        icon: "envelope.fill",
-                        title: "Contact Support",
-                        subtitle: "jackwallner+bb@gmail.com"
-                    )
-                }
-                .buttonStyle(.plain)
+            Button {
+                ReviewPromptTracker.markFeedbackSent()
+                UIApplication.shared.open(AppStoreReviewLinks.feedbackMailURL)
+            } label: {
+                row(
+                    icon: "envelope.fill",
+                    title: "Send Feedback",
+                    subtitle: AppStoreReviewLinks.feedbackEmail
+                )
             }
-            
+            .buttonStyle(.plain)
+
             Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline)
-            
+
             if let privacyURL = URL(string: "https://jackwallner.github.io/baseball/privacy-policy.html") {
                 Link(destination: privacyURL) {
                     row(

@@ -7,9 +7,12 @@ project/scheme: `StatScout`, sim lease owner `baseball`.
 `metadata/en-US/`, `screenshots/en-US/`, and `Fastfile` review info canonical
 here and copy outward.
 
-**App Store reviews:** enjoyment funnel in `StatScout/Services/ReviewPromptTracker.swift`
-(passive triggers: 3rd+ player profile open, Pro player comparison). App Store
-ID `6763945657`; feedback `jackwallner+bb@gmail.com`.
+**App Store reviews:** system `requestReview()` only, no custom rating question
+(App Review 5.6.1). `ReviewPromptTracker` gates it (2nd launch on, onboarding
+done, 30-day cooldown, Settings "Rate StatScout" row ends asks; "Send Feedback"
+never does); `RootTabView` asks ~3s after a positive moment (3rd+ player profile
+open, Pro player comparison) only if nothing is presented. App Store ID
+`6763945657`; feedback `jackwallner+bb@gmail.com`.
 
 ## Backend / data pipeline (Statcast)
 

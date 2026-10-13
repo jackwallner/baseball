@@ -265,19 +265,16 @@ struct PlayerProfileView: View {
             if !store.isPro, opens >= 2, PaywallGate.shared.shouldPresent(.playerScouting) {
                 trialPitchTrigger = .playerScouting
             }
-            // Engaged browsing, but only counted once the user has come back on
-            // separate days, see ReviewPromptTracker.minimumDistinctUseDays.
-            // Opening three profiles in one sitting used to be enough, which is
-            // browsing depth, not satisfaction.
+            // Engaged browsing: a positive moment for the system rating
+            // prompt. The tracker keeps it out of the first session.
             if opens >= 3 {
                 ReviewPromptTracker.recordPositiveMoment()
             }
         }
     }
 
-    /// Following a player is free. It's the signal the Hot/Cold tab and the
-    /// review funnel read from, so gating it would suppress the thing we most
-    /// want people to do.
+    /// Following a player is free. It's the signal the Hot/Cold tab reads
+    /// from, so gating it would suppress the thing we most want people to do.
     private var favoriteButton: some View {
         let isFavorite = favorites.isFavorite(playerId: player.playerId)
         return Button {
