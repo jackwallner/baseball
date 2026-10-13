@@ -91,6 +91,14 @@ AVD is temporary and holds only our debug app.
   `rc api ... --body @-`; no dashboard upload needed). Store state reads `ok`
   for both subscriptions; RevenueCat's store-state tool does not support
   Play one-time products.
+- Licence testing, verified 2026-10-13: the tester list above is selected in
+  Play Console License testing (`RESPOND_NORMALLY`), and the `small_phone`
+  account joined the internal test via the Testers page opt-in link. Play
+  purchase and restore are not verified yet. `small_phone` has a PIN lock and
+  an enrolled fingerprint; it cold-boots (no valid snapshot), and after a cold
+  boot only the PIN unlocks it. Agents cannot enter that PIN, so Jack must
+  unlock the AVD (or authorize the PIN) before a billing run. See
+  `project-docs/android/release-2026-10.md` Billing.
 - Screenshot captures use the QA build on Pro (`--ez onboarded true --ez
   forcePro true --ei tab <n>`) with System UI demo mode. The emulator is slow;
   wait for content before capturing.

@@ -60,6 +60,24 @@ verification needs a licence tester. The service account JSON was attached to
 the RevenueCat Play app on 2026-10-13 through API v2, and RevenueCat now reads
 both subscriptions' Play store state.
 
+Licence-tester run, 2026-10-13, not completed:
+
+- Passed: Play Console **Settings > License testing** selects the "IM Iron
+  Splits internal testers" list (1 user, `RESPOND_NORMALLY`). That user is the
+  Google account on the Pro Play AVD `small_phone`. The internal testing opt-in
+  link (copied from Testers > Join on the web) was accepted in Chrome for that
+  account. Play shows the temporary name `com.jackwallner.baseball
+  (unreviewed)` until the app is reviewed.
+- Blocked: `small_phone` cold-booted (its `default_boot` snapshot is invalid
+  and the AVD does not save on exit). The device has a PIN screen lock with an
+  enrolled fingerprint. After a cold boot Android requires the PIN
+  (`strongAuthRequired=0x1`), and Play Store cannot open until then. No install,
+  purchase or restore was attempted. The AVD was shut down with its data intact.
+- To finish: Jack unlocks `small_phone` with its PIN (or authorizes an agent
+  to enter it), then install from the Play listing, buy the yearly plan only
+  under a test-order notice, check the paid boundary and RevenueCat's sandbox
+  entitlement, and test Restore Purchases.
+
 ## Console staging
 
 The app record is created. Privacy, ads, government, financial, health,
