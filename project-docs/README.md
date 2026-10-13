@@ -2,6 +2,10 @@
 
 Developer notes and historical audits for this repository. The published site remains in the docs directory.
 
+## Android
+
+- [Android release notes](android/README.md): Porting, test evidence, billing, and Play Console state.
+
 ## Audits
 
 - [aso827.md](audits/aso827.md): Baseball Savvy StatScout ASO Audit

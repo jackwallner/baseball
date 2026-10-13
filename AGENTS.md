@@ -28,3 +28,7 @@ Unlike the other apps, StatScout is backed by a Supabase Statcast dataset fed by
 ---
 Shared iOS conventions (build, simulator, release scripts, ASC key, review funnel, signing, gotchas):
 the global agent rules + the `ios-dev` skill.
+
+## Area rules
+
+- [.claude/rules/android.md](.claude/rules/android.md): Android port, baseball feed parity, Pro emulator, billing, and Google Play state.
