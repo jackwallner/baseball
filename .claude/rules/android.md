@@ -87,9 +87,7 @@ AVD is temporary and holds only our debug app.
 - Pre-launch report: none exists as of 2026-10-13. Play only generates it
   for releases on closed, open or production tracks, so internal-only builds
   never get one. It first appears once a closed test or production release
-  is sent for review. With the Claude Chrome extension disconnected, Play
-  Console is still readable via `osascript` Chrome `execute javascript`
-  (activate Chrome first; hidden tabs render no content).
+  is sent for review.
 - The fleet service account JSON (`~/.config/google-play/mahj-service-account.json`)
   is the RevenueCat Play credential (attached 2026-10-13 via API v2
   `POST /projects/proje8aeddd9/apps/app94f43f7fc0` with
