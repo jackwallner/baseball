@@ -83,7 +83,11 @@ AVD is temporary and holds only our debug app.
   are saved. Play products are active: monthly and yearly subscriptions
   (base plans `monthly`/`yearly`, offer `free-trial-7d`, new customers who
   never had any subscription) and one-time `com.jackwallner.baseball.pro`
-  (purchase option `lifetime`, backwards compatible). Nothing sent for review.
+  (purchase option `lifetime`, backwards compatible). Production release
+  3 (1.5.3) saved 2026-10-14 for 177 countries plus rest of world; Advertising
+  ID declared "No" (merged release manifest has no AD_ID permission; the
+  RevenueCat-pulled `play-services-ads-identifier` 17.0.1 adds none).
+  Nothing sent for review.
 - Pre-launch report: none exists as of 2026-10-13. Play only generates it
   for releases on closed, open or production tracks, so internal-only builds
   never get one. It first appears once a closed test or production release
