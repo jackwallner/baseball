@@ -107,7 +107,7 @@ Publishing overview lists these as changes not yet sent for review.
 Remaining: add a licence tester and
 run the no-charge purchase and restore test (done), then create the production
 release (done 2026-10-14: version code 3, 177 countries plus rest of world,
-Advertising ID declared No). The pre-launch report cannot be checked first: Play does not run it
+Advertising ID declared No). Jack sent the changes for review on 2026-10-14. The pre-launch report cannot be checked first: Play does not run it
 for internal-only builds, so it appears after a closed or production release
 is sent for review. The final Send for review action belongs to
 Jack.
