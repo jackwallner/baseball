@@ -105,6 +105,8 @@ audience 13 and over, six listing screenshots and the feature graphic.
 Publishing overview lists these as changes not yet sent for review.
 
 Remaining: add a licence tester and
-run the no-charge purchase and restore test, check the pre-launch report, then
-create the production release. The final Send for review action belongs to
+run the no-charge purchase and restore test (done), then create the production
+release. The pre-launch report cannot be checked first: Play does not run it
+for internal-only builds, so it appears after a closed or production release
+is sent for review. The final Send for review action belongs to
 Jack.
