@@ -39,7 +39,7 @@
         "url": "https://jackwallner.com/"
       },
       "datePublished": "2026-10-12",
-      "dateModified": "2026-10-12",
+      "dateModified": "2026-10-13",
       "mainEntityOfPage": "https://jackwallner.com/ios/baseball/statcast-metrics-explained.html",
       "image": "https://jackwallner.github.io/baseball/images/01_leaderboard.png",
       "about": {
@@ -95,6 +95,22 @@
           "acceptedAnswer": {
             "@type": "Answer",
             "text": "For judging a hitter's contact, usually yes. xwOBA counts extra-base hits and walks, and it removes defense and ballpark luck from batted balls. It is not a prediction of future results by itself."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is the difference between xwOBA and xwOBAcon?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "xwOBA covers every plate appearance: walks, strikeouts and hit-by-pitches stay real, and each batted ball gets its expected value. xwOBAcon (xwOBA on contact) uses only the batted balls, so walks and strikeouts drop out and it measures contact quality alone. That is why xwOBAcon numbers run higher, and Baseball Savant's Expected Statistics leaderboard shows both."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What does wOBA tell you?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "wOBA tells you how much a hitter adds to scoring runs from the way he reaches base. MLB's glossary describes it as a version of on-base percentage that weights each outcome by its run value, so a double counts more than a single and a home run more than a walk. Unlike on-base percentage or OPS, it values every way of reaching base by its real impact on runs."
           }
         }
       ]
@@ -178,7 +194,7 @@ footer a { color: #86868b; text-decoration: none; margin: 0 10px; }
 <article>
 <div class="container">
 <h1>What is xwOBA? Barrel rate, hard-hit rate and sprint speed explained</h1>
-<p class="meta">By Jack Wallner. Updated October 12, 2026.</p>
+<p class="meta">By Jack Wallner. Updated October 13, 2026.</p>
 <p class="answer">xwOBA is the on-base value a hitter should have earned from the quality of his contact, built from exit velocity and launch angle instead of what actually happened. Barrel rate, hard-hit rate and sprint speed are the three Statcast numbers that most often explain it: how often a hitter squares the ball up, how often he hits it 95 mph or harder, and how fast he runs.</p>
 
 <h2>xwOBA: what the contact deserved</h2>
@@ -220,6 +236,8 @@ footer a { color: #86868b; text-decoration: none; margin: 0 10px; }
 <details><summary>What counts as a hard-hit ball?</summary><p>Statcast calls any batted ball with an exit velocity of 95 mph or higher hard-hit. Hard-hit rate is the percentage of a hitter&#x27;s batted balls that reach that speed.</p></details>
 <details><summary>What is a good sprint speed?</summary><p>Sprint speed is measured in feet per second in a runner&#x27;s fastest one-second window. In 2025 the median was 27.5 ft/s and the 90th percentile was 29.0 ft/s. A run of 30 ft/s or faster is called a bolt.</p></details>
 <details><summary>Is xwOBA better than batting average?</summary><p>For judging a hitter&#x27;s contact, usually yes. xwOBA counts extra-base hits and walks, and it removes defense and ballpark luck from batted balls. It is not a prediction of future results by itself.</p></details>
+<details><summary>What is the difference between xwOBA and xwOBAcon?</summary><p>xwOBA covers every plate appearance: walks, strikeouts and hit-by-pitches stay real, and each batted ball gets its expected value. xwOBAcon (xwOBA on contact) uses only the batted balls, so walks and strikeouts drop out and it measures contact quality alone. That is why xwOBAcon numbers run higher, and Baseball Savant's Expected Statistics leaderboard shows both.</p></details>
+<details><summary>What does wOBA tell you?</summary><p>wOBA tells you how much a hitter adds to scoring runs from the way he reaches base. MLB's glossary describes it as a version of on-base percentage that weights each outcome by its run value, so a double counts more than a single and a home run more than a walk. Unlike on-base percentage or OPS, it values every way of reaching base by its real impact on runs.</p></details>
 </div>
 <h2>Sources</h2>
 <ol class="sources">
