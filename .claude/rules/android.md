@@ -43,10 +43,10 @@ paths:
 ## Emulator, Pro only
 
 SSH: `jackwallner@192.168.4.25`, strict host key checking. SDK:
-`/Users/jackwallner/Library/Android/sdk`. Temporary test workspace:
-`/private/tmp/baseball-android-agent/source`. Java 17 runtime: the Pro's
-`$HOME/jdks/temurin-17/Contents/Home`. Builds without a target serial use
-`fm-gradle <tasks>` from `android/`, never `./gradlew` on the Air.
+`/Users/jackwallner/Library/Android/sdk`. Builds and tests use
+`fm-gradle <tasks>` from `android/`, never `./gradlew` on the Air. It runs on
+the Pro with its JDK 17, syncs the source with a debug-only `local.properties`
+(no Play key or signing material) and forwards `ANDROID_SERIAL`.
 
 Use temporary AVD `baseball_agent_test`, Google Play API 36 x86_64, port 5560,
 serial `emulator-5560`. Preserve the existing `small_phone` AVD and accounts.
@@ -57,15 +57,15 @@ ssh jackwallner@192.168.4.25 '/Users/jackwallner/Library/Android/sdk/emulator/em
 ```
 
 Confirm `adb -s emulator-5560 shell getprop sys.boot_completed` returns 1.
-Run connected Gradle tests on Pro with `ANDROID_SERIAL=emulator-5560`,
-`JAVA_HOME` set to that runtime and `--no-daemon`. Check nonzero test counts,
+Run connected tests from `android/` with
+`ANDROID_SERIAL=emulator-5560 fm-gradle connectedDebugAndroidTest`. Check nonzero test counts,
 not only Gradle's exit code. Stop only this AVD:
 
 ```sh
 ssh jackwallner@192.168.4.25 '/Users/jackwallner/Library/Android/sdk/platform-tools/adb -s emulator-5560 emu kill'
 ```
 
-Confirm it is gone before removing its temporary AVD and workspace. Never
+Confirm it is gone before removing its temporary AVD. Never
 uninstall a Play-installed app to resolve a debug signing conflict. This test
 AVD is temporary and holds only our debug app.
 
