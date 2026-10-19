@@ -44,8 +44,9 @@ paths:
 
 SSH: `jackwallner@192.168.4.25`, strict host key checking. SDK:
 `/Users/jackwallner/Library/Android/sdk`. Temporary test workspace:
-`/private/tmp/baseball-android-agent/source`. Verified temporary Java 17 runtime:
-`/private/tmp/baseball-android-agent/runtime/jdk-17.0.20.1+1/Contents/Home`.
+`/private/tmp/baseball-android-agent/source`. Java 17 runtime: the Pro's
+`$HOME/jdks/temurin-17/Contents/Home`. Builds without a target serial use
+`fm-gradle <tasks>` from `android/`, never `./gradlew` on the Air.
 
 Use temporary AVD `baseball_agent_test`, Google Play API 36 x86_64, port 5560,
 serial `emulator-5560`. Preserve the existing `small_phone` AVD and accounts.
