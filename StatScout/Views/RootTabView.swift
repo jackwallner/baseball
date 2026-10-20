@@ -85,6 +85,10 @@ struct RootTabView: View {
         }
         let step = value("-DuoTourStep", 13.5)
         let first = value("-DuoTourFirst", 19.5)
+        // Seeded data loads after launch; routes that need players wait for it.
+        for _ in 0..<60 where viewModel.filteredPlayers.isEmpty {
+            try? await Task.sleep(nanoseconds: 500_000_000)
+        }
         // `-DuoRoutes a,b` replaces the default walk (first route shown at once).
         if let i = args.firstIndex(of: "-DuoRoutes"), i + 1 < args.count {
             let routes = args[i + 1].split(separator: ",").map(String.init)
