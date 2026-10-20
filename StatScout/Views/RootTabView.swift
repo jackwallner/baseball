@@ -50,6 +50,7 @@ struct RootTabView: View {
     // Owned here so TeamsView can auto-push the favorite team and the user can
     // still pop back to the list.
     @State private var teamsPath = NavigationPath()
+    @State private var statsPath = NavigationPath()
 
     init(viewModel: DashboardViewModel) {
         _viewModel = State(initialValue: viewModel)
@@ -61,7 +62,34 @@ struct RootTabView: View {
             .onReceive(NotificationCenter.default.publisher(for: .statscoutPositiveMomentForReview)) { _ in
                 scheduleReviewRequestAfterPositiveMoment()
             }
+            #if DEBUG
+            .onReceive(NotificationCenter.default.publisher(for: .duoRoute)) { note in
+                openDuoRoute(note.object as? String ?? "")
+            }
+            #endif
     }
+
+    #if DEBUG
+    private func openDuoRoute(_ route: String) {
+        statsPath = NavigationPath()
+        teamsPath = NavigationPath()
+        switch route {
+        case "stats": selection = Tab.stats.rawValue
+        case "trends": selection = Tab.trends.rawValue
+        case "teams": selection = Tab.teams.rawValue
+        case "compare": selection = Tab.compare.rawValue
+        case "team":
+            selection = Tab.teams.rawValue
+            teamsPath.append(TeamDestination(abbr: "NYY"))
+        case "player":
+            selection = Tab.stats.rawValue
+            if let player = viewModel.filteredPlayers.first {
+                statsPath.append(PlayerRoute(player: player))
+            }
+        default: break
+        }
+    }
+    #endif
 
     /// Nothing sits over the tabs: onboarding and the update showcase are done,
     /// and no sheet, alert, paywall or trial pitch is up. Those sheets belong
@@ -188,7 +216,7 @@ struct RootTabView: View {
     }
 
     private var statsTab: some View {
-        NavigationStack {
+        NavigationStack(path: $statsPath) {
             StatsView(viewModel: viewModel)
                 .navigationTitle("Stats")
                 .navigationBarTitleDisplayMode(.inline)
@@ -274,6 +302,7 @@ private struct SavantNavBar: ViewModifier {
             .toolbarBackground(SavantPalette.savantNavy, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbarColorScheme(.dark, for: .navigationBar)
+            .modifier(ReadableColumn())
     }
 }
 

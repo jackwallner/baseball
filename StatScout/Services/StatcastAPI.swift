@@ -371,8 +371,12 @@ private struct Lenient<T: Decodable>: Decodable {
 
 #if DEBUG
 struct PreviewStatcastAPI: StatcastProviding {
+    /// False for the Duo screenshot seed: no synthetic current-season rows, so
+    /// the app falls back to the real bundled history.
+    var includesSamples = true
+
     func fetchPlayers() async throws -> [Player] {
-        SampleData.players
+        includesSamples ? SampleData.players : []
     }
 
     func fetchHistoricalPlayers() async throws -> [Player] {
@@ -380,7 +384,8 @@ struct PreviewStatcastAPI: StatcastProviding {
     }
 
     func fetchCurrentPlayers() async throws -> [Player] {
-        SampleData.players.filter { ($0.season ?? 0) >= StatScoutSeason.current }
+        guard includesSamples else { return [] }
+        return SampleData.players.filter { ($0.season ?? 0) >= StatScoutSeason.current }
     }
 
     func fetchGameLogs(playerId: Int, season: Int, phase: SeasonPhase) async throws -> [PlayerGameLog] {
