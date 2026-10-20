@@ -145,6 +145,9 @@ struct RootTabView: View {
     /// shows. If something is on screen the moment stays pending and the next
     /// one asks.
     private func scheduleReviewRequestAfterPositiveMoment() {
+        #if DEBUG
+        if DuoScreenshotMode.isSeeded { return }
+        #endif
         guard ReviewPromptTracker.shouldRequestAfterPositiveMoment(hasCompletedOnboarding: hasCompletedOnboarding),
               !reviewPromptShownThisSession
         else { return }
