@@ -85,6 +85,16 @@ struct RootTabView: View {
         }
         let step = value("-DuoTourStep", 13.5)
         let first = value("-DuoTourFirst", 19.5)
+        // `-DuoRoutes a,b` replaces the default walk (first route shown at once).
+        if let i = args.firstIndex(of: "-DuoRoutes"), i + 1 < args.count {
+            let routes = args[i + 1].split(separator: ",").map(String.init)
+            for route in routes {
+                if Task.isCancelled { return }
+                openDuoRoute(route)
+                try? await Task.sleep(nanoseconds: UInt64(step * 1_000_000_000))
+            }
+            return
+        }
         openDuoRoute("stats")
         try? await Task.sleep(nanoseconds: UInt64(first * 1_000_000_000))
         for route in ["trends", "teams", "team", "compare", "player", "stats"] {
