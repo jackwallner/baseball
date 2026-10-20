@@ -29,7 +29,7 @@ targets:
         ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS: YES
         PRODUCT_NAME: "Baseball Savvy StatScout"
         MARKETING_VERSION: "1.5.3"
-        CURRENT_PROJECT_VERSION: "187"
+        CURRENT_PROJECT_VERSION: "188"
         GENERATE_INFOPLIST_FILE: NO
         INFOPLIST_FILE: StatScout/Info.plist
         CODE_SIGN_ENTITLEMENTS: StatScout/StatScout.entitlements
