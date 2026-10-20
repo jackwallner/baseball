@@ -267,3 +267,22 @@ struct StatScoutTheme {
         SavantPalette.color(forPercentile: percentile)
     }
 }
+
+/// Caps screen content to a readable column when the horizontal size class is
+/// regular (iPhone Duo inner display, iPad, wide windows). Compact width is
+/// untouched, so a folded or ordinary iPhone lays out exactly as before.
+struct ReadableColumn: ViewModifier {
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    static let maxWidth: CGFloat = 720
+
+    func body(content: Content) -> some View {
+        if horizontalSizeClass == .regular {
+            content
+                .frame(maxWidth: Self.maxWidth)
+                .frame(maxWidth: .infinity)
+                .background(SavantPalette.canvas.ignoresSafeArea())
+        } else {
+            content
+        }
+    }
+}

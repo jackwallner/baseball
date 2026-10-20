@@ -12,6 +12,7 @@ struct StatScoutApp: App {
             UserDefaults.standard.removeObject(forKey: "favoriteTeam")
         }
         #endif
+        DuoScreenshotMode.prepareIfSeeded()
         ReviewPromptTracker.recordAppLaunch()
         ConversionDiagnostics.recordAppOpen()
         #if DEBUG
@@ -27,6 +28,13 @@ struct StatScoutApp: App {
                     _ = try? await StoreService.shared.purchase(package)
                 }
             }
+        }
+        #endif
+        #if DEBUG
+        // Seeded screenshot runs use bundled data and never start RevenueCat.
+        if DuoScreenshotMode.isSeeded {
+            self.api = nil
+            return
         }
         #endif
         guard let urlString = Self.configValue(for: "SUPABASE_URL"),
@@ -51,7 +59,12 @@ struct StatScoutApp: App {
     var body: some Scene {
         WindowGroup {
             #if DEBUG
-            if let mode = PaywallScreenshotMode.current {
+            if DuoScreenshotMode.isSeeded {
+                ContentView(api: PreviewStatcastAPI(includesSamples: false))
+                    .environmentObject(store)
+                    .preferredColorScheme(.light)
+                    .onOpenURL { DuoScreenshotMode.handle($0) }
+            } else if let mode = PaywallScreenshotMode.current {
                 PaywallScreenshotHarness(mode: mode)
                     .environmentObject(store)
                     .preferredColorScheme(.light)
@@ -91,7 +104,7 @@ struct ContentView: View {
     @State private var viewModel: DashboardViewModel
     @State private var showUpdateShowcase = false
 
-    init(api: StatcastAPI) {
+    init(api: any StatcastProviding) {
         _viewModel = State(initialValue: DashboardViewModel(provider: api, cache: TwoTierPlayerCache()))
     }
 
@@ -116,12 +129,18 @@ struct ContentView: View {
         .task { await viewModel.loadIfNeeded() }
         .onAppear {
             viewModel.applyProState(store.isPro)
+            #if DEBUG
+            if DuoScreenshotMode.isSeeded { viewModel.applyProState(true) }
+            #endif
             evaluateUpdateShowcase()
         }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
             Task { await viewModel.load() }
         }
         .onChange(of: store.isPro) { _, isPro in
+            #if DEBUG
+            if DuoScreenshotMode.isSeeded { return }
+            #endif
             viewModel.applyProState(isPro)
         }
     }

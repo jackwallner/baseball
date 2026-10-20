@@ -1001,6 +1001,7 @@ struct SavantNavBarPublic: ViewModifier {
             .toolbarBackground(SavantPalette.savantNavy, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbarColorScheme(.dark, for: .navigationBar)
+            .modifier(ReadableColumn())
     }
 }
 
