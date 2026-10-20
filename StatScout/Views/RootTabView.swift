@@ -107,7 +107,7 @@ struct RootTabView: View {
             teamsPath.append(TeamDestination(abbr: "NYY"))
         case "player":
             selection = Tab.stats.rawValue
-            if let player = viewModel.filteredPlayers.first {
+            if let player = viewModel.filteredPlayers.first(where: { $0.name == "Aaron Judge" }) ?? viewModel.filteredPlayers.first {
                 statsPath.append(PlayerRoute(player: player))
             }
         default: break
