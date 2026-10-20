@@ -119,13 +119,17 @@ struct StandardStatsLeadersView: View {
     // Sort players by the selected stat value, then by the playing time behind
     // it, so a board full of identical values (every 0-error fielder, every
     // 1.000 fielding percentage) leads with the players who earned it.
+    // Keys are read once per player up front: each read is a stat lookup plus
+    // a string parse, and reading them inside the comparator ran thousands of
+    // them per sort.
     var sortedPlayers: [Player] {
-        filteredPlayers.sorted { p1, p2 in
-            let v1 = numericStat(for: p1) ?? 0
-            let v2 = numericStat(for: p2) ?? 0
-            if v1 != v2 { return sortDescending ? v1 > v2 : v1 < v2 }
-            return volume(for: p1) > volume(for: p2)
-        }
+        filteredPlayers
+            .map { (player: $0, value: numericStat(for: $0) ?? 0, volume: volume(for: $0)) }
+            .sorted { a, b in
+                if a.value != b.value { return sortDescending ? a.value > b.value : a.value < b.value }
+                return a.volume > b.volume
+            }
+            .map(\.player)
     }
 
     /// The workload a tied value sits on: chances for the glove, plate
@@ -280,7 +284,9 @@ struct StandardStatsLeadersView: View {
     }
 
     private var leadersList: some View {
-        VStack(spacing: 0) {
+        // Sorted once per render; every branch below reads it.
+        let sortedPlayers = sortedPlayers
+        return VStack(spacing: 0) {
             // Header - tap stat column to toggle sort direction
             Button {
                 sortDescending.toggle()

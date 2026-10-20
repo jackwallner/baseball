@@ -96,4 +96,27 @@ final class BoardPerformanceTests: XCTestCase {
         XCTAssertFalse(vm.allMetrics.isEmpty)
         XCTAssertLessThan(elapsed, 0.5, "10 leader board passes should take well under half a second")
     }
+
+    /// The Standard board sorts its pool on every render, and used to sort it
+    /// once per branch of its body.
+    @MainActor
+    func testStandardBoardSortStaysCheap() async throws {
+        let vm = try await loadedViewModel()
+        vm.selectSeason(StatScoutSeason.current - 1)
+        let players = vm.qualifiedSeasonPlayers
+
+        let start = Date()
+        for (stat, category) in [("AVG", MetricCategory.hitting), ("HR", .hitting), ("ERA", .pitching), ("SO", .pitching)] {
+            let board = StandardStatsLeadersView(
+                players: players,
+                selectedStat: .constant(stat),
+                selectedCategory: .constant(category),
+                sortDescending: .constant(true)
+            )
+            for _ in 0..<5 { XCTAssertFalse(board.sortedPlayers.isEmpty, stat) }
+        }
+        let elapsed = Date().timeIntervalSince(start)
+        print("PERF 20 standard board sorts: \(Int(elapsed * 1000)) ms")
+        XCTAssertLessThan(elapsed, 0.5, "20 standard board sorts should take well under half a second")
+    }
 }
