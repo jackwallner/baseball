@@ -51,6 +51,7 @@ struct RootTabView: View {
     // still pop back to the list.
     @State private var teamsPath = NavigationPath()
     @State private var statsPath = NavigationPath()
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     init(viewModel: DashboardViewModel) {
         _viewModel = State(initialValue: viewModel)
@@ -66,10 +67,33 @@ struct RootTabView: View {
             .onReceive(NotificationCenter.default.publisher(for: .duoRoute)) { note in
                 openDuoRoute(note.object as? String ?? "")
             }
+            .task(id: horizontalSizeClass) { await runDuoTour() }
             #endif
     }
 
     #if DEBUG
+    /// `-DuoTour`: walks the routes on a timer for unattended capture, since
+    /// simctl openurl raises a confirmation sheet. Restarts whenever the size
+    /// class changes (fold to unfold) so each pose gets the full tour.
+    /// `-DuoTourStep <s>` is the dwell, `-DuoTourFirst <s>` the first delay.
+    private func runDuoTour() async {
+        let args = ProcessInfo.processInfo.arguments
+        guard args.contains("-DuoTour") else { return }
+        func value(_ key: String, _ fallback: Double) -> Double {
+            guard let i = args.firstIndex(of: key), i + 1 < args.count else { return fallback }
+            return Double(args[i + 1]) ?? fallback
+        }
+        let step = value("-DuoTourStep", 13.5)
+        let first = value("-DuoTourFirst", 19.5)
+        openDuoRoute("stats")
+        try? await Task.sleep(nanoseconds: UInt64(first * 1_000_000_000))
+        for route in ["trends", "teams", "team", "compare", "player", "stats"] {
+            if Task.isCancelled { return }
+            openDuoRoute(route)
+            try? await Task.sleep(nanoseconds: UInt64(step * 1_000_000_000))
+        }
+    }
+
     private func openDuoRoute(_ route: String) {
         statsPath = NavigationPath()
         teamsPath = NavigationPath()
@@ -363,6 +387,10 @@ private struct HomeTabToolbar: ViewModifier {
             Image(systemName: "gearshape")
                 .font(.system(size: 16, weight: .regular))
                 .foregroundStyle(.white.opacity(0.85))
+                // Navy disc: invisible on the nav bar, but keeps the white gear
+                // legible when a vertical bar (Duo) moves it onto the canvas.
+                .padding(7)
+                .background(SavantPalette.savantNavy, in: Circle())
         }
         .accessibilityLabel("Settings")
     }
