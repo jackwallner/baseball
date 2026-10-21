@@ -267,3 +267,12 @@ struct StatScoutTheme {
         SavantPalette.color(forPercentile: percentile)
     }
 }
+
+extension View {
+    /// Navy disc behind a white toolbar glyph: invisible on the navy nav bar,
+    /// but keeps the glyph legible when a vertical bar (iPhone Duo) moves it
+    /// onto the light canvas.
+    func toolbarGlyphDisc() -> some View {
+        padding(7).background(SavantPalette.savantNavy, in: Circle())
+    }
+}

@@ -107,6 +107,8 @@ struct RootTabView: View {
             if wait > 0 { try? await Task.sleep(nanoseconds: UInt64(wait * 1_000_000_000)) }
             if Task.isCancelled { return }
             withAnimation(.easeInOut(duration: 0.3)) { openDuoRoute(route) }
+            let elapsed = Date().timeIntervalSince(DuoScreenshotMode.launchedAt)
+            NSLog("duo-tour %@ %@ at %ds", unfolded ? "inner" : "outer", route, Int(elapsed))
         }
     }
 
@@ -538,10 +540,7 @@ private struct HomeTabToolbar: ViewModifier {
             Image(systemName: "gearshape")
                 .font(.system(size: 16, weight: .regular))
                 .foregroundStyle(.white.opacity(0.85))
-                // Navy disc: invisible on the nav bar, but keeps the white gear
-                // legible when a vertical bar (Duo) moves it onto the canvas.
-                .padding(7)
-                .background(SavantPalette.savantNavy, in: Circle())
+                .toolbarGlyphDisc()
         }
         .accessibilityLabel("Settings")
     }
