@@ -757,7 +757,17 @@ final class StoreService: NSObject, ObservableObject {
         #if DEBUG
         Purchases.logLevel = .debug
         #endif
-        Purchases.configure(withAPIKey: RevenueCatConfig.apiKey)
+        // Test Store runs share one tester instead of a fresh anonymous customer
+        // per install, so test installs don't inflate the live project's
+        // customer charts. Never with the appl_ key.
+        let appUserID = RevenueCatConfig.apiKey.hasPrefix("test_")
+            ? ProcessInfo.processInfo.environment["RC_APP_USER_ID"] ?? "qa-ios"
+            : nil
+        Purchases.configure(
+            with: Configuration.Builder(withAPIKey: RevenueCatConfig.apiKey)
+                .with(appUserID: appUserID)
+                .build()
+        )
         Purchases.shared.delegate = self
         isConfigured = true
         return true
