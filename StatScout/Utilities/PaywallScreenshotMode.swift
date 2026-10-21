@@ -39,9 +39,9 @@ enum DuoScreenshotMode {
     static var isSeeded: Bool { ProcessInfo.processInfo.arguments.contains("-DuoSeed") }
 
     /// Set from the app's init, the clock `-DuoTour` offsets count from.
-    private(set) static var launchedAt = Date()
+    @MainActor private(set) static var launchedAt = Date()
 
-    static func prepareIfSeeded() {
+    @MainActor static func prepareIfSeeded() {
         guard isSeeded else { return }
         launchedAt = Date()
         let defaults = UserDefaults.standard
