@@ -32,3 +32,4 @@ the global agent rules + the `ios-dev` skill.
 ## Area rules
 
 - [.claude/rules/android.md](.claude/rules/android.md): Android port, baseball feed parity, Pro emulator, billing, and Google Play state.
+- [.claude/rules/iphone-duo.md](.claude/rules/iphone-duo.md): unfolded iPhone Duo two-pane layout, detail-pane links, and the seeded capture tour.
