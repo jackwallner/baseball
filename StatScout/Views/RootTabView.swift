@@ -215,30 +215,9 @@ struct RootTabView: View {
     /// folding or unfolding keeps every stack, scroll position and selection.
     private var tabView: some View {
         ZStack(alignment: .topLeading) {
-            ZStack(alignment: .bottom) {
-                ForEach(Tab.allCases) { tab in
-                    tabContent(tab)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .opacity(selection == tab.rawValue ? 1 : 0)
-                        .allowsHitTesting(selection == tab.rawValue)
-                        .accessibilityHidden(selection != tab.rawValue)
-                }
-
-                floatingTabBar
-            }
-            .environment(\.horizontalSizeClass, paneSizeClass)
-            .environment(\.openInDetailPane, split == nil ? nil : { openDetail($0) })
-            .environment(\.detailPaneSelection, split == nil ? nil : shownDetail)
-            .frame(maxWidth: split?.primaryWidth ?? .infinity, maxHeight: .infinity)
-
+            primaryPane
             if detailHasAppeared {
-                detailPane
-                    .environment(\.horizontalSizeClass, .compact)
-                    .frame(maxWidth: split?.secondaryWidth ?? .infinity, maxHeight: .infinity)
-                    .padding(.leading, split?.secondaryX ?? 0)
-                    .opacity(split == nil ? 0 : 1)
-                    .allowsHitTesting(split != nil)
-                    .accessibilityHidden(split == nil)
+                secondaryPane
             }
         }
         .background(SavantPalette.canvas)
@@ -258,6 +237,48 @@ struct RootTabView: View {
             guard tab == Tab.trends.rawValue else { return }
             Task { await viewModel.loadRecentFormIfNeeded() }
         }
+    }
+
+    private var tabs: some View {
+        ZStack(alignment: .bottom) {
+            ForEach(Tab.allCases) { tab in
+                tabContent(tab)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .opacity(selection == tab.rawValue ? 1 : 0)
+                    .allowsHitTesting(selection == tab.rawValue)
+                    .accessibilityHidden(selection != tab.rawValue)
+            }
+
+            floatingTabBar
+        }
+    }
+
+    private var primaryPane: some View {
+        let width: CGFloat = split?.primaryWidth ?? .infinity
+        return tabs
+            .environment(\.horizontalSizeClass, paneSizeClass)
+            .environment(\.openInDetailPane, detailOpener)
+            .environment(\.detailPaneSelection, split == nil ? nil : shownDetail)
+            .frame(maxWidth: width, maxHeight: .infinity)
+    }
+
+    private var secondaryPane: some View {
+        let isSplit = split != nil
+        let width: CGFloat = split?.secondaryWidth ?? .infinity
+        let leading: CGFloat = split?.secondaryX ?? 0
+        return detailPane
+            .environment(\.horizontalSizeClass, .compact)
+            .frame(maxWidth: width, maxHeight: .infinity)
+            .padding(.leading, leading)
+            .opacity(isSplit ? 1 : 0)
+            .allowsHitTesting(isSplit)
+            .accessibilityHidden(!isSplit)
+    }
+
+    /// Only the split layout routes rows to the right pane.
+    private var detailOpener: (@MainActor (PaneDetail) -> Void)? {
+        guard split != nil else { return nil }
+        return { openDetail($0) }
     }
 
     private enum Tab: Int, CaseIterable, Identifiable {
