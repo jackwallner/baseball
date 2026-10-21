@@ -1,7 +1,3 @@
-O StatScout agora acompanha a temporada até os playoffs.
-
-Qualquer painel pode alternar entre temporada regular e pós-temporada pelo menu de temporada, na tela de estatísticas e na página de qualquer time. Os painéis de pós-temporada trazem as estatísticas de sempre e os registros de jogo dos playoffs: quem está produzindo em outubro, não quem fez isso em junho.
-
-A opção de pós-temporada fica no menu de temporada e pode ser selecionada assim que o primeiro jogo de playoff acontecer, então não há nada para ativar.
-
-Vale lembrar que os percentis do Statcast continuam sendo números de temporada regular, igual ao Baseball Savant, que não publica percentis de pós-temporada.
+Compartilhe o painel de percentis de qualquer jogador como imagem, direto do perfil dele.
+Rankings, busca e troca de temporada estão muito mais rápidos, principalmente em temporadas passadas.
+Os rankings da pós-temporada agora mostram corretamente os jogos de outubro.

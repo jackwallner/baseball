@@ -1,7 +1,3 @@
-StatScout folgt der Saison jetzt bis in die Playoffs.
-
-Jede Tafel lässt sich im Saisonmenü zwischen Hauptrunde und Playoffs umschalten, auf der Statistikansicht und auf jeder Teamseite. Die Playoff-Tafeln enthalten die klassischen Werte und die Spielprotokolle der Playoffs: wer im Oktober liefert, nicht wer es im Juni getan hat.
-
-Die Playoff-Option steht im Saisonmenü und wird auswählbar, sobald das erste Playoff-Spiel gespielt ist. Du musst also nichts aktivieren.
-
-Beachte, dass die Statcast-Perzentile weiterhin Werte der Hauptrunde sind, genau wie bei Baseball Savant, das keine Playoff-Perzentile veröffentlicht.
+Teile die Perzentil-Übersicht jedes Spielers als Bild, direkt aus seinem Profil.
+Bestenlisten, Suche und Saisonwechsel sind deutlich schneller, vor allem bei früheren Saisons.
+Die Postseason-Bestenlisten zeigen die Oktoberspiele jetzt korrekt an.

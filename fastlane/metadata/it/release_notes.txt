@@ -1,7 +1,3 @@
-StatScout ora segue la stagione fino ai playoff.
-
-Ogni tabellone si può passare da stagione regolare a playoff dal menu della stagione, sia nella schermata delle statistiche sia nella pagina di qualsiasi squadra. I tabelloni dei playoff contengono le statistiche classiche e i tabellini delle partite di playoff: chi produce a ottobre, non chi lo ha fatto a giugno.
-
-L'opzione playoff si trova nel menu della stagione e diventa selezionabile appena viene giocata la prima partita di playoff, quindi non c'è nulla da attivare.
-
-Nota che i percentili Statcast restano valori di stagione regolare, come su Baseball Savant, che non pubblica percentili dei playoff.
+Condividi la tabella dei percentili di qualsiasi giocatore come immagine, direttamente dal suo profilo.
+Classifiche, ricerca e cambio di stagione sono molto più veloci, soprattutto per le stagioni passate.
+Le classifiche della postseason ora mostrano correttamente le partite di ottobre.

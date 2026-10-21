@@ -1,7 +1,3 @@
-StatScout suit désormais la saison jusqu'aux playoffs.
-
-N'importe quel tableau peut basculer entre saison régulière et playoffs depuis le menu de saison, sur l'écran des statistiques comme sur la page de n'importe quelle équipe. Les tableaux de playoffs contiennent les statistiques classiques et les feuilles de match des playoffs : qui produit en octobre, pas qui l'a fait en juin.
-
-L'option playoffs figure dans le menu de saison et devient sélectionnable dès le premier match de playoffs joué, il n'y a donc rien à activer.
-
-À noter que les centiles Statcast restent des chiffres de saison régulière, comme sur Baseball Savant, qui ne publie pas de centiles de playoffs.
+Partagez le tableau de percentiles de n'importe quel joueur en image, depuis son profil.
+Classements, recherche et changement de saison sont bien plus rapides, surtout pour les saisons passées.
+Les classements des séries éliminatoires affichent désormais correctement les matchs d'octobre.

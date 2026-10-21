@@ -1,7 +1,3 @@
-StatScout følger nå sesongen helt inn i sluttspillet.
-
-Alle tavler kan byttes mellom grunnserie og sluttspill fra sesongmenyen, både på statistikkskjermen og på siden til et hvilket som helst lag. Sluttspilltavlene inneholder de vanlige tallene og kamplogger fra sluttspillet: hvem som leverer i oktober, ikke hvem som gjorde det i juni.
-
-Sluttspillvalget ligger i sesongmenyen og blir mulig å velge så snart den første sluttspillkampen er spilt, så det er ingenting å slå på.
-
-Merk at Statcast-persentilene fortsatt er tall fra grunnserien, akkurat som hos Baseball Savant, som ikke publiserer persentiler for sluttspillet.
+Del percentiltavlen til enhver spiller som et bilde, rett fra profilen.
+Rangeringer, søk og bytte av sesong går mye raskere, særlig for tidligere sesonger.
+Rangeringene for sluttspillet viser nå oktoberkampene riktig.

@@ -1,7 +1,3 @@
-StatScout ahora sigue la temporada hasta los playoffs.
-
-Cualquier tablero se puede cambiar entre Temporada regular y Postemporada desde el menú de temporada, en la pantalla de estadísticas y en la página de cualquier equipo. Los tableros de postemporada traen las estadísticas de siempre y los registros de juego de los playoffs: quién está produciendo en octubre, no quién lo hizo en junio.
-
-La opción de postemporada está en el menú de temporada y se puede elegir en cuanto se juega el primer partido de playoffs, así que no hay nada que activar.
-
-Ten en cuenta que los percentiles de Statcast siguen siendo cifras de temporada regular, igual que en Baseball Savant, que no publica percentiles de postemporada.
+Comparte el tablero de percentiles de cualquier jugador como imagen, desde su perfil.
+Las tablas de líderes, la búsqueda y el cambio de temporada son mucho más rápidos, sobre todo en temporadas pasadas.
+Las tablas de la postemporada ya muestran bien los juegos de octubre.

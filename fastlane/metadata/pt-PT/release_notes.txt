@@ -1,7 +1,3 @@
-O StatScout acompanha agora a época até aos playoffs.
-
-Qualquer painel pode alternar entre época regular e pós-época no menu de época, no ecrã de estatísticas e na página de qualquer equipa. Os painéis de pós-época trazem as estatísticas habituais e os registos de jogo dos playoffs: quem está a produzir em outubro, não quem o fez em junho.
-
-A opção de pós-época está no menu de época e fica selecionável assim que o primeiro jogo de playoff for disputado, por isso não há nada para ativar.
-
-Note que os percentis do Statcast continuam a ser números de época regular, tal como no Baseball Savant, que não publica percentis de pós-época.
+Partilhe o painel de percentis de qualquer jogador como imagem, diretamente do perfil.
+Classificações, pesquisa e mudança de época estão muito mais rápidas, sobretudo em épocas passadas.
+As classificações da pós-época mostram agora corretamente os jogos de outubro.

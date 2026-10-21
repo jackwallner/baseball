@@ -1,1 +1,3 @@
-Behind-the-scenes improvements and fixes to keep StatScout running smoothly. Thank you for being here.
+Share any player's percentile board as an image, right from their profile.
+Leaderboards, search and season switching are much faster, especially for past seasons.
+Postseason leaderboards now show October games correctly.

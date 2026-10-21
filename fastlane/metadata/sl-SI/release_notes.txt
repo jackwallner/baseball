@@ -1,7 +1,3 @@
-StatScout zdaj spremlja sezono vse do končnice.
-
-Vsako tablo lahko v meniju sezone preklopiš med rednim delom in končnico, tako na zaslonu s statistiko kot na strani katere koli ekipe. Table končnice vsebujejo običajne številke in zapise tekem končnice: kdo dostavlja oktobra, ne kdo je to počel junija.
-
-Možnost končnice je v meniju sezone in postane izbirna takoj, ko je odigrana prva tekma končnice, zato ni ničesar za vklop.
-
-Upoštevaj, da percentili Statcast ostajajo številke rednega dela sezone, enako kot na Baseball Savantu, ki percentilov končnice ne objavlja.
+Delite percentilno tabelo katerega koli igralca kot sliko, neposredno iz njegovega profila.
+Lestvice, iskanje in menjava sezone so precej hitrejši, zlasti pri preteklih sezonah.
+Lestvice končnice zdaj pravilno prikazujejo oktobrske tekme.

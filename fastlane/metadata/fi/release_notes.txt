@@ -1,7 +1,3 @@
-StatScout seuraa kautta nyt myös pudotuspeleihin.
-
-Minkä tahansa näkymän voi vaihtaa runkosarjan ja pudotuspelien välillä kausivalikosta, sekä tilastonäkymässä että jokaisen joukkueen sivulla. Pudotuspelinäkymissä ovat pudotuspelien perusluvut ja ottelukohtaiset tiedot: kuka tuottaa lokakuussa, ei se, kuka teki sen kesäkuussa.
-
-Pudotuspelivalinta on kausivalikossa ja muuttuu valittavaksi heti ensimmäisen pudotuspeliottelun jälkeen, joten mitään ei tarvitse ottaa käyttöön.
-
-Huomaa, että Statcastin persentiilit ovat edelleen runkosarjan lukuja, kuten Baseball Savantissa, joka ei julkaise pudotuspelien persentiilejä.
+Jaa minkä tahansa pelaajan persentiilitaulu kuvana suoraan hänen profiilistaan.
+Tulostaulut, haku ja kauden vaihto ovat paljon nopeampia, etenkin aiemmilla kausilla.
+Pudotuspelien tilastolistat näyttävät nyt lokakuun ottelut oikein.

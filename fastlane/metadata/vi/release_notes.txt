@@ -1,7 +1,3 @@
-StatScout giờ theo mùa giải tới tận vòng playoff.
-
-Bạn có thể chuyển bất kỳ bảng nào giữa mùa giải chính và hậu mùa giải từ menu mùa giải, ở màn hình thống kê cũng như trên trang của bất kỳ đội nào. Các bảng hậu mùa giải mang theo những chỉ số quen thuộc và nhật ký từng trận playoff: ai đang làm được ở tháng 10, chứ không phải ai đã làm được hồi tháng 6.
-
-Tùy chọn hậu mùa giải nằm sẵn trong menu mùa giải và có thể chọn ngay khi trận playoff đầu tiên diễn ra, nên không có gì phải bật.
-
-Lưu ý rằng thứ hạng phần trăm của Statcast vẫn là số liệu mùa giải chính, giống như Baseball Savant, nơi không công bố phần trăm cho hậu mùa giải.
+Chia sẻ bảng phân vị của bất kỳ cầu thủ nào dưới dạng hình ảnh, ngay từ hồ sơ của họ.
+Bảng xếp hạng, tìm kiếm và chuyển mùa giải nhanh hơn nhiều, nhất là với các mùa trước.
+Bảng xếp hạng hậu mùa giải giờ đã hiển thị đúng các trận tháng 10.

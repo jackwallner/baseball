@@ -1,7 +1,3 @@
-StatScout teraz sleduje sezónu až do play-off.
-
-Každý prehľad sa dá v ponuke sezóny prepnúť medzi základnou časťou a play-off, a to na obrazovke štatistík aj na stránke ktoréhokoľvek tímu. Prehľady play-off obsahujú bežné čísla a záznamy zápasov play-off: kto podáva výkon v októbri, nie kto to dokázal v júni.
-
-Voľba play-off je v ponuke sezóny a sprístupní sa hneď po prvom odohranom zápase play-off, takže netreba nič zapínať.
-
-Percentilové hodnotenia Statcast zostávajú číslami základnej časti, rovnako ako na Baseball Savant, ktorý percentily play-off nezverejňuje.
+Zdieľajte percentilovú tabuľku ľubovoľného hráča ako obrázok priamo z jeho profilu.
+Rebríčky, vyhľadávanie a prepínanie sezón sú oveľa rýchlejšie, najmä pri minulých sezónach.
+Rebríčky play-off teraz správne zobrazujú októbrové zápasy.

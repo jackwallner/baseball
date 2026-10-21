@@ -1,7 +1,3 @@
-StatScout artık sezonu playofflara kadar takip ediyor.
-
-İstatistik ekranında ve herhangi bir takım sayfasında, sezon menüsünden her tabloyu normal sezon ile playoff arasında değiştirebilirsin. Playoff tabloları playoffun standart istatistiklerini ve maç kayıtlarını taşır: haziranda kimin yaptığını değil, ekimde kimin üretim yaptığını.
-
-Playoff seçeneği sezon menüsünde duruyor ve ilk playoff maçı oynanır oynanmaz seçilebilir hale geliyor, yani açılacak bir şey yok.
-
-Statcast yüzdelik sıralamalarının normal sezon rakamları olarak kaldığını unutma; playoff yüzdelikleri yayımlamayan Baseball Savant ile aynı.
+Herhangi bir oyuncunun yüzdelik tablosunu doğrudan profilinden görsel olarak paylaşın.
+Sıralamalar, arama ve sezon değiştirme çok daha hızlı, özellikle geçmiş sezonlarda.
+Sezon sonu liderlik tabloları artık ekim maçlarını doğru gösteriyor.

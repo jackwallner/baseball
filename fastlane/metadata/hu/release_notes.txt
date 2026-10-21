@@ -1,7 +1,3 @@
-A StatScout mostantól a rájátszásig követi a szezont.
-
-Bármelyik tábla átváltható alapszakasz és rájátszás között a szezonmenüből, a statisztikák képernyőn és bármelyik csapat oldalán is. A rájátszástáblák a megszokott mutatókat és a rájátszás mérkőzésnaplóit hozzák: ki teljesít októberben, nem az, ki tette ezt júniusban.
-
-A rájátszás lehetőség a szezonmenüben van, és az első lejátszott rájátszásmérkőzés után azonnal választhatóvá válik, tehát nincs mit bekapcsolni.
-
-Fontos: a Statcast percentilisek továbbra is alapszakaszbeli értékek, ugyanúgy, mint a Baseball Savanton, amely nem tesz közzé rájátszás-percentiliseket.
+Oszd meg bármely játékos percentilis tábláját képként, közvetlenül a profiljáról.
+A ranglisták, a keresés és a szezonváltás sokkal gyorsabb, főleg a korábbi szezonoknál.
+A rájátszás ranglistái most már helyesen mutatják az októberi meccseket.

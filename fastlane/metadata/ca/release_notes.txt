@@ -1,7 +1,3 @@
-StatScout ara segueix la temporada fins als playoffs.
-
-Qualsevol tauler es pot canviar entre Temporada regular i Postemporada des del menú de temporada, a la pantalla d'estadístiques i a la pàgina de qualsevol equip. Els taulers de postemporada porten les estadístiques clàssiques i els registres de partit dels playoffs: qui rendeix a l'octubre, no qui ho va fer al juny.
-
-L'opció de postemporada és al menú de temporada i es pot seleccionar tan bon punt es juga el primer partit de playoff, així que no cal activar res.
-
-Tingues en compte que els percentils de Statcast continuen sent xifres de temporada regular, igual que a Baseball Savant, que no publica percentils de postemporada.
+Comparteix el tauler de percentils de qualsevol jugador com a imatge, des del seu perfil.
+Les classificacions, la cerca i el canvi de temporada són molt més ràpids, sobretot en temporades passades.
+Les classificacions de la postemporada ara mostren correctament els partits d'octubre.

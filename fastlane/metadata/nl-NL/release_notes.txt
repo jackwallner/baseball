@@ -1,7 +1,3 @@
-StatScout volgt het seizoen nu tot in de play-offs.
-
-Elk overzicht is via het seizoensmenu om te schakelen tussen reguliere seizoen en play-offs, zowel op het statistiekenscherm als op de pagina van elk team. De play-offoverzichten bevatten de gewone cijfers en de wedstrijdlogs van de play-offs: wie het in oktober waarmaakt, niet wie dat in juni deed.
-
-De play-offoptie staat in het seizoensmenu en wordt selecteerbaar zodra de eerste play-offwedstrijd is gespeeld, dus je hoeft niets aan te zetten.
-
-Let op: de Statcast-percentielen blijven cijfers uit het reguliere seizoen, net als bij Baseball Savant, dat geen play-offpercentielen publiceert.
+Deel het percentielbord van elke speler als afbeelding, direct vanuit zijn profiel.
+Ranglijsten, zoeken en wisselen van seizoen gaan veel sneller, vooral bij eerdere seizoenen.
+De ranglijsten van de postseason tonen de wedstrijden van oktober nu correct.
