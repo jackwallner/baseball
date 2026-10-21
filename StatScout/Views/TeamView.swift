@@ -720,11 +720,11 @@ struct TeamView: View {
                 .buttonStyle(.plain)
 
                 ForEach(Array(filteredPlayers.enumerated()), id: \.element.id) { index, player in
-                    NavigationLink(value: PlayerRoute(
+                    DetailPaneLink(value: PlayerRoute(
                         player: player,
                         phase: currentPhase,
                         season: displaySeason
-                    )) {
+                    ), marksSelection: true) {
                         LeaderboardTableRow(
                             rank: index + 1,
                             player: player,

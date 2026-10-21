@@ -148,7 +148,7 @@ struct MetricLeadersView: View {
                     .buttonStyle(.plain)
 
                     if let best = item.best {
-                        NavigationLink(value: PlayerRoute(
+                        DetailPaneLink(value: PlayerRoute(
                             player: best.player,
                             phase: phase,
                             season: season
@@ -179,7 +179,7 @@ struct MetricLeadersView: View {
                     }
 
                     if let worst = item.worst {
-                        NavigationLink(value: PlayerRoute(
+                        DetailPaneLink(value: PlayerRoute(
                             player: worst.player,
                             phase: phase,
                             season: season

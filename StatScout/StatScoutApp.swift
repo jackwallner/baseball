@@ -116,12 +116,14 @@ struct ContentView: View {
 
             if !hasCompletedOnboarding {
                 OnboardingCards(viewModel: viewModel, hasCompletedOnboarding: $hasCompletedOnboarding)
+                    .modifier(UnfoldedPrimaryPane())
                     .transition(.opacity)
                     .zIndex(1)
             }
 
             if showUpdateShowcase {
                 UpdateShowcaseView(onFinish: finishUpdateShowcase)
+                    .modifier(UnfoldedPrimaryPane())
                     .transition(.opacity)
                     .zIndex(2)
             }

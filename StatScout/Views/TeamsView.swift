@@ -332,7 +332,7 @@ struct TeamsView: View {
     /// recognise a club anyway.
     private func teamDot(_ abbr: String) -> some View {
         ZStack(alignment: .topTrailing) {
-            NavigationLink(value: TeamDestination(abbr: abbr)) {
+            DetailPaneLink(value: TeamDestination(abbr: abbr)) {
                 // The disk already carries the abbreviation, so no caption beneath,
                 // it printed the same three letters twice and ate the vertical room
                 // the six division rows need.
@@ -415,7 +415,7 @@ struct TeamGridTile: View {
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
-            NavigationLink(value: destination) {
+            DetailPaneLink(value: destination) {
                 tileBody
             }
             .buttonStyle(.plain)
@@ -483,7 +483,7 @@ struct FavoriteTeamCard: View {
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
-            NavigationLink(value: destination) {
+            DetailPaneLink(value: destination) {
                 HStack(spacing: 14) {
                     ZStack {
                         Circle()

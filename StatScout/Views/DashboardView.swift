@@ -306,7 +306,7 @@ struct DashboardView: View {
                             .fill(SavantPalette.divider)
                             .frame(height: SavantGeo.hairline)
                     }
-                    NavigationLink(value: TeamDestination(abbr: team)) {
+                    DetailPaneLink(value: TeamDestination(abbr: team)) {
                         HStack(spacing: 10) {
                             ZStack {
                                 Circle()
@@ -462,11 +462,11 @@ struct DashboardView: View {
                 let sortMetric = viewModel.currentSortMetricForDisplay
                 LazyVStack(spacing: 0) {
                     ForEach(Array(viewModel.leaderboard.enumerated()), id: \.element.id) { index, player in
-                        NavigationLink(value: PlayerRoute(
+                        DetailPaneLink(value: PlayerRoute(
                             player: player,
                             phase: viewModel.selectedPhase,
                             season: viewModel.selectedSeason
-                        )) {
+                        ), marksSelection: true) {
                             LeaderboardTableRow(
                                 rank: index + 1,
                                 player: player,

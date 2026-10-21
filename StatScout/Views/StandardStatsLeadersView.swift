@@ -393,11 +393,11 @@ struct StandardStatsLeadersView: View {
     }
 
     private func playerRow(rank: Int, player: Player) -> some View {
-        NavigationLink(value: PlayerRoute(
+        DetailPaneLink(value: PlayerRoute(
             player: player,
             phase: phase,
             season: season
-        )) {
+        ), marksSelection: true) {
             HStack(spacing: 0) {
                 // Rank
                 Text("\(rank)")

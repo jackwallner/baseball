@@ -250,6 +250,14 @@ struct CompareView: View {
             )
                 .modifier(SavantNavBarPublic())
         }
+        #if DEBUG
+        .onReceive(NotificationCenter.default.publisher(for: .duoCompare)) { note in
+            guard let pair = note.object as? [Player], pair.count == 2 else { return }
+            playerA = pair[0]
+            playerB = pair[1]
+            comparisonRoute = ComparisonRoute(playerA: pair[0], playerB: pair[1])
+        }
+        #endif
         .navigationDestination(item: $yearRoute) { route in
             YearCompareDestination(
                 route: route,
@@ -352,7 +360,7 @@ struct CompareView: View {
                 // curated yourself with no way through to any of the pages it
                 // names. The chevron is its own target and does the obvious
                 // thing.
-                    NavigationLink(value: PlayerRoute(
+                    DetailPaneLink(value: PlayerRoute(
                         player: player,
                         phase: .regular,
                         season: player.season
@@ -366,7 +374,7 @@ struct CompareView: View {
                 .buttonStyle(.plain)
                 .accessibilityLabel("Open \(player.name)'s page")
             } else {
-                NavigationLink(value: PlayerRoute(
+                DetailPaneLink(value: PlayerRoute(
                     player: player,
                     phase: .regular,
                     season: player.season
@@ -384,7 +392,7 @@ struct CompareView: View {
             alignment: .bottom
         )
         .contextMenu {
-            NavigationLink(value: PlayerRoute(
+            DetailPaneLink(value: PlayerRoute(
                 player: player,
                 phase: .regular,
                 season: player.season
@@ -775,7 +783,7 @@ private struct YearCompareDestination: View {
     private var playerBar: some View {
         HStack(spacing: 10) {
             if let latest {
-                NavigationLink(value: PlayerRoute(
+                DetailPaneLink(value: PlayerRoute(
                     player: latest,
                     phase: .regular,
                     season: latest.season
@@ -1001,7 +1009,6 @@ struct SavantNavBarPublic: ViewModifier {
             .toolbarBackground(SavantPalette.savantNavy, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbarColorScheme(.dark, for: .navigationBar)
-            .modifier(ReadableColumn())
     }
 }
 

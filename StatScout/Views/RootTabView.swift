@@ -52,6 +52,15 @@ struct RootTabView: View {
     @State private var teamsPath = NavigationPath()
     @State private var statsPath = NavigationPath()
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    /// The container's width and fold, measured so the unfolded iPhone Duo can
+    /// put the tabs and the page they open on opposite sides of the fold.
+    @State private var paneGeometry = PaneGeometry(width: 0, fold: nil)
+    /// The trailing pane's page. `nil` shows the leader of the Stats board.
+    @State private var detail: PaneDetail?
+    @State private var detailPath = NavigationPath()
+    /// The trailing pane is built the first time the Duo splits, then kept, so
+    /// folding and unfolding only move frames and nothing loses its state.
+    @State private var detailHasAppeared = false
 
     init(viewModel: DashboardViewModel) {
         _viewModel = State(initialValue: viewModel)
@@ -72,58 +81,81 @@ struct RootTabView: View {
     }
 
     #if DEBUG
-    /// `-DuoTour`: walks the routes on a timer for unattended capture, since
-    /// simctl openurl raises a confirmation sheet. Restarts whenever the size
-    /// class changes (fold to unfold) so each pose gets the full tour.
-    /// `-DuoTourStep <s>` is the dwell, `-DuoTourFirst <s>` the first delay.
+    /// `-DuoTour`: walks screenshot routes on a clock for unattended capture,
+    /// since simctl openurl raises a confirmation sheet. Each route is shown
+    /// at its offset in seconds from launch, so the timing doesn't depend on
+    /// how long the seeded data took to load. Unfolded runs read
+    /// `-DuoRoutes a,b` and `-DuoAt 0,24`; folded runs read `-DuoOuterRoutes`
+    /// and `-DuoOuterAt`.
     private func runDuoTour() async {
         let args = ProcessInfo.processInfo.arguments
         guard args.contains("-DuoTour") else { return }
-        func value(_ key: String, _ fallback: Double) -> Double {
-            guard let i = args.firstIndex(of: key), i + 1 < args.count else { return fallback }
-            return Double(args[i + 1]) ?? fallback
+        func list(_ key: String) -> [String] {
+            guard let i = args.firstIndex(of: key), i + 1 < args.count else { return [] }
+            return args[i + 1].split(separator: ",").map(String.init)
         }
-        let step = value("-DuoTourStep", 13.5)
-        let first = value("-DuoTourFirst", 19.5)
+        let unfolded = horizontalSizeClass == .regular
+        let routes = list(unfolded ? "-DuoRoutes" : "-DuoOuterRoutes")
+        let offsets = list(unfolded ? "-DuoAt" : "-DuoOuterAt").compactMap(Double.init)
         // Seeded data loads after launch; routes that need players wait for it.
         for _ in 0..<60 where viewModel.filteredPlayers.isEmpty {
             try? await Task.sleep(nanoseconds: 500_000_000)
         }
-        // `-DuoRoutes a,b` replaces the default walk (first route shown at once).
-        if let i = args.firstIndex(of: "-DuoRoutes"), i + 1 < args.count {
-            let routes = args[i + 1].split(separator: ",").map(String.init)
-            for route in routes {
-                if Task.isCancelled { return }
-                openDuoRoute(route)
-                try? await Task.sleep(nanoseconds: UInt64(step * 1_000_000_000))
-            }
-            return
-        }
-        openDuoRoute("stats")
-        try? await Task.sleep(nanoseconds: UInt64(first * 1_000_000_000))
-        for route in ["trends", "teams", "team", "compare", "player", "stats"] {
+        for (index, route) in routes.enumerated() {
+            let due = DuoScreenshotMode.launchedAt.addingTimeInterval(index < offsets.count ? offsets[index] : 0)
+            let wait = due.timeIntervalSinceNow
+            if wait > 0 { try? await Task.sleep(nanoseconds: UInt64(wait * 1_000_000_000)) }
             if Task.isCancelled { return }
-            openDuoRoute(route)
-            try? await Task.sleep(nanoseconds: UInt64(step * 1_000_000_000))
+            withAnimation(.easeInOut(duration: 0.3)) { openDuoRoute(route) }
+        }
+    }
+
+    private func seededPlayer(_ name: String) -> Player? {
+        viewModel.filteredPlayers.first { $0.name == name }
+            ?? viewModel.players(forSeason: viewModel.selectedSeason).first { $0.name == name }
+    }
+
+    private func showPlayer(_ name: String) {
+        guard let player = seededPlayer(name) ?? viewModel.leaderboard.first else { return }
+        let route = PlayerRoute(player: player, phase: viewModel.selectedPhase, season: viewModel.selectedSeason)
+        if split == nil {
+            statsPath.append(route)
+        } else {
+            openDetail(.player(route))
         }
     }
 
     private func openDuoRoute(_ route: String) {
         statsPath = NavigationPath()
         teamsPath = NavigationPath()
+        if route != "pitching" { viewModel.selectedCategory = .hitting }
         switch route {
-        case "stats": selection = Tab.stats.rawValue
+        case "stats":
+            selection = Tab.stats.rawValue
+            if split != nil { showPlayer("Aaron Judge") }
+        case "pitching":
+            selection = Tab.stats.rawValue
+            viewModel.selectedCategory = .pitching
+            if split != nil, let ace = viewModel.leaderboard.first {
+                openDetail(.player(PlayerRoute(player: ace, phase: viewModel.selectedPhase, season: viewModel.selectedSeason)))
+            }
         case "trends": selection = Tab.trends.rawValue
-        case "teams": selection = Tab.teams.rawValue
-        case "compare": selection = Tab.compare.rawValue
+        case "teams":
+            selection = Tab.teams.rawValue
+            openDetail(.team(TeamDestination(abbr: "LAD")))
         case "team":
             selection = Tab.teams.rawValue
             teamsPath.append(TeamDestination(abbr: "NYY"))
+            if split != nil { showPlayer("Cody Bellinger") }
+        case "compare":
+            selection = Tab.compare.rawValue
+            if let a = seededPlayer("Aaron Judge"), let b = seededPlayer("Juan Soto") {
+                NotificationCenter.default.post(name: .duoCompare, object: [a, b])
+                openDetail(.player(PlayerRoute(player: b, phase: viewModel.selectedPhase, season: viewModel.selectedSeason)))
+            }
         case "player":
             selection = Tab.stats.rawValue
-            if let player = viewModel.filteredPlayers.first(where: { $0.name == "Aaron Judge" }) ?? viewModel.filteredPlayers.first {
-                statsPath.append(PlayerRoute(player: player))
-            }
+            showPlayer("Aaron Judge")
         default: break
         }
     }
@@ -176,19 +208,47 @@ struct RootTabView: View {
     /// so navigation stacks and scroll positions survive switching. The inactive
     /// tabs are hidden from VoiceOver as well as from sight, at `opacity(0)`
     /// they'd otherwise still be reachable via the rotor.
+    ///
+    /// Unfolded, the tabs and their bar take the pane left of the fold and the
+    /// player or team they open fills the pane on the right (`detailPane`).
+    /// Both panes are always in this one tree and only their frames change, so
+    /// folding or unfolding keeps every stack, scroll position and selection.
     private var tabView: some View {
-        ZStack(alignment: .bottom) {
-            ForEach(Tab.allCases) { tab in
-                tabContent(tab)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .opacity(selection == tab.rawValue ? 1 : 0)
-                    .allowsHitTesting(selection == tab.rawValue)
-                    .accessibilityHidden(selection != tab.rawValue)
-            }
+        ZStack(alignment: .topLeading) {
+            ZStack(alignment: .bottom) {
+                ForEach(Tab.allCases) { tab in
+                    tabContent(tab)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .opacity(selection == tab.rawValue ? 1 : 0)
+                        .allowsHitTesting(selection == tab.rawValue)
+                        .accessibilityHidden(selection != tab.rawValue)
+                }
 
-            floatingTabBar
+                floatingTabBar
+            }
+            .environment(\.horizontalSizeClass, paneSizeClass)
+            .environment(\.openInDetailPane, split == nil ? nil : { openDetail($0) })
+            .environment(\.detailPaneSelection, split == nil ? nil : shownDetail)
+            .frame(maxWidth: split?.primaryWidth ?? .infinity, maxHeight: .infinity)
+
+            if detailHasAppeared {
+                detailPane
+                    .environment(\.horizontalSizeClass, .compact)
+                    .frame(maxWidth: split?.secondaryWidth ?? .infinity, maxHeight: .infinity)
+                    .padding(.leading, split?.secondaryX ?? 0)
+                    .opacity(split == nil ? 0 : 1)
+                    .allowsHitTesting(split != nil)
+                    .accessibilityHidden(split == nil)
+            }
         }
+        .background(SavantPalette.canvas)
         .ignoresSafeArea(edges: .bottom)
+        .onGeometryChange(for: PaneGeometry.self) { proxy in
+            PaneGeometry(width: proxy.size.width, fold: proxy.verticalFold())
+        } action: { paneGeometry = $0 }
+        .onChange(of: split != nil, initial: true) { _, isSplit in
+            if isSplit { detailHasAppeared = true }
+        }
         // Every tab stays mounted, so a tab's own `.task` fires once at launch
         // and never again. Trends is the one that depends on a fetch it doesn't
         // own the trigger for, and if that single launch attempt lost its race
@@ -302,6 +362,60 @@ struct RootTabView: View {
         }
     }
 
+    // MARK: - Unfolded iPhone Duo
+
+    private var split: UnfoldedSplit? {
+        UnfoldedSplit.make(
+            width: paneGeometry.width,
+            isRegularWidth: horizontalSizeClass == .regular,
+            fold: paneGeometry.fold
+        )
+    }
+
+    /// Each unfolded pane is phone-width, so its screen lays out as on a phone.
+    private var paneSizeClass: UserInterfaceSizeClass? {
+        split == nil ? horizontalSizeClass : .compact
+    }
+
+    /// Until something is opened, the right pane shows whoever leads the board
+    /// on the left, so the unfolded app never opens on an empty half.
+    private var shownDetail: PaneDetail? {
+        if let detail { return detail }
+        return viewModel.leaderboard.first.map {
+            .player(PlayerRoute(player: $0, phase: viewModel.selectedPhase, season: viewModel.selectedSeason))
+        }
+    }
+
+    private func openDetail(_ next: PaneDetail) {
+        detailPath = NavigationPath()
+        detail = next
+    }
+
+    /// The player or team opened from the left pane. Its own drill-downs
+    /// (a metric's leaderboard, a comparison) push within this pane.
+    private var detailPane: some View {
+        NavigationStack(path: $detailPath) {
+            Group {
+                switch shownDetail {
+                case .player(let route)?:
+                    PlayerProfileScreen(
+                        viewModel: viewModel,
+                        player: route.player,
+                        requestedPhase: route.phase,
+                        requestedSeason: route.season
+                    )
+                case .team(let team)?:
+                    TeamScreen(viewModel: viewModel, abbr: team.abbr)
+                case nil:
+                    SavantPalette.canvas.ignoresSafeArea()
+                }
+            }
+            .id(shownDetail)
+            .transition(.opacity)
+            .modifier(StandardDestinations(viewModel: viewModel))
+        }
+    }
+
 }
 
 /// One item in the hand-rolled floating tab bar. The selected pill uses the
@@ -343,7 +457,6 @@ private struct SavantNavBar: ViewModifier {
             .toolbarBackground(SavantPalette.savantNavy, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbarColorScheme(.dark, for: .navigationBar)
-            .modifier(ReadableColumn())
     }
 }
 
@@ -466,23 +579,28 @@ struct PlayerProfileDestination: ViewModifier {
     func body(content: Content) -> some View {
         content
             .navigationDestination(for: Player.self) { player in
-                profileView(player: player)
+                PlayerProfileScreen(viewModel: viewModel, player: player)
             }
             .navigationDestination(for: PlayerRoute.self) { route in
-                profileView(
+                PlayerProfileScreen(
+                    viewModel: viewModel,
                     player: route.player,
                     requestedPhase: route.phase,
                     requestedSeason: route.season
                 )
             }
     }
+}
 
-    @ViewBuilder
-    private func profileView(
-        player: Player,
-        requestedPhase: SeasonPhase? = nil,
-        requestedSeason: Int? = nil
-    ) -> some View {
+/// A player's profile, resolved to the season and phase the link asked for.
+/// Pushed from any list on a phone, and the right pane of the unfolded Duo.
+struct PlayerProfileScreen: View {
+    let viewModel: DashboardViewModel
+    let player: Player
+    var requestedPhase: SeasonPhase? = nil
+    var requestedSeason: Int? = nil
+
+    var body: some View {
         let history = viewModel.playerHistories[player.playerId] ?? []
         let inferredPostseason = viewModel.selectedPhase == .postseason
             && viewModel.postseasonPlayers.contains { $0.id == player.id }
@@ -541,16 +659,7 @@ private struct StandardDestinations: ViewModifier {
         content
             .modifier(PlayerProfileDestination(viewModel: viewModel))
             .navigationDestination(for: TeamDestination.self) { dest in
-                TeamView(
-                    team: dest.abbr,
-                    players: viewModel.players(forTeam: dest.abbr),
-                    season: viewModel.selectedSeason,
-                    viewModel: viewModel,
-                    fetchTeamGameLogs: { team, season, since in
-                        try await viewModel.fetchTeamGameLogs(team: team, season: season, sinceDate: since)
-                    }
-                )
-                    .modifier(SavantNavBar())
+                TeamScreen(viewModel: viewModel, abbr: dest.abbr)
             }
             .navigationDestination(for: MetricRoute.self) { route in
                 MetricRankingScreen(
@@ -581,5 +690,24 @@ private struct StandardDestinations: ViewModifier {
                 )
                     .modifier(SavantNavBar())
             }
+    }
+}
+
+/// A club's page for the selected season.
+struct TeamScreen: View {
+    let viewModel: DashboardViewModel
+    let abbr: String
+
+    var body: some View {
+        TeamView(
+            team: abbr,
+            players: viewModel.players(forTeam: abbr),
+            season: viewModel.selectedSeason,
+            viewModel: viewModel,
+            fetchTeamGameLogs: { team, season, since in
+                try await viewModel.fetchTeamGameLogs(team: team, season: season, sinceDate: since)
+            }
+        )
+            .modifier(SavantNavBar())
     }
 }

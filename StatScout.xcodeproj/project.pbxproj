@@ -32,6 +32,7 @@
 		4B7BDFD3B210265A2DA385E1 /* RobotoCondensed-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 351D8EA00A1B77668EF10DD7 /* RobotoCondensed-Regular.ttf */; };
 		4DB98DE4F93CE7B69B0A99C8 /* SavantDesign.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78899318EB8CD135C293FB83 /* SavantDesign.swift */; };
 		4E8714E7B4C269F6EF91AEE3 /* PostseasonQualifierTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1A56B3A0FC30C451F518C1E /* PostseasonQualifierTests.swift */; };
+		3D104EB23F3782D39E2DE6DB /* UnfoldedSplitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F939040091EB95B95C8FBAF8 /* UnfoldedSplitTests.swift */; };
 		51D6C519A411A84526061954 /* RecentFormPercentile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 725784CE4007DABF6BEAA038 /* RecentFormPercentile.swift */; };
 		530DACB92F83D8B251DD53FA /* TrialPitchSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 227F1309E0C8906969049D9F /* TrialPitchSheet.swift */; };
 		53AAA361EDCCDA0BB2681CD8 /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28F7C1A7CADA7CA917C9B9BF /* Components.swift */; };
@@ -54,9 +55,11 @@
 		97ADF393CE14DE856A50A0B5 /* StatScoutApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECB59368024F23FBC63D833E /* StatScoutApp.swift */; };
 		A211C246D1B8BD2A42CF97B0 /* StatDirectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 651F39025F6839FC272B2181 /* StatDirectionTests.swift */; };
 		A6741F572242D827B65EF326 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64CFDB4111B83AFFDDABB591 /* DashboardView.swift */; };
+		9F4F3F146AD25768ADB96E17 /* DetailPaneLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = A62C22AFF89AC85223107825 /* DetailPaneLink.swift */; };
 		A7D62E93A01EF924FE5CEF0B /* players-historical.json in Resources */ = {isa = PBXBuildFile; fileRef = 11CC376E01BC54EAB941E7A7 /* players-historical.json */; };
 		AB2B246F8DF32AF7AF3AEE0B /* StatScoutComprehensiveUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BC5EE3CB654E37FE99FE844 /* StatScoutComprehensiveUITests.swift */; };
 		ABBBBE498E9A1E517A147E40 /* PaywallScreenshotMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 572A0EB8383B16EB9207EE2A /* PaywallScreenshotMode.swift */; };
+		2420812BEB0B40DC754D3AC4 /* UnfoldedSplit.swift in Sources */ = {isa = PBXBuildFile; fileRef = E52F7425AE6F269EB01EE86E /* UnfoldedSplit.swift */; };
 		AC4568CDBDB8D9DD78A080F9 /* ReviewPromptTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = C62780264C15B926A095378C /* ReviewPromptTracker.swift */; };
 		B254FB702E1FD23611E5472B /* DashboardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E4FF70B13A65617E39C4E75 /* DashboardViewModel.swift */; };
 		B4DCC3A1E6B450909ED5F5DC /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B12DA38BF60E2D7C4CC7DFF /* Player.swift */; };
@@ -136,6 +139,7 @@
 		52830F232CD201E1DAC22F7C /* PlayerGameLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerGameLog.swift; sourceTree = "<group>"; };
 		5656B47DF4560469CCFA8564 /* DashboardViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardViewModelTests.swift; sourceTree = "<group>"; };
 		572A0EB8383B16EB9207EE2A /* PaywallScreenshotMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallScreenshotMode.swift; sourceTree = "<group>"; };
+		E52F7425AE6F269EB01EE86E /* UnfoldedSplit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnfoldedSplit.swift; sourceTree = "<group>"; };
 		57A36C805E9D0AB83292B6F7 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
 		5915A8F24A5447D26C221603 /* StatScout.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = StatScout.entitlements; sourceTree = "<group>"; };
 		5BC5EE3CB654E37FE99FE844 /* StatScoutComprehensiveUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatScoutComprehensiveUITests.swift; sourceTree = "<group>"; };
@@ -143,6 +147,7 @@
 		5DC2DEECB438987B32405C3A /* PlayerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerTests.swift; sourceTree = "<group>"; };
 		6029BCBF6CD96B24E1EF3DDB /* TeamFormCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamFormCard.swift; sourceTree = "<group>"; };
 		64CFDB4111B83AFFDDABB591 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
+		A62C22AFF89AC85223107825 /* DetailPaneLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailPaneLink.swift; sourceTree = "<group>"; };
 		651F39025F6839FC272B2181 /* StatDirectionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatDirectionTests.swift; sourceTree = "<group>"; };
 		700D5472E58D809AD7C969D6 /* HotColdView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotColdView.swift; sourceTree = "<group>"; };
 		7021023A2FAE67C688618334 /* YearComparisonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YearComparisonView.swift; sourceTree = "<group>"; };
@@ -179,6 +184,7 @@
 		ABD86AFA956A34A31F84B507 /* ReviewPromptTrackerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewPromptTrackerTests.swift; sourceTree = "<group>"; };
 		ABF48DD11DD060EE63F73302 /* PostseasonCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostseasonCard.swift; sourceTree = "<group>"; };
 		B1A56B3A0FC30C451F518C1E /* PostseasonQualifierTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostseasonQualifierTests.swift; sourceTree = "<group>"; };
+		F939040091EB95B95C8FBAF8 /* UnfoldedSplitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnfoldedSplitTests.swift; sourceTree = "<group>"; };
 		B2EAE4FBE4CF576F735F06C7 /* StandardStatsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StandardStatsTests.swift; sourceTree = "<group>"; };
 		C09B5BA2F2442F748C0FC062 /* PaywallScreenshotHarness.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallScreenshotHarness.swift; sourceTree = "<group>"; };
 		C1F9C4B1F4674E2DABB9CF60 /* SavantMenus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavantMenus.swift; sourceTree = "<group>"; };
@@ -235,6 +241,7 @@
 				4217AB45E328A9DF3C935F4A /* PlayerShareCardTests.swift */,
 				5DC2DEECB438987B32405C3A /* PlayerTests.swift */,
 				B1A56B3A0FC30C451F518C1E /* PostseasonQualifierTests.swift */,
+				F939040091EB95B95C8FBAF8 /* UnfoldedSplitTests.swift */,
 				89D6FE8BD9E23822F9D32E2E /* PurchaseFailureCopyTests.swift */,
 				ABD86AFA956A34A31F84B507 /* ReviewPromptTrackerTests.swift */,
 				3E672B9C8F60D5640DC5EA6D /* StandardStatsQualifierTests.swift */,
@@ -264,6 +271,7 @@
 			children = (
 				32B545E98CC346F651DBE948 /* AppStoreReviewLinks.swift */,
 				572A0EB8383B16EB9207EE2A /* PaywallScreenshotMode.swift */,
+				E52F7425AE6F269EB01EE86E /* UnfoldedSplit.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -357,6 +365,7 @@
 				924C787B5EA5949F5BB19DF5 /* CompareView.swift */,
 				28F7C1A7CADA7CA917C9B9BF /* Components.swift */,
 				64CFDB4111B83AFFDDABB591 /* DashboardView.swift */,
+				A62C22AFF89AC85223107825 /* DetailPaneLink.swift */,
 				010E2231E8DE30734FAF333D /* FollowPlayersSheet.swift */,
 				700D5472E58D809AD7C969D6 /* HotColdView.swift */,
 				91414B3D597831487B630032 /* MetricLeadersView.swift */,
@@ -545,6 +554,7 @@
 				ED016CD796655DB5AAC68847 /* PlayerShareCardTests.swift in Sources */,
 				DE3E81E46D644C2617940B7E /* PlayerTests.swift in Sources */,
 				4E8714E7B4C269F6EF91AEE3 /* PostseasonQualifierTests.swift in Sources */,
+				3D104EB23F3782D39E2DE6DB /* UnfoldedSplitTests.swift in Sources */,
 				2143DB27E4B8D137F0FA7AB7 /* PurchaseFailureCopyTests.swift in Sources */,
 				8D59F7C29E73159B2CC488A4 /* ReviewPromptTrackerTests.swift in Sources */,
 				D701F13035200994D96A5350 /* StandardStatsQualifierTests.swift in Sources */,
@@ -567,6 +577,7 @@
 				53AAA361EDCCDA0BB2681CD8 /* Components.swift in Sources */,
 				87FCA2CBD23BD6254A28429E /* ConversionDiagnostics.swift in Sources */,
 				A6741F572242D827B65EF326 /* DashboardView.swift in Sources */,
+				9F4F3F146AD25768ADB96E17 /* DetailPaneLink.swift in Sources */,
 				B254FB702E1FD23611E5472B /* DashboardViewModel.swift in Sources */,
 				CDA064F24B601616E69CC6CF /* FavoritesStore.swift in Sources */,
 				D301316C6B07B213D27409B6 /* FollowPlayersSheet.swift in Sources */,
@@ -575,6 +586,7 @@
 				B7206DA461865E379BE3029D /* MetricRankingView.swift in Sources */,
 				F341C68173E63893D81C1AD6 /* PaywallScreenshotHarness.swift in Sources */,
 				ABBBBE498E9A1E517A147E40 /* PaywallScreenshotMode.swift in Sources */,
+				2420812BEB0B40DC754D3AC4 /* UnfoldedSplit.swift in Sources */,
 				1C05ED9E954E365E79E177AC /* PaywallView.swift in Sources */,
 				B4DCC3A1E6B450909ED5F5DC /* Player.swift in Sources */,
 				3DA5F5AA0CC4C3141DB727AA /* PlayerCache.swift in Sources */,

@@ -287,7 +287,7 @@ struct PlayerComparisonView: View {
             // The identity opens his page. A comparison is where you decide a
             // player is worth a closer look, and until now it was the one
             // screen in the app where his name wasn't a link.
-            NavigationLink(value: PlayerRoute(
+            DetailPaneLink(value: PlayerRoute(
                 player: player,
                 phase: phase,
                 season: player.season

@@ -89,11 +89,11 @@ struct MetricRankingView: View {
                     // (e.g. "xwOBA") so the column matches what's in each row.
                     LeaderboardTableHeader(sortDescending: sortDescending, sortLabel: metricLabel)
                     ForEach(Array(rankedPlayers.enumerated()), id: \.element.id) { index, player in
-                        NavigationLink(value: PlayerRoute(
+                        DetailPaneLink(value: PlayerRoute(
                             player: player,
                             phase: phase,
                             season: season
-                        )) {
+                        ), marksSelection: true) {
                             LeaderboardTableRow(
                                 rank: index + 1,
                                 player: player,
