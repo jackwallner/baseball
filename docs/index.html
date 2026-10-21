@@ -34,11 +34,20 @@
       "alternateName": "StatScout",
       "description": "Baseball Savvy StatScout is a baseball percentile rankings app for iPhone. It shows Statcast-style percentile bars for xwOBA, Hard-Hit%, Barrel% and Sprint Speed, with nightly leaderboards for every qualified MLB player. It is free, with no ads and no account, and an optional StatScout+ upgrade adds year-over-year comparisons.",
       "applicationCategory": "SportsApplication",
-      "operatingSystem": "iOS 17+",
+      "operatingSystem": "iOS 17+, Android 8.0+",
       "url": "https://jackwallner.com/ios/baseball/",
-      "downloadUrl": "https://apps.apple.com/us/app/id6763945657",
-      "installUrl": "https://apps.apple.com/us/app/id6763945657",
-      "sameAs": "https://apps.apple.com/us/app/id6763945657",
+      "downloadUrl": [
+        "https://apps.apple.com/us/app/id6763945657",
+        "https://play.google.com/store/apps/details?id=com.jackwallner.baseball"
+      ],
+      "installUrl": [
+        "https://apps.apple.com/us/app/id6763945657",
+        "https://play.google.com/store/apps/details?id=com.jackwallner.baseball"
+      ],
+      "sameAs": [
+        "https://apps.apple.com/us/app/id6763945657",
+        "https://play.google.com/store/apps/details?id=com.jackwallner.baseball"
+      ],
       "screenshot": [
         "https://jackwallner.github.io/baseball/images/01_leaderboard.png",
         "https://jackwallner.github.io/baseball/images/02_player_profile.png",
@@ -270,6 +279,24 @@
         }
 
         .download-btn:hover { opacity: 0.85; }
+
+        /* Store badges: the Play badge matches the App Store button height */
+        .store-badges {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .store-badges .download-btn { line-height: 20px; }
+        .play-badge { display: inline-flex; transition: opacity 0.15s; }
+        .play-badge:hover { opacity: 0.85; }
+        .play-badge img { display: block; width: auto; height: 48px; }
+
+        .nav-actions { display: flex; align-items: center; gap: 8px; }
+        .nav-actions .nav-link { line-height: 18px; }
+        .nav-actions .play-badge img { height: 34px; }
 
         /* Showcase */
         .showcase {
@@ -575,6 +602,7 @@
 
         @media (max-width: 480px) {
             .showcase-card img { height: 360px; }
+            .nav-actions .play-badge { display: none; }
         }
         .feature-card .tier {
             margin-top: 12px;
@@ -592,15 +620,21 @@
                 <img src="images/icon_256.webp" alt="StatScout" loading="lazy" decoding="async">
                 <span>StatScout</span>
             </a>
-            <a class="nav-link" href="https://apps.apple.com/us/app/baseball-savvy-statscout/id6763945657?pt=128748779&amp;ct=jw-baseball-home&amp;mt=8">Download</a>
+            <div class="nav-actions">
+                <a class="nav-link" href="https://apps.apple.com/us/app/baseball-savvy-statscout/id6763945657?pt=128748779&amp;ct=jw-baseball-home&amp;mt=8">Download</a>
+                <a class="play-badge" href="https://play.google.com/store/apps/details?id=com.jackwallner.baseball"><img src="google-play-badge.png" alt="Get it on Google Play" width="478" height="142" decoding="async"></a>
+            </div>
         </div>
     </nav>
 
     <section class="hero">
         <h1>Scout the league <span>like a pro</span></h1>
         <p class="tagline">Baseball Savvy StatScout is a baseball percentile rankings app for iPhone, with Statcast-style leaderboards and advanced metrics for qualified players. Free with no ads or accounts.</p>
-        <p class="platforms">iPhone &middot; Nightly Updates &middot; Privacy First</p>
-        <a class="download-btn" href="https://apps.apple.com/us/app/baseball-savvy-statscout/id6763945657?pt=128748779&amp;ct=jw-baseball-home&amp;mt=8">Download on the App Store</a>
+        <p class="platforms">iPhone &middot; Android &middot; Nightly Updates &middot; Privacy First</p>
+        <div class="store-badges">
+            <a class="download-btn" href="https://apps.apple.com/us/app/baseball-savvy-statscout/id6763945657?pt=128748779&amp;ct=jw-baseball-home&amp;mt=8">Download on the App Store</a>
+            <a class="play-badge" href="https://play.google.com/store/apps/details?id=com.jackwallner.baseball"><img src="google-play-badge.png" alt="Get it on Google Play" width="478" height="142" decoding="async"></a>
+        </div>
     </section>
 
     <section class="showcase">
@@ -753,8 +787,11 @@
 
     <section class="cta">
         <h2>Scout the league</h2>
-        <p>Baseball Savvy StatScout is free on the App Store. No account required. Upgrade to StatScout+ anytime.</p>
-        <a class="download-btn" href="https://apps.apple.com/us/app/baseball-savvy-statscout/id6763945657?pt=128748779&amp;ct=jw-baseball-home&amp;mt=8">Download on the App Store</a>
+        <p>Baseball Savvy StatScout is free on the App Store and Google Play. No account required. Upgrade to StatScout+ anytime.</p>
+        <div class="store-badges">
+            <a class="download-btn" href="https://apps.apple.com/us/app/baseball-savvy-statscout/id6763945657?pt=128748779&amp;ct=jw-baseball-home&amp;mt=8">Download on the App Store</a>
+            <a class="play-badge" href="https://play.google.com/store/apps/details?id=com.jackwallner.baseball"><img src="google-play-badge.png" alt="Get it on Google Play" width="478" height="142" decoding="async"></a>
+        </div>
     </section>
 
     <footer>

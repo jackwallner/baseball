@@ -323,6 +323,9 @@
         }
         .appstore-btn { display: inline-block; height: 44px; }
         .appstore-btn svg { height: 100%; }
+        .store-badges { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 12px; }
+        .play-badge { display: inline-flex; }
+        .play-badge img { display: block; width: auto; height: 44px; }
         .download-features {
             display: flex;
             justify-content: center;
@@ -550,9 +553,12 @@
             <div class="download-card">
                 <h2 class="download-title">Scout the league</h2>
                 <p class="download-subtitle">Download StatScout and start exploring baseball analytics with visual percentile rankings.</p>
-                <a class="appstore-btn" href="#" aria-label="Download on the App Store">
-                    <svg xmlns="http://www.w3.org/2000/svg" height="44" viewBox="0 0 120 40"><path d="M110.3 0H7.7C3.4 0 0 3.4 0 7.7v24.6C0 36.6 3.4 40 7.7 40h102.6c4.3 0 7.7-3.4 7.7-7.7V7.7C118 3.4 114.6 0 110.3 0z" fill="#1a1a1c"/><path d="M81.4 19.9c0-3.2 2.6-4.8 2.7-4.9-1.5-2.1-3.8-2.4-4.6-2.5-1.9-.2-3.8 1.1-4.8 1.1-1 0-2.6-1.1-4.2-1.1-2.2 0-4.2 1.3-5.3 3.2-2.3 4-0.6 9.9 1.6 13.1 1.1 1.5 2.4 3.3 4 3.2 1.6 0 2.2-1 4.2-1s2.6 1 4.2 1c1.7 0 2.8-1.5 3.9-3.1 1.2-1.8 1.7-3.5 1.8-3.6-.1-.1-3.4-1.3-3.5-4.4zM78.2 10.5c.9-1.1 1.5-2.5 1.3-4-1.3.1-2.8.8-3.7 1.8-.8.9-1.5 2.4-1.3 3.8 1.4.1 2.8-.7 3.7-1.6z" fill="#fff"/></svg>
-                </a>
+                <div class="store-badges">
+                    <a class="appstore-btn" href="#" aria-label="Download on the App Store">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="44" viewBox="0 0 120 40"><path d="M110.3 0H7.7C3.4 0 0 3.4 0 7.7v24.6C0 36.6 3.4 40 7.7 40h102.6c4.3 0 7.7-3.4 7.7-7.7V7.7C118 3.4 114.6 0 110.3 0z" fill="#1a1a1c"/><path d="M81.4 19.9c0-3.2 2.6-4.8 2.7-4.9-1.5-2.1-3.8-2.4-4.6-2.5-1.9-.2-3.8 1.1-4.8 1.1-1 0-2.6-1.1-4.2-1.1-2.2 0-4.2 1.3-5.3 3.2-2.3 4-0.6 9.9 1.6 13.1 1.1 1.5 2.4 3.3 4 3.2 1.6 0 2.2-1 4.2-1s2.6 1 4.2 1c1.7 0 2.8-1.5 3.9-3.1 1.2-1.8 1.7-3.5 1.8-3.6-.1-.1-3.4-1.3-3.5-4.4zM78.2 10.5c.9-1.1 1.5-2.5 1.3-4-1.3.1-2.8.8-3.7 1.8-.8.9-1.5 2.4-1.3 3.8 1.4.1 2.8-.7 3.7-1.6z" fill="#fff"/></svg>
+                    </a>
+                    <a class="play-badge" href="https://play.google.com/store/apps/details?id=com.jackwallner.baseball"><img src="google-play-badge.png" alt="Get it on Google Play" width="478" height="142" decoding="async"></a>
+                </div>
                 <div class="download-features">
                     <span class="download-feature">Visual Percentiles</span>
                     <span class="download-feature">Nightly Updates</span>
