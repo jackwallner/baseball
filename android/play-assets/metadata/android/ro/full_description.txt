@@ -1,0 +1,42 @@
+Baseballul dincolo de tabela de scor.
+
+StatScout aduce percentilele Statcast, statisticile clasice ale sezonului și forma recentă într-o singură aplicație rapidă de scouting pentru baseball. Găsește liderii ligii, urmărește-ți jucătorii și vezi ce face un batter sau un pitcher să fie de elită.
+
+PERCENTILE STATCAST VIZUALE
+Citește xwOBA, xBA, viteza de ieșire, rata de barrels, loviturile puternice, strikeout-urile și altele ca bare de percentile clare. Roșul marchează partea de sus, albastrul partea de jos. Un percentil mai mare înseamnă o performanță mai bună.
+
+PROFILURI COMPLETE DE JUCĂTORI
+Lovire, aruncare, apărare și alergare. Linia statistică clasică apare lângă metricile avansate, cu statistici separate pentru jucătorii cu dublu rol.
+
+LIDERII SEZONULUI CURENT, GRATUIT
+Caută jucători și echipe, schimbă metrica, ajustează pragul de calificare și construiește-ți lista de urmăriți. O atingere deschide profilul jucătorului. Liderii sezonului curent, scoutingul echipelor și urmărirea jucătorilor sunt gratuite.
+
+PLAYOFF ÎN CONTEXT
+Datele din sezonul regulat și din playoff rămân separate. Valorile din octombrie sunt așezate pe curba de percentile a sezonului regulat din același an, cu etichete clare și pragul de timp de joc folosit de MLB.
+
+STATSCOUT+
+Deblochează toate instrumentele de scouting:
+- Tendințe: cine e în formă și cine se răcește în toată liga
+- Forma recentă: ultimele 7, 15 sau 30 de zile, cu schimbarea față de perioada anterioară
+- Compară jucători: doi jucători unul lângă altul la toate metricile
+- An de an: sezoanele unui jucător până în 2015
+- Forma echipelor: ultimele 7, 15 sau 30 de zile pentru toate cele 30 de cluburi
+- Sezoane anterioare: întreaga eră Statcast
+
+Alege Lunar, Anual sau Pe viață. Prețurile și eligibilitatea pentru perioada de probă apar în aplicație înainte de cumpărare.
+
+ACTUALIZAT ÎN FIECARE NOAPTE
+Datele se actualizează în fiecare noapte. Datele de acoperire arată ce meciuri sunt incluse.
+
+FĂRĂ CONT
+Fără înregistrare și fără reclame. Jucătorii urmăriți și preferințele rămân pe telefonul tău. Plățile sunt gestionate de Google Play.
+
+Abonamente
+Lunar și Anual sunt abonamente cu reînnoire automată, cu perioadă de probă gratuită pentru abonații noi eligibili atunci când Google Play o oferă. Pe viață este o achiziție unică. Google Play îți debitează contul când confirmi sau când se încheie o perioadă de probă. Abonamentele se reînnoiesc automat până le anulezi. Le gestionezi sau le anulezi în Google Play, la Plăți și abonamente.
+
+Atenție: aplicația în sine este în limba engleză.
+
+Confidențialitate: https://jackwallner.github.io/baseball/android-privacy.html
+Termeni de utilizare: https://jackwallner.github.io/baseball/android-terms.html
+
+StatScout este independent și nu este afiliat, aprobat sau sponsorizat de Major League Baseball, de vreo echipă sau de Baseball Savant. Numele jucătorilor și ale echipelor și statisticile sunt folosite pentru identificare și informare.

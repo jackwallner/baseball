@@ -1,0 +1,42 @@
+Bejzbol iza samog rezultata.
+
+StatScout spaja Statcast percentile, klasičnu statistiku sezone i trenutnu formu u jednoj brzoj bejzbol aplikaciji za scouting. Pronađite vodeće u ligi, pratite svoje igrače i pogledajte što udarača ili bacača čini vrhunskim.
+
+STATCAST PERCENTILI NA PRVI POGLED
+Čitajte xwOBA, xBA, brzinu odbijanja, udio barrela, jakih udaraca, strikeouta i više kao jasne percentilne trake. Crvena označava vrh ljestvice, plava dno. Viši percentil znači bolju izvedbu.
+
+POTPUNI PROFILI IGRAČA
+Udaranje, bacanje, obrana i trčanje. Klasični statistički redak stoji uz napredne metrike, s odvojenom statistikom za dvosmjerne igrače.
+
+VODEĆI TEKUĆE SEZONE, BESPLATNO
+Tražite igrače i momčadi, mijenjajte metriku, prilagodite prag kvalifikacije i složite popis praćenih. Jedan dodir otvara profil igrača. Vodeći tekuće sezone, scouting momčadi i praćenje igrača su besplatni.
+
+DOIGRAVANJE U KONTEKSTU
+Podaci regularne sezone i doigravanja ostaju odvojeni. Listopadske vrijednosti smještene su na percentilnu krivulju regularne sezone iste godine, s jasnim oznakama i pragom vremena igre kakav koristi MLB.
+
+STATSCOUT+
+Otključajte cijeli alat za scouting:
+- Trendovi: tko je u cijeloj ligi u naletu, a tko se hladi
+- Trenutna forma: zadnjih 7, 15 ili 30 dana, s promjenom u odnosu na prethodno razdoblje
+- Usporedba igrača: dva igrača jedan uz drugog u svim metrikama
+- Iz godine u godinu: sezone igrača sve do 2015.
+- Forma momčadi: zadnjih 7, 15 ili 30 dana za svih 30 klubova
+- Prošle sezone: cijelo Statcast razdoblje
+
+Odaberite mjesečni, godišnji ili doživotni paket. Cijene i pravo na probno razdoblje prikazuju se u aplikaciji prije kupnje.
+
+AŽURIRANJE SVAKE NOĆI
+Podaci se osvježavaju svake noći. Datumi pokrivenosti pokazuju koje su utakmice uključene.
+
+BEZ RAČUNA
+Bez registracije i bez oglasa. Praćeni igrači i postavke ostaju na vašem telefonu. Plaćanja obrađuje Google Play.
+
+Pretplate
+Mjesečni i godišnji paket su pretplate koje se automatski obnavljaju, s besplatnim probnim razdobljem za nove pretplatnike koji ispunjavaju uvjete kad ga Google Play nudi. Doživotni paket je jednokratna kupnja. Google Play tereti vaš račun kad potvrdite ili kad probno razdoblje istekne. Pretplate se automatski obnavljaju dok ih ne otkažete. Upravljajte njima ili ih otkažite u Google Playu pod Plaćanja i pretplate.
+
+Napomena: sama aplikacija je na engleskom jeziku.
+
+Privatnost: https://jackwallner.github.io/baseball/android-privacy.html
+Uvjeti korištenja: https://jackwallner.github.io/baseball/android-terms.html
+
+StatScout je neovisan i nije povezan s Major League Baseballom, nijednom momčadi ni Baseball Savantom, niti ga oni podržavaju ili sponzoriraju. Imena igrača i momčadi te statistika koriste se za identifikaciju i informiranje.

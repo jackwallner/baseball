@@ -77,7 +77,10 @@ AVD is temporary and holds only our debug app.
   `python3 scripts/make_android_icon.py`.
 - Android-specific policy pages: `docs/android-privacy.html` and
   `docs/android-terms.html`. Listing copy lives in
-  `android/play-assets/metadata/android/en-US/`.
+  `android/play-assets/metadata/android/<play-locale>/` (fastlane supply
+  layout), 50 locales matching Sober. en-US is the live listing verbatim;
+  other locales carry local search terms from the iOS keywords and say the app
+  itself is in English. Check with `python3 scripts/validate-play-listing.py`.
 - Play state, verified 2026-10-13: versionCode 3 (1.5.3) active on internal
   testing (tester list "IM Iron Splits internal testers"). App content, Data
   safety, target audience (13+), listing, six screenshots and feature graphic

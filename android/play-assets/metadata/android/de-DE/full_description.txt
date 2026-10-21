@@ -1,0 +1,42 @@
+Baseball jenseits der Box Score verstehen.
+
+StatScout bringt Statcast-Perzentile, klassische Saisonstatistiken und die aktuelle Form in eine schnelle Scouting-App für MLB-Baseball. Finde die Ligaführenden, folge deinen Spielern und sieh, was einen Elite-Schlagmann oder Pitcher ausmacht.
+
+STATCAST-PERZENTILE AUF EINEN BLICK
+xwOBA, xBA, Exit Velocity, Barrel-Rate, Hard-Hit-Rate, Strikeout-Rate und mehr als klare Perzentilbalken. Rot steht für das obere Ende, Blau für das untere. Ein höheres Perzentil bedeutet eine bessere Leistung.
+
+VOLLSTÄNDIGE SPIELERPROFILE
+Schlagen, Pitchen, Feldspiel und Baserunning. Die klassische Statistikzeile steht neben den erweiterten Metriken, im vertrauten Baseball-Zahlenformat und mit getrennten Werten für Two-Way-Spieler.
+
+LIGAFÜHRENDE DER AKTUELLEN SAISON, KOSTENLOS
+Suche Spieler und Teams, wechsle die Metrik, passe die Qualifikationsgrenze an und stelle deine Liste gefolgter Spieler zusammen. Ein Tippen öffnet das Spielerprofil. Ligaführende der aktuellen Saison, Team-Scouting und das Folgen von Spielern sind kostenlos.
+
+POSTSEASON IM KONTEXT
+Daten aus regulärer Saison und Postseason bleiben getrennt. Oktober-Werte werden auf die Perzentilkurve der regulären Saison desselben Jahres gelegt, klar gekennzeichnet und mit der Qualifikation nach Spielzeit, wie sie die MLB verwendet.
+
+STATSCOUT+
+Das komplette Scouting-Werkzeug:
+- Trends: wer in der Liga gerade heiß läuft und wer abkühlt
+- Aktuelle Form: die letzten 7, 15 oder 30 Kalendertage, mit Veränderung zum Zeitraum davor
+- Spielervergleiche: zwei Spieler nebeneinander über alle verfügbaren Metriken
+- Jahresvergleich: die Saisons eines Spielers zurück bis 2015
+- Team-Form: die letzten 7, 15 oder 30 Tage für alle 30 Clubs
+- Vergangene Saisons: die gesamte Statcast-Ära
+
+Wähle Monatlich, Jährlich oder Lifetime. Preise und die Berechtigung für einen Probezeitraum siehst du vor dem Kauf in der App.
+
+JEDE NACHT AKTUALISIERT
+Die Baseball-Daten werden jede Nacht aktualisiert. Abdeckungsdaten zeigen, welche Spiele enthalten sind, damit du die Zahlen im Kontext beurteilen kannst.
+
+KEIN KONTO NÖTIG
+Keine Registrierung und keine Werbung. Gefolgte Spieler und Einstellungen bleiben auf deinem Handy. Die Zahlung läuft über Google Play.
+
+Abos
+Monatlich und Jährlich sind sich automatisch verlängernde Abos, mit einem kostenlosen Probezeitraum für berechtigte Neukunden, sofern Google Play ihn anbietet. Lifetime ist ein einmaliger Kauf. Google Play belastet dein Konto, wenn du bestätigst oder ein berechtigter Probezeitraum endet. Abos verlängern sich automatisch, bis du sie kündigst. Verwalten oder kündigen kannst du sie in Google Play unter Zahlungen und Abos.
+
+Hinweis: Die App selbst ist auf Englisch.
+
+Datenschutz: https://jackwallner.github.io/baseball/android-privacy.html
+Nutzungsbedingungen: https://jackwallner.github.io/baseball/android-terms.html
+
+StatScout ist unabhängig und steht in keiner Verbindung zu Major League Baseball, einem Team oder Baseball Savant. Es wird von diesen weder unterstützt noch gesponsert. Spielernamen, Teamnamen und Statistiken dienen der Identifikation und Information.

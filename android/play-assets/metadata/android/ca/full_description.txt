@@ -1,0 +1,42 @@
+El beisbol més enllà del marcador.
+
+StatScout reuneix percentils Statcast, estadístiques clàssiques de la temporada i la forma recent en una app d'scouting de beisbol ràpida. Troba els líders de la lliga, segueix els teus jugadors i descobreix què fa d'elit un batedor o un llançador.
+
+PERCENTILS STATCAST VISUALS
+Consulta xwOBA, xBA, velocitat de sortida, percentatge de barrels, contacte fort, eliminacions per strikes i més com a barres de percentil clares. El vermell marca la part alta i el blau la baixa. Un percentil més alt vol dir un rendiment millor.
+
+PERFILS COMPLETS DE JUGADORS
+Bateig, llançament, defensa i cursa. La línia estadística clàssica apareix al costat de les mètriques avançades, amb estadístiques separades per als jugadors de doble funció.
+
+LÍDERS DE LA TEMPORADA ACTUAL, GRATIS
+Cerca jugadors i equips, canvia la mètrica, ajusta el mínim de qualificació i crea la teva llista de seguits. Un toc obre el perfil del jugador. Els líders de la temporada actual, l'scouting d'equips i el seguiment de jugadors són gratis.
+
+POSTTEMPORADA EN CONTEXT
+Les dades de temporada regular i de posttemporada es mantenen separades. Els valors d'octubre se situen sobre la corba de percentils de la temporada regular del mateix any, amb etiquetes clares i la qualificació per temps de joc que fa servir la MLB.
+
+STATSCOUT+
+Desbloqueja totes les eines d'scouting:
+- Tendències: qui està en ratxa i qui es refreda a tota la lliga
+- Forma recent: últims 7, 15 o 30 dies, amb el canvi respecte al període anterior
+- Comparar jugadors: dos jugadors costat a costat en totes les mètriques
+- Any rere any: compara les temporades d'un jugador fins al 2015
+- Forma dels equips: últims 7, 15 o 30 dies dels 30 clubs
+- Temporades històriques: explora tota l'era Statcast
+
+Tria Mensual, Anual o Vitalici. Els preus i l'elegibilitat per a la prova es mostren a l'app abans de comprar.
+
+ACTUALITZAT CADA NIT
+Les dades s'actualitzen cada nit. Les dates de cobertura indiquen quins partits hi són inclosos.
+
+SENSE COMPTE
+Sense registre i sense anuncis. Els jugadors seguits i les preferències es queden al teu telèfon. Google Play gestiona els pagaments.
+
+Subscripcions
+Mensual i Anual són subscripcions de renovació automàtica, amb prova gratuïta per als nous subscriptors elegibles quan Google Play l'ofereix. Vitalici és una compra única. Google Play fa el càrrec al teu compte quan confirmes o quan acaba una prova elegible. Les subscripcions es renoven automàticament fins que les cancel·lis. Gestiona-les o cancel·la-les a Google Play, a Pagaments i subscripcions.
+
+Important: l'app en si és en anglès.
+
+Privadesa: https://jackwallner.github.io/baseball/android-privacy.html
+Condicions d'ús: https://jackwallner.github.io/baseball/android-terms.html
+
+StatScout és independent i no està afiliat, avalat ni patrocinat per la Major League Baseball, cap equip ni Baseball Savant. Els noms de jugadors i equips i les estadístiques s'utilitzen per a identificació i informació.

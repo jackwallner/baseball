@@ -1,0 +1,42 @@
+El béisbol más allá del marcador.
+
+StatScout reúne percentiles Statcast, estadísticas clásicas de la temporada y la forma reciente en una app de scouting de béisbol rápida. Encuentra a los líderes de la liga, sigue a tus jugadores y descubre qué hace élite a un bateador o a un lanzador.
+
+PERCENTILES STATCAST VISUALES
+Consulta xwOBA, xBA, velocidad de salida, porcentaje de barrels, contacto fuerte, ponches y más como barras de percentil claras. El rojo marca la parte alta y el azul la baja. Un percentil más alto significa mejor rendimiento.
+
+PERFILES DE JUGADOR COMPLETOS
+Bateo, pitcheo, defensa y carrera. La línea estadística clásica aparece junto a las métricas avanzadas, con el formato de siempre del béisbol y estadísticas separadas para los jugadores de doble función.
+
+LÍDERES DE LA TEMPORADA ACTUAL, GRATIS
+Busca jugadores y equipos, cambia la métrica, ajusta el mínimo de calificación y crea tu lista de seguidos. Un toque abre el perfil del jugador. Los líderes de la temporada actual, el scouting de equipos de la temporada y el seguimiento de jugadores son gratis.
+
+POSTEMPORADA EN CONTEXTO
+Los datos de temporada regular y postemporada se mantienen separados. Los valores de octubre se sitúan sobre la curva de percentiles de la temporada regular del mismo año, con etiquetas claras y la calificación por tiempo de juego que usa la MLB.
+
+STATSCOUT+
+Desbloquea todas las herramientas de scouting:
+- Tendencias: quién está en racha y quién se enfría en toda la liga
+- Forma reciente: últimos 7, 15 o 30 días naturales, con el cambio frente al periodo anterior
+- Comparar jugadores: dos jugadores lado a lado en todas las métricas disponibles
+- Año contra año: compara las temporadas de un jugador hasta 2015
+- Forma de equipos: últimos 7, 15 o 30 días de los 30 clubes
+- Temporadas históricas: explora toda la era Statcast
+
+Elige Mensual, Anual o Vitalicio. Los precios y la disponibilidad de la prueba se muestran en la app antes de comprar.
+
+ACTUALIZADO CADA NOCHE
+Los datos se actualizan cada noche. Las fechas de cobertura indican qué partidos están incluidos, para que valores las cifras en contexto.
+
+SIN CUENTA
+Sin registro y sin anuncios. Tus jugadores seguidos y tus preferencias se quedan en tu teléfono. Google Play gestiona los pagos.
+
+Suscripciones
+Mensual y Anual son suscripciones con renovación automática, con prueba gratuita para nuevos suscriptores elegibles cuando Google Play la ofrece. Vitalicio es una compra única. Google Play cobra en tu cuenta al confirmar o cuando termina una prueba elegible. Las suscripciones se renuevan automáticamente hasta que las canceles. Gestiónalas o cancélalas en Google Play, en Pagos y suscripciones.
+
+Importante: la app en sí está en inglés.
+
+Privacidad: https://jackwallner.github.io/baseball/android-privacy.html
+Condiciones de uso: https://jackwallner.github.io/baseball/android-terms.html
+
+StatScout es independiente y no está afiliado, respaldado ni patrocinado por Major League Baseball, ningún equipo ni Baseball Savant. Los nombres de jugadores y equipos y las estadísticas se usan con fines de identificación e información.

@@ -1,0 +1,42 @@
+Honkbal voorbij de boxscore.
+
+StatScout brengt Statcast-percentielen, klassieke seizoensstatistieken en recente vorm samen in één snelle scouting-app voor honkbal. Vind de koplopers van de competitie, volg je spelers en zie wat een slagman of werper tot de top maakt.
+
+STATCAST-PERCENTIELEN IN BEELD
+Lees xwOBA, xBA, exit velocity, barrel-percentage, hard-hit-percentage, strikeout-percentage en meer als duidelijke percentielbalken. Rood is de bovenkant, blauw de onderkant. Een hoger percentiel betekent een betere prestatie.
+
+VOLLEDIGE SPELERSPROFIELEN
+Slaan, werpen, verdedigen en honklopen. De klassieke statistiekregel staat naast de geavanceerde cijfers, met aparte statistieken voor two-way spelers.
+
+KOPLOPERS VAN DIT SEIZOEN, GRATIS
+Zoek spelers en teams, wissel van statistiek, pas de kwalificatiegrens aan en bouw je lijst met gevolgde spelers. Met één tik open je een spelersprofiel. Koplopers van dit seizoen, teamscouting en spelers volgen zijn gratis.
+
+POSTSEASON IN CONTEXT
+Gegevens van het reguliere seizoen en de postseason blijven gescheiden. Oktoberwaarden worden op de percentielcurve van het reguliere seizoen van hetzelfde jaar gezet, met duidelijke labels en de kwalificatie op speeltijd die de MLB gebruikt.
+
+STATSCOUT+
+Ontgrendel de complete scoutingset:
+- Trends: wie in de hele competitie heet is en wie afkoelt
+- Recente vorm: laatste 7, 15 of 30 dagen, met de verandering ten opzichte van de periode ervoor
+- Spelers vergelijken: twee spelers naast elkaar op elke beschikbare statistiek
+- Jaar op jaar: de seizoenen van een speler terug tot 2015
+- Teamvorm: laatste 7, 15 of 30 dagen voor alle 30 clubs
+- Eerdere seizoenen: het hele Statcast-tijdperk
+
+Kies Maandelijks, Jaarlijks of Levenslang. Prijzen en of je een proefperiode krijgt, zie je in de app vóór de aankoop.
+
+ELKE NACHT BIJGEWERKT
+De gegevens worden elke nacht ververst. Dekkingsdata laten zien welke wedstrijden zijn meegenomen.
+
+GEEN ACCOUNT NODIG
+Geen registratie en geen advertenties. Gevolgde spelers en voorkeuren blijven op je telefoon. Google Play verwerkt de betalingen.
+
+Abonnementen
+Maandelijks en Jaarlijks zijn automatisch verlengende abonnementen, met een gratis proefperiode voor nieuwe abonnees die in aanmerking komen als Google Play die aanbiedt. Levenslang is een eenmalige aankoop. Google Play brengt je account in rekening wanneer je bevestigt of wanneer een proefperiode afloopt. Abonnementen worden automatisch verlengd tot je opzegt. Beheer of zeg op in Google Play onder Betalingen en abonnementen.
+
+Let op: de app zelf is in het Engels.
+
+Privacy: https://jackwallner.github.io/baseball/android-privacy.html
+Gebruiksvoorwaarden: https://jackwallner.github.io/baseball/android-terms.html
+
+StatScout is onafhankelijk en is niet gelieerd aan, goedgekeurd door of gesponsord door Major League Baseball, een team of Baseball Savant. Namen van spelers en teams en statistieken worden gebruikt ter identificatie en informatie.

@@ -1,0 +1,42 @@
+Lihat cerita bisbol di balik box score.
+
+StatScout menghadirkan persentil Statcast, statistik musim standar, dan performa terkini dalam satu aplikasi scouting bisbol MLB yang cepat. Temukan pemimpin liga, ikuti pemain favorit, dan lihat apa yang membuat seorang pemukul atau pitcher masuk kelas elite.
+
+PERSENTIL STATCAST SEKILAS
+Baca xwOBA, xBA, exit velocity, barrel rate, hard-hit rate, strikeout rate, dan lainnya sebagai bar persentil yang jelas. Merah menandai ujung atas, biru ujung bawah. Persentil lebih tinggi berarti performa lebih baik.
+
+PROFIL PEMAIN LENGKAP
+Jelajahi memukul, melempar, bertahan, dan berlari. Statistik standar tampil berdampingan dengan metrik lanjutan, dalam format angka bisbol yang familiar, dengan statistik terpisah untuk pemain two-way.
+
+PEMIMPIN MUSIM INI, GRATIS
+Cari pemain dan tim, ganti metrik, atur batas kualifikasi, dan susun daftar pemain yang Anda ikuti. Buka profil pemain dengan sekali ketuk. Pemimpin musim ini, scouting tim per musim, dan fitur mengikuti pemain tersedia gratis.
+
+PASCAMUSIM DALAM KONTEKS
+Data musim reguler dan pascamusim dipisahkan. Nilai bulan Oktober ditempatkan pada kurva persentil musim reguler tahun yang sama, dengan label jelas dan kualifikasi waktu bermain ala MLB.
+
+STATSCOUT+
+Buka seluruh perangkat scouting:
+- Tren: siapa yang sedang panas dan siapa yang mendingin di liga
+- Performa Terkini: 7, 15, atau 30 hari terakhir, dengan perubahan dari periode sebelumnya
+- Bandingkan Pemain: dua pemain berdampingan di semua metrik yang tersedia
+- Antar Musim: bandingkan musim seorang pemain hingga 2015
+- Performa Tim: 7, 15, atau 30 hari terakhir untuk semua 30 klub
+- Musim Lampau: jelajahi seluruh era Statcast
+
+Pilih Bulanan, Tahunan, atau Seumur Hidup. Harga paket dan kelayakan uji coba tampil di aplikasi sebelum pembelian.
+
+DIPERBARUI SETIAP MALAM
+Data bisbol diperbarui setiap malam. Tanggal cakupan menunjukkan pertandingan mana yang termasuk, sehingga Anda bisa menilai angka sesuai konteks.
+
+TANPA AKUN
+Tanpa pendaftaran dan tanpa iklan. Pemain yang Anda ikuti dan preferensi tetap di ponsel Anda. Pembayaran ditangani oleh Google Play.
+
+Langganan
+Bulanan dan Tahunan adalah langganan yang diperpanjang otomatis, dengan uji coba gratis untuk pelanggan baru yang memenuhi syarat bila ditawarkan oleh Google Play. Seumur Hidup adalah pembelian satu kali. Google Play menagih akun Anda saat Anda mengonfirmasi atau saat uji coba yang memenuhi syarat berakhir. Langganan diperpanjang otomatis sampai dibatalkan. Kelola atau batalkan di Google Play pada Pembayaran & langganan.
+
+Catatan: aplikasinya sendiri berbahasa Inggris.
+
+Kebijakan Privasi: https://jackwallner.github.io/baseball/android-privacy.html
+Ketentuan Penggunaan: https://jackwallner.github.io/baseball/android-terms.html
+
+StatScout bersifat independen dan tidak berafiliasi dengan, didukung, atau disponsori oleh Major League Baseball, tim mana pun, atau Baseball Savant. Nama pemain, nama tim, dan statistik digunakan untuk identifikasi dan informasi.

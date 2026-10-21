@@ -1,0 +1,42 @@
+Le baseball au-delà de la feuille de match.
+
+StatScout réunit les percentiles Statcast, les statistiques classiques de la saison et la forme récente dans une application de scouting baseball rapide. Trouvez les meneurs de la ligue, suivez vos joueurs et voyez ce qui fait un frappeur ou un lanceur d'élite.
+
+PERCENTILES STATCAST VISUELS
+Lisez xwOBA, xBA, vitesse de sortie, taux de barrels, taux de frappes dures, taux de retraits sur prises et plus encore sous forme de barres de percentiles claires. Le rouge marque le haut de l'échelle, le bleu le bas. Un percentile plus élevé signifie une meilleure performance.
+
+PROFILS DE JOUEURS COMPLETS
+Frappe, lancer, défense et course. La ligne statistique classique s'affiche à côté des métriques avancées, au format habituel du baseball, avec des stats séparées pour les joueurs à double rôle.
+
+MENEURS DE LA SAISON EN COURS, GRATUIT
+Cherchez des joueurs et des équipes, changez de métrique, ajustez le seuil de qualification et construisez votre liste de suivis. Un toucher ouvre le profil du joueur. Les meneurs de la saison en cours, le scouting des équipes sur la saison et le suivi de joueurs sont gratuits.
+
+LES SÉRIES ÉLIMINATOIRES EN CONTEXTE
+Les données de saison régulière et de séries restent séparées. Les valeurs d'octobre sont placées sur la courbe de percentiles de la saison régulière de la même année, avec des libellés clairs et la qualification au temps de jeu utilisée par la MLB.
+
+STATSCOUT+
+Débloquez la boîte à outils complète :
+- Tendances : qui est en feu et qui se refroidit dans toute la ligue
+- Forme récente : les 7, 15 ou 30 derniers jours, avec l'évolution par rapport à la période précédente
+- Comparaisons : deux joueurs côte à côte sur toutes les métriques disponibles
+- D'une année à l'autre : comparez les saisons d'un joueur jusqu'en 2015
+- Forme des équipes : les 7, 15 ou 30 derniers jours pour les 30 clubs
+- Saisons passées : explorez toute l'ère Statcast
+
+Choisissez Mensuel, Annuel ou À vie. Les prix et l'éligibilité à l'essai s'affichent dans l'application avant l'achat.
+
+MIS À JOUR CHAQUE NUIT
+Les données sont actualisées chaque nuit. Les dates de couverture indiquent quels matchs sont inclus, pour juger les chiffres dans leur contexte.
+
+AUCUN COMPTE REQUIS
+Pas d'inscription et pas de publicité. Vos joueurs suivis et vos préférences restent sur votre téléphone. Google Play gère les paiements.
+
+Abonnements
+Mensuel et Annuel sont des abonnements à renouvellement automatique, avec un essai gratuit pour les nouveaux abonnés éligibles lorsque Google Play le propose. À vie est un achat unique. Google Play débite votre compte lorsque vous confirmez ou à la fin d'un essai éligible. Les abonnements se renouvellent automatiquement jusqu'à leur résiliation. Gérez-les ou résiliez-les dans Google Play, rubrique Paiements et abonnements.
+
+À noter : l'application elle-même est en anglais.
+
+Confidentialité : https://jackwallner.github.io/baseball/android-privacy.html
+Conditions d'utilisation : https://jackwallner.github.io/baseball/android-terms.html
+
+StatScout est indépendant et n'est ni affilié, ni approuvé, ni parrainé par la Major League Baseball, une équipe ou Baseball Savant. Les noms des joueurs, des équipes et les statistiques sont utilisés à des fins d'identification et d'information.

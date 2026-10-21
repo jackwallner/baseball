@@ -1,0 +1,42 @@
+Baseball za hranicí výsledkové tabulky.
+
+StatScout spojuje percentily Statcast, klasické statistiky sezóny a aktuální formu v jedné rychlé baseballové aplikaci pro scouting. Najděte lídry ligy, sledujte své hráče a podívejte se, co dělá pálkaře nebo nadhazovače elitním.
+
+PERCENTILY STATCAST NA PRVNÍ POHLED
+Čtěte xwOBA, xBA, rychlost odpalu, podíl barrelů, tvrdých odpalů, strikeoutů a další jako přehledné percentilové pruhy. Červená značí horní část škály, modrá spodní. Vyšší percentil znamená lepší výkon.
+
+KOMPLETNÍ PROFILY HRÁČŮ
+Pálení, nadhazování, obrana a běh. Klasický statistický řádek je vedle pokročilých metrik, s oddělenými statistikami pro obousměrné hráče.
+
+LÍDŘI AKTUÁLNÍ SEZÓNY, ZDARMA
+Hledejte hráče a týmy, měňte metriku, upravte kvalifikační hranici a sestavte si seznam sledovaných. Jedno klepnutí otevře profil hráče. Lídři aktuální sezóny, scouting týmů a sledování hráčů jsou zdarma.
+
+PLAY-OFF V KONTEXTU
+Data základní části a play-off zůstávají oddělená. Říjnové hodnoty jsou umístěny na percentilovou křivku základní části stejného roku, s jasnými popisky a kvalifikací podle herního času, jakou používá MLB.
+
+STATSCOUT+
+Odemkněte kompletní scoutingové nástroje:
+- Trendy: kdo je v celé lize ve formě a kdo chladne
+- Aktuální forma: posledních 7, 15 nebo 30 dní, se změnou proti předchozímu období
+- Srovnání hráčů: dva hráči vedle sebe ve všech dostupných metrikách
+- Meziroční srovnání: sezóny hráče až do roku 2015
+- Forma týmů: posledních 7, 15 nebo 30 dní pro všech 30 klubů
+- Minulé sezóny: celá éra Statcast
+
+Vyberte měsíční, roční nebo doživotní plán. Ceny a nárok na zkušební období uvidíte v aplikaci před nákupem.
+
+AKTUALIZACE KAŽDOU NOC
+Data se obnovují každou noc. Data pokrytí ukazují, které zápasy jsou zahrnuty.
+
+BEZ ÚČTU
+Žádná registrace a žádné reklamy. Sledovaní hráči a nastavení zůstávají ve vašem telefonu. Platby vyřizuje Google Play.
+
+Předplatné
+Měsíční a roční plán jsou automaticky obnovovaná předplatná, se zkušebním obdobím zdarma pro oprávněné nové předplatitele, pokud ho Google Play nabízí. Doživotní plán je jednorázový nákup. Google Play strhne platbu z vašeho účtu při potvrzení nebo po skončení zkušebního období. Předplatné se automaticky obnovuje, dokud ho nezrušíte. Spravovat nebo zrušit ho můžete v Google Play v části Platby a předplatná.
+
+Upozornění: samotná aplikace je v angličtině.
+
+Ochrana soukromí: https://jackwallner.github.io/baseball/android-privacy.html
+Podmínky použití: https://jackwallner.github.io/baseball/android-terms.html
+
+StatScout je nezávislý a není přidružen k Major League Baseball, žádnému týmu ani Baseball Savant, ani jimi schválen či sponzorován. Jména hráčů, názvy týmů a statistiky slouží k identifikaci a informování.

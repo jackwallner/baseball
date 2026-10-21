@@ -1,0 +1,42 @@
+Baseball poza samym wynikiem.
+
+StatScout łączy percentyle Statcast, klasyczne statystyki sezonu i aktualną formę w jednej szybkiej aplikacji scoutingowej do baseballu. Znajdź liderów ligi, obserwuj swoich zawodników i zobacz, co sprawia, że pałkarz lub miotacz należy do elity.
+
+PERCENTYLE STATCAST W PIGUŁCE
+Odczytuj xwOBA, xBA, prędkość wybicia, odsetek barreli, mocnych uderzeń, strikeoutów i więcej jako czytelne paski percentyli. Czerwony to górna część skali, niebieski dolna. Wyższy percentyl oznacza lepszy wynik.
+
+PEŁNE PROFILE ZAWODNIKÓW
+Odbijanie, rzucanie, obrona i bieganie. Klasyczna linia statystyk stoi obok zaawansowanych metryk, z osobnymi statystykami dla zawodników dwufunkcyjnych.
+
+LIDERZY BIEŻĄCEGO SEZONU, ZA DARMO
+Szukaj zawodników i drużyn, zmieniaj metrykę, ustaw próg kwalifikacji i twórz listę obserwowanych. Jedno dotknięcie otwiera profil zawodnika. Liderzy bieżącego sezonu, scouting drużyn i obserwowanie zawodników są bezpłatne.
+
+POSTSEASON W KONTEKŚCIE
+Dane z sezonu zasadniczego i postseasonu są rozdzielone. Wartości z października trafiają na krzywą percentyli sezonu zasadniczego z tego samego roku, z jasnymi oznaczeniami i progiem czasu gry stosowanym przez MLB.
+
+STATSCOUT+
+Odblokuj pełny zestaw narzędzi:
+- Trendy: kto jest w gazie, a kto stygnie w całej lidze
+- Aktualna forma: ostatnie 7, 15 lub 30 dni, ze zmianą względem poprzedniego okresu
+- Porównanie zawodników: dwóch graczy obok siebie we wszystkich metrykach
+- Rok do roku: sezony zawodnika aż do 2015
+- Forma drużyn: ostatnie 7, 15 lub 30 dni dla wszystkich 30 klubów
+- Poprzednie sezony: cała era Statcast
+
+Wybierz plan miesięczny, roczny lub dożywotni. Ceny i dostępność okresu próbnego są widoczne w aplikacji przed zakupem.
+
+AKTUALIZACJA CO NOC
+Dane odświeżają się co noc. Daty zakresu pokazują, które mecze są uwzględnione.
+
+BEZ KONTA
+Bez rejestracji i bez reklam. Obserwowani zawodnicy i ustawienia zostają na Twoim telefonie. Płatności obsługuje Google Play.
+
+Subskrypcje
+Plan miesięczny i roczny to subskrypcje odnawiane automatycznie, z bezpłatnym okresem próbnym dla uprawnionych nowych subskrybentów, gdy Google Play go oferuje. Plan dożywotni to jednorazowy zakup. Google Play obciąża Twoje konto po potwierdzeniu lub po zakończeniu okresu próbnego. Subskrypcje odnawiają się automatycznie do czasu anulowania. Zarządzaj nimi lub anuluj w Google Play w sekcji Płatności i subskrypcje.
+
+Uwaga: sama aplikacja jest w języku angielskim.
+
+Prywatność: https://jackwallner.github.io/baseball/android-privacy.html
+Warunki korzystania: https://jackwallner.github.io/baseball/android-terms.html
+
+StatScout jest niezależny i nie jest powiązany z Major League Baseball, żadną drużyną ani Baseball Savant, ani przez nie popierany czy sponsorowany. Nazwiska zawodników, nazwy drużyn i statystyki służą identyfikacji i informacji.

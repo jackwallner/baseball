@@ -1,0 +1,42 @@
+Baseboll bortom boxscoren.
+
+StatScout samlar Statcast-percentiler, klassisk säsongsstatistik och aktuell form i en snabb scoutingapp för baseboll. Hitta ligans ledare, följ dina spelare och se vad som gör en slagman eller pitcher till elit.
+
+STATCAST-PERCENTILER I BILD
+Läs xwOBA, xBA, exit velocity, barrel-andel, hard-hit-andel, strikeout-andel och mer som tydliga percentilstaplar. Rött är toppen och blått botten. Högre percentil betyder bättre prestation.
+
+KOMPLETTA SPELARPROFILER
+Slag, pitching, fältspel och löpning. Den klassiska statistikraden visas bredvid de avancerade måtten, med separat statistik för tvåvägsspelare.
+
+ÅRETS LEDARE, GRATIS
+Sök spelare och lag, byt mått, justera kvalgränsen och bygg din lista över följda spelare. Ett tryck öppnar spelarprofilen. Årets ledare, lagscouting och att följa spelare är gratis.
+
+SLUTSPELET I SITT SAMMANHANG
+Grundserie och slutspel hålls isär. Oktobervärden placeras på samma års percentilkurva för grundserien, med tydliga etiketter och den kvalgräns för speltid som MLB använder.
+
+STATSCOUT+
+Lås upp hela scoutingverktyget:
+- Trender: vem som är het och vem som svalnar i hela ligan
+- Aktuell form: senaste 7, 15 eller 30 dagarna, med förändringen mot perioden innan
+- Jämför spelare: två spelare sida vid sida i alla tillgängliga mått
+- År mot år: en spelares säsonger tillbaka till 2015
+- Lagform: senaste 7, 15 eller 30 dagarna för alla 30 klubbar
+- Tidigare säsonger: hela Statcast-eran
+
+Välj Månadsvis, Årsvis eller Livstid. Priser och om du kan få en provperiod visas i appen före köpet.
+
+UPPDATERAS VARJE NATT
+Datan uppdateras varje natt. Datum för täckning visar vilka matcher som ingår.
+
+INGET KONTO
+Ingen registrering och ingen reklam. Följda spelare och inställningar stannar på din telefon. Google Play sköter betalningen.
+
+Prenumerationer
+Månadsvis och Årsvis är prenumerationer som förnyas automatiskt, med en kostnadsfri provperiod för berättigade nya prenumeranter när Google Play erbjuder den. Livstid är ett engångsköp. Google Play debiterar ditt konto när du bekräftar eller när en provperiod tar slut. Prenumerationer förnyas automatiskt tills du säger upp dem. Hantera eller säg upp i Google Play under Betalningar och prenumerationer.
+
+Obs: själva appen är på engelska.
+
+Integritet: https://jackwallner.github.io/baseball/android-privacy.html
+Användarvillkor: https://jackwallner.github.io/baseball/android-terms.html
+
+StatScout är fristående och är inte knutet till, godkänt av eller sponsrat av Major League Baseball, något lag eller Baseball Savant. Spelarnamn, lagnamn och statistik används för identifiering och information.

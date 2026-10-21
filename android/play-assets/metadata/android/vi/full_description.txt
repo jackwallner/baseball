@@ -1,0 +1,42 @@
+Xem câu chuyện bóng chày vượt ra ngoài bảng tỉ số.
+
+StatScout gom phân vị Statcast, thống kê mùa giải tiêu chuẩn và phong độ gần đây vào một ứng dụng tuyển trạch bóng chày MLB nhanh gọn. Tìm những người dẫn đầu giải, theo dõi cầu thủ của bạn và xem điều gì làm nên một tay đánh hay pitcher hàng đầu.
+
+PHÂN VỊ STATCAST TRONG NHÁY MẮT
+Đọc xwOBA, xBA, tốc độ bóng bật ra, tỉ lệ barrel, tỉ lệ đánh mạnh, tỉ lệ strikeout và nhiều chỉ số khác dưới dạng thanh phân vị rõ ràng. Đỏ là đầu cao, xanh là đầu thấp. Phân vị càng cao nghĩa là thành tích càng tốt.
+
+HỒ SƠ CẦU THỦ ĐẦY ĐỦ
+Khám phá đánh bóng, ném bóng, phòng ngự và chạy base. Dòng thống kê tiêu chuẩn nằm cạnh các chỉ số nâng cao, theo định dạng số quen thuộc của bóng chày, với thống kê riêng cho cầu thủ two-way.
+
+DẪN ĐẦU MÙA HIỆN TẠI, MIỄN PHÍ
+Tìm cầu thủ và đội, đổi chỉ số, chỉnh ngưỡng đủ điều kiện và lập danh sách theo dõi. Mở hồ sơ cầu thủ chỉ với một chạm. Bảng dẫn đầu mùa hiện tại, tuyển trạch đội theo mùa và theo dõi cầu thủ đều miễn phí.
+
+HẬU MÙA GIẢI TRONG BỐI CẢNH
+Dữ liệu mùa giải chính thức và hậu mùa giải được tách riêng. Giá trị tháng Mười được đặt trên đường phân vị của mùa giải chính thức cùng năm, có nhãn rõ ràng và ngưỡng thời gian thi đấu theo kiểu MLB.
+
+STATSCOUT+
+Mở khóa bộ công cụ tuyển trạch đầy đủ:
+- Xu hướng: ai đang lên phong độ và ai đang chững lại trong giải
+- Phong độ gần đây: 7, 15 hoặc 30 ngày qua, kèm thay đổi so với giai đoạn trước
+- So sánh cầu thủ: hai cầu thủ cạnh nhau trên mọi chỉ số có sẵn
+- Qua từng năm: so sánh các mùa của một cầu thủ từ 2015
+- Phong độ đội: 7, 15 hoặc 30 ngày qua cho cả 30 câu lạc bộ
+- Mùa giải cũ: khám phá toàn bộ kỷ nguyên Statcast
+
+Chọn gói Tháng, Năm hoặc Trọn đời. Giá gói và điều kiện dùng thử hiển thị trong ứng dụng trước khi mua.
+
+CẬP NHẬT MỖI ĐÊM
+Dữ liệu bóng chày được làm mới mỗi đêm. Ngày bao phủ cho biết những trận nào được tính, để bạn đánh giá con số đúng bối cảnh.
+
+KHÔNG CẦN TÀI KHOẢN
+Không cần đăng ký và không có quảng cáo. Cầu thủ đang theo dõi và tùy chọn được lưu trên điện thoại của bạn. Google Play xử lý thanh toán.
+
+Gói đăng ký
+Gói Tháng và Năm là gói đăng ký tự động gia hạn, có dùng thử miễn phí cho người đăng ký mới đủ điều kiện khi Google Play cung cấp. Trọn đời là giao dịch mua một lần. Google Play tính phí tài khoản của bạn khi bạn xác nhận hoặc khi thời gian dùng thử đủ điều kiện kết thúc. Gói đăng ký tự động gia hạn cho đến khi bị hủy. Quản lý hoặc hủy trong Google Play tại mục Thanh toán và gói đăng ký.
+
+Lưu ý: bản thân ứng dụng dùng tiếng Anh.
+
+Chính sách quyền riêng tư: https://jackwallner.github.io/baseball/android-privacy.html
+Điều khoản sử dụng: https://jackwallner.github.io/baseball/android-terms.html
+
+StatScout là ứng dụng độc lập, không liên kết, không được bảo trợ hay tài trợ bởi Major League Baseball, bất kỳ đội nào hoặc Baseball Savant. Tên cầu thủ, tên đội và số liệu thống kê được dùng để nhận diện và cung cấp thông tin.

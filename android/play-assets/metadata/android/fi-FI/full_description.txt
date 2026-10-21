@@ -1,0 +1,42 @@
+Baseball tulostaulun takana.
+
+StatScout kokoaa Statcast-persentiilit, kauden perinteiset tilastot ja tuoreen vireen yhteen nopeaan baseballin scouting-sovellukseen. Löydä liigan kärkinimet, seuraa pelaajiasi ja näe, mikä tekee lyöjästä tai syöttäjästä huippuluokkaa.
+
+STATCAST-PERSENTIILIT SELKEÄSTI
+Lue xwOBA, xBA, exit velocity, barrel-osuus, kovien lyöntien osuus, strikeout-osuus ja muut selkeinä persentiilipalkkeina. Punainen on kärkipää ja sininen häntäpää. Korkeampi persentiili tarkoittaa parempaa suoritusta.
+
+KATTAVAT PELAAJAPROFIILIT
+Lyönti, syöttö, kenttäpeli ja juoksu. Perinteinen tilastorivi näkyy edistyneiden mittarien rinnalla, ja kaksisuuntaisille pelaajille on omat tilastot.
+
+KULUVAN KAUDEN KÄRKI, ILMAINEN
+Hae pelaajia ja joukkueita, vaihda mittaria, säädä kelpoisuusrajaa ja kokoa seurattujen lista. Yksi napautus avaa pelaajaprofiilin. Kuluvan kauden kärkilistat, joukkueiden scouting ja pelaajien seuraaminen ovat ilmaisia.
+
+PUDOTUSPELIT OIKEASSA YHTEYDESSÄ
+Runkosarjan ja pudotuspelien tiedot pidetään erillään. Lokakuun arvot sijoitetaan saman vuoden runkosarjan persentiilikäyrälle selkein merkinnöin ja MLB:n peliaikarajalla.
+
+STATSCOUT+
+Avaa koko scouting-työkalupakki:
+- Trendit: kuka on kuumana ja kuka viilenee koko liigassa
+- Tuore vire: viimeiset 7, 15 tai 30 päivää ja muutos edelliseen jaksoon
+- Pelaajavertailu: kaksi pelaajaa rinnakkain kaikilla mittareilla
+- Vuosivertailu: pelaajan kaudet vuoteen 2015 asti
+- Joukkueiden vire: viimeiset 7, 15 tai 30 päivää kaikille 30 seuralle
+- Aiemmat kaudet: koko Statcast-aikakausi
+
+Valitse Kuukausi, Vuosi tai Elinikäinen. Hinnat ja kokeilujakson saatavuus näkyvät sovelluksessa ennen ostoa.
+
+PÄIVITTYY JOKA YÖ
+Tiedot päivittyvät joka yö. Kattavuuspäivät kertovat, mitkä ottelut ovat mukana.
+
+EI TILIÄ
+Ei rekisteröitymistä eikä mainoksia. Seuratut pelaajat ja asetukset pysyvät puhelimessasi. Maksut hoitaa Google Play.
+
+Tilaukset
+Kuukausi ja Vuosi ovat automaattisesti uusiutuvia tilauksia, ja kelpoisille uusille tilaajille voi olla ilmainen kokeilujakso, kun Google Play tarjoaa sen. Elinikäinen on kertaosto. Google Play veloittaa tiliäsi, kun vahvistat tai kun kokeilujakso päättyy. Tilaukset uusiutuvat automaattisesti, kunnes peruutat ne. Hallitse tai peru Google Playssa kohdassa Maksut ja tilaukset.
+
+Huomaa: itse sovellus on englanninkielinen.
+
+Tietosuoja: https://jackwallner.github.io/baseball/android-privacy.html
+Käyttöehdot: https://jackwallner.github.io/baseball/android-terms.html
+
+StatScout on itsenäinen eikä ole Major League Baseballin, minkään joukkueen tai Baseball Savantin kumppani, hyväksymä tai sponsoroima. Pelaajien ja joukkueiden nimiä sekä tilastoja käytetään tunnistamiseen ja tiedottamiseen.

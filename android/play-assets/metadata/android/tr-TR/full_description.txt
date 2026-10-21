@@ -1,0 +1,42 @@
+Beyzbolu skor tabelasının ötesinde görün.
+
+StatScout, Statcast yüzdeliklerini, sezonun klasik istatistiklerini ve son formu tek bir hızlı beyzbol scouting uygulamasında toplar. Liganın liderlerini bulun, oyuncularınızı takip edin ve bir vurucuyu ya da atıcıyı elit yapan şeyi görün.
+
+GÖRSEL STATCAST YÜZDELİKLERİ
+xwOBA, xBA, çıkış hızı, barrel oranı, sert vuruş oranı, strikeout oranı ve daha fazlasını net yüzdelik çubuklarıyla okuyun. Kırmızı üst ucu, mavi alt ucu gösterir. Daha yüksek yüzdelik daha iyi performans demektir.
+
+EKSİKSİZ OYUNCU PROFİLLERİ
+Vuruş, atış, savunma ve koşu. Klasik istatistik satırı gelişmiş metriklerin yanında yer alır; çift yönlü oyuncular için istatistikler ayrı tutulur.
+
+BU SEZONUN LİDERLERİ, ÜCRETSİZ
+Oyuncu ve takım arayın, metriği değiştirin, yeterlilik eşiğini ayarlayın ve takip listenizi oluşturun. Tek dokunuşla oyuncu profili açılır. Bu sezonun liderleri, takım scouting'i ve oyuncu takibi ücretsizdir.
+
+PLAYOFF BAĞLAMINDA
+Normal sezon ve playoff verileri ayrı tutulur. Ekim değerleri aynı yılın normal sezon yüzdelik eğrisine yerleştirilir; açık etiketler ve MLB'nin kullandığı oyun süresi eşiğiyle.
+
+STATSCOUT+
+Tüm scouting araçlarının kilidini açın:
+- Trendler: ligde kim yükselişte, kim düşüşte
+- Son form: son 7, 15 veya 30 gün ve bir önceki döneme göre değişim
+- Oyuncu karşılaştırma: iki oyuncu yan yana, tüm metriklerde
+- Yıldan yıla: bir oyuncunun 2015'e kadar uzanan sezonları
+- Takım formu: 30 kulübün son 7, 15 veya 30 günü
+- Geçmiş sezonlar: tüm Statcast dönemi
+
+Aylık, Yıllık veya Ömür boyu seçin. Fiyatlar ve deneme uygunluğu satın almadan önce uygulamada gösterilir.
+
+HER GECE GÜNCELLENİR
+Veriler her gece yenilenir. Kapsam tarihleri hangi maçların dahil olduğunu gösterir.
+
+HESAP GEREKMEZ
+Kayıt yok, reklam yok. Takip ettiğiniz oyuncular ve tercihleriniz telefonunuzda kalır. Ödemeleri Google Play yönetir.
+
+Abonelikler
+Aylık ve Yıllık otomatik yenilenen aboneliklerdir; Google Play sunduğunda uygun yeni aboneler için ücretsiz deneme vardır. Ömür boyu tek seferlik bir satın alımdır. Google Play, onayladığınızda veya uygun bir deneme bittiğinde hesabınızdan ücret alır. Abonelikler iptal edilene kadar otomatik yenilenir. Google Play'de Ödemeler ve abonelikler bölümünden yönetebilir veya iptal edebilirsiniz.
+
+Not: uygulamanın kendisi İngilizcedir.
+
+Gizlilik: https://jackwallner.github.io/baseball/android-privacy.html
+Kullanım koşulları: https://jackwallner.github.io/baseball/android-terms.html
+
+StatScout bağımsızdır; Major League Baseball, herhangi bir takım veya Baseball Savant ile bağlantılı değildir ve bunlar tarafından onaylanmamış ya da desteklenmemiştir. Oyuncu adları, takım adları ve istatistikler tanımlama ve bilgilendirme amacıyla kullanılır.

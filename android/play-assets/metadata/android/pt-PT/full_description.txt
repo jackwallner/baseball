@@ -1,0 +1,42 @@
+O basebol para lá do resultado.
+
+O StatScout junta percentis Statcast, estatísticas clássicas da época e a forma recente numa app de scouting de basebol rápida. Encontre os líderes da liga, siga os seus jogadores e perceba o que faz de um batedor ou lançador um jogador de elite.
+
+PERCENTIS STATCAST VISUAIS
+Leia xwOBA, xBA, velocidade de saída, taxa de barrels, batidas fortes, strikeouts e mais em barras de percentil claras. O vermelho marca o topo e o azul a base. Um percentil mais alto significa melhor desempenho.
+
+PERFIS COMPLETOS DE JOGADORES
+Batida, lançamento, defesa e corrida. A linha estatística clássica surge ao lado das métricas avançadas, com valores separados para jogadores de dupla função.
+
+LÍDERES DA ÉPOCA ATUAL, GRÁTIS
+Pesquise jogadores e equipas, mude a métrica, ajuste o mínimo de qualificação e crie a sua lista de seguidos. Um toque abre o perfil do jogador. Os líderes da época atual, o scouting de equipas e seguir jogadores são grátis.
+
+PÓS-ÉPOCA EM CONTEXTO
+Os dados da época regular e da pós-época ficam separados. Os valores de outubro são colocados na curva de percentis da época regular do mesmo ano, com etiquetas claras e a qualificação por tempo de jogo usada pela MLB.
+
+STATSCOUT+
+Desbloqueie todas as ferramentas de scouting:
+- Tendências: quem está em alta e quem está a arrefecer em toda a liga
+- Forma recente: últimos 7, 15 ou 30 dias, com a variação face ao período anterior
+- Comparar jogadores: dois jogadores lado a lado em todas as métricas
+- Ano a ano: compare as épocas de um jogador até 2015
+- Forma das equipas: últimos 7, 15 ou 30 dias dos 30 clubes
+- Épocas anteriores: explore toda a era Statcast
+
+Escolha Mensal, Anual ou Vitalício. Os preços e a elegibilidade para o período experimental aparecem na app antes da compra.
+
+ATUALIZADO TODAS AS NOITES
+Os dados são atualizados todas as noites. As datas de cobertura mostram que jogos estão incluídos.
+
+SEM CONTA
+Sem registo e sem anúncios. Os jogadores seguidos e as preferências ficam no seu telemóvel. O Google Play trata dos pagamentos.
+
+Subscrições
+Mensal e Anual são subscrições com renovação automática, com período experimental gratuito para novos subscritores elegíveis quando o Google Play o disponibiliza. Vitalício é uma compra única. O Google Play cobra na sua conta quando confirma ou quando termina um período experimental elegível. As subscrições renovam-se automaticamente até serem canceladas. Faça a gestão ou cancele no Google Play, em Pagamentos e subscrições.
+
+Atenção: a app em si está em inglês.
+
+Privacidade: https://jackwallner.github.io/baseball/android-privacy.html
+Termos de utilização: https://jackwallner.github.io/baseball/android-terms.html
+
+O StatScout é independente e não é afiliado, apoiado nem patrocinado pela Major League Baseball, por qualquer equipa ou pelo Baseball Savant. Os nomes de jogadores e equipas e as estatísticas são usados para identificação e informação.

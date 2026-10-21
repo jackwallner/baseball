@@ -1,0 +1,40 @@
+See the baseball story beyond the box score.
+
+StatScout brings Statcast percentiles, standard season stats, and recent form into one fast baseball scouting app. Find league leaders, follow your players, and see what makes an elite hitter or pitcher.
+
+VISUAL STATCAST PERCENTILES
+Read xwOBA, xBA, exit velocity, barrel rate, hard-hit rate, strikeout rate, and more as clear percentile bars. Red marks the high end and blue the low end. Higher percentiles mean better performance.
+
+COMPLETE PLAYER PROFILES
+Explore hitting, pitching, fielding, and running. See the standard line alongside advanced metrics, with baseball's familiar number formatting and separate stats for two-way players.
+
+CURRENT-SEASON LEADERS, FREE
+Search players and teams, change the metric, adjust the qualifier, and build your Following list. Open a player profile in one tap. Current-season leaders, team season scouting, and following are free.
+
+POSTSEASON IN CONTEXT
+Regular-season and postseason data stay separate. October player values are placed on the same year's regular-season percentile curve, with clear labels and MLB-style playing-time qualification.
+
+STATSCOUT+
+Unlock the full scouting toolkit:
+- Trends: see who is heating up and cooling off across the league
+- Recent Form: last 7, 15, or 30 calendar days, with change from the prior window
+- Player Comparisons: two players side by side across every available metric
+- Year-over-Year: compare a player's seasons back to 2015
+- Team Recent Form: last 7, 15, or 30 days for all 30 clubs
+- Historical Seasons: explore the full Statcast era
+
+Choose Monthly, Yearly, or Lifetime. Plan prices and trial eligibility appear in the app before purchase.
+
+UPDATED NIGHTLY
+The baseball data pipeline refreshes nightly. Coverage dates show which games are included, so you can judge the numbers in context.
+
+NO ACCOUNT REQUIRED
+No sign-up and no ads. Followed players and preferences stay on your phone. Google Play handles payments.
+
+Subscriptions
+Monthly and Yearly are auto-renewing subscriptions, with a free trial for eligible new subscribers when offered by Google Play. Lifetime is a one-time purchase. Google Play charges your account when you confirm or when an eligible trial ends. Subscriptions renew automatically until cancelled. Manage or cancel in Google Play under Payments & subscriptions.
+
+Privacy Policy: https://jackwallner.github.io/baseball/android-privacy.html
+Terms of Use: https://jackwallner.github.io/baseball/android-terms.html
+
+StatScout is independent and is not affiliated with, endorsed by, or sponsored by Major League Baseball, any team, or Baseball Savant. Player names, team names, and statistics are used for identification and information.

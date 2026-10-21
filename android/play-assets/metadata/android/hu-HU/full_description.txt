@@ -1,0 +1,42 @@
+A baseball az eredményjelzőn túl.
+
+A StatScout egyetlen gyors baseball scouting alkalmazásba hozza a Statcast percentiliseket, a szezon klasszikus statisztikáit és az aktuális formát. Találd meg a liga élmezőnyét, kövesd a játékosaidat, és nézd meg, mitől elit egy ütőjátékos vagy dobó.
+
+STATCAST PERCENTILISEK EGY PILLANTÁSRA
+Olvasd az xwOBA, xBA, exit velocity, barrel arány, kemény ütések, strikeoutok és más mutatók értékét áttekinthető percentilis sávokként. A piros a skála teteje, a kék az alja. A magasabb percentilis jobb teljesítményt jelent.
+
+TELJES JÁTÉKOSPROFILOK
+Ütés, dobás, védekezés és futás. A klasszikus statisztikai sor a haladó mutatók mellett áll, a kétirányú játékosoknak külön számokkal.
+
+AZ IDEI SZEZON ÉLMEZŐNYE, INGYEN
+Keress játékosokat és csapatokat, válts mutatót, állítsd a kvalifikációs határt, és építsd fel a követett játékosok listáját. Egy koppintás megnyitja a profilt. Az idei szezon élmezőnye, a csapatok scoutingja és a követés ingyenes.
+
+RÁJÁTSZÁS KONTEXTUSBAN
+Az alapszakasz és a rájátszás adatai külön maradnak. Az októberi értékek ugyanazon év alapszakaszának percentilis görbéjére kerülnek, egyértelmű jelöléssel és az MLB játékidő szerinti kvalifikációjával.
+
+STATSCOUT+
+Oldd fel a teljes scouting eszköztárat:
+- Trendek: ki van formában és ki hűl le az egész ligában
+- Aktuális forma: az utolsó 7, 15 vagy 30 nap, az előző időszakhoz mért változással
+- Játékos-összevetés: két játékos egymás mellett minden mutatóban
+- Évről évre: egy játékos szezonjai egészen 2015-ig
+- Csapatforma: az utolsó 7, 15 vagy 30 nap mind a 30 klubnál
+- Korábbi szezonok: a teljes Statcast-korszak
+
+Válassz havi, éves vagy élethosszig tartó csomagot. Az árak és a próbaidőszak elérhetősége vásárlás előtt megjelennek az alkalmazásban.
+
+MINDEN ÉJJEL FRISSÜL
+Az adatok minden éjjel frissülnek. A lefedettségi dátumok mutatják, mely meccsek szerepelnek.
+
+NINCS FIÓK
+Nincs regisztráció és nincs reklám. A követett játékosok és a beállítások a telefonodon maradnak. A fizetést a Google Play intézi.
+
+Előfizetések
+A havi és az éves csomag automatikusan megújuló előfizetés, ingyenes próbaidőszakkal a jogosult új előfizetőknek, ha a Google Play kínálja. Az élethosszig tartó csomag egyszeri vásárlás. A Google Play a megerősítéskor vagy a próbaidőszak végén terheli a fiókodat. Az előfizetések automatikusan megújulnak, amíg le nem mondod őket. Kezelni vagy lemondani a Google Play Fizetések és előfizetések menüjében tudod.
+
+Fontos: maga az alkalmazás angol nyelvű.
+
+Adatvédelem: https://jackwallner.github.io/baseball/android-privacy.html
+Felhasználási feltételek: https://jackwallner.github.io/baseball/android-terms.html
+
+A StatScout független, és nem áll kapcsolatban a Major League Baseballal, egyetlen csapattal vagy a Baseball Savanttal, és ezek nem is támogatják vagy szponzorálják. A játékosok és csapatok nevei, valamint a statisztikák azonosítási és tájékoztatási célt szolgálnak.
