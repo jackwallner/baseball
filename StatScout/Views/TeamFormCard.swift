@@ -311,14 +311,7 @@ struct TeamRankingsCard: View {
     /// decide whether the earliest game counts.
     private var sideLogs: [PlayerGameLog] {
         let ofSide = logs.filter { $0.playerType == side.playerType }
-        guard let anchor = ofSide.map(\.gameDate).max() else { return [] }
-        let calendar = Calendar.current
-        let start = calendar.date(
-            byAdding: .day,
-            value: -(windowDays - 1),
-            to: calendar.startOfDay(for: anchor)
-        ) ?? anchor
-        return ofSide.filter { $0.gameDate >= start }
+        return RecentFormWindow.logs(ofSide, endingOnNewestGameWithin: windowDays)
     }
 
     private var recentWindow: RecentFormWindow? {

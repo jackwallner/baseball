@@ -145,6 +145,35 @@ struct RecentFormWindow {
         )
     }
 
+    /// A team card's logs for the `days` calendar days that end on the newest
+    /// game, not on today: the pipeline runs overnight, so a clock-anchored
+    /// window silently loses its oldest days. Start-of-day, so the hour the
+    /// app is opened does not decide whether the earliest game counts.
+    static func logs(
+        _ logs: [PlayerGameLog],
+        endingOnNewestGameWithin days: Int,
+        calendar: Calendar = .current
+    ) -> [PlayerGameLog] {
+        guard let anchor = logs.map(\.gameDate).max() else { return [] }
+        let start = calendar.date(
+            byAdding: .day,
+            value: -(days - 1),
+            to: calendar.startOfDay(for: anchor)
+        ) ?? anchor
+        return logs.filter { $0.gameDate >= start }
+    }
+
+    /// A player card's logs from the last `days` calendar days before `now`.
+    static func logs(
+        _ logs: [PlayerGameLog],
+        lastDays days: Int,
+        now: Date = .now,
+        calendar: Calendar = .current
+    ) -> [PlayerGameLog] {
+        let cutoff = calendar.date(byAdding: .day, value: -days, to: now) ?? now
+        return logs.filter { $0.gameDate >= cutoff }
+    }
+
     private enum Weight { case pa, bbe }
 
     /// Which denominator a metric is naturally a rate of. EV / HardHit% /

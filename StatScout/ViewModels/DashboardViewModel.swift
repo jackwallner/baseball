@@ -51,7 +51,7 @@ final class DashboardViewModel {
     var sortDescending = true
     // Defaults to current year, but `load()` will reset to the most recent season
     // that actually has data once the cache/network resolves so first paint isn't an empty state.
-    var selectedSeason: Int = Calendar.current.component(.year, from: Date()) {
+    var selectedSeason: Int = StatScoutSeason.calendarYear() {
         didSet {
             guard oldValue != selectedSeason else { return }
             // Past seasons live in the bundled historical cache, which loads
@@ -386,16 +386,22 @@ final class DashboardViewModel {
         // the gap, or by November the request would ask for October games of a
         // season that ended in September and the card would come back empty.
         let anchor = phase == .postseason ? postseasonThrough : dataThrough
-        var since = sinceDate
-        if season == StatScoutSeason.current, let anchor, anchor < .now {
-            since = sinceDate.addingTimeInterval(-Date.now.timeIntervalSince(anchor))
-        }
+        let since = season == StatScoutSeason.current
+            ? Self.slidWindowStart(sinceDate, anchor: anchor, now: .now)
+            : sinceDate
         return try await provider.fetchTeamGameLogs(
             team: team,
             season: season,
             sinceDate: since,
             phase: phase
         )
+    }
+
+    /// `since` slid back by however far `now` has run ahead of the newest game
+    /// in the data, so the window keeps its full length.
+    nonisolated static func slidWindowStart(_ since: Date, anchor: Date?, now: Date) -> Date {
+        guard let anchor, anchor < now else { return since }
+        return since.addingTimeInterval(-now.timeIntervalSince(anchor))
     }
 
     init(provider: StatcastProviding, cache: PlayerCaching? = nil) {

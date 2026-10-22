@@ -30,8 +30,7 @@ struct RecentFormCard: View {
     private var smallSamplePAThreshold: Int { isPitcher ? 30 : 15 }
 
     private var windowLogs: [PlayerGameLog] {
-        let cutoff = Calendar.current.date(byAdding: .day, value: -windowDays, to: .now) ?? .now
-        return logs.filter { $0.gameDate >= cutoff }
+        RecentFormWindow.logs(logs, lastDays: windowDays)
     }
 
     private var window: RecentFormWindow? {

@@ -42,6 +42,14 @@ enum StatScoutSeason {
     /// 2015, and the bundled players-historical.plist ships all of it, so the
     /// season menus can list every year without waiting on a fetch.
     static let earliest = 2015
+
+    /// The calendar year of `date` in `calendar`'s zone: the season a fresh
+    /// launch opens on before any data says otherwise. Split out so the New
+    /// Year flip, when this runs ahead of `current`, can be tested at a fixed
+    /// clock.
+    static func calendarYear(on date: Date = .now, calendar: Calendar = .current) -> Int {
+        calendar.component(.year, from: date)
+    }
 }
 
 enum StatScoutLegal {

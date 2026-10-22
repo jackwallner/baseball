@@ -7,14 +7,14 @@ extension Date {
     /// ISO8601 decoding strategy the rest of the payload uses. Anchoring them
     /// at local midnight is what makes "Through Jul 28" mean the same calendar
     /// day the pipeline closed out, whatever zone the reader is in.
-    static func fromPostgresDate(_ raw: String) -> Date? {
+    static func fromPostgresDate(_ raw: String, calendar: Calendar = .current) -> Date? {
         let bits = raw.split(separator: "-").compactMap { Int($0) }
         guard bits.count == 3 else { return nil }
         var parts = DateComponents()
         parts.year = bits[0]
         parts.month = bits[1]
         parts.day = bits[2]
-        return Calendar.current.date(from: parts)
+        return calendar.date(from: parts)
     }
 }
 
