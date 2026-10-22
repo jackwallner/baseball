@@ -11,6 +11,7 @@ Developer notes and historical audits for this repository. The published site re
 - [aso827.md](audits/aso827.md): Baseball Savvy StatScout ASO Audit
 - [audit823.md](audits/audit823.md): Baseball Savvy StatScout audit
 - [ios27StatScout.md](audits/ios27StatScout.md): iOS 27 compatibility audit: Baseball StatScout
+- [interrupted-persona-audit.md](audits/interrupted-persona-audit.md): Interrupted-user persona UX audit (state loss on background, kill, flaky return)
 
 ## Marketing
 
