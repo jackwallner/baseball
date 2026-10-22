@@ -55,3 +55,16 @@ No motion problem seen in source for these flows. Frame rate: not measured here.
 
 ## Suggested priority
 1 (postseason snap), 6 (Pro cache), 3 (SceneStorage for tab/category/season/Compare), 2 (stale banner), then 4, 5, 7.
+
+## Evidence status (runtime)
+
+GitHub run 39857492170 via `gh-sim test --only StatScoutUITests/InterruptedAuditUITests` on iPhone 17, iOS 27.0, `-DuoSeed` fixtures, no SDK keys. 4 tests ran: 3 passed, 1 failed (harness, see below). Screenshots: `~/fleet-evidence/shift-audit-baseball-interrupted-2-1792706916/shots/`. Frame rate: not measured here.
+
+Runtime observed:
+- **Onboarding (finding 5): confirmed.** Page 2 survives a Home trip (same process, screenshot 03) but a kill and relaunch returns to page 1 (04, observation "restarted at page 1 after kill: true").
+- **Search text (finding 3): confirmed.** "Skubal" typed in the Stats search survives a Home trip (31) and is gone after a kill (32, "search field after kill: false"); the board is back on Hitting with the default season and the "Loading past seasons..." bar runs again (14).
+- **Profile: not verified at runtime.** `testStatsAndProfileInterrupted` failed before the interruption: after typing "Judge" the single result row was tapped but the profile never opened (screenshot 12 still shows the search results with the keyboard up; `sharePlayerCard` absent in the UI hierarchy both before and after the trip). That is either a harness issue (first tap only resigning the keyboard) or a real "result row needs a second tap" bug; the run cannot tell. Next action: rerun the test after commit `test: retry search result tap` (retry added, not yet run).
+- **Compare (finding 3): not verified.** The seeded user is non-Pro, so Compare shows the blurred paywall (20, 25). The "slot A still Aaron Judge: true" observations are a false positive from the followed-players list, which also contains Judge. Needs a Pro-seeded run to test the slot survival claim.
+- **Layout observation (Low, runtime observed):** on the Compare tab the Pro pitch text under the blur ("Stack any two players or any two clubs...") runs behind the floating tab bar and overlaps its labels at the scroll position in screenshots 20 and 25. Legibility of the tab labels suffers, the pitch is partly hidden. Fix: bottom content inset equal to the tab bar height on the gated Compare screen.
+
+Findings 1, 2, 4, 6, 7, 8 remain source-only suspicions.

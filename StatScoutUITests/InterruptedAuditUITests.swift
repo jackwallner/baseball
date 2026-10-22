@@ -67,7 +67,11 @@ final class InterruptedAuditUITests: XCTestCase {
         let judge = app.staticTexts["Aaron Judge"].firstMatch
         guard judge.waitForExistence(timeout: 20) else { return false }
         judge.tap()
-        return true
+        if app.buttons["sharePlayerCard"].waitForExistence(timeout: 5) { return true }
+        // First tap may only resign the keyboard; tap the row again.
+        note("first tap on the search result did not open the profile; retrying")
+        judge.tap()
+        return app.buttons["sharePlayerCard"].waitForExistence(timeout: 10)
     }
 
     // MARK: - Flows
@@ -118,7 +122,7 @@ final class InterruptedAuditUITests: XCTestCase {
         // Back to hitting for the search/profile flow.
         let hitting = app.buttons["HITTING"]
         if hitting.exists { hitting.tap() }
-        XCTAssertTrue(openJudgeViaSearch(), "Search should find Aaron Judge")
+        XCTAssertTrue(openJudgeViaSearch(), "Search result should open Aaron Judge profile")
         sleep(2)
         let maybeLater = app.buttons["Maybe later"]
         if maybeLater.waitForExistence(timeout: 3) { maybeLater.tap() }
@@ -171,7 +175,7 @@ final class InterruptedAuditUITests: XCTestCase {
         interrupt()
         shot("23-compare-after-background")
         let filled = app.staticTexts["Aaron Judge"].exists
-        note("slot A still Aaron Judge after background: \(filled)")
+        note("Aaron Judge text after background: \(filled) (also in the followed list, so not proof of slot A; Compare is Pro-gated and blurred for this non-Pro seed)")
 
         // Leave the tab and come back.
         tab("Stats").tap()
