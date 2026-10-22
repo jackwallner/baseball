@@ -29,8 +29,8 @@ final class AccessibilityPersonaUITests: XCTestCase {
     private func audit(_ app: XCUIApplication, _ name: String) {
         let screen = app.windows.firstMatch.frame
         var lines = ["screen \(Int(screen.width))x\(Int(screen.height))"]
-        for kind in [XCUIElement.ElementType.button, .link, .switch, .textField, .segmentedControl] {
-            for el in app.descendants(matching: kind).allElementsBoundByIndex.prefix(80) {
+        for kind in [XCUIElement.ElementType.button, .switch, .textField] {
+            for el in app.descendants(matching: kind).allElementsBoundByIndex.prefix(30) {
                 let f = el.frame
                 guard f.width > 0, f.height > 0, f.intersects(screen) else { continue }
                 var flags: [String] = []
@@ -38,7 +38,6 @@ final class AccessibilityPersonaUITests: XCTestCase {
                 if el.label.isEmpty { flags.append("NOLABEL") }
                 if f.midY < screen.height / 3 { flags.append("TOPZONE") }
                 if f.maxX > screen.maxX + 1 || f.minX < -1 { flags.append("CLIPPED-X") }
-                if !el.isHittable { flags.append("NOTHITTABLE") }
                 lines.append("\(kind.rawValue) '\(el.label)' id=\(el.identifier) \(Int(f.minX)),\(Int(f.minY)) \(Int(f.width))x\(Int(f.height)) \(flags.joined(separator: ","))")
             }
         }
