@@ -26,8 +26,10 @@ final class InterruptedAuditUITests: XCTestCase {
 
     // MARK: - Helpers
 
-    private func launch(onboarding: Bool = false) {
+    private func launch(onboarding: Bool = false, pro: Bool = false) {
         app.launchArguments = ["-DuoSeed"]
+        // Test-only entitlement hook (StoreService), no RevenueCat key involved.
+        if pro { app.launchEnvironment["STATSCOUT_FORCE_PRO"] = "1" }
         if onboarding { app.launchArguments += ["-hasCompletedOnboarding", "NO"] }
         app.launch()
     }
@@ -146,9 +148,9 @@ final class InterruptedAuditUITests: XCTestCase {
         note("trial pitch/paywall visible right after relaunch: \(maybeAgain.exists)")
     }
 
-    /// Compare tab: fill slot A, interrupt, kill.
+    /// Compare tab (Pro-seeded so the slots are usable): fill slot A, interrupt, kill.
     func testCompareSlotInterrupted() throws {
-        launch()
+        launch(pro: true)
         XCTAssertTrue(app.buttons["Search"].waitForExistence(timeout: 30))
         let compare = tab("Compare")
         XCTAssertTrue(compare.waitForExistence(timeout: 10), "Compare tab should exist")
@@ -157,25 +159,30 @@ final class InterruptedAuditUITests: XCTestCase {
         shot("20-compare-empty")
 
         let slotA = app.buttons.matching(NSPredicate(format: "label CONTAINS 'Player A'")).firstMatch
+        var picked = false
         if slotA.waitForExistence(timeout: 5) {
             slotA.tap()
             let judge = app.buttons.matching(NSPredicate(format: "label CONTAINS 'Aaron Judge'")).firstMatch
-            if judge.waitForExistence(timeout: 20) {
+            if judge.waitForExistence(timeout: 30) {
                 judge.tap()
+                picked = true
             } else {
-                note("picker had no Aaron Judge row within 20s (history load?)")
+                note("picker had no Aaron Judge row within 30s (history load?)")
                 shot("21-compare-picker")
             }
-            sleep(1)
+            sleep(2)
         } else {
             note("Player A slot not found; labels: \(app.buttons.allElementsBoundByIndex.prefix(20).map(\.label))")
         }
         shot("22-compare-slot-a-filled")
+        note("Pro-seeded Compare, slot A picked: \(picked)")
+        // With Pro the empty slot label disappears once A is chosen.
+        let slotStillEmpty = app.buttons.matching(NSPredicate(format: "label CONTAINS 'Player A'")).firstMatch.exists
+        note("empty Player A slot still shown after picking: \(slotStillEmpty)")
 
         interrupt()
         shot("23-compare-after-background")
-        let filled = app.staticTexts["Aaron Judge"].exists
-        note("Aaron Judge text after background: \(filled) (also in the followed list, so not proof of slot A; Compare is Pro-gated and blurred for this non-Pro seed)")
+        note("empty Player A slot after background: \(app.buttons.matching(NSPredicate(format: "label CONTAINS 'Player A'")).firstMatch.exists)")
 
         // Leave the tab and come back.
         tab("Stats").tap()
@@ -183,15 +190,15 @@ final class InterruptedAuditUITests: XCTestCase {
         tab("Compare").tap()
         sleep(1)
         shot("24-compare-after-tab-switch")
-        note("slot A after switching tabs: \(app.staticTexts["Aaron Judge"].exists)")
+        note("empty Player A slot after tab switch: \(app.buttons.matching(NSPredicate(format: "label CONTAINS 'Player A'")).firstMatch.exists)")
 
         kill()
-        launch()
+        launch(pro: true)
         _ = app.buttons["Search"].waitForExistence(timeout: 30)
         tab("Compare").tap()
         sleep(1)
         shot("25-compare-after-kill")
-        note("slot A after kill/relaunch: \(app.staticTexts["Aaron Judge"].exists)")
+        note("empty Player A slot after kill/relaunch (true means the pick was lost): \(app.buttons.matching(NSPredicate(format: "label CONTAINS 'Player A'")).firstMatch.exists)")
     }
 
     /// A search typed on the board, then a trip away and back.
