@@ -155,6 +155,42 @@ final class InterruptedAuditUITests: XCTestCase {
         note("trial pitch/paywall visible right after relaunch: \(maybeAgain.exists)")
     }
 
+    /// Profile opened from the unfiltered board (no search), then interrupt and kill.
+    func testProfileFromBoardInterrupted() throws {
+        launch()
+        XCTAssertTrue(app.buttons["Search"].waitForExistence(timeout: 30), "Stats board should load")
+        sleep(3)
+        shot("40-board")
+        let row = app.buttons.matching(NSPredicate(format: "label CONTAINS 'Judge'")).firstMatch
+        let text = app.staticTexts["Aaron Judge"].firstMatch
+        if row.waitForExistence(timeout: 20) {
+            note("board row exposed as a button: \(row.label)")
+            row.tap()
+        } else if text.waitForExistence(timeout: 10) {
+            note("board row only exposed as static text; tapping it")
+            text.tap()
+        } else {
+            note("no Judge row on the unfiltered board")
+        }
+        let opened = app.buttons["sharePlayerCard"].waitForExistence(timeout: 10)
+        shot("41-profile-from-board")
+        note("profile opened from the unfiltered board: \(opened)")
+        guard opened else { return }
+        let maybeLater = app.buttons["Maybe later"]
+        if maybeLater.waitForExistence(timeout: 3) { maybeLater.tap() }
+
+        interrupt()
+        shot("42-profile-after-background")
+        note("profile still open after background/foreground: \(app.buttons["sharePlayerCard"].waitForExistence(timeout: 5))")
+
+        kill()
+        launch()
+        _ = app.buttons["Search"].waitForExistence(timeout: 30)
+        sleep(2)
+        shot("43-profile-after-kill")
+        note("profile restored after kill/relaunch: \(app.buttons["sharePlayerCard"].exists)")
+    }
+
     /// Compare tab (Pro-seeded so the slots are usable): fill slot A, interrupt, kill.
     func testCompareSlotInterrupted() throws {
         launch(pro: true)
