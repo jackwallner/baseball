@@ -191,6 +191,37 @@ final class InterruptedAuditUITests: XCTestCase {
         note("profile restored after kill/relaunch: \(app.buttons["sharePlayerCard"].exists)")
     }
 
+    /// Diagnostic: which tap route (if any) opens a profile from the board.
+    func testProfileTapRoutesDiagnostic() throws {
+        launch()
+        XCTAssertTrue(app.buttons["Search"].waitForExistence(timeout: 30), "Stats board should load")
+        sleep(4)
+        let row = app.buttons.matching(NSPredicate(format: "label CONTAINS 'Aaron Judge'")).firstMatch
+        XCTAssertTrue(row.waitForExistence(timeout: 20))
+        note("row frame: \(row.frame), hittable: \(row.isHittable)")
+        func opened() -> Bool {
+            app.buttons["sharePlayerCard"].waitForExistence(timeout: 6) || app.navigationBars.buttons.matching(NSPredicate(format: "label CONTAINS 'Stats'")).firstMatch.exists
+        }
+        row.tap()
+        note("route 1 (row.tap): \(opened())")
+        shot("50-after-row-tap")
+        if !opened() {
+            app.coordinate(withNormalizedOffset: .zero).withOffset(CGVector(dx: 200, dy: row.frame.midY)).tap()
+            note("route 2 (screen coordinate at row midY): \(opened())")
+            shot("51-after-coordinate-tap")
+        }
+        if !opened() {
+            let down = row.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+            down.press(forDuration: 0.3)
+            note("route 3 (press 0.3s): \(opened())")
+            shot("52-after-press")
+        }
+        let dump = XCTAttachment(string: app.debugDescription)
+        dump.name = "hierarchy"
+        dump.lifetime = .keepAlways
+        add(dump)
+    }
+
     /// Compare tab (Pro-seeded so the slots are usable): fill slot A, interrupt, kill.
     func testCompareSlotInterrupted() throws {
         launch(pro: true)
