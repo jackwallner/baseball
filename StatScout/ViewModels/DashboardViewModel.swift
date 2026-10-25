@@ -258,6 +258,10 @@ final class DashboardViewModel {
     func applyProState(_ pro: Bool) {
         isPro = pro
         clampSelectedSeason()
+        // A deferred purchase can resume its year before this mirror updates.
+        if pro, selectedSeason < StatScoutSeason.current, !hasLoadedHistorical, !isHistoricalLoading {
+            Task { await loadHistoricalIfNeeded() }
+        }
     }
 
     private func clampSelectedSeason() {

@@ -121,4 +121,34 @@ final class PendingUnlockActionTests: XCTestCase {
         pending.dismiss(isPro: true, purchasePending: false)
         XCTAssertEqual(selectedSeason, 2022)
     }
+
+    @MainActor
+    func testDelayedApprovalLoadsTheChosenSeasonRegardlessOfProStateUpdateOrder() async throws {
+        for proStateFirst in [false, true] {
+            let season = StatScoutSeason.current - 1
+            let player = Player(
+                playerId: 1, name: "Past", team: "NYY", position: "RF", handedness: "R/R", imageURL: nil,
+                updatedAt: Date(), season: season, metrics: [], standardStats: [], games: []
+            )
+            let viewModel = DashboardViewModel(
+                provider: MockProvider(players: []),
+                cache: InMemoryPlayerCache(seed: [player])
+            )
+            var pending = PendingUnlockAction()
+            pending.set { viewModel.selectSeason(season) }
+            pending.dismiss(isPro: false, purchasePending: true)
+
+            if proStateFirst { viewModel.applyProState(true) }
+            pending.resume(isPro: true)
+            if !proStateFirst { viewModel.applyProState(true) }
+
+            for _ in 0..<200 {
+                if viewModel.hasLoadedHistorical { break }
+                try await Task.sleep(for: .milliseconds(10))
+            }
+            XCTAssertEqual(viewModel.selectedSeason, season)
+            XCTAssertTrue(viewModel.hasLoadedHistorical, "Pro state first: \(proStateFirst)")
+            XCTAssertEqual(viewModel.seasonPlayers.map(\.playerId), [player.playerId])
+        }
+    }
 }
