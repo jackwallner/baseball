@@ -22,8 +22,10 @@ fun SeasonControls() {
     val actions = LocalAppActions.current
     Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         ChoiceMenu("${vm.selectedSeason}", vm.seasons.map { it to "$it${if (it < StatScoutSeason.CURRENT && !graph.subscriptions.isPro) " · Pro" else ""}" }, {
-            if (it < StatScoutSeason.CURRENT && !graph.subscriptions.isPro) actions.openTrialPitch(PaywallTrigger.LockedSeason(it))
-            else { vm.selectedSeason = it; if (it != StatScoutSeason.CURRENT) vm.selectedPhase = SeasonPhase.REGULAR }
+            val season = it
+            val selectSeason = { vm.selectedSeason = season; if (season != StatScoutSeason.CURRENT) vm.selectedPhase = SeasonPhase.REGULAR }
+            if (season < StatScoutSeason.CURRENT && !graph.subscriptions.isPro) actions.openTrialPitch(PaywallTrigger.LockedSeason(season), selectSeason)
+            else selectSeason()
         }, "season-picker")
         if (vm.selectedSeason == StatScoutSeason.CURRENT) ChoiceMenu(vm.selectedPhase.label, SeasonPhase.entries.map { it to it.label }, { vm.selectedPhase = it }, "phase-picker")
         IconButton({ vm.refresh() }, Modifier.testTag("refresh")) { SfIcon("arrow.clockwise", 20.dp, SavantPalette.linkBlue, contentDescription = "Refresh data") }
@@ -57,7 +59,7 @@ fun StatsScreen() {
         }.thenBy { it.name })
     Column {
         Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            listOf("Leaders", "Following", "Best & Worst").forEach { name -> FilterChip(board == name, { if (name == "Best & Worst" && !graph.subscriptions.isPro) actions.openTrialPitch(PaywallTrigger.BestWorst) else board = name }, label = { Text(name, style = SavantType.smallBold) }, modifier = Modifier.testTag("board-$name")) }
+            listOf("Leaders", "Following", "Best & Worst").forEach { name -> FilterChip(board == name, { if (name == "Best & Worst" && !graph.subscriptions.isPro) actions.openTrialPitch(PaywallTrigger.BestWorst) { board = name } else board = name }, label = { Text(name, style = SavantType.smallBold) }, modifier = Modifier.testTag("board-$name")) }
         }
         SeasonControls()
         SearchField(query, { query = it })

@@ -65,6 +65,7 @@ struct PlayerProfileView: View {
     // all route through the low-friction TrialPitchSheet, its CTA starts the
     // yearly trial directly. PaywallView stays for the deliberate upsell card.
     @State private var trialPitchTrigger: PaywallTrigger?
+    @State private var pendingUnlock = PendingUnlockAction()
     @State private var formDisplayMode: FormDisplayMode = .season
     @State private var recentWindowDays: Int = 15
     @State private var recentLogs: [PlayerGameLog] = []
@@ -255,8 +256,16 @@ struct PlayerProfileView: View {
         }
         // Sizing and the drag indicator belong to the sheet itself now, so every
         // entry point in the app presents an identically-shaped pitch.
-        .sheet(item: $trialPitchTrigger) { trigger in
+        .sheet(item: $trialPitchTrigger, onDismiss: {
+            pendingUnlock.dismiss(isPro: store.isPro, purchasePending: store.purchasePending)
+        }) { trigger in
             TrialPitchSheet(trigger: trigger)
+        }
+        .onChange(of: store.isPro) { _, isPro in
+            if trialPitchTrigger == nil { pendingUnlock.resume(isPro: isPro) }
+            if isPro, selectedTab == .yearCompare, !hasLoadedHistorical, !isHistoricalLoading {
+                Task { await loadHistorical?() }
+            }
         }
         .navigationDestination(item: $comparisonRoute) { route in
             PlayerComparisonView(
@@ -340,6 +349,7 @@ struct PlayerProfileView: View {
             if store.isPro {
                 showingPlayerPicker = true
             } else {
+                pendingUnlock.set { showingPlayerPicker = true }
                 trialPitchTrigger = .playerComparison
             }
         } label: {
@@ -598,6 +608,13 @@ struct PlayerProfileView: View {
 
     // MARK: - Cards
 
+    private func selectPercentileSeason(_ season: Int) {
+        selectedPercentileSeason = season
+        if season < StatScoutSeason.current, !hasLoadedHistorical {
+            Task { await loadHistorical?() }
+        }
+    }
+
     private var seasonMenu: some View {
         SeasonMenu(
             seasons: availablePercentileSeasons,
@@ -607,12 +624,10 @@ struct PlayerProfileView: View {
                 if season != StatScoutSeason.free && !store.isPro {
                     // Explicit tap on a locked season, always answer it.
                     // PaywallGate only caps automatic pop-ups.
+                    pendingUnlock.set { selectPercentileSeason(season) }
                     trialPitchTrigger = .lockedSeason(season)
                 } else {
-                    selectedPercentileSeason = season
-                    if season < StatScoutSeason.current, !hasLoadedHistorical {
-                        Task { await loadHistorical?() }
-                    }
+                    selectPercentileSeason(season)
                 }
             }
         ) {
@@ -643,7 +658,10 @@ struct PlayerProfileView: View {
                 .init(value: $0, label: $0.rawValue, isLocked: !store.isPro && $0 != .season)
             },
             selection: $formDisplayMode,
-            onLockedTap: { _ in trialPitchTrigger = .recentForm }
+            onLockedTap: { mode in
+                pendingUnlock.set { formDisplayMode = mode }
+                trialPitchTrigger = .recentForm
+            }
         )
         .padding(.horizontal, SavantGeo.padInline)
         .padding(.vertical, 10)
@@ -1215,7 +1233,10 @@ struct PlayerProfileView: View {
                 .init(value: $0, label: $0.rawValue, isLocked: !store.isPro && $0 != .season)
             },
             selection: $standardMode,
-            onLockedTap: { _ in trialPitchTrigger = .recentForm }
+            onLockedTap: { mode in
+                pendingUnlock.set { standardMode = mode }
+                trialPitchTrigger = .recentForm
+            }
         )
         .padding(.horizontal, SavantGeo.padInline)
         .padding(.vertical, 10)

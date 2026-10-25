@@ -56,7 +56,7 @@ fun PlayerProfileScreen(initial: Player) {
                         OutlinedButton({ graph.favorites.toggleFavorite(player.playerId) }, Modifier.testTag("follow-player")) { Text(if (graph.favorites.isFavorite(player.playerId)) "Following" else "Follow") }
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        ChoiceMenu("$season", history.mapNotNull { it.season }.distinct().map { it to "$it" }, { if (it < StatScoutSeason.CURRENT && !graph.subscriptions.isPro) actions.openTrialPitch(PaywallTrigger.LockedSeason(it)) else season = it }, "profile-season")
+                        ChoiceMenu("$season", history.mapNotNull { it.season }.distinct().map { it to "$it" }, { if (it < StatScoutSeason.CURRENT && !graph.subscriptions.isPro) actions.openTrialPitch(PaywallTrigger.LockedSeason(it)) { season = it } else season = it }, "profile-season")
                         TextButton({ navigator.push(Route.Team(player.team)) }) { Text(teamDisplayName(player.team), style = SavantType.smallBold) }
                     }
                     if (phase == SeasonPhase.POSTSEASON) Text("Postseason values · Percentiles vs $season regular season", style = SavantType.small, color = SavantPalette.inkSecondary)

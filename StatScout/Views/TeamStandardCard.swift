@@ -20,7 +20,7 @@ struct TeamStandardCard: View {
     let leaguePlayers: [Player]
     let phase: SeasonPhase
     let fetchTeamGameLogs: ((String, Int, Date) async throws -> [PlayerGameLog])?
-    let onUpgradeTap: () -> Void
+    let onUpgradeTap: (@escaping () -> Void) -> Void
 
     @State private var side: TeamRankingsCard.Side = .batting
     @State private var showingRecent = false
@@ -86,7 +86,7 @@ struct TeamStandardCard: View {
                         .init(value: true, label: "Recent", isLocked: !store.isPro),
                     ],
                     selection: $showingRecent,
-                    onLockedTap: { _ in onUpgradeTap() }
+                    onLockedTap: { requested in onUpgradeTap { showingRecent = requested } }
                 )
                 if showingRecent {
                     SavantSegmented(

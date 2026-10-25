@@ -555,9 +555,6 @@ struct StandardStatsLeaderboardScreen: View {
             guard season != viewModel.selectedSeason else { return }
             await viewModel.loadHistoricalIfNeeded()
         }
-        .sheet(item: $paywallTrigger) { trigger in
-            TrialPitchSheet(trigger: trigger)
-        }
     }
 }
 
@@ -566,6 +563,8 @@ struct StandardStatsLeaderboardScreen: View {
 /// Same control, same place, as the Teams page's own season switcher, so a year
 /// can be changed wherever a year is being shown.
 struct DrillDownSeasonPill: ViewModifier {
+    @EnvironmentObject private var store: StoreService
+    @State private var pendingUnlock = PendingUnlockAction()
     let viewModel: DashboardViewModel
     @Binding var season: Int
     @Binding var paywallTrigger: PaywallTrigger?
@@ -581,6 +580,10 @@ struct DrillDownSeasonPill: ViewModifier {
             isLocked: { viewModel.isSeasonLocked($0) },
             onSelectSeason: { picked in
                 if viewModel.isSeasonLocked(picked) {
+                    pendingUnlock.set {
+                        season = picked
+                        if picked != StatScoutSeason.current { phase = .regular }
+                    }
                     paywallTrigger = .lockedSeason(picked)
                 } else {
                     season = picked
@@ -621,6 +624,14 @@ struct DrillDownSeasonPill: ViewModifier {
             } else {
                 ToolbarItem(placement: .topBarTrailing) { pill }
             }
+        }
+        .sheet(item: $paywallTrigger, onDismiss: {
+            pendingUnlock.dismiss(isPro: store.isPro, purchasePending: store.purchasePending)
+        }) { trigger in
+            TrialPitchSheet(trigger: trigger)
+        }
+        .onChange(of: store.isPro) { _, isPro in
+            if paywallTrigger == nil { pendingUnlock.resume(isPro: isPro) }
         }
     }
 }

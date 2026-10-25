@@ -300,6 +300,7 @@ final class StoreService: NSObject, ObservableObject {
     #else
     @Published private(set) var isPro: Bool = false
     #endif
+    @Published private(set) var purchasePending: Bool = false
     @Published private(set) var purchaseInFlight: Bool = false
     @Published private(set) var isLoadingProducts: Bool = false
     @Published private(set) var lastError: String?
@@ -577,6 +578,7 @@ final class StoreService: NSObject, ObservableObject {
         // would otherwise surface as the *purchase's* error the moment a
         // transaction takes any other path than success.
         lastError = nil
+        purchasePending = false
         purchaseInFlight = true
         defer { purchaseInFlight = false }
 
@@ -603,6 +605,7 @@ final class StoreService: NSObject, ObservableObject {
             // before telling a buyer their purchase is pending: calling a
             // completed purchase "pending" leaves them paid and locked out.
             await updateCustomerProductStatus(fetchPolicy: .fetchCurrent)
+            purchasePending = !isPro
             return isPro ? .purchased : .pending
         } catch {
             // RevenueCat reports a cancelled sheet as a thrown error in some
@@ -618,11 +621,13 @@ final class StoreService: NSObject, ObservableObject {
                 case .purchaseCancelledError:
                     return .cancelled
                 case .paymentPendingError:
+                    purchasePending = true
                     return .pending
                 case .productAlreadyPurchasedError, .receiptAlreadyInUseError:
                     // Already entitled on this Apple ID: settle it as a restore
                     // rather than telling the buyer their purchase failed.
                     await updateCustomerProductStatus(fetchPolicy: .fetchCurrent)
+                    purchasePending = !isPro
                     return isPro ? .purchased : .pending
                 default:
                     break
@@ -733,6 +738,7 @@ final class StoreService: NSObject, ObservableObject {
         let allKeys = customerInfo.entitlements.all.keys.sorted().joined(separator: ", ")
         logger.info("Applied customerInfo, active: [\(activeKeys, privacy: .public)] all: [\(allKeys, privacy: .public)]")
         let hasActiveSubscription = customerInfo.hasProEntitlement
+        if hasActiveSubscription { purchasePending = false }
         if isPro != hasActiveSubscription {
             isPro = hasActiveSubscription
             logger.info("isPro updated to \(hasActiveSubscription, privacy: .public)")

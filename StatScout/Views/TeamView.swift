@@ -20,6 +20,7 @@ struct TeamView: View {
     @State private var lastDefaultedSortKey: String? = nil
     @State private var showingTrial = false
     @State private var trialTrigger: PaywallTrigger?
+    @State private var pendingUnlock = PendingUnlockAction()
     @State private var rosterSide: RosterSide = .hitters
     @State private var qualifierLevel: DashboardViewModel.QualifierLevel = .all
     /// Whether the roster ranks on the season line or on a rolling window.
@@ -369,11 +370,18 @@ struct TeamView: View {
             guard isRosterRecent else { return }
             await viewModel?.loadRecentFormIfNeeded(window: rosterWindow)
         }
-        .sheet(isPresented: $showingTrial) {
+        .sheet(isPresented: $showingTrial, onDismiss: {
+            pendingUnlock.dismiss(isPro: store.isPro, purchasePending: store.purchasePending)
+        }) {
             TrialPitchSheet(trigger: .teamView)
         }
-        .sheet(item: $trialTrigger) { trigger in
+        .sheet(item: $trialTrigger, onDismiss: {
+            pendingUnlock.dismiss(isPro: store.isPro, purchasePending: store.purchasePending)
+        }) { trigger in
             TrialPitchSheet(trigger: trigger)
+        }
+        .onChange(of: store.isPro) { _, isPro in
+            if trialTrigger == nil, !showingTrial { pendingUnlock.resume(isPro: isPro) }
         }
     }
 
@@ -416,7 +424,8 @@ struct TeamView: View {
                 leaguePlayers: advancedLeaguePlayers,
                 phase: currentPhase,
                 fetchTeamGameLogs: fetchTeamGameLogs,
-                onUpgradeTap: {
+                onUpgradeTap: { action in
+                    pendingUnlock.set(action)
                     // Explicit tap, always answer it; the gate only caps
                     // automatic pop-ups.
                     showingTrial = true
@@ -435,7 +444,10 @@ struct TeamView: View {
             leaguePlayers: leaguePlayers,
             phase: currentPhase,
             fetchTeamGameLogs: fetchTeamGameLogs,
-            onUpgradeTap: { showingTrial = true }
+            onUpgradeTap: { action in
+                pendingUnlock.set(action)
+                showingTrial = true
+            }
         )
         .padding(.horizontal, 12)
         .padding(.top, 12)
@@ -558,7 +570,10 @@ struct TeamView: View {
                 .init(value: $0, label: $0.rawValue, isLocked: !store.isPro && $0 == .recent)
             },
             selection: $rosterMode,
-            onLockedTap: { _ in trialTrigger = .recentForm }
+            onLockedTap: { mode in
+                pendingUnlock.set { rosterMode = mode }
+                trialTrigger = .recentForm
+            }
         )
     }
 
@@ -881,6 +896,7 @@ struct TeamView: View {
             isLocked: { viewModel.isSeasonLocked($0) },
             onSelectSeason: { season in
                 if viewModel.isSeasonLocked(season) {
+                    pendingUnlock.set { viewModel.selectSeason(season) }
                     trialTrigger = .lockedSeason(season)
                 } else {
                     viewModel.selectSeason(season)

@@ -13,6 +13,7 @@ import com.google.android.play.core.review.ReviewManagerFactory
 import com.jackwallner.baseball.AppGraph
 import com.jackwallner.baseball.DebugLaunchOptions
 import com.jackwallner.baseball.data.PaywallTrigger
+import com.jackwallner.baseball.data.PendingUnlockAction
 import com.jackwallner.baseball.data.StoreLinks
 import com.jackwallner.baseball.ui.components.*
 import com.jackwallner.baseball.ui.nav.*
@@ -28,12 +29,22 @@ fun RootScreen(graph: AppGraph) {
     var tab by remember { mutableIntStateOf(DebugLaunchOptions.launchTab ?: 0) }
     var paywall by remember { mutableStateOf<PaywallTrigger?>(null) }
     var trialPitch by remember { mutableStateOf<PaywallTrigger?>(null) }
+    val pendingUnlock = remember { PendingUnlockAction() }
     val navigators = remember { List(4) { Navigator() } }
     val context = LocalContext.current
     val actions = remember {
         object : AppActions {
-            override fun openPaywall(trigger: PaywallTrigger) { trialPitch = null; paywall = trigger }
-            override fun openTrialPitch(trigger: PaywallTrigger) { if (graph.paywallGate.shouldPresent(trigger)) trialPitch = trigger }
+            override fun openPaywall(trigger: PaywallTrigger) {
+                if (trialPitch != trigger) pendingUnlock.set(null)
+                trialPitch = null
+                paywall = trigger
+            }
+            override fun openTrialPitch(trigger: PaywallTrigger, onUnlock: (() -> Unit)?) {
+                if (onUnlock != null || graph.paywallGate.shouldPresent(trigger)) {
+                    pendingUnlock.set(onUnlock)
+                    trialPitch = trigger
+                }
+            }
             override fun openFeedback() { context.openMail(StoreLinks.feedbackMail("StatScout feedback", "")) }
             override fun positiveMoment() {
                 graph.review.recordPositiveMoment()
@@ -44,6 +55,14 @@ fun RootScreen(graph: AppGraph) {
                 manager.requestReviewFlow().addOnSuccessListener { manager.launchReviewFlow(activity, it) }
             }
         }
+    }
+    fun dismissOffer() {
+        trialPitch = null
+        paywall = null
+        pendingUnlock.dismiss(graph.subscriptions.isPro, graph.subscriptions.purchasePending)
+    }
+    LaunchedEffect(graph.subscriptions.isPro) {
+        if (graph.subscriptions.isPro) dismissOffer()
     }
     LaunchedEffect(Unit) { graph.dashboard.start() }
     LaunchedEffect(graph.pendingTab) {
@@ -87,8 +106,8 @@ fun RootScreen(graph: AppGraph) {
                 }
             }
         }
-        StatScoutSheet(trialPitch != null, { trialPitch = null }, fullHeight = false) { trialPitch?.let { TrialPitchSheet(it) { trialPitch = null } } }
-        StatScoutSheet(paywall != null, { paywall = null }) { paywall?.let { PaywallScreen(it) { paywall = null } } }
+        StatScoutSheet(trialPitch != null, ::dismissOffer, fullHeight = false) { trialPitch?.let { TrialPitchSheet(it, ::dismissOffer) } }
+        StatScoutSheet(paywall != null, ::dismissOffer) { paywall?.let { PaywallScreen(it, ::dismissOffer) } }
     }
 }
 

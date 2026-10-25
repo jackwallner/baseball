@@ -1,5 +1,29 @@
 import SwiftUI
 
+/// Keeps an explicit locked action until entitlement activation or dismissal.
+struct PendingUnlockAction {
+    private var action: (() -> Void)?
+    private var offerIsPresented = false
+
+    mutating func set(_ action: @escaping () -> Void) {
+        self.action = action
+        offerIsPresented = true
+    }
+
+    mutating func resume(isPro: Bool) {
+        guard isPro, !offerIsPresented else { return }
+        let action = action
+        self.action = nil
+        action?()
+    }
+
+    mutating func dismiss(isPro: Bool, purchasePending: Bool) {
+        offerIsPresented = false
+        resume(isPro: isPro)
+        if !purchasePending { action = nil }
+    }
+}
+
 /// The app's one contextual offer: a compact, native half-sheet that names what
 /// the user just reached for, makes three promises, and buys the yearly plan in
 /// place.

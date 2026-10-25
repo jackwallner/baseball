@@ -24,7 +24,7 @@ struct TeamRankingsCard: View {
     let leaguePlayers: [Player]
     let phase: SeasonPhase
     let fetchTeamGameLogs: ((String, Int, Date) async throws -> [PlayerGameLog])?
-    let onUpgradeTap: () -> Void
+    let onUpgradeTap: (@escaping () -> Void) -> Void
 
     @State private var side: Side = .batting
     @State private var mode: Mode = .season
@@ -140,7 +140,7 @@ struct TeamRankingsCard: View {
                 .init(value: $0, label: $0.rawValue, isLocked: !store.isPro && $0 != .season)
             },
             selection: $mode,
-            onLockedTap: { _ in onUpgradeTap() }
+            onLockedTap: { requested in onUpgradeTap { mode = requested } }
         )
     }
 

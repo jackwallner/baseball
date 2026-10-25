@@ -102,6 +102,8 @@ class SubscriptionService(
         private set
     var isLoadingProducts by mutableStateOf(false)
         private set
+    var purchasePending by mutableStateOf(false)
+        private set
     var purchaseInFlight by mutableStateOf(false)
         private set
     var lastError by mutableStateOf<String?>(null)
@@ -288,6 +290,7 @@ class SubscriptionService(
         }
         val pkg = plan?.let { p -> packages.firstOrNull { it.identifier == p.packageId } }
         if (!configureIfNeeded() || pkg == null) throw PurchaseException(UNAVAILABLE)
+        purchasePending = false
         purchaseInFlight = true
         val startedTrial = isEligibleForIntroOffer(plan)
         // A returning subscriber buys the base plan; Play would refuse the trial offer anyway.
@@ -298,12 +301,17 @@ class SubscriptionService(
         return try {
             val result = Purchases.sharedInstance.awaitPurchase(params)
             apply(result.customerInfo)
-            if (!entitlementActive) return PurchaseOutcome.PENDING
+            if (!entitlementActive) {
+                purchasePending = true
+                return PurchaseOutcome.PENDING
+            }
             diagnostics.recordConversion(pkg.product.id, startedTrial, pkg.presentedOfferingContext.offeringIdentifier)
             syncConversionAttributes()
             PurchaseOutcome.PURCHASED
         } catch (error: PurchasesTransactionException) {
-            purchaseOutcome(error.code, error.userCancelled) ?: run {
+            val outcome = purchaseOutcome(error.code, error.userCancelled)
+            purchasePending = outcome == PurchaseOutcome.PENDING
+            outcome ?: run {
                 lastError = "Couldn't complete the purchase. Please try again."
                 throw PurchaseException(lastError!!)
             }
@@ -359,6 +367,7 @@ class SubscriptionService(
         hasSubscriptionHistory = info.allExpirationDatesByProduct.isNotEmpty()
         introEligibilityResolved = plans.isNotEmpty() || packages.isNotEmpty()
         entitlementActive = hasProEntitlement(info)
+        if (entitlementActive) purchasePending = false
         activeProductId = managedSubscriptionId(info.activeSubscriptions)
         val now = Date()
         isLapsed = !entitlementActive && info.entitlements.all.values.any { !it.isActive && (it.expirationDate?.before(now) ?: false) }

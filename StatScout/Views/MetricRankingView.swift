@@ -192,9 +192,6 @@ struct MetricRankingScreen: View {
             guard season != viewModel.selectedSeason else { return }
             await viewModel.loadHistoricalIfNeeded()
         }
-        .sheet(item: $paywallTrigger) { trigger in
-            TrialPitchSheet(trigger: trigger)
-        }
     }
 }
 

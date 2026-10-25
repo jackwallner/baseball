@@ -27,6 +27,7 @@ struct TeamsView: View {
     // re-push it, or the user can never reach the list.
     @State private var didAutoEnterFavorite = false
     @State private var lockedSeasonTrigger: PaywallTrigger?
+    @State private var pendingUnlock = PendingUnlockAction()
 
     private static let allTeams: [String] = [
         "ARI", "ATL", "BAL", "BOS", "CHC", "CWS", "CIN", "CLE", "COL", "DET",
@@ -114,8 +115,13 @@ struct TeamsView: View {
         .sheet(isPresented: $showingTrial) {
             TrialPitchSheet(trigger: .teamView)
         }
-        .sheet(item: $lockedSeasonTrigger) { trigger in
+        .sheet(item: $lockedSeasonTrigger, onDismiss: {
+            pendingUnlock.dismiss(isPro: store.isPro, purchasePending: store.purchasePending)
+        }) { trigger in
             TrialPitchSheet(trigger: trigger)
+        }
+        .onChange(of: store.isPro) { _, isPro in
+            if lockedSeasonTrigger == nil { pendingUnlock.resume(isPro: isPro) }
         }
     }
 
@@ -175,6 +181,7 @@ struct TeamsView: View {
             isLocked: { viewModel.isSeasonLocked($0) },
             onSelectSeason: { season in
                 if viewModel.isSeasonLocked(season) {
+                    pendingUnlock.set { viewModel.selectSeason(season) }
                     lockedSeasonTrigger = .lockedSeason(season)
                 } else {
                     viewModel.selectSeason(season)

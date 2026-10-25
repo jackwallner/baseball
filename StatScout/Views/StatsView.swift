@@ -29,6 +29,7 @@ struct StatsView: View {
     @State private var standardStat = "AVG"
     @State private var standardSortDescending = true
     @State private var paywallTrigger: PaywallTrigger?
+    @State private var pendingUnlock = PendingUnlockAction()
 
     private var category: MetricCategory { viewModel.selectedCategory ?? .hitting }
 
@@ -97,8 +98,13 @@ struct StatsView: View {
         // Contextual past-season pitches route through the low-friction
         // TrialPitchSheet (its CTA starts the yearly trial directly), not the
         // full multi-plan PaywallView.
-        .sheet(item: $paywallTrigger) { trigger in
+        .sheet(item: $paywallTrigger, onDismiss: {
+            pendingUnlock.dismiss(isPro: store.isPro, purchasePending: store.purchasePending)
+        }) { trigger in
             TrialPitchSheet(trigger: trigger)
+        }
+        .onChange(of: store.isPro) { _, isPro in
+            if paywallTrigger == nil { pendingUnlock.resume(isPro: isPro) }
         }
     }
 
@@ -140,6 +146,7 @@ struct StatsView: View {
                 if viewModel.isSeasonLocked(season) {
                     // Explicit tap on a locked year, always answer it; the
                     // gate only caps automatic pop-ups.
+                    pendingUnlock.set { viewModel.selectSeason(season) }
                     paywallTrigger = .lockedSeason(season)
                 } else {
                     viewModel.selectSeason(season)
