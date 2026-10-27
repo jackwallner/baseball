@@ -11,8 +11,8 @@ struct StatScoutApp: App {
         if ProcessInfo.processInfo.environment["STATSCOUT_RESET_TEAM_FAVORITE"] == "1" {
             UserDefaults.standard.removeObject(forKey: "favoriteTeam")
         }
-        #endif
         DuoScreenshotMode.prepareIfSeeded()
+        #endif
         ReviewPromptTracker.recordAppLaunch()
         ConversionDiagnostics.recordAppOpen()
         #if DEBUG
