@@ -774,9 +774,12 @@ final class StoreService: NSObject, ObservableObject {
         // Test Store runs share one tester instead of a fresh anonymous customer
         // per install, so test installs don't inflate the live project's
         // customer charts. Never with the appl_ key.
-        let appUserID = RevenueCatConfig.apiKey.hasPrefix("test_")
-            ? ProcessInfo.processInfo.environment["RC_APP_USER_ID"] ?? "qa-ios"
-            : nil
+        #if DEBUG
+        let qaUserID = ProcessInfo.processInfo.environment["RC_APP_USER_ID"] ?? "qa-ios"
+        #else
+        let qaUserID = "qa-ios"
+        #endif
+        let appUserID = RevenueCatConfig.apiKey.hasPrefix("test_") ? qaUserID : nil
         Purchases.configure(
             with: Configuration.Builder(withAPIKey: RevenueCatConfig.apiKey)
                 .with(appUserID: appUserID)
