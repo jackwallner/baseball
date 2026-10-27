@@ -6,7 +6,7 @@ Web page: https://jackwallner.com/ios/baseball/statcast-metrics-explained.html
 
 ## What is xwOBA? Barrel rate, hard-hit rate and sprint speed explained
 
-By Jack Wallner. Last updated October 19, 2026.
+By Jack Wallner. Last updated October 27, 2026.
 
 xwOBA is the on-base value a hitter should have earned from the quality of his contact, built from exit velocity and launch angle instead of what actually happened. Barrel rate, hard-hit rate and sprint speed are the three Statcast numbers that most often explain it: how often a hitter squares the ball up, how often he hits it 95 mph or harder, and how fast he runs.
 
