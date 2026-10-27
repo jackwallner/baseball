@@ -63,7 +63,6 @@ struct StatScoutApp: App {
                 ContentView(api: PreviewStatcastAPI(includesSamples: false))
                     .environmentObject(store)
                     .preferredColorScheme(.light)
-                    .onOpenURL { DuoScreenshotMode.handle($0) }
             } else if let mode = PaywallScreenshotMode.current {
                 PaywallScreenshotHarness(mode: mode)
                     .environmentObject(store)

@@ -64,9 +64,6 @@ struct RootTabView: View {
                 scheduleReviewRequestAfterPositiveMoment()
             }
             #if DEBUG
-            .onReceive(NotificationCenter.default.publisher(for: .duoRoute)) { note in
-                openDuoRoute(note.object as? String ?? "")
-            }
             .task(id: horizontalSizeClass) { await runDuoTour() }
             #endif
     }

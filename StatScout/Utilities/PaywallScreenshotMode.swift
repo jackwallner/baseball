@@ -23,16 +23,12 @@ enum PaywallScreenshotMode: String {
 #if DEBUG
 import SwiftUI
 
-extension Notification.Name {
-    static let duoRoute = Notification.Name("statscout.duoRoute")
-}
-
 /// Seeded launch for iPhone Duo screenshot runs: `-DuoSeed` uses the bundled
 /// history (no Supabase, no RevenueCat), skips onboarding and the update
 /// showcase, and unlocks Pro in the view model only.
 ///
-/// Routes arrive as `statscout://duo/<route>` (gh-sim `--url`): `stats`,
-/// `trends`, `teams`, `team` (a team page), `compare`, `player` (top profile).
+/// `-DuoTour` walks the routes on a timer (see `RootTabView.runDuoTour`):
+/// `stats`, `trends`, `teams`, `team` (a team page), `compare`, `player` (top profile).
 enum DuoScreenshotMode {
     static var isSeeded: Bool { ProcessInfo.processInfo.arguments.contains("-DuoSeed") }
 
@@ -42,12 +38,6 @@ enum DuoScreenshotMode {
         defaults.set(true, forKey: "hasCompletedOnboarding")
         defaults.set(UpdateShowcaseCampaign.identifier, forKey: UpdateShowcaseCampaign.storageKey)
         defaults.removeObject(forKey: "favoriteTeam")
-    }
-
-    static func handle(_ url: URL) {
-        guard url.scheme == "statscout", url.host == "duo" else { return }
-        let route = url.lastPathComponent
-        NotificationCenter.default.post(name: .duoRoute, object: route)
     }
 }
 #endif
