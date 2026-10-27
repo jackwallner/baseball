@@ -445,7 +445,7 @@ struct DashboardView: View {
             } else if viewModel.leaderboard.isEmpty && !viewModel.isLoading {
                 let noCategoryData = viewModel.selectedCategory != nil && !viewModel.seasonPlayers.isEmpty
                 ContentUnavailableView {
-                    Label(noCategoryData ? "No players in category" : "No players yet", systemImage: "baseball")
+                    Label(noCategoryData ? String(localized: "No players in category") : String(localized: "No players yet"), systemImage: "baseball")
                 } description: {
                     if noCategoryData {
                         Text("No players match the selected category for the \(String(viewModel.selectedSeason)) season.")

@@ -134,21 +134,21 @@ struct PostseasonCard: View {
     // lines, and a card that oversold them would land on an empty bar chart.
     private var title: String {
         switch creative {
-        case .upgrade: return "October is live."
-        case .pro:     return "Postseason boards are live."
+        case .upgrade: return String(localized: "October is live.")
+        case .pro:     return String(localized: "Postseason boards are live.")
         }
     }
 
     private var detail: String {
         switch creative {
         case .upgrade:
-            return "Every playoff game, tracked the way the regular season is. See who is actually hitting the ball hard in October, not who did it in June."
+            return String(localized: "Every playoff game, tracked the way the regular season is. See who is actually hitting the ball hard in October, not who did it in June.")
         case .pro:
-            return "Switch any board to Postseason from the season menu to see playoff game logs and how each roster is performing right now."
+            return String(localized: "Switch any board to Postseason from the season menu to see playoff game logs and how each roster is performing right now.")
         }
     }
 
-    private var ctaLabel: String { "SEE THE POSTSEASON" }
+    private var ctaLabel: String { String(localized: "SEE THE POSTSEASON") }
 }
 
 #if DEBUG

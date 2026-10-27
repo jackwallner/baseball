@@ -54,53 +54,53 @@ enum PaywallTrigger: Identifiable, Hashable {
 
     var title: String {
         switch self {
-        case .pastSeason:        return "Unlock Past Seasons"
-        case .lockedSeason(let year): return "Unlock \(year)"
-        case .yearCompare:       return "Year-over-Year Comparison"
-        case .playerComparison:  return "Player Comparison"
-        case .onboarding:        return "Scout Like a GM"
-        case .activation:        return "Get the Full Picture"
-        case .upgrade:           return "Scout Every Player"
-        case .pastSeasonsLoad:   return "Load Past Seasons"
-        case .teamView:          return "Team Insights"
-        case .winback:           return "Welcome Back"
-        case .playerScouting:    return "Full Player Scouting"
-        case .recentForm:        return "Recent Form"
-        case .bestWorst:         return "Best & Worst"
-        case .postseason:        return "Scout the Postseason"
+        case .pastSeason:        return String(localized: "Unlock Past Seasons")
+        case .lockedSeason(let year): return String(localized: "Unlock \(String(year))")
+        case .yearCompare:       return String(localized: "Year-over-Year Comparison")
+        case .playerComparison:  return String(localized: "Player Comparison")
+        case .onboarding:        return String(localized: "Scout Like a GM")
+        case .activation:        return String(localized: "Get the Full Picture")
+        case .upgrade:           return String(localized: "Scout Every Player")
+        case .pastSeasonsLoad:   return String(localized: "Load Past Seasons")
+        case .teamView:          return String(localized: "Team Insights")
+        case .winback:           return String(localized: "Welcome Back")
+        case .playerScouting:    return String(localized: "Full Player Scouting")
+        case .recentForm:        return String(localized: "Recent Form")
+        case .bestWorst:         return String(localized: "Best & Worst")
+        case .postseason:        return String(localized: "Scout the Postseason")
         }
     }
 
     var subtitle: String {
         switch self {
         case .pastSeason:
-            return "Track how every player ranked since 2015, plus the year-over-year trends behind today's leaders."
+            return String(localized: "Track how every player ranked since 2015, plus the year-over-year trends behind today's leaders.")
         case .lockedSeason(let year):
-            return "See every player's \(year) percentile rankings, and how they stack up against any other season."
+            return String(localized: "See every player's \(String(year)) percentile rankings, and how they stack up against any other season.")
         case .yearCompare:
-            return "Compare any player's percentile rankings across any two seasons. See what changed, what held, and where they're headed."
+            return String(localized: "Compare any player's percentile rankings across any two seasons. See what changed, what held, and where they're headed.")
         case .playerComparison:
-            return "Stack any two players head-to-head across every Statcast metric: xwOBA, Barrel%, Sprint Speed, and more."
+            return String(localized: "Stack any two players head-to-head across every Statcast metric: xwOBA, Barrel%, Sprint Speed, and more.")
         case .onboarding:
-            return "The Trends board, recent form, head-to-head matchups, and every season back to 2015. The full Statcast picture on every player."
+            return String(localized: "The Trends board, recent form, head-to-head matchups, and every season back to 2015. The full Statcast picture on every player.")
         case .activation:
-            return "The Trends board, recent form, head-to-head matchups, and every season back to 2015. The full Statcast picture on every player."
+            return String(localized: "The Trends board, recent form, head-to-head matchups, and every season back to 2015. The full Statcast picture on every player.")
         case .upgrade:
-            return "The Trends board, recent form, head-to-head matchups, and every season back to 2015. The full Statcast picture on every player."
+            return String(localized: "The Trends board, recent form, head-to-head matchups, and every season back to 2015. The full Statcast picture on every player.")
         case .pastSeasonsLoad:
-            return "Load historical data to explore past seasons, year-over-year trends, and more."
+            return String(localized: "Load historical data to explore past seasons, year-over-year trends, and more.")
         case .teamView:
-            return "Advanced and standard stats for every club, a roster you can rank by any metric over any window, and side-by-side comparisons for every squad."
+            return String(localized: "Advanced and standard stats for every club, a roster you can rank by any metric over any window, and side-by-side comparisons for every squad.")
         case .winback:
-            return "Your StatScout+ access has lapsed. Pick it back up to get the Trends board, recent form, head-to-head matchups, and every past season."
+            return String(localized: "Your StatScout+ access has lapsed. Pick it back up to get the Trends board, recent form, head-to-head matchups, and every past season.")
         case .playerScouting:
-            return "Last 7 / 15 / 30 day form, head-to-head matchups, every roster. The full picture, not just season totals."
+            return String(localized: "Last 7 / 15 / 30 day form, head-to-head matchups, every roster. The full picture, not just season totals.")
         case .recentForm:
-            return "Every player's last 7 / 15 / 30 day form. Catch hot streaks and slumps before the season totals catch up."
+            return String(localized: "Every player's last 7 / 15 / 30 day form. Catch hot streaks and slumps before the season totals catch up.")
         case .bestWorst:
-            return "The league leader and the league trailer on every Statcast metric, side by side, in one board."
+            return String(localized: "The league leader and the league trailer on every Statcast metric, side by side, in one board.")
         case .postseason:
-            return "Every playoff game, tracked the way the regular season is. Playoff game logs, live form, and the matchups that decide the series."
+            return String(localized: "Every playoff game, tracked the way the regular season is. Playoff game logs, live form, and the matchups that decide the series.")
         }
     }
 
@@ -129,11 +129,11 @@ enum PaywallTrigger: Identifiable, Hashable {
     /// list was written and went unmentioned, so the pitch was selling less
     /// than the product does.
     private static let proFeatures: [(icon: String, title: String)] = [
-        ("flame.fill", "The Trends board: who's heating up and cooling off, league-wide"),
-        ("chart.bar.fill", "Last 7 / 15 / 30 day form on any player, team or leaderboard"),
-        ("person.2.fill", "Head-to-head: any two players, every metric"),
-        ("shield.lefthalf.filled", "Team scouting: advanced and standard, season or recent"),
-        ("calendar.badge.clock", "Every season back to 2015 + year-over-year trends")
+        ("flame.fill", String(localized: "The Trends board: who's heating up and cooling off, league-wide")),
+        ("chart.bar.fill", String(localized: "Last 7 / 15 / 30 day form on any player, team or leaderboard")),
+        ("person.2.fill", String(localized: "Head-to-head: any two players, every metric")),
+        ("shield.lefthalf.filled", String(localized: "Team scouting: advanced and standard, season or recent")),
+        ("calendar.badge.clock", String(localized: "Every season back to 2015 + year-over-year trends"))
     ]
 
     var features: [(icon: String, title: String)] {
@@ -218,7 +218,7 @@ struct PaywallView: View {
             Text("Couldn't Load Plans")
                 .font(SavantType.cardTitle)
                 .foregroundStyle(SavantPalette.inkSecondary)
-            Text(store.lastError ?? "Check your connection and try again.")
+            Text(store.lastError ?? String(localized: "Check your connection and try again."))
                 .font(SavantType.small)
                 .foregroundStyle(SavantPalette.inkTertiary)
                 .multilineTextAlignment(.center)
@@ -296,7 +296,7 @@ struct PaywallView: View {
                     .font(SavantType.small)
                     .foregroundStyle(.white.opacity(0.85))
                     .multilineTextAlignment(.center)
-                    .lineLimit(3)
+                    .lineLimit(4)
                     .minimumScaleFactor(0.9)
                     .padding(.horizontal, 22)
             }
@@ -430,7 +430,7 @@ struct PaywallView: View {
             }
 
             Button(action: startRestore) {
-                Text(isRestoring ? "Restoring…" : "Restore Purchases")
+                Text(isRestoring ? String(localized: "Restoring…") : String(localized: "Restore Purchases"))
                     .font(SavantType.smallBold)
                     .foregroundStyle(SavantPalette.inkSecondary)
             }
@@ -467,10 +467,10 @@ struct PaywallView: View {
     // MARK: - Copy
 
     private var ctaTitle: String {
-        guard let package = selectedPackage else { return "Continue" }
-        if package.productKind == .lifetime { return "Unlock Lifetime" }
-        if store.isEligibleForIntroOffer(package) { return "Start Free Trial" }
-        return "Subscribe"
+        guard let package = selectedPackage else { return String(localized: "Continue") }
+        if package.productKind == .lifetime { return String(localized: "Unlock Lifetime") }
+        if store.isEligibleForIntroOffer(package) { return String(localized: "Start Free Trial") }
+        return String(localized: "Subscribe")
     }
 
     /// Apple 3.1.2 disclosure adjacent to the purchase button.
@@ -478,11 +478,11 @@ struct PaywallView: View {
         guard let package = selectedPackage else { return nil }
         let price = package.priceLabel
         if package.productKind == .lifetime {
-            return "\(price). One-time purchase. Lifetime access, no subscription."
+            return String(localized: "\(price). One-time purchase. Lifetime access, no subscription.")
         }
-        let renew = "Auto-renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel in Settings › Apple ID › Subscriptions."
-        if store.isEligibleForIntroOffer(package), let trial = package.introOfferLabel {
-            return "\(trial.capitalized), then \(price). \(renew)"
+        let renew = StoreService.renewalTerms
+        if store.isEligibleForIntroOffer(package), let trial = package.introTrial {
+            return "\(trial.thenSentence(price: price)) \(renew)"
         }
         return "\(price). \(renew)"
     }
@@ -522,7 +522,7 @@ struct PaywallView: View {
                 case .pending:
                     // Ask-to-Buy / deferred payment: nothing is unlocked yet and
                     // no error occurred, tell the user instead of going silent.
-                    restoreMessage = "Purchase pending approval. StatScout+ unlocks automatically once it's approved."
+                    restoreMessage = String(localized: "Purchase pending approval. StatScout+ unlocks automatically once it's approved.")
                 case .cancelled:
                     // Dismissing Apple's sheet is a choice, not a failure.
                     errorMessage = nil
@@ -541,7 +541,7 @@ struct PaywallView: View {
             defer { isRestoring = false }
             await store.restorePurchases()
             if !store.isPro {
-                restoreMessage = store.lastError ?? "No active StatScout+ purchase was found for this Apple ID."
+                restoreMessage = store.lastError ?? String(localized: "No active StatScout+ purchase was found for this Apple ID.")
             }
         }
     }
@@ -613,7 +613,7 @@ private struct PaywallPlanCard: View {
                         }
                     }
                     if showsTrialBadge, let trial = package.introOfferLabel {
-                        Text(trial.capitalized)
+                        Text(trial)
                             .font(SavantType.micro)
                             .tracking(0.3)
                             .foregroundStyle(SavantPalette.savantRed)

@@ -53,8 +53,8 @@ struct YearComparisonView: View {
             Label("No Data Available", systemImage: "calendar.badge.clock")
         } description: {
             Text(availableYears.isEmpty
-                 ? "No historical data is available for this player."
-                 : "Data for \(String(fromYear)) or \(String(toYear)) is not available.")
+                 ? String(localized: "No historical data is available for this player.")
+                 : String(localized: "Data for \(String(fromYear)) or \(String(toYear)) is not available."))
         }
         .padding(.vertical, 48)
         .frame(maxWidth: .infinity)
@@ -71,8 +71,8 @@ struct YearComparisonView: View {
     private var yearPickerCard: some View {
         VStack(spacing: 12) {
             HStack(spacing: 12) {
-                yearButton(year: $fromYear, otherYear: toYear, caption: "From",
-                           label: fromYear > 0 ? String(fromYear) : "Select")
+                yearButton(year: $fromYear, otherYear: toYear, caption: String(localized: "From"),
+                           label: fromYear > 0 ? String(fromYear) : String(localized: "Select"))
                 // Flips which season is the baseline and which is the result,
                 // one tap instead of two menus. The table below re-labels
                 // itself, so a "how far has he come" reading and a "what has
@@ -92,8 +92,8 @@ struct YearComparisonView: View {
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("Swap the two seasons")
-                yearButton(year: $toYear, otherYear: fromYear, caption: "To",
-                           label: toYear > 0 ? String(toYear) : "Select")
+                yearButton(year: $toYear, otherYear: fromYear, caption: String(localized: "To"),
+                           label: toYear > 0 ? String(toYear) : String(localized: "Select"))
             }
         }
         .padding(16)
@@ -227,7 +227,7 @@ struct YearComparisonView: View {
 
     private func categoryCard(category: MetricCategory, items: [MetricComparison]) -> some View {
         VStack(spacing: 0) {
-            SavantSubSectionBar(title: category.rawValue.uppercased())
+            SavantSubSectionBar(title: category.title.localizedUppercase)
 
             columnHeader
 
@@ -278,7 +278,7 @@ struct YearComparisonView: View {
 
         return HStack(spacing: 0) {
             // Metric label
-            Text(item.metricLabel)
+            Text(MetricName.localized(item.metricLabel))
                 .font(SavantType.body)
                 .foregroundStyle(SavantPalette.ink)
                 .frame(maxWidth: .infinity, alignment: .leading)

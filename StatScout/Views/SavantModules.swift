@@ -12,7 +12,7 @@ func positionAndHandedness(_ player: Player) -> String {
 func displayTeamFullName(_ abbr: String) -> String {
     let trimmed = abbr.trimmingCharacters(in: .whitespaces).uppercased()
     if trimmed.isEmpty || trimmed == "TBD" || trimmed == "—" || trimmed == "-" {
-        return "Free Agent"
+        return String(localized: "Free Agent")
     }
     // "Los Angeles Dodgers", not "Los Angeles (NL)": the league suffix is for
     // telling two cities apart in a list, and a fan names a club by nickname.
@@ -63,7 +63,7 @@ struct TeamIdentityStrip: View {
 
     private var seasonLabel: String {
         let year = season ?? Calendar(identifier: .gregorian).component(.year, from: Date())
-        return String(year) + " Season"
+        return String(localized: "\(String(year)) Season")
     }
 
     var body: some View {
@@ -102,7 +102,7 @@ struct SavantSectionBar: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            Text(title.uppercased())
+            Text(title.localizedUppercase)
                 .font(SavantType.sectionTitle)
                 .tracking(0.8)
                 .foregroundStyle(SavantPalette.ink)
@@ -122,7 +122,7 @@ struct SavantSubSectionBar: View {
 
     var body: some View {
         HStack {
-            Text(title.uppercased())
+            Text(title.localizedUppercase)
                 .font(SavantType.micro)
                 .tracking(0.6)
                 .foregroundStyle(SavantPalette.inkSecondary)
@@ -159,7 +159,8 @@ struct SavantTabs: View {
                     generator.impactOccurred()
                 }) {
                     VStack(spacing: 0) {
-                        Text(tab.uppercased())
+                        Text(LocalizedStringKey(tab))
+                            .textCase(.uppercase)
                             .font(SavantType.smallBold)
                             .tracking(0.5)
                             .lineLimit(1)

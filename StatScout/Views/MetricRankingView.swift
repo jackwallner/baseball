@@ -51,12 +51,12 @@ struct MetricRankingView: View {
                     PostseasonReferenceNote(referenceSeason: StatScoutSeason.current, showsQualifier: true)
                 }
                 SavantSectionBar(
-                    title: "\(metricLabel) · \(metricCategory.rawValue)",
+                    title: "\(MetricName.localized(metricLabel)) · \(metricCategory.title)",
                     trailing: AnyView(
                         HStack(spacing: 12) {
                             if let season {
                                 Text(phase == .postseason
-                                     ? "\(String(season)) Postseason"
+                                     ? String(localized: "\(String(season)) Postseason")
                                      : String(season))
                                     .font(SavantType.micro)
                                     .foregroundStyle(SavantPalette.inkSecondary)
@@ -67,7 +67,7 @@ struct MetricRankingView: View {
                                 generator.impactOccurred()
                             }) {
                                 HStack(spacing: 4) {
-                                    Text(metricLabel)
+                                    Text(MetricName.localized(metricLabel))
                                     Image(systemName: sortDescending ? "arrow.down" : "arrow.up")
                                 }
                                 .font(SavantType.micro)
@@ -81,7 +81,7 @@ struct MetricRankingView: View {
                     ContentUnavailableView {
                         Label("No rankings found", systemImage: "chart.bar")
                     } description: {
-                        Text("No players have the \(metricLabel) metric for this season.")
+                        Text("No players have the \(MetricName.localized(metricLabel)) metric for this season.")
                     }
                     .padding(.vertical, 24)
                 } else {
@@ -121,8 +121,8 @@ struct MetricRankingView: View {
         .background(SavantPalette.canvas.ignoresSafeArea())
         .navigationTitle(
             phase == .postseason
-                ? "\(metricLabel) · \(metricCategory.rawValue) Postseason"
-                : "\(metricLabel) · \(metricCategory.rawValue)"
+                ? String(localized: "\(MetricName.localized(metricLabel)) · \(metricCategory.title) Postseason")
+                : "\(MetricName.localized(metricLabel)) · \(metricCategory.title)"
         )
         .navigationBarTitleDisplayMode(.inline)
     }

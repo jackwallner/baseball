@@ -4,6 +4,8 @@ packages:
     url: https://github.com/RevenueCat/purchases-ios-spm.git
     from: 5.91.0
 options:
+  developmentLanguage: en
+  knownRegions: [en, es, fr, it, ja, pt-BR, zh-Hant, Base]
   deploymentTarget:
     iOS: "17.0"
   createIntermediateGroups: true

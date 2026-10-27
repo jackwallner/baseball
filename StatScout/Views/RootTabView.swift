@@ -204,10 +204,10 @@ struct RootTabView: View {
 
         var title: String {
             switch self {
-            case .stats: return "Stats"
-            case .trends: return "Trends"
-            case .teams: return "Teams"
-            case .compare: return "Compare"
+            case .stats: return String(localized: "Stats")
+            case .trends: return String(localized: "Trends")
+            case .teams: return String(localized: "Teams")
+            case .compare: return String(localized: "Compare")
             }
         }
 

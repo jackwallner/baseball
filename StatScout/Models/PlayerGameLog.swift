@@ -89,9 +89,9 @@ struct RecentFormWindow {
     let metrics: [String: Double]
 
     static let windows: [(label: String, days: Int)] = [
-        ("Last 7", 7),
-        ("Last 15", 15),
-        ("Last 30", 30),
+        (String(localized: "Last 7"), 7),
+        (String(localized: "Last 15"), 15),
+        (String(localized: "Last 30"), 30),
     ]
 
     /// Build a window from per-game logs filtered to a date range. Per-game

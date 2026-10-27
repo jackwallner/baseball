@@ -59,50 +59,50 @@ struct TrialPitchSheet: View {
         case .playerScouting, .recentForm, .upgrade, .onboarding, .activation, .bestWorst, .postseason:
             return [
                 Benefit(icon: "flame.fill",
-                        title: "The Trends board",
-                        detail: "The whole league ranked by who's moving, right now."),
+                        title: String(localized: "The Trends board"),
+                        detail: String(localized: "The whole league ranked by who's moving, right now.")),
                 Benefit(icon: "chart.bar.fill",
-                        title: "Recent form everywhere",
-                        detail: "Last 7 / 15 / 30 days on any player, team or board."),
+                        title: String(localized: "Recent form everywhere"),
+                        detail: String(localized: "Last 7 / 15 / 30 days on any player, team or board.")),
                 Benefit(icon: "person.2.fill",
-                        title: "Head-to-head matchups",
-                        detail: "Stack any two players across every percentile.")
+                        title: String(localized: "Head-to-head matchups"),
+                        detail: String(localized: "Stack any two players across every percentile."))
             ]
         case .lockedSeason(let year):
             return [
                 Benefit(icon: "calendar.badge.clock",
-                        title: "The \(year) season",
-                        detail: "Every percentile ranking, plus every year back to 2015."),
+                        title: String(localized: "The \(String(year)) season"),
+                        detail: String(localized: "Every percentile ranking, plus every year back to 2015.")),
                 Benefit(icon: "arrow.left.arrow.right.circle.fill",
-                        title: "Year-over-year trends",
-                        detail: "Put \(year) beside any other season and see what moved."),
+                        title: String(localized: "Year-over-year trends"),
+                        detail: String(localized: "Put \(String(year)) beside any other season and see what moved.")),
                 Benefit(icon: "flame.fill",
-                        title: "The Trends board",
-                        detail: "The whole league ranked by who's moving, right now.")
+                        title: String(localized: "The Trends board"),
+                        detail: String(localized: "The whole league ranked by who's moving, right now."))
             ]
         case .pastSeason, .pastSeasonsLoad, .yearCompare:
             return [
                 Benefit(icon: "calendar.badge.clock",
-                        title: "Every past season",
-                        detail: "Back to 2015, with full percentile history."),
+                        title: String(localized: "Every past season"),
+                        detail: String(localized: "Back to 2015, with full percentile history.")),
                 Benefit(icon: "arrow.left.arrow.right.circle.fill",
-                        title: "Year-over-year trends",
-                        detail: "Compare any two seasons side by side."),
+                        title: String(localized: "Year-over-year trends"),
+                        detail: String(localized: "Compare any two seasons side by side.")),
                 Benefit(icon: "flame.fill",
-                        title: "The Trends board",
-                        detail: "The whole league ranked by who's moving, right now.")
+                        title: String(localized: "The Trends board"),
+                        detail: String(localized: "The whole league ranked by who's moving, right now."))
             ]
         case .playerComparison, .teamView, .winback:
             return [
                 Benefit(icon: "person.2.fill",
-                        title: "Head-to-head matchups",
-                        detail: "Stack any two players across every percentile."),
+                        title: String(localized: "Head-to-head matchups"),
+                        detail: String(localized: "Stack any two players across every percentile.")),
                 Benefit(icon: "shield.lefthalf.filled",
-                        title: "Full team scouting",
-                        detail: "Every club's roster, ranked by any metric."),
+                        title: String(localized: "Full team scouting"),
+                        detail: String(localized: "Every club's roster, ranked by any metric.")),
                 Benefit(icon: "flame.fill",
-                        title: "The Trends board",
-                        detail: "The whole league ranked by who's moving, right now.")
+                        title: String(localized: "The Trends board"),
+                        detail: String(localized: "The whole league ranked by who's moving, right now."))
             ]
         }
     }

@@ -62,7 +62,7 @@ struct FollowPlayersSheet: View {
                     // jump down by its height on the first star you tapped,
                     // right under the finger about to tap the second one.
                     card {
-                        SavantSectionBar(title: "FOLLOWING (\(followed.count))")
+                        SavantSectionBar(title: String(localized: "FOLLOWING (\(followed.count))"))
                         if followed.isEmpty {
                             Text("Nobody yet. Tap a star to follow.")
                                 .font(SavantType.small)
@@ -169,7 +169,7 @@ struct FollowPlayersSheet: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(following ? "Unfollow \(player.name)" : "Follow \(player.name)")
+        .accessibilityLabel(following ? String(localized: "Unfollow \(player.name)") : String(localized: "Follow \(player.name)"))
     }
 
     private func card<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {

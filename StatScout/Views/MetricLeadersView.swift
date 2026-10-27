@@ -101,7 +101,7 @@ struct MetricLeadersView: View {
 
     private func categoryCard(_ group: (MetricCategory, [MetricLeaderEntry])) -> some View {
         VStack(spacing: 0) {
-            SavantSectionBar(title: group.0.rawValue.uppercased())
+            SavantSectionBar(title: group.0.title.localizedUppercase)
 
             HStack(spacing: 8) {
                 Text("METRIC")
@@ -136,7 +136,7 @@ struct MetricLeadersView: View {
                         phase: phase
                     )) {
                         HStack(spacing: 2) {
-                            Text(item.label)
+                            Text(MetricName.localized(item.label))
                                 .font(SavantType.smallBold)
                                 .foregroundStyle(SavantPalette.ink)
                             Image(systemName: "chevron.right")

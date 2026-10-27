@@ -38,7 +38,7 @@ struct TeamRankingsCard: View {
     enum Side: String, CaseIterable, Identifiable {
         case batting, pitching
         var id: String { rawValue }
-        var label: String { self == .batting ? "Hitting" : "Pitching" }
+        var label: String { self == .batting ? String(localized: "Hitting") : String(localized: "Pitching") }
         var playerType: String { self == .batting ? "batter" : "pitcher" }
         var category: MetricCategory { self == .batting ? .hitting : .pitching }
     }
@@ -46,6 +46,14 @@ struct TeamRankingsCard: View {
     enum Mode: String, CaseIterable, Identifiable {
         case season = "Season", recent = "Recent", both = "Both"
         var id: String { rawValue }
+
+        var title: String {
+            switch self {
+            case .season: return String(localized: "Season")
+            case .recent: return String(localized: "Recent")
+            case .both: return String(localized: "Both")
+            }
+        }
 
         /// Whether this mode needs game logs, and therefore whether the
         /// window picker is worth showing.
@@ -63,7 +71,7 @@ struct TeamRankingsCard: View {
     var body: some View {
         VStack(spacing: 0) {
             SavantSectionBar(
-                title: "TEAM ADVANCED STATS",
+                title: String(localized: "TEAM ADVANCED STATS"),
                 trailing: store.isPro ? nil : AnyView(proBadge)
             )
 
@@ -137,7 +145,7 @@ struct TeamRankingsCard: View {
     private var modePicker: some View {
         SavantSegmented(
             segments: Mode.allCases.map {
-                .init(value: $0, label: $0.rawValue, isLocked: !store.isPro && $0 != .season)
+                .init(value: $0, label: $0.title, isLocked: !store.isPro && $0 != .season)
             },
             selection: $mode,
             onLockedTap: { requested in onUpgradeTap { mode = requested } }
@@ -171,7 +179,7 @@ struct TeamRankingsCard: View {
                     DualMetricBar(
                         season: metric,
                         recent: recentRows[metric.label],
-                        recentCaption: "Last \(windowDays)d"
+                        recentCaption: String(localized: "Last \(windowDays)d")
                     )
                     .padding(.horizontal, SavantGeo.padCard)
                     .padding(.vertical, 10)
@@ -216,7 +224,7 @@ struct TeamRankingsCard: View {
         if rows.isEmpty {
             emptyAggregate
         } else {
-            SavantSubSectionBar(title: side.category.rawValue.uppercased())
+            SavantSubSectionBar(title: side.category.title.localizedUppercase)
 
             VStack(spacing: 0) {
                 ForEach(Array(rows.enumerated()), id: \.element.id) { index, metric in
@@ -235,7 +243,7 @@ struct TeamRankingsCard: View {
                             )
                     }
                     .buttonStyle(.plain)
-                    .accessibilityHint("See the league leaderboard for \(metric.label)")
+                    .accessibilityHint("See the league leaderboard for \(MetricName.localized(metric.label))")
                 }
             }
 
@@ -330,7 +338,7 @@ struct TeamRankingsCard: View {
                     .disabled(true)
                     .allowsHitTesting(false)
                 BlurGateUnlock(
-                    headline: "See every team's last 7 / 15 / 30 day form",
+                    headline: String(localized: "See every team's last 7 / 15 / 30 day form"),
                     trigger: .teamView
                 )
             }
@@ -357,7 +365,7 @@ struct TeamRankingsCard: View {
             }
             .padding(SavantGeo.padInline)
 
-            SavantSubSectionBar(title: side.category.rawValue.uppercased())
+            SavantSubSectionBar(title: side.category.title.localizedUppercase)
             VStack(spacing: 0) {
                 ForEach(Array(sample.enumerated()), id: \.element.id) { index, metric in
                     MetricBar(metric: metric)
@@ -434,7 +442,7 @@ struct TeamRankingsCard: View {
             recentSummaryRow(w)
             let rows = recentDisplayRows(window: w)
             if !rows.isEmpty {
-                SavantSubSectionBar(title: side.category.rawValue.uppercased())
+                SavantSubSectionBar(title: side.category.title.localizedUppercase)
                 VStack(spacing: 0) {
                     ForEach(Array(rows.enumerated()), id: \.element.id) { index, metric in
                         MetricBar(metric: metric)
@@ -453,7 +461,7 @@ struct TeamRankingsCard: View {
                 Image(systemName: "calendar.badge.exclamationmark")
                     .font(.system(size: 22))
                     .foregroundStyle(SavantPalette.inkTertiary)
-                Text("No \(side.label.lowercased()) data in the last \(windowDays) days")
+                Text(side == .batting ? String(localized: "No hitting data in the last \(windowDays) days") : String(localized: "No pitching data in the last \(windowDays) days"))
                     .font(SavantType.small)
                     .foregroundStyle(SavantPalette.inkSecondary)
             }
@@ -586,7 +594,7 @@ struct TeamRankingsCard: View {
             // A superseded load isn't a failed one, and the card that's about
             // to be replaced shouldn't flash an error on its way out.
             if !isTaskCancellation(error) {
-                loadError = "Couldn't load team form."
+                loadError = String(localized: "Couldn't load team form.")
             }
         }
         loading = false
@@ -599,7 +607,7 @@ struct TeamRankingsCard: View {
             Image(systemName: "chart.bar.xaxis")
                 .font(.system(size: 22))
                 .foregroundStyle(SavantPalette.inkTertiary)
-            Text("Not enough \(side.label.lowercased()) data to aggregate")
+            Text(side == .batting ? String(localized: "Not enough hitting data to aggregate") : String(localized: "Not enough pitching data to aggregate"))
                 .font(SavantType.small)
                 .foregroundStyle(SavantPalette.inkSecondary)
         }
@@ -608,7 +616,7 @@ struct TeamRankingsCard: View {
     }
 
     private var weightedCaption: some View {
-        Text("Weighted by \(side == .pitching ? "IP" : "PA") across the \(side.label.lowercased()) roster")
+        Text(side == .pitching ? String(localized: "Weighted by IP across the pitching roster") : String(localized: "Weighted by PA across the hitting roster"))
             .font(SavantType.micro)
             .tracking(0.3)
             .foregroundStyle(SavantPalette.inkTertiary)

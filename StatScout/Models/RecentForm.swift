@@ -178,11 +178,11 @@ enum RecentWindow: Int, CaseIterable, Identifiable, Sendable {
     /// Always says "days". The window is calendar days, not games, and "Last
     /// 15" beside a row that also reports a game count ("· 12G") read as
     /// fifteen *games* to everyone who wasn't the person who wrote it.
-    var label: String { "Last \(rawValue) days" }
+    var label: String { String(localized: "Last \(rawValue) days") }
     /// Segment-width version of the same wording: still explicit about the
     /// unit, short enough for three of them across a phone.
-    var segmentLabel: String { "\(rawValue) days" }
-    var shortLabel: String { "\(rawValue)d" }
+    var segmentLabel: String { String(localized: "\(rawValue) days") }
+    var shortLabel: String { String(localized: "\(rawValue)d") }
 }
 
 /// How much playing time inside a rolling window a player needs before the
@@ -200,6 +200,14 @@ enum TrendQualifier: String, CaseIterable, Identifiable, Sendable {
     case regulars = "Regulars"
 
     var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .all: return String(localized: "All")
+        case .sample: return String(localized: "Min Sample")
+        case .regulars: return String(localized: "Regulars")
+        }
+    }
 
     /// Plate appearances per window day for a hitter. A pitcher's equivalent is
     /// batters faced, which `RecentForm.plateAppearances` already holds for a
@@ -236,7 +244,8 @@ enum TrendQualifier: String, CaseIterable, Identifiable, Sendable {
     /// Spells the active threshold out in the window's own numbers, so "Min
     /// Sample" and "Regulars" don't read as synonyms.
     func description(isPitcher: Bool, windowDays: Int) -> String {
-        guard self != .all else { return "No minimum" }
-        return "\(minimum(isPitcher: isPitcher, windowDays: windowDays))+ \(isPitcher ? "BF" : "PA")"
+        guard self != .all else { return String(localized: "No minimum") }
+        let n = minimum(isPitcher: isPitcher, windowDays: windowDays)
+        return isPitcher ? String(localized: "\(n)+ BF") : String(localized: "\(n)+ PA")
     }
 }

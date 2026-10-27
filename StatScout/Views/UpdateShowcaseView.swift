@@ -64,25 +64,25 @@ struct UpdateShowcaseView: View {
 
                 TabView(selection: $page) {
                     showcasePage(
-                        eyebrow: "NEW IN STATSCOUT",
-                        title: "Who's hot\nright now.",
-                        detail: "The new Trends board ranks the biggest movers across the league, not just the names already at the top.",
+                        eyebrow: String(localized: "NEW IN STATSCOUT"),
+                        title: String(localized: "Who's hot\nright now."),
+                        detail: String(localized: "The new Trends board ranks the biggest movers across the league, not just the names already at the top."),
                         visual: AnyView(TrendShowcaseGraphic())
                     )
                     .tag(0)
 
                     showcasePage(
-                        eyebrow: "COMPARE YOUR WAY",
-                        title: "Any two.\nAny season.",
-                        detail: "Change either player and either year. See every shared metric side by side, with the winner called out instantly.",
+                        eyebrow: String(localized: "COMPARE YOUR WAY"),
+                        title: String(localized: "Any two.\nAny season."),
+                        detail: String(localized: "Change either player and either year. See every shared metric side by side, with the winner called out instantly."),
                         visual: AnyView(ComparisonShowcaseGraphic())
                     )
                     .tag(1)
 
                     showcasePage(
-                        eyebrow: "A DEEPER SCOREBOOK",
-                        title: "Every club.\nEvery angle.",
-                        detail: "Sort advanced and traditional stats across players and teams, from xwOBA and Barrel% to AVG, ERA, and stolen bases.",
+                        eyebrow: String(localized: "A DEEPER SCOREBOOK"),
+                        title: String(localized: "Every club.\nEvery angle."),
+                        detail: String(localized: "Sort advanced and traditional stats across players and teams, from xwOBA and Barrel% to AVG, ERA, and stolen bases."),
                         visual: AnyView(StatsShowcaseGraphic())
                     )
                     .tag(2)
@@ -243,7 +243,7 @@ private struct TrendShowcaseGraphic: View {
     ]
 
     var body: some View {
-        ShowcaseCard(title: "HOTTEST IN THE LEAGUE", trailing: "15 DAYS") {
+        ShowcaseCard(title: String(localized: "HOTTEST IN THE LEAGUE"), trailing: String(localized: "15 DAYS")) {
             VStack(spacing: 0) {
                 ForEach(Array(players.enumerated()), id: \.offset) { index, player in
                     HStack(spacing: 10) {
@@ -292,7 +292,7 @@ private struct ComparisonShowcaseGraphic: View {
     ]
 
     var body: some View {
-        ShowcaseCard(title: "PLAYER COMPARISON", trailing: "2026") {
+        ShowcaseCard(title: String(localized: "PLAYER COMPARISON"), trailing: "2026") {
             VStack(spacing: 0) {
                 HStack {
                     playerBadge(initials: "AJ", name: "Aaron Judge", team: "NYY")
@@ -365,7 +365,7 @@ private struct StatsShowcaseGraphic: View {
     ]
 
     var body: some View {
-        ShowcaseCard(title: "EVERY WAY TO RANK", trailing: "30 CLUBS") {
+        ShowcaseCard(title: String(localized: "EVERY WAY TO RANK"), trailing: String(localized: "30 CLUBS")) {
             VStack(spacing: 12) {
                 HStack(spacing: 7) {
                     filterPill("Advanced", selected: true)

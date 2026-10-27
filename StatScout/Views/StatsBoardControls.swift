@@ -87,7 +87,7 @@ struct StatPickerMenu: View {
                 Section("Standard") { rows(standard, select: onSelectStandard) }
             }
         } label: {
-            SavantInlinePill(systemImage: "chart.bar.fill", title: activeLabel)
+            SavantInlinePill(systemImage: "chart.bar.fill", title: MetricName.localized(activeLabel))
         }
         .menuOrder(.fixed)
         .savantMenuAppearance()
@@ -102,9 +102,9 @@ struct StatPickerMenu: View {
                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
             } label: {
                 if option.isSelected {
-                    Label(option.label, systemImage: "checkmark")
+                    Label(MetricName.localized(option.label), systemImage: "checkmark")
                 } else {
-                    Text(option.label)
+                    Text(MetricName.localized(option.label))
                 }
             }
         }
@@ -130,7 +130,7 @@ struct SortDirectionButton: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Sort direction")
-        .accessibilityValue("\(statLabel), \(descending ? "highest first" : "lowest first")")
+        .accessibilityValue(descending ? String(localized: "\(statLabel), highest first") : String(localized: "\(statLabel), lowest first"))
         .accessibilityHint("Tap to flip sort direction")
     }
 }
@@ -148,7 +148,7 @@ struct StatsBoardStatPicker: View {
         switch bindings.board {
         case .advanced: return viewModel.currentSortMetric ?? viewModel.sortLabel
         case .standard: return bindings.standardStat
-        case .bestWorst: return "Best & Worst"
+        case .bestWorst: return String(localized: "Best & Worst")
         }
     }
 
@@ -219,7 +219,7 @@ struct StatsViewMenu: View {
             boardSection
         } label: {
             SavantChip(
-                title: "View",
+                title: String(localized: "View"),
                 systemImage: "slider.horizontal.3",
                 trailing: .chevron,
                 isActive: isActive
@@ -256,9 +256,9 @@ struct StatsViewMenu: View {
                     UIImpactFeedbackGenerator(style: .light).impactOccurred()
                 } label: {
                     if level == viewModel.qualifierLevel {
-                        Label("\(level.rawValue) · \(caption(for: level))", systemImage: "checkmark")
+                        Label("\(level.title) · \(caption(for: level))", systemImage: "checkmark")
                     } else {
-                        Text("\(level.rawValue) · \(caption(for: level))")
+                        Text("\(level.title) · \(caption(for: level))")
                     }
                 }
             }
@@ -268,7 +268,7 @@ struct StatsViewMenu: View {
     /// Savant publishes no postseason qualifier, so October boards use MLB's.
     private func caption(for level: DashboardViewModel.QualifierLevel) -> String {
         guard level == .qualified, viewModel.isPostseasonActive else { return level.description }
-        return "3.1 PA / 1 IP per team game"
+        return String(localized: "3.1 PA / 1 IP per team game")
     }
 
     // MARK: - Board

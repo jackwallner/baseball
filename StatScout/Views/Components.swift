@@ -56,11 +56,11 @@ struct OverallPercentileBadge: View {
 
     private var tierDescription: String {
         switch percentile {
-        case 90...100: return "Elite"
-        case 75..<90: return "Excellent"
-        case 50..<75: return "Above Average"
-        case 25..<50: return "Below Average"
-        default: return "Poor"
+        case 90...100: return String(localized: "Elite")
+        case 75..<90: return String(localized: "Excellent")
+        case 50..<75: return String(localized: "Above Average")
+        case 25..<50: return String(localized: "Below Average")
+        default: return String(localized: "Poor")
         }
     }
 
@@ -79,7 +79,7 @@ struct OverallPercentileBadge: View {
         .frame(width: size, height: size)
         .background(SavantPalette.color(forPercentile: percentile))
         .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusBadge))
-        .accessibilityLabel("Overall \(percentile)th percentile, \(tierDescription)")
+        .accessibilityLabel(String(localized: "Overall \(percentile.ordinal) percentile, \(tierDescription)"))
     }
 }
 
@@ -118,17 +118,22 @@ struct MetricBar: View {
     private var isRanked: Bool { metric.percentile != Self.unranked }
 
     private var accessibilityLabel: String {
-        guard isRanked else { return "\(metric.label): \(metric.value), not ranked" }
-        let valueText = metric.value.isEmpty ? "\(metric.percentile)th percentile" : "\(metric.value), \(metric.percentile)th percentile"
-        return "\(metric.label): \(valueText)"
+        let label = MetricName.localized(metric.label)
+        guard isRanked else { return String(localized: "\(label): \(metric.value), not ranked") }
+        let pctText = metric.percentile.ordinal
+        return metric.value.isEmpty
+            ? String(localized: "\(label): \(pctText) percentile")
+            : String(localized: "\(label): \(metric.value), \(pctText) percentile")
     }
 
     var body: some View {
         HStack(spacing: 12) {
             // Label column - left aligned
-            Text(metric.label)
+            Text(MetricName.localized(metric.label))
                 .font(SavantType.bodyBold)
                 .foregroundStyle(SavantPalette.ink)
+                .lineLimit(2)
+                .minimumScaleFactor(0.7)
                 .frame(width: 70, alignment: .leading)
 
             // Percentile bar - takes remaining space
@@ -199,8 +204,8 @@ struct PostseasonReferenceNote: View {
         HStack(alignment: .top, spacing: 6) {
             Image(systemName: "info.circle")
             Text(showsQualifier
-                 ? "Percentiles vs. \(String(referenceSeason)) regular season. Ranks players with 3.1 PA or 1 IP per team game."
-                 : "Percentiles vs. \(String(referenceSeason)) regular season")
+                 ? String(localized: "Percentiles vs. \(String(referenceSeason)) regular season. Ranks players with 3.1 PA or 1 IP per team game.")
+                 : String(localized: "Percentiles vs. \(String(referenceSeason)) regular season"))
         }
         .font(SavantType.micro)
         .tracking(0.2)
@@ -210,7 +215,7 @@ struct PostseasonReferenceNote: View {
         .padding(.bottom, 6)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(
-            "Postseason percentiles are measured against the \(referenceSeason) regular season"
+            String(localized: "Postseason percentiles are measured against the \(String(referenceSeason)) regular season")
         )
     }
 }
@@ -220,7 +225,7 @@ struct PostseasonReferenceNote: View {
 struct DualMetricBar: View {
     let season: Metric
     var recent: Metric?
-    var recentCaption: String = "Recent"
+    var recentCaption: String = String(localized: "Recent")
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -311,7 +316,7 @@ struct CategoryFilter: View {
     var showAllOption: Bool = false
 
     var body: some View {
-        let categoryTabs = MetricCategory.allCases.map { $0.rawValue }
+        let categoryTabs = MetricCategory.allCases.map { $0.rawValue }  // English ids, localized by SavantTabs
         let tabs = showAllOption ? ["All"] + categoryTabs : categoryTabs
         let selectedTab = selectedCategory?.rawValue ?? (showAllOption ? "All" : MetricCategory.hitting.rawValue)
 
@@ -405,7 +410,7 @@ struct PercentileBarMini: View {
 
 struct LeaderboardTableHeader: View {
     let sortDescending: Bool
-    var sortLabel: String = "OVERALL"
+    var sortLabel: String = String(localized: "OVERALL")
 
     var body: some View {
         HStack(spacing: 0) {
@@ -429,7 +434,7 @@ struct LeaderboardTableHeader: View {
 
             // Sort indicator - display only, tap SavantSectionBar to change sort
             HStack(spacing: 4) {
-                Text(sortLabel.uppercased())
+                Text(MetricName.localized(sortLabel).localizedUppercase)
                     .font(SavantType.micro)
                     .tracking(0.5)
                     .foregroundStyle(SavantPalette.savantRed)
@@ -495,7 +500,8 @@ struct TrendArrow: View {
         }
         .foregroundStyle(tint)
         .accessibilityLabel(
-            isFlat ? "No recent change" : "\(delta > 0 ? "Up" : "Down") \(text) recently"
+            isFlat ? String(localized: "No recent change")
+                : delta > 0 ? String(localized: "Up \(text) recently") : String(localized: "Down \(text) recently")
         )
     }
 }
@@ -865,7 +871,7 @@ struct PlusDirectCTA: View {
                 break
             case .pending:
                 // Ask-to-Buy / deferred payment: not unlocked, not an error.
-                statusMessage = "Purchase pending approval. StatScout+ unlocks automatically once it's approved."
+                statusMessage = String(localized: "Purchase pending approval. StatScout+ unlocks automatically once it's approved.")
             case .cancelled:
                 // Backing out of Apple's sheet is not an error to report.
                 statusMessage = nil
@@ -877,25 +883,6 @@ struct PlusDirectCTA: View {
                 showingPlans = true
             }
         }
-    }
-}
-
-// MARK: - Int Ordinal Extension
-
-extension Int {
-    var ordinal: String {
-        let suffix: String
-        switch self % 100 {
-        case 11...13: suffix = "th"
-        default:
-            switch self % 10 {
-            case 1: suffix = "st"
-            case 2: suffix = "nd"
-            case 3: suffix = "rd"
-            default: suffix = "th"
-            }
-        }
-        return "\(self)\(suffix)"
     }
 }
 

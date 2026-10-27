@@ -102,7 +102,7 @@ enum StoreServiceError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .purchasesUnavailableInSimulator:
-            return "Purchases are unavailable in simulator builds."
+            return String(localized: "Purchases are unavailable in simulator builds.")
         }
     }
 }
@@ -145,27 +145,23 @@ extension Package {
 
     var displayName: String {
         switch productKind {
-        case .lifetime: return "Lifetime"
-        case .yearly: return "Yearly"
-        case .monthly: return "Monthly"
+        case .lifetime: return String(localized: "Lifetime")
+        case .yearly: return String(localized: "Yearly")
+        case .monthly: return String(localized: "Monthly")
         case .other: return storeProduct.localizedTitle
         }
     }
 
     var priceLabel: String {
         guard let period = storeProduct.subscriptionPeriod else { return storeProduct.localizedPriceString }
-        let unit: String
+        let price = storeProduct.localizedPriceString
+        let n = period.value
         switch period.unit {
-        case .day: unit = period.value == 1 ? "day" : "days"
-        case .week: unit = period.value == 1 ? "week" : "weeks"
-        case .month: unit = period.value == 1 ? "month" : "months"
-        case .year: unit = period.value == 1 ? "year" : "years"
-        @unknown default: unit = ""
-        }
-        if period.value == 1 {
-            return "\(storeProduct.localizedPriceString) / \(unit)"
-        } else {
-            return "\(storeProduct.localizedPriceString) / \(period.value) \(unit)"
+        case .day: return n == 1 ? String(localized: "\(price) / day") : String(localized: "\(price) / \(n) days")
+        case .week: return n == 1 ? String(localized: "\(price) / week") : String(localized: "\(price) / \(n) weeks")
+        case .month: return n == 1 ? String(localized: "\(price) / month") : String(localized: "\(price) / \(n) months")
+        case .year: return n == 1 ? String(localized: "\(price) / year") : String(localized: "\(price) / \(n) years")
+        @unknown default: return price
         }
     }
 
@@ -197,10 +193,10 @@ extension Package {
     var monthlyEquivalentAnchorLabel: String? {
         switch productKind {
         case .monthly:
-            return "\(storeProduct.localizedPriceString)/mo"
+            return String(localized: "\(storeProduct.localizedPriceString)/mo")
         case .yearly, .lifetime, .other:
             guard let perMonth = monthlyEquivalentLabel else { return nil }
-            return "\(perMonth)/mo"
+            return String(localized: "\(perMonth)/mo")
         }
     }
 
@@ -211,28 +207,65 @@ extension Package {
         return f
     }
 
-    var introOfferLabel: String? {
+    var introTrial: IntroTrial? {
         #if DEBUG && targetEnvironment(simulator)
         if RevenueCatConfig.apiKey.hasPrefix("test_"), productKind == .monthly || productKind == .yearly {
-            return "7-day free trial"
+            return IntroTrial(unit: .day, count: 7)
         }
         #endif
         guard let intro = storeProduct.introductoryDiscount, intro.paymentMode == .freeTrial else {
             return nil
         }
         let period = intro.subscriptionPeriod
-        let unit: String
         switch period.unit {
-        case .day: unit = period.value == 1 ? "day" : "days"
-        case .week: unit = period.value == 1 ? "week" : "weeks"
-        case .month: unit = period.value == 1 ? "month" : "months"
-        case .year: unit = period.value == 1 ? "year" : "years"
-        @unknown default: unit = ""
+        case .day: return IntroTrial(unit: .day, count: period.value)
+        case .week: return IntroTrial(unit: .day, count: period.value * 7)
+        case .month: return IntroTrial(unit: .month, count: period.value)
+        case .year: return IntroTrial(unit: .year, count: period.value)
+        @unknown default: return nil
         }
-        if period.unit == .week {
-            return "\(period.value * 7)-day free trial"
-        } else {
-            return "\(period.value)-\(unit.dropLast(period.value == 1 ? 0 : 1)) free trial"
+    }
+
+    var introOfferLabel: String? { introTrial?.label }
+}
+
+/// A free trial length. Each sentence that mentions it is a whole localized
+/// string with a plural count, never a fragment glued to other copy.
+struct IntroTrial {
+    enum Unit { case day, month, year }
+    let unit: Unit
+    let count: Int
+
+    /// "7-day free trial"
+    var label: String {
+        switch (unit, count) {
+        case (.day, _): return String(localized: "\(count)-day free trial")
+        case (.month, 1): return String(localized: "1-month free trial")
+        case (.month, _): return String(localized: "\(count)-month free trial")
+        case (.year, 1): return String(localized: "1-year free trial")
+        case (.year, _): return String(localized: "\(count)-year free trial")
+        }
+    }
+
+    /// "Start 7-day free trial"
+    var startLabel: String {
+        switch (unit, count) {
+        case (.day, _): return String(localized: "Start \(count)-day free trial")
+        case (.month, 1): return String(localized: "Start 1-month free trial")
+        case (.month, _): return String(localized: "Start \(count)-month free trial")
+        case (.year, 1): return String(localized: "Start 1-year free trial")
+        case (.year, _): return String(localized: "Start \(count)-year free trial")
+        }
+    }
+
+    /// "7-day free trial, then $29.99 / year."
+    func thenSentence(price: String) -> String {
+        switch (unit, count) {
+        case (.day, _): return String(localized: "\(count)-day free trial, then \(price).")
+        case (.month, 1): return String(localized: "1-month free trial, then \(price).")
+        case (.month, _): return String(localized: "\(count)-month free trial, then \(price).")
+        case (.year, 1): return String(localized: "1-year free trial, then \(price).")
+        case (.year, _): return String(localized: "\(count)-year free trial, then \(price).")
         }
     }
 }
@@ -336,7 +369,7 @@ final class StoreService: NSObject, ObservableObject {
     /// simulator run and a `.storekit` config can't change that. The trial
     /// branch could only ever be seen on a real device.
     nonisolated static func upgradeCTALabel(trialAvailable: Bool) -> String {
-        trialAvailable ? "Try Free" : "Upgrade"
+        trialAvailable ? String(localized: "Try Free") : String(localized: "Upgrade")
     }
 
     /// Whether the yearly plan is currently offering an intro trial this user
@@ -360,17 +393,20 @@ final class StoreService: NSObject, ObservableObject {
         if let yearly = yearlyPackage {
             if trigger != .winback,
                isEligibleForIntroOffer(yearly),
-               let trial = yearly.introOfferLabel {
-                return "Start \(trial)"
+               let trial = yearly.introTrial {
+                return trial.startLabel
             }
-            let verb = trigger == .winback ? "Restart" : "Try"
-            return "\(verb) StatScout+ for \(yearly.priceLabel)"
+            let price = yearly.priceLabel
+            return trigger == .winback
+                ? String(localized: "Restart StatScout+ for \(price)")
+                : String(localized: "Try StatScout+ for \(price)")
         }
         if let price = proPrice {
-            let verb = trigger == .winback ? "Restart" : "Unlock"
-            return "\(verb) StatScout+ for \(price)"
+            return trigger == .winback
+                ? String(localized: "Restart StatScout+ for \(price)")
+                : String(localized: "Unlock StatScout+ for \(price)")
         }
-        return trigger == .winback ? "Restart StatScout+" : "Unlock StatScout+"
+        return trigger == .winback ? String(localized: "Restart StatScout+") : String(localized: "Unlock StatScout+")
     }
 
     /// One-line secondary caption shown under the CTA when a trial is offered,
@@ -379,7 +415,8 @@ final class StoreService: NSObject, ObservableObject {
         guard let yearly = products.first(where: { $0.productKind == .yearly }),
               isEligibleForIntroOffer(yearly),
               yearly.introOfferLabel != nil else { return nil }
-        return "Then \(yearly.priceLabel). Cancel anytime."
+        let price = yearly.priceLabel
+        return String(localized: "Then \(price). Cancel anytime.")
     }
 
     /// The yearly package, the one-tap conversion target for every trial /
@@ -396,26 +433,31 @@ final class StoreService: NSObject, ObservableObject {
     /// are present at the point of purchase.
     var yearlyCTADisclosureText: String? {
         guard let yearly = yearlyPackage else { return nil }
-        let renew = "Auto-renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel in Settings › Apple ID › Subscriptions."
-        if isEligibleForIntroOffer(yearly), let trial = yearly.introOfferLabel {
-            return "\(trial.capitalized), then \(yearly.priceLabel). \(renew)"
+        let renew = Self.renewalTerms
+        if isEligibleForIntroOffer(yearly), let trial = yearly.introTrial {
+            return "\(trial.thenSentence(price: yearly.priceLabel)) \(renew)"
         }
         return "\(yearly.priceLabel). \(renew)"
     }
 
+    static var renewalTerms: String {
+        String(localized: "Auto-renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel in Settings › Apple ID › Subscriptions.")
+    }
+
     var onboardingMonthlyCTALabel: String {
-        guard let monthly = monthlyPackage else { return "Upgrade to StatScout+" }
-        if isEligibleForIntroOffer(monthly), let trial = monthly.introOfferLabel {
-            return "Start \(trial)"
+        guard let monthly = monthlyPackage else { return String(localized: "Upgrade to StatScout+") }
+        if isEligibleForIntroOffer(monthly), let trial = monthly.introTrial {
+            return trial.startLabel
         }
-        return "Try StatScout+ for \(monthly.priceLabel)"
+        let price = monthly.priceLabel
+        return String(localized: "Try StatScout+ for \(price)")
     }
 
     var onboardingMonthlyDisclosureText: String? {
         guard let monthly = monthlyPackage else { return nil }
-        let renew = "Auto-renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel in Settings › Apple ID › Subscriptions."
-        if isEligibleForIntroOffer(monthly), let trial = monthly.introOfferLabel {
-            return "\(trial.capitalized), then \(monthly.priceLabel). \(renew)"
+        let renew = Self.renewalTerms
+        if isEligibleForIntroOffer(monthly), let trial = monthly.introTrial {
+            return "\(trial.thenSentence(price: monthly.priceLabel)) \(renew)"
         }
         return "\(monthly.priceLabel). \(renew)"
     }
@@ -554,7 +596,7 @@ final class StoreService: NSObject, ObservableObject {
                 }
             }
         }
-        lastError = "Couldn't load subscription options. Check your connection and try again."
+        lastError = String(localized: "Couldn't load subscription options. Check your connection and try again.")
     }
 
     /// Guarantees the offering is loaded before a CTA transacts, so a tap on a
@@ -647,22 +689,22 @@ final class StoreService: NSObject, ObservableObject {
            let code = RevenueCat.ErrorCode(rawValue: nsError.code) {
             switch code {
             case .networkError, .offlineConnectionError:
-                return "Couldn't reach the App Store. Check your connection and try again."
+                return String(localized: "Couldn't reach the App Store. Check your connection and try again.")
             case .storeProblemError:
-                return "The App Store is temporarily unavailable. Please try again in a moment."
+                return String(localized: "The App Store is temporarily unavailable. Please try again in a moment.")
             case .purchaseNotAllowedError:
-                return "Purchases are turned off for this device. Check Screen Time › Content & Privacy Restrictions."
+                return String(localized: "Purchases are turned off for this device. Check Screen Time › Content & Privacy Restrictions.")
             case .purchaseInvalidError:
-                return "This Apple ID can't complete the purchase. Try again, or use a different Apple ID."
+                return String(localized: "This Apple ID can't complete the purchase. Try again, or use a different Apple ID.")
             case .productNotAvailableForPurchaseError:
-                return "StatScout+ isn't available for purchase on this account's App Store region right now."
+                return String(localized: "StatScout+ isn't available for purchase on this account's App Store region right now.")
             case .ineligibleError:
-                return "That offer isn't available on this Apple ID. Tap again to subscribe at the regular price."
+                return String(localized: "That offer isn't available on this Apple ID. Tap again to subscribe at the regular price.")
             default:
                 break
             }
         }
-        return "Couldn't complete the purchase. Please try again."
+        return String(localized: "Couldn't complete the purchase. Please try again.")
     }
 
     /// The single conversion path behind every pitch in the app.
@@ -700,7 +742,7 @@ final class StoreService: NSObject, ObservableObject {
             lastError = nil
         } catch {
             logger.error("Customer info refresh failed: \(String(describing: error), privacy: .public)")
-            lastError = "Couldn't refresh your subscription status. Check your connection and try again."
+            lastError = String(localized: "Couldn't refresh your subscription status. Check your connection and try again.")
         }
     }
 
@@ -713,10 +755,10 @@ final class StoreService: NSObject, ObservableObject {
         do {
             let info = try await Purchases.shared.restorePurchases()
             apply(customerInfo: info)
-            lastError = isPro ? nil : "No active StatScout+ purchase was found for this Apple ID."
+            lastError = isPro ? nil : String(localized: "No active StatScout+ purchase was found for this Apple ID.")
         } catch {
             logger.error("Restore failed: \(String(describing: error), privacy: .public)")
-            lastError = "Couldn't restore purchases. Try again."
+            lastError = String(localized: "Couldn't restore purchases. Try again.")
         }
     }
 

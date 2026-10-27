@@ -41,7 +41,7 @@ struct PlayerProfileView: View {
     var regularSeasonPlayers: [Player] = []
     var isHistoricalLoading = false
     var hasLoadedHistorical = true
-    var historicalLoadingMessage = "Loading past seasons…"
+    var historicalLoadingMessage = String(localized: "Loading past seasons…")
     var historicalLoadingProgress = 0.12
     var loadHistorical: (() async -> Void)?
     var fetchGameLogs: ((Int, Int) async throws -> [PlayerGameLog])?
@@ -83,12 +83,28 @@ struct PlayerProfileView: View {
         case season = "Season"
         case recent = "Recent"
         case both = "Both"
+
+        var title: String {
+            switch self {
+            case .season: return String(localized: "Season")
+            case .recent: return String(localized: "Recent")
+            case .both: return String(localized: "Both")
+            }
+        }
     }
 
     enum PlayerStatTab: String, CaseIterable {
         case statcast = "Advanced"
         case standard = "Standard"
         case yearCompare = "Year Compare"
+
+        var title: String {
+            switch self {
+            case .statcast: return String(localized: "Advanced")
+            case .standard: return String(localized: "Standard")
+            case .yearCompare: return String(localized: "Year Compare")
+            }
+        }
     }
 
     /// Every season the dataset covers, not just the ones already loaded for
@@ -304,7 +320,7 @@ struct PlayerProfileView: View {
             Image(systemName: isFavorite ? "star.fill" : "star")
                 .foregroundStyle(isFavorite ? Color.yellow : .white)
         }
-        .accessibilityLabel(isFavorite ? "Unfollow \(player.name)" : "Follow \(player.name)")
+        .accessibilityLabel(isFavorite ? String(localized: "Unfollow \(player.name)") : String(localized: "Follow \(player.name)"))
     }
 
     /// Shares the season board on screen as an image. Hidden until there is a
@@ -376,7 +392,7 @@ struct PlayerProfileView: View {
             let generator = UIImpactFeedbackGenerator(style: .light)
             generator.impactOccurred()
         }) {
-            Text(PlayerStatTab.statcast.rawValue)
+            Text(PlayerStatTab.statcast.title)
                 .font(SavantType.bodyBold)
                 .foregroundStyle(isSelected ? .white : SavantPalette.ink)
                 .frame(maxWidth: .infinity)
@@ -396,7 +412,7 @@ struct PlayerProfileView: View {
             let generator = UIImpactFeedbackGenerator(style: .light)
             generator.impactOccurred()
         }) {
-            Text(PlayerStatTab.standard.rawValue)
+            Text(PlayerStatTab.standard.title)
                 .font(SavantType.bodyBold)
                 .foregroundStyle(isSelected ? .white : SavantPalette.ink)
                 .frame(maxWidth: .infinity)
@@ -419,7 +435,7 @@ struct PlayerProfileView: View {
             let generator = UIImpactFeedbackGenerator(style: .light)
             generator.impactOccurred()
         }) {
-            Text(PlayerStatTab.yearCompare.rawValue)
+            Text(PlayerStatTab.yearCompare.title)
                 .font(SavantType.bodyBold)
                 .foregroundStyle(isSelected ? .white : SavantPalette.ink)
                 .frame(maxWidth: .infinity)
@@ -469,10 +485,10 @@ struct PlayerProfileView: View {
                 .fixedSize(horizontal: false, vertical: true)
 
             VStack(alignment: .leading, spacing: 6) {
-                proPerk("chart.line.uptrend.xyaxis", "Year-over-year trends across every metric")
-                proPerk("person.2.fill", "Head-to-head comparisons vs any player")
-                proPerk("calendar.badge.clock", "Every past season, not just this one")
-                proPerk("arrow.down.circle.fill", "Saved offline, works on the road")
+                proPerk("chart.line.uptrend.xyaxis", String(localized: "Year-over-year trends across every metric"))
+                proPerk("person.2.fill", String(localized: "Head-to-head comparisons vs any player"))
+                proPerk("calendar.badge.clock", String(localized: "Every past season, not just this one"))
+                proPerk("arrow.down.circle.fill", String(localized: "Saved offline, works on the road"))
             }
 
             // Buys in place. This card's CTA used to open the plan picker,
@@ -644,7 +660,7 @@ struct PlayerProfileView: View {
         }
         .accessibilityValue(
             activePhase == .postseason
-                ? "\(seasonLabel), Postseason"
+                ? String(localized: "\(seasonLabel), Postseason")
                 : seasonLabel
         )
     }
@@ -655,7 +671,7 @@ struct PlayerProfileView: View {
     private var formModePicker: some View {
         SavantSegmented(
             segments: FormDisplayMode.allCases.map {
-                .init(value: $0, label: $0.rawValue, isLocked: !store.isPro && $0 != .season)
+                .init(value: $0, label: $0.title, isLocked: !store.isPro && $0 != .season)
             },
             selection: $formDisplayMode,
             onLockedTap: { mode in
@@ -671,7 +687,7 @@ struct PlayerProfileView: View {
     private var percentileRankingsCard: some View {
         VStack(spacing: 0) {
             SavantSectionBar(
-                title: "ADVANCED STATS",
+                title: String(localized: "ADVANCED STATS"),
                 trailing: AnyView(
                     HStack(spacing: 4) {
                         seasonMenu
@@ -735,8 +751,8 @@ struct PlayerProfileView: View {
             if groupedMetrics.isEmpty {
                 emptyStateCard(
                     icon: "chart.bar",
-                    title: "No metrics available",
-                    description: "Percentile rankings are not available for this player in the \(seasonLabel) season."
+                    title: String(localized: "No metrics available"),
+                    description: String(localized: "Percentile rankings are not available for this player in the \(seasonLabel) season.")
                 )
                 .padding(.vertical, 24)
             } else {
@@ -744,7 +760,7 @@ struct PlayerProfileView: View {
                     let rows = displayedMetrics(in: group.metrics)
                     if !rows.isEmpty {
                         SavantSubSectionBar(
-                            title: "\(group.category.rawValue.uppercased())"
+                            title: group.category.title.localizedUppercase
                         )
 
                         ForEach(Array(rows.enumerated()), id: \.element.id) { index, metric in
@@ -805,9 +821,10 @@ struct PlayerProfileView: View {
         guard let anchor = recentAnchor,
               !Calendar.current.isDate(anchor, inSameDayAs: .now),
               anchor < .now else {
-            return "No games in the last \(recentWindowDays) days"
+            return String(localized: "No games in the last \(recentWindowDays) days")
         }
-        return "No games in the \(recentWindowDays) days through \(anchor.formatted(.dateTime.month(.abbreviated).day()))"
+        let through = anchor.formatted(.dateTime.month(.abbreviated).day())
+        return String(localized: "No games in the \(recentWindowDays) days through \(through)")
     }
 
     private var recentWindowPicker: some View {
@@ -967,7 +984,7 @@ struct PlayerProfileView: View {
                     DualMetricBar(
                         season: metric,
                         recent: recentMetric,
-                        recentCaption: "Last \(recentWindowDays)d"
+                        recentCaption: String(localized: "Last \(recentWindowDays)d")
                     )
                     .padding(.horizontal, SavantGeo.padCard)
                     .padding(.vertical, 12)
@@ -1018,7 +1035,7 @@ struct PlayerProfileView: View {
             // Distinguish "no games" from "fetch failed", otherwise a network
             // error renders as an honest-looking "No games in the last N days".
             recentLogs = []
-            recentLoadError = "Couldn't load recent games. Check your connection and try again."
+            recentLoadError = String(localized: "Couldn't load recent games. Check your connection and try again.")
         }
         recentLoading = false
     }
@@ -1179,7 +1196,7 @@ struct PlayerProfileView: View {
             // The season already appears in the picker on the right; printing
             // it in the title too was saying it twice.
             SavantSectionBar(
-                title: "STANDARD STATS",
+                title: String(localized: "STANDARD STATS"),
                 trailing: AnyView(seasonMenu)
             )
 
@@ -1197,8 +1214,8 @@ struct PlayerProfileView: View {
             if (displayedPlayer.standardStats ?? []).isEmpty {
                 emptyStateCard(
                     icon: "chart.bar",
-                    title: "Standard stats unavailable",
-                    description: "Traditional stats are not available for this player."
+                    title: String(localized: "Standard stats unavailable"),
+                    description: String(localized: "Traditional stats are not available for this player.")
                 )
                 .padding(.vertical, 24)
             } else {
@@ -1206,11 +1223,11 @@ struct PlayerProfileView: View {
                 let counts = standardMetrics(counting: true)
 
                 if !rates.isEmpty {
-                    SavantSubSectionBar(title: "RATE")
+                    SavantSubSectionBar(title: String(localized: "RATE"))
                     standardRows(rates)
                 }
                 if !counts.isEmpty {
-                    SavantSubSectionBar(title: "VOLUME")
+                    SavantSubSectionBar(title: String(localized: "VOLUME"))
                     standardRows(counts, startingIndex: rates.count)
                 }
             }
@@ -1230,7 +1247,7 @@ struct PlayerProfileView: View {
     private var standardModePicker: some View {
         SavantSegmented(
             segments: FormDisplayMode.allCases.map {
-                .init(value: $0, label: $0.rawValue, isLocked: !store.isPro && $0 != .season)
+                .init(value: $0, label: $0.title, isLocked: !store.isPro && $0 != .season)
             },
             selection: $standardMode,
             onLockedTap: { mode in

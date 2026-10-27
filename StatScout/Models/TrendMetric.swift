@@ -101,7 +101,7 @@ enum TrendSide: String, CaseIterable, Identifiable, Sendable {
     case pitching
 
     var id: String { rawValue }
-    var label: String { self == .batting ? "Hitting" : "Pitching" }
+    var label: String { self == .batting ? String(localized: "Hitting") : String(localized: "Pitching") }
     /// Matches `player_recent_form.player_type`.
     var playerType: String { self == .batting ? "batter" : "pitcher" }
 }

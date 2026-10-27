@@ -13,7 +13,7 @@ struct YearComparePreview: View {
                 .clipped()
 
             BlurGateUnlock(
-                headline: "See how \(playerName) evolved season to season",
+                headline: String(localized: "See how \(playerName) evolved season to season"),
                 trigger: .yearCompare
             )
         }
@@ -46,11 +46,11 @@ struct YearComparePreview: View {
 
     private var mockYearPicker: some View {
         HStack(spacing: 12) {
-            mockYearButton(label: "2026", subtitle: "Recent")
+            mockYearButton(label: "2026", subtitle: String(localized: "Recent"))
             Image(systemName: "arrow.right")
                 .font(.system(size: 14, weight: .semibold))
                 .foregroundStyle(SavantPalette.inkTertiary)
-            mockYearButton(label: "2025", subtitle: "Prior")
+            mockYearButton(label: "2025", subtitle: String(localized: "Prior"))
         }
         .padding(16)
         .background(SavantPalette.surface)

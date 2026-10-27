@@ -18,7 +18,7 @@ struct PlayerShareCard: View {
         VStack(spacing: 0) {
             header
             ForEach(groups, id: \.category) { group in
-                SavantSubSectionBar(title: group.category.rawValue)
+                SavantSubSectionBar(title: group.category.title)
                 ForEach(Array(group.metrics.enumerated()), id: \.element.id) { index, metric in
                     MetricBar(metric: metric)
                         .padding(.horizontal, SavantGeo.padCard)
@@ -89,8 +89,9 @@ struct PlayerShareCard: View {
     /// A current-season board moves daily, so it carries its date. A past
     /// season is settled and just says what it is ranked against.
     private var footnote: String {
-        guard isCurrentSeason else { return "Ranked against MLB qualifiers" }
-        return "Through \(player.updatedAt.formatted(.dateTime.month(.abbreviated).day()))"
+        guard isCurrentSeason else { return String(localized: "Ranked against MLB qualifiers") }
+        let date = player.updatedAt.formatted(.dateTime.month(.abbreviated).day())
+        return String(localized: "Through \(date)")
     }
 }
 
@@ -125,6 +126,7 @@ enum StatScoutShare {
     static let appStoreURL = URL(string: "https://apps.apple.com/app/id\(AppStoreReviewLinks.appStoreID)")!
 
     static func message(for player: Player, seasonLabel: String) -> String {
-        "\(player.name), \(seasonLabel) percentiles on StatScout \(appStoreURL.absoluteString)"
+        let link = appStoreURL.absoluteString
+        return String(localized: "\(player.name), \(seasonLabel) percentiles on StatScout \(link)")
     }
 }

@@ -110,10 +110,19 @@ struct Player: Identifiable, Codable, Hashable, Sendable {
 
     var shareSummary: String {
         let headline = headlineMetric.map { metric in
-            let valueText = metric.value.isEmpty ? "\(metric.percentile.ordinal) percentile" : "\(metric.value), \(metric.percentile.ordinal) percentile"
-            return "\(metric.label) \(valueText)"
-        } ?? "\(overallPercentile.ordinal) overall percentile"
-        return "\(name) · \(team) \(position)\nOverall: \(overallPercentile.ordinal) percentile\nTop stat: \(headline)\nStatScout"
+            let label = MetricName.localized(metric.label)
+            let pctText = metric.percentile.ordinal
+            return metric.value.isEmpty
+                ? String(localized: "\(label) \(pctText) percentile")
+                : String(localized: "\(label) \(metric.value), \(pctText) percentile")
+        } ?? String(localized: "\(overallPercentile.ordinal) overall percentile")
+        let lines = [
+            "\(name) · \(team) \(position)",
+            String(localized: "Overall: \(overallPercentile.ordinal) percentile"),
+            String(localized: "Top stat: \(headline)"),
+            "StatScout",
+        ]
+        return lines.joined(separator: "\n")
     }
 
     func percentile(for category: MetricCategory) -> Int? {
@@ -142,8 +151,8 @@ enum SeasonPhase: String, Codable, CaseIterable, Identifiable, Hashable, Sendabl
     /// year rather than the slate.
     var label: String {
         switch self {
-        case .regular:    return "Regular Season"
-        case .postseason: return "Postseason"
+        case .regular:    return String(localized: "Regular Season")
+        case .postseason: return String(localized: "Postseason")
         }
     }
 
@@ -164,7 +173,7 @@ enum SeasonLabel {
 
     /// Longer form for prose and subtitles ("2026 Postseason").
     static func text(_ season: Int, phase: SeasonPhase) -> String {
-        "\(season) \(phase.label)"
+        String(localized: "\(String(season)) \(phase.label)")
     }
 }
 

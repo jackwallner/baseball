@@ -32,3 +32,4 @@ the global agent rules + the `ios-dev` skill.
 ## Area rules
 
 - [.claude/rules/android.md](.claude/rules/android.md): Android port, baseball feed parity, Pro emulator, billing, and Google Play state.
+- [.claude/rules/localization.md](.claude/rules/localization.md): iOS String Catalog (en, es, fr, it, ja, pt-BR, zh-Hant), how to add and proof copy.

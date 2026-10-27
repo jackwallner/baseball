@@ -128,7 +128,7 @@ struct RecentFormCard: View {
                         .overlay(Capsule().stroke(SavantPalette.hairline, lineWidth: 0.5))
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("\(w.label) days")
+                .accessibilityLabel(String(localized: "Last \(w.days) days"))
             }
         }
     }
@@ -144,7 +144,7 @@ struct RecentFormCard: View {
                     .disabled(true)
                     .allowsHitTesting(false)
                 BlurGateUnlock(
-                    headline: "See last 7 / 15 / 30 day form for any player",
+                    headline: String(localized: "See last 7 / 15 / 30 day form for any player"),
                     trigger: .recentForm
                 )
             }
@@ -330,7 +330,7 @@ struct RecentFormCard: View {
             // Switching window or season cancels the in-flight fetch; that's
             // the user changing their mind, not a failure to answer them.
             if !isTaskCancellation(error) {
-                loadError = "Couldn't load recent games."
+                loadError = String(localized: "Couldn't load recent games.")
             }
         }
         loading = false

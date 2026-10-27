@@ -189,7 +189,10 @@ struct OnboardingMetrics {
     init(availableHeight: CGFloat) {
         // A modern iPhone leaves ~760pt inside the safe area; an iPhone SE and
         // the iPad compatibility window leave ~620-650.
-        isCompact = availableHeight < 720
+        // Translations run longer than the English copy the tall layout was
+        // sized for, so non-English locales switch to the compact one sooner.
+        let isEnglish = Locale.current.language.languageCode?.identifier == "en"
+        isCompact = availableHeight < (isEnglish ? 720 : 820)
     }
 
     /// Onboarding is a single centred column. Left to itself it would stretch
@@ -229,11 +232,23 @@ struct OnboardingCards: View {
     @EnvironmentObject private var store: StoreService
     let viewModel: DashboardViewModel
     @Binding var hasCompletedOnboarding: Bool
-    @State private var currentPage = 0
+    @State private var currentPage = OnboardingCards.initialPage
     @State private var paywallTrigger: PaywallTrigger?
     @State private var isStartingTrial = false
     @State private var trialError: String?
     @State private var isRestoring = false
+
+    /// DEBUG only: `-OnboardingPage 2` opens a given page, for localized screenshots.
+    static var initialPage: Int {
+        #if DEBUG
+        let arguments = ProcessInfo.processInfo.arguments
+        if let index = arguments.firstIndex(of: "-OnboardingPage"), index + 1 < arguments.count,
+           let page = Int(arguments[index + 1]) {
+            return page
+        }
+        #endif
+        return 0
+    }
 
     private var isLastPage: Bool { currentPage == pages.count - 1 }
     private var dataReady: Bool { viewModel.isReady }
@@ -476,11 +491,11 @@ struct OnboardingCards: View {
                             defer { isRestoring = false }
                             await store.restorePurchases()
                             if !store.isPro {
-                                trialError = store.lastError ?? "No active StatScout+ purchase was found for this Apple ID."
+                                trialError = store.lastError ?? String(localized: "No active StatScout+ purchase was found for this Apple ID.")
                             }
                         }
                     } label: {
-                        Text(isRestoring ? "Restoring…" : "Restore Purchases")
+                        Text(isRestoring ? String(localized: "Restoring…") : String(localized: "Restore Purchases"))
                             .font(SavantType.micro)
                             .tracking(0.4)
                             .foregroundStyle(SavantPalette.inkTertiary)
@@ -544,7 +559,7 @@ struct OnboardingCards: View {
                 await store.ensureProductsLoaded()
             }
             guard let monthly = store.monthlyPackage else {
-                trialError = "Still loading subscription options. Tap again in a moment."
+                trialError = String(localized: "Still loading subscription options. Tap again in a moment.")
                 return
             }
             do {
@@ -554,7 +569,7 @@ struct OnboardingCards: View {
                 case .pending:
                     // Ask-to-Buy / deferred payment: onboarding stays up because
                     // isPro hasn't flipped, explain instead of appearing dead.
-                    trialError = "Purchase pending approval. StatScout+ unlocks automatically once it's approved."
+                    trialError = String(localized: "Purchase pending approval. StatScout+ unlocks automatically once it's approved.")
                 case .cancelled:
                     // Backing out of Apple's sheet is a normal choice, not an
                     // error. Showing red text here is what App Review reads as
@@ -573,13 +588,13 @@ struct OnboardingCards: View {
     private let pages: [OnboardingPage] = [
         OnboardingPage(
             icon: "baseball.fill",
-            title: "Your Pocket\nScout",
-            description: "Baseball percentile rankings built for a fast mobile view. Every qualified player, every metric, always up to date.",
+            title: String(localized: "Your Pocket\nScout"),
+            description: String(localized: "Baseball percentile rankings built for a fast mobile view. Every qualified player, every metric, always up to date."),
             bullets: [
-                BulletItem(text: "Every qualified player ranked", icon: "checkmark.circle.fill", color: SavantPalette.savantRed),
-                BulletItem(text: "xwOBA, Barrel%, Sprint Speed, and more", icon: "checkmark.circle.fill", color: SavantPalette.savantRed),
-                BulletItem(text: "Updated daily, always fresh", icon: "checkmark.circle.fill", color: SavantPalette.savantRed),
-                BulletItem(text: "No account, no sign-up", icon: "checkmark.circle.fill", color: SavantPalette.savantRed)
+                BulletItem(text: String(localized: "Every qualified player ranked"), icon: "checkmark.circle.fill", color: SavantPalette.savantRed),
+                BulletItem(text: String(localized: "xwOBA, Barrel%, Sprint Speed, and more"), icon: "checkmark.circle.fill", color: SavantPalette.savantRed),
+                BulletItem(text: String(localized: "Updated daily, always fresh"), icon: "checkmark.circle.fill", color: SavantPalette.savantRed),
+                BulletItem(text: String(localized: "No account, no sign-up"), icon: "checkmark.circle.fill", color: SavantPalette.savantRed)
             ]
         ),
         // Four tabs, and the bullets name all four. This page said "three tabs"
@@ -588,13 +603,13 @@ struct OnboardingCards: View {
         // user was never told existed.
         OnboardingPage(
             icon: "chart.bar.fill",
-            title: "Find Insights\nFast",
-            description: "Four tabs cover every angle of the game. See what's happening across the league in seconds.",
+            title: String(localized: "Find Insights\nFast"),
+            description: String(localized: "Four tabs cover every angle of the game. See what's happening across the league in seconds."),
             bullets: [
-                BulletItem(text: "Stats: sort the league, leaders, best & worst", icon: "checkmark.circle.fill", color: SavantPalette.savantRed),
-                BulletItem(text: "Trends: who's heating up and cooling off", icon: "checkmark.circle.fill", color: SavantPalette.savantRed),
-                BulletItem(text: "Teams: browse any roster, see who's hot", icon: "checkmark.circle.fill", color: SavantPalette.savantRed),
-                BulletItem(text: "Compare: stack two players head-to-head", icon: "checkmark.circle.fill", color: SavantPalette.savantRed)
+                BulletItem(text: String(localized: "Stats: sort the league, leaders, best & worst"), icon: "checkmark.circle.fill", color: SavantPalette.savantRed),
+                BulletItem(text: String(localized: "Trends: who's heating up and cooling off"), icon: "checkmark.circle.fill", color: SavantPalette.savantRed),
+                BulletItem(text: String(localized: "Teams: browse any roster, see who's hot"), icon: "checkmark.circle.fill", color: SavantPalette.savantRed),
+                BulletItem(text: String(localized: "Compare: stack two players head-to-head"), icon: "checkmark.circle.fill", color: SavantPalette.savantRed)
             ]
         ),
         // The conversion page, so it argues in the same order the TrialPitchSheet
@@ -604,13 +619,13 @@ struct OnboardingCards: View {
         // player" — a feature list, in the order the features were built.
         OnboardingPage(
             icon: "crown.fill",
-            title: "Go Deeper\nwith StatScout+",
-            description: "Season numbers tell you who's good. StatScout+ tells you who's good right now, and lets you prove it.",
+            title: String(localized: "Go Deeper\nwith StatScout+"),
+            description: String(localized: "Season numbers tell you who's good. StatScout+ tells you who's good right now, and lets you prove it."),
             bullets: [
-                BulletItem(text: "The Trends board: the league ranked by who's moving", icon: "flame.fill", color: SavantPalette.savantRed),
-                BulletItem(text: "Last 7 / 15 / 30 day form on any player or team", icon: "chart.bar.fill", color: SavantPalette.savantRed),
-                BulletItem(text: "Head-to-head matchups across every percentile", icon: "person.2.fill", color: SavantPalette.savantRed),
-                BulletItem(text: "Every season back to 2015, and year-over-year", icon: "calendar.badge.clock", color: SavantPalette.savantRed)
+                BulletItem(text: String(localized: "The Trends board: the league ranked by who's moving"), icon: "flame.fill", color: SavantPalette.savantRed),
+                BulletItem(text: String(localized: "Last 7 / 15 / 30 day form on any player or team"), icon: "chart.bar.fill", color: SavantPalette.savantRed),
+                BulletItem(text: String(localized: "Head-to-head matchups across every percentile"), icon: "person.2.fill", color: SavantPalette.savantRed),
+                BulletItem(text: String(localized: "Every season back to 2015, and year-over-year"), icon: "calendar.badge.clock", color: SavantPalette.savantRed)
             ]
         )
     ]
