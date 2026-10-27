@@ -71,7 +71,7 @@ struct TeamStandardCard: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            SavantSectionBar(title: "TEAM STANDARD STATS")
+            SavantSectionBar(title: String(localized: "TEAM STANDARD STATS"))
 
             // One question per row. See TeamFormCard: side and mode on a shared
             // strip read as a single five-choice control.
@@ -82,8 +82,8 @@ struct TeamStandardCard: View {
                 )
                 SavantSegmented(
                     segments: [
-                        .init(value: false, label: "Season"),
-                        .init(value: true, label: "Recent", isLocked: !store.isPro),
+                        .init(value: false, label: String(localized: "Season")),
+                        .init(value: true, label: String(localized: "Recent"), isLocked: !store.isPro),
                     ],
                     selection: $showingRecent,
                     onLockedTap: { requested in onUpgradeTap { showingRecent = requested } }
@@ -125,18 +125,18 @@ struct TeamStandardCard: View {
     private var seasonContent: some View {
         let line = teamLine(for: players)
         if line.isEmpty {
-            emptyState("No standard stats for this roster")
+            emptyState(String(localized: "No standard stats for this roster"))
         } else {
             let league = leagueLines()
             barGroup(
-                title: "RATE",
+                title: String(localized: "RATE"),
                 labels: rateLabels,
                 line: line,
                 league: league,
                 startIndex: 0
             )
             barGroup(
-                title: "VOLUME",
+                title: String(localized: "VOLUME"),
                 labels: countingLabels,
                 line: line,
                 league: league,
@@ -195,7 +195,7 @@ struct TeamStandardCard: View {
                     .blur(radius: 8)
                     .allowsHitTesting(false)
                 BlurGateUnlock(
-                    headline: "See every team's last 7 / 15 / 30 days",
+                    headline: String(localized: "See every team's last 7 / 15 / 30 days"),
                     trigger: .teamView
                 )
             }
@@ -213,7 +213,7 @@ struct TeamStandardCard: View {
         } else {
             let totals = windowTotals()
             if totals.isEmpty {
-                emptyState("No \(side.label.lowercased()) games in the last \(windowDays) days")
+                emptyState(side == .batting ? String(localized: "No hitting games in the last \(windowDays) days") : String(localized: "No pitching games in the last \(windowDays) days"))
             } else {
                 let rates = windowRates(totals)
                 let seasonLine = teamLine(for: players)
@@ -225,7 +225,7 @@ struct TeamStandardCard: View {
                 // team's own season number is the real information, and it's
                 // the same framing the Trends board uses.
                 if !rates.isEmpty {
-                    SavantSubSectionBar(title: "RATE · LAST \(windowDays) DAYS")
+                    SavantSubSectionBar(title: String(localized: "RATE · LAST \(windowDays) DAYS"))
                     ForEach(Array(rates.keys.sorted(by: sortByOrder).enumerated()), id: \.element) { index, label in
                         let now = rates[label] ?? 0
                         let then = seasonLine[label]
@@ -273,7 +273,7 @@ struct TeamStandardCard: View {
                 // Counting stats get no bar. A fortnight's home runs against
                 // thirty season totals would sit at the first percentile for
                 // every team in the league, which says nothing.
-                SavantSubSectionBar(title: "TOTALS · LAST \(windowDays) DAYS")
+                SavantSubSectionBar(title: String(localized: "TOTALS · LAST \(windowDays) DAYS"))
                 let counts = Self.countingWindowKeys.filter { totals[$0.label] != nil }
                 ForEach(Array(counts.enumerated()), id: \.element.label) { index, entry in
                     HStack {
@@ -304,7 +304,7 @@ struct TeamStandardCard: View {
     private var teaser: some View {
         let rows = teaserRows
         return VStack(spacing: 0) {
-            SavantSubSectionBar(title: "RATE · LAST \(windowDays) DAYS")
+            SavantSubSectionBar(title: String(localized: "RATE · LAST \(windowDays) DAYS"))
             ForEach(Array(rows.enumerated()), id: \.element.0) { index, row in
                 HStack(spacing: 10) {
                     Text(row.0)
@@ -322,7 +322,7 @@ struct TeamStandardCard: View {
                 .frame(height: SavantGeo.rowHeight)
                 .background(index % 2 == 0 ? SavantPalette.surface : SavantPalette.surfaceAlt)
             }
-            SavantSubSectionBar(title: "TOTALS · LAST \(windowDays) DAYS")
+            SavantSubSectionBar(title: String(localized: "TOTALS · LAST \(windowDays) DAYS"))
             ForEach(Array(teaserTotals.enumerated()), id: \.element.0) { index, row in
                 HStack {
                     Text(row.0)
@@ -524,7 +524,7 @@ struct TeamStandardCard: View {
             // Cancelled loads are the normal cost of flipping between the
             // season and recent windows; only a real failure is an error.
             if !isTaskCancellation(error) {
-                loadError = "Couldn't load team form."
+                loadError = String(localized: "Couldn't load team form.")
             }
         }
         loading = false

@@ -41,6 +41,14 @@ struct TeamView: View {
         case advanced = "Advanced"
         case standard = "Standard"
         case roster = "Roster"
+
+        var title: String {
+            switch self {
+            case .advanced: return String(localized: "Advanced")
+            case .standard: return String(localized: "Standard")
+            case .roster: return String(localized: "Roster")
+            }
+        }
     }
 
     /// Season totals or a rolling window, the same pair the team cards and the
@@ -50,6 +58,13 @@ struct TeamView: View {
         case recent = "Recent"
 
         var id: String { rawValue }
+
+        var title: String {
+            switch self {
+            case .season: return String(localized: "Season")
+            case .recent: return String(localized: "Recent")
+            }
+        }
     }
 
     /// What "best" means on a rolling-window roster.
@@ -62,6 +77,13 @@ struct TeamView: View {
         case change = "Change vs prior"
 
         var id: String { rawValue }
+
+        var title: String {
+            switch self {
+            case .value: return String(localized: "Window value")
+            case .change: return String(localized: "Change vs prior")
+            }
+        }
     }
 
     /// Which half of the roster to show. Deliberately never "both": raw stats
@@ -73,6 +95,13 @@ struct TeamView: View {
         case pitchers = "Pitchers"
 
         var id: String { rawValue }
+
+        var title: String {
+            switch self {
+            case .hitters: return String(localized: "Hitters")
+            case .pitchers: return String(localized: "Pitchers")
+            }
+        }
 
         var categories: [MetricCategory] {
             switch self {
@@ -155,7 +184,7 @@ struct TeamView: View {
 
     private var sortLabel: String {
         if selectedCategory == nil { return "xwOBA" }
-        return sortMetric?.label ?? "Top Category"
+        return sortMetric?.label ?? String(localized: "Top Category")
     }
 
     /// What the sort chip and the table header say the list is ranked by. In
@@ -163,8 +192,9 @@ struct TeamView: View {
     /// or the movement being ranked; the two produce very different lists.
     private var rosterSortLabel: String {
         guard isRosterRecent else { return sortLabel }
-        let base = rosterRecentRank == .change ? "Δ \(sortLabel)" : sortLabel
-        return "\(base) · \(rosterWindow.rawValue)d"
+        let name = MetricName.localized(sortLabel)
+        let base = rosterRecentRank == .change ? "Δ \(name)" : name
+        return String(localized: "\(base) · \(rosterWindow.rawValue)d")
     }
 
     private var rowDisplayMetric: (label: String?, category: MetricCategory?) {
@@ -398,7 +428,7 @@ struct TeamView: View {
                     withAnimation(.easeInOut(duration: 0.2)) { selectedTab = tab }
                     UIImpactFeedbackGenerator(style: .light).impactOccurred()
                 } label: {
-                    Text(tab.rawValue)
+                    Text(tab.title)
                         // Three tabs where there were two, so the label has to
                         // give a little rather than truncate on a small phone.
                         .font(SavantType.smallBold)
@@ -475,7 +505,7 @@ struct TeamView: View {
             // pitcher list never offers a Running tab that would empty it.
             if rosterSide.categories.count > 1 {
                 SavantTabs(
-                    tabs: rosterSide.categories.map(\.rawValue),
+                    tabs: rosterSide.categories.map(\.rawValue),  // English ids, localized by SavantTabs
                     selected: Binding(
                         get: { (selectedCategory ?? rosterSide.categories[0]).rawValue },
                         set: { newValue in
@@ -523,7 +553,7 @@ struct TeamView: View {
                 )
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("Sorted by \(rosterSortLabel), \(sortDescending ? "highest first" : "lowest first")")
+            .accessibilityLabel(sortDescending ? String(localized: "Sorted by \(rosterSortLabel), highest first") : String(localized: "Sorted by \(rosterSortLabel), lowest first"))
             .accessibilityHint("Tap to flip sort direction")
 
             Spacer(minLength: 0)
@@ -552,7 +582,7 @@ struct TeamView: View {
     /// whole list means.
     private var sidePicker: some View {
         SavantSegmented(
-            segments: RosterSide.allCases.map { .init(value: $0, label: $0.rawValue) },
+            segments: RosterSide.allCases.map { .init(value: $0, label: $0.title) },
             selection: $rosterSide
         )
         .onChange(of: rosterSide) { _, side in
@@ -567,7 +597,7 @@ struct TeamView: View {
     private var rosterModePicker: some View {
         SavantSegmented(
             segments: RosterMode.allCases.map {
-                .init(value: $0, label: $0.rawValue, isLocked: !store.isPro && $0 == .recent)
+                .init(value: $0, label: $0.title, isLocked: !store.isPro && $0 == .recent)
             },
             selection: $rosterMode,
             onLockedTap: { mode in
@@ -592,9 +622,9 @@ struct TeamView: View {
                             UIImpactFeedbackGenerator(style: .light).impactOccurred()
                         } label: {
                             if label == sortMetric?.label {
-                                Label(label, systemImage: "checkmark")
+                                Label(MetricName.localized(label), systemImage: "checkmark")
                             } else {
-                                Text(label)
+                                Text(MetricName.localized(label))
                             }
                         }
                     }
@@ -611,9 +641,9 @@ struct TeamView: View {
                             UIImpactFeedbackGenerator(style: .light).impactOccurred()
                         } label: {
                             if option == rosterRecentRank {
-                                Label(option.rawValue, systemImage: "checkmark")
+                                Label(option.title, systemImage: "checkmark")
                             } else {
-                                Text(option.rawValue)
+                                Text(option.title)
                             }
                         }
                     }
@@ -627,9 +657,9 @@ struct TeamView: View {
                         UIImpactFeedbackGenerator(style: .light).impactOccurred()
                     } label: {
                         if level == qualifierLevel {
-                            Label("\(level.rawValue) · \(level.description)", systemImage: "checkmark")
+                            Label("\(level.title) · \(level.description)", systemImage: "checkmark")
                         } else {
-                            Text("\(level.rawValue) · \(level.description)")
+                            Text("\(level.title) · \(level.description)")
                         }
                     }
                 }
@@ -657,7 +687,7 @@ struct TeamView: View {
             }
         } label: {
             SavantChip(
-                title: "Filters",
+                title: String(localized: "Filters"),
                 systemImage: "line.3.horizontal.decrease.circle",
                 trailing: .chevron,
                 isActive: isFiltered
@@ -701,17 +731,17 @@ struct TeamView: View {
             } else if currentPlayers.isEmpty {
                 emptyStateView(
                     icon: "person.2.slash",
-                    title: "No players tracked",
-                    description: "No players are tracked for \(teamFullName(team)) in the \(String(displaySeason)) season."
+                    title: String(localized: "No players tracked"),
+                    description: String(localized: "No players are tracked for \(teamFullName(team)) in the \(String(displaySeason)) season.")
                 )
             } else if filteredPlayers.isEmpty {
                 let noCategoryMatch = searchText.isEmpty && selectedCategory != nil
                 emptyStateView(
                     icon: "magnifyingglass",
-                    title: "No players found",
+                    title: String(localized: "No players found"),
                     description: noCategoryMatch
-                        ? "No players match the selected category for this team."
-                        : "Try a different search term."
+                        ? String(localized: "No players match the selected category for this team.")
+                        : String(localized: "Try a different search term.")
                 )
             } else if isRosterRecent && !hasRecentData {
                 HStack(spacing: 10) {

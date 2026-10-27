@@ -40,12 +40,12 @@ struct TeamsView: View {
     /// people already hold the league in their heads, so it reads faster than
     /// an alphabetical wall even before the space saving.
     static let divisions: [(name: String, teams: [String])] = [
-        ("AL East",    ["BAL", "BOS", "NYY", "TB", "TOR"]),
-        ("AL Central", ["CWS", "CLE", "DET", "KC", "MIN"]),
-        ("AL West",    ["HOU", "LAA", "OAK", "SEA", "TEX"]),
-        ("NL East",    ["ATL", "MIA", "NYM", "PHI", "WSH"]),
-        ("NL Central", ["CHC", "CIN", "MIL", "PIT", "STL"]),
-        ("NL West",    ["ARI", "COL", "LAD", "SD", "SF"]),
+        (String(localized: "AL East"),    ["BAL", "BOS", "NYY", "TB", "TOR"]),
+        (String(localized: "AL Central"), ["CWS", "CLE", "DET", "KC", "MIN"]),
+        (String(localized: "AL West"),    ["HOU", "LAA", "OAK", "SEA", "TEX"]),
+        (String(localized: "NL East"),    ["ATL", "MIA", "NYM", "PHI", "WSH"]),
+        (String(localized: "NL Central"), ["CHC", "CIN", "MIL", "PIT", "STL"]),
+        (String(localized: "NL West"),    ["ARI", "COL", "LAD", "SD", "SF"]),
     ]
 
     private var filteredTeams: [String] {
@@ -192,7 +192,7 @@ struct TeamsView: View {
             SavantNavPill(
                 systemImage: "calendar",
                 title: viewModel.selectedPhase == .postseason
-                    ? "\(viewModel.selectedSeason) POST"
+                    ? String(localized: "\(String(viewModel.selectedSeason)) POST")
                     : String(viewModel.selectedSeason)
             )
         }
@@ -283,11 +283,11 @@ struct TeamsView: View {
             } else if filteredTeams.isEmpty {
                 let noDataForSeason = searchText.isEmpty && activeTeams.isEmpty
                 ContentUnavailableView {
-                    Label(noDataForSeason ? "No teams available" : "No teams found", systemImage: "magnifyingglass")
+                    Label(noDataForSeason ? String(localized: "No teams available") : String(localized: "No teams found"), systemImage: "magnifyingglass")
                 } description: {
                     Text(noDataForSeason
-                         ? "No teams have player data for the \(String(viewModel.selectedSeason)) \(viewModel.selectedPhase.label.lowercased())."
-                         : "Try a different search term.")
+                         ? noTeamsMessage
+                         : String(localized: "Try a different search term."))
                 }
                 .padding(.vertical, 48)
             } else if searchText.isEmpty {
@@ -307,6 +307,13 @@ struct TeamsView: View {
     }
 
     /// Six labelled rows of five. Sized so the whole league sits on one screen.
+    private var noTeamsMessage: String {
+        let season = String(viewModel.selectedSeason)
+        return viewModel.selectedPhase == .postseason
+            ? String(localized: "No teams have player data for the \(season) postseason.")
+            : String(localized: "No teams have player data for the \(season) regular season.")
+    }
+
     private var divisionGrid: some View {
         VStack(spacing: 10) {
             ForEach(Self.divisions, id: \.name) { division in
@@ -314,7 +321,7 @@ struct TeamsView: View {
                 if !teams.isEmpty {
                     VStack(spacing: 6) {
                         HStack {
-                            Text(division.name.uppercased())
+                            Text(division.name.localizedUppercase)
                                 .font(SavantType.micro)
                                 .tracking(0.6)
                                 .foregroundStyle(SavantPalette.inkTertiary)
@@ -369,7 +376,7 @@ struct TeamsView: View {
                     .overlay(Circle().stroke(SavantPalette.hairline, lineWidth: 0.5))
             }
             .buttonStyle(.borderless)
-            .accessibilityLabel(teamsViewModel.isFavorite(abbr) ? "Remove favorite" : "Set as favorite")
+            .accessibilityLabel(teamsViewModel.isFavorite(abbr) ? String(localized: "Remove favorite") : String(localized: "Set as favorite"))
             .offset(x: 4, y: -4)
         }
         .accessibilityElement(children: .contain)
@@ -382,7 +389,7 @@ struct TeamsView: View {
                 }
                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
             } label: {
-                Label(teamsViewModel.isFavorite(abbr) ? "Remove Favorite" : "Set as Favorite",
+                Label(teamsViewModel.isFavorite(abbr) ? String(localized: "Remove Favorite") : String(localized: "Set as Favorite"),
                       systemImage: teamsViewModel.isFavorite(abbr) ? "star.slash" : "star.fill")
             }
         }
@@ -438,7 +445,7 @@ struct TeamGridTile: View {
                     .overlay(Circle().stroke(SavantPalette.hairline, lineWidth: 0.5))
             }
             .buttonStyle(.borderless)
-            .accessibilityLabel(isFavorite ? "Remove favorite" : "Set as favorite")
+            .accessibilityLabel(isFavorite ? String(localized: "Remove favorite") : String(localized: "Set as favorite"))
             .padding(6)
         }
     }

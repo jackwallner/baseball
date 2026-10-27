@@ -47,7 +47,7 @@ struct AboutView: View {
 
     private var aboutCard: some View {
         VStack(spacing: 0) {
-            SavantSectionBar(title: "STATSCOUT")
+            SavantSectionBar(title: String(localized: "STATSCOUT"))
             HStack(spacing: 12) {
                 Image(systemName: "baseball.fill")
                     .font(.title2)
@@ -74,17 +74,17 @@ struct AboutView: View {
 
     private var proStatusCard: some View {
         VStack(spacing: 0) {
-            SavantSectionBar(title: "STATSCOUT+")
+            SavantSectionBar(title: String(localized: "STATSCOUT+"))
             VStack(spacing: 0) {
                 HStack {
                     Image(systemName: store.isPro ? "crown.fill" : "crown")
                         .font(.title2)
                         .foregroundStyle(store.isPro ? Color.yellow : SavantPalette.inkTertiary)
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(store.isPro ? "StatScout+ Unlocked" : "Free Version")
+                        Text(store.isPro ? String(localized: "StatScout+ Unlocked") : String(localized: "Free Version"))
                             .font(SavantType.bodyBold)
                             .foregroundStyle(SavantPalette.ink)
-                        Text(store.isPro ? "All StatScout+ features are active." : "Unlock historical seasons and year-over-year comparisons.")
+                        Text(store.isPro ? String(localized: "All StatScout+ features are active.") : String(localized: "Unlock historical seasons and year-over-year comparisons."))
                             .font(SavantType.small)
                             .foregroundStyle(SavantPalette.inkSecondary)
                     }
@@ -95,7 +95,7 @@ struct AboutView: View {
                         // used to say "Upgrade" while the toolbar two taps away
                         // said "Try Free" and the board footer said "Unlock
                         // StatScout+", three labels for one destination.
-                        Button(store.isLapsed ? "Renew" : store.upgradeCTALabel) {
+                        Button(store.isLapsed ? String(localized: "Renew") : store.upgradeCTALabel) {
                             paywallTrigger = store.defaultUpgradeTrigger
                         }
                         .buttonStyle(.borderedProminent)
@@ -172,7 +172,8 @@ struct AboutView: View {
         // Once the playoffs have games in, the regular season is finished and
         // its last day is a final, not an age.
         if postseasonThrough != nil {
-            return "\(dataThrough.formatted(.dateTime.month(.abbreviated).day())) (regular season final)"
+            let date = dataThrough.formatted(.dateTime.month(.abbreviated).day())
+            return String(localized: "\(date) (regular season final)")
         }
         return Self.coverageText(dataThrough)
     }
@@ -183,38 +184,38 @@ struct AboutView: View {
         // Only reachable if a day got ingested while it was still being played,
         // which the pipeline is built not to do. Saying so beats a bare "today",
         // which would read as a complete day.
-        if calendar.isDateInToday(date) { return "\(stamp) (today, still in progress)" }
-        if calendar.isDateInYesterday(date) { return "\(stamp) (yesterday)" }
+        if calendar.isDateInToday(date) { return String(localized: "\(stamp) (today, still in progress)") }
+        if calendar.isDateInYesterday(date) { return String(localized: "\(stamp) (yesterday)") }
         let days = calendar.dateComponents([.day], from: date, to: .now).day ?? 0
-        return "\(stamp) (\(days) days ago)"
+        return String(localized: "\(stamp) (\(days) days ago)")
     }
 
     private var refreshCard: some View {
         VStack(spacing: 0) {
-            SavantSectionBar(title: "DATA")
+            SavantSectionBar(title: String(localized: "DATA"))
             row(
                 icon: "moon.stars.fill",
-                title: "Overnight Refresh",
-                subtitle: "Rebuilt overnight from publicly available pitch-tracking data, once the previous night's games have published."
+                title: String(localized: "Overnight Refresh"),
+                subtitle: String(localized: "Rebuilt overnight from publicly available pitch-tracking data, once the previous night's games have published.")
             )
             Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline)
             row(
                 icon: "calendar.badge.clock",
-                title: "Games Through",
+                title: String(localized: "Games Through"),
                 subtitle: gamesThroughText
             )
             if let postseasonThrough {
                 Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline)
                 row(
                     icon: "trophy",
-                    title: "Postseason Through",
+                    title: String(localized: "Postseason Through"),
                     subtitle: Self.coverageText(postseasonThrough)
                 )
             }
             Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline)
             row(
                 icon: "clock.arrow.circlepath",
-                title: "Last Refreshed",
+                title: String(localized: "Last Refreshed"),
                 subtitle: lastUpdatedText
             )
         }
@@ -228,7 +229,7 @@ struct AboutView: View {
 
     private var linkCard: some View {
         VStack(spacing: 0) {
-            SavantSectionBar(title: "SUPPORT & PRIVACY")
+            SavantSectionBar(title: String(localized: "SUPPORT & PRIVACY"))
             // Two separate rows with no rating question in front of either
             // (App Review 5.6.1). The rate row deep-links to the review page;
             // requestReview() from a button may show nothing.
@@ -238,8 +239,8 @@ struct AboutView: View {
             } label: {
                 row(
                     icon: "star.fill",
-                    title: "Rate StatScout",
-                    subtitle: "Opens the App Store to write a review."
+                    title: String(localized: "Rate StatScout"),
+                    subtitle: String(localized: "Opens the App Store to write a review.")
                 )
             }
             .buttonStyle(.plain)
@@ -252,7 +253,7 @@ struct AboutView: View {
             } label: {
                 row(
                     icon: "envelope.fill",
-                    title: "Send Feedback",
+                    title: String(localized: "Send Feedback"),
                     subtitle: AppStoreReviewLinks.feedbackEmail
                 )
             }
@@ -264,8 +265,8 @@ struct AboutView: View {
                 Link(destination: privacyURL) {
                     row(
                         icon: "shield.lefthalf.filled",
-                        title: "Privacy Policy",
-                        subtitle: "No ads or tracking."
+                        title: String(localized: "Privacy Policy"),
+                        subtitle: String(localized: "No ads or tracking.")
                     )
                 }
                 .buttonStyle(.plain)
@@ -281,7 +282,7 @@ struct AboutView: View {
 
     private var versionCard: some View {
         VStack(spacing: 0) {
-            SavantSectionBar(title: "VERSION")
+            SavantSectionBar(title: String(localized: "VERSION"))
             HStack {
                 Text("App Version")
                     .font(SavantType.bodyBold)
@@ -303,7 +304,7 @@ struct AboutView: View {
 
     private var disclaimerCard: some View {
         VStack(spacing: 0) {
-            SavantSectionBar(title: "DISCLAIMER")
+            SavantSectionBar(title: String(localized: "DISCLAIMER"))
             Text("Not affiliated with, endorsed by, or sponsored by Major League Baseball, MLB Advanced Media, MLBPA, or any team. Team names and abbreviations are used for identification only. All trademarks are property of their respective owners.")
                 .font(SavantType.small)
                 .foregroundStyle(SavantPalette.inkSecondary)

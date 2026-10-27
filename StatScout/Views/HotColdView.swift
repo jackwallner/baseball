@@ -141,8 +141,8 @@ struct HotColdView: View {
             // differs, because here the choice itself encodes hot vs cold.
             SavantSegmented(
                 segments: [
-                    .init(value: false, label: "Heating up", systemImage: "flame.fill"),
-                    .init(value: true, label: "Cooling off", systemImage: "snowflake"),
+                    .init(value: false, label: String(localized: "Heating up"), systemImage: "flame.fill"),
+                    .init(value: true, label: String(localized: "Cooling off"), systemImage: "snowflake"),
                 ],
                 selection: $showingCold,
                 selectedFill: { $0 ? SavantPalette.pctlCold : SavantPalette.pctlHot }
@@ -171,16 +171,15 @@ struct HotColdView: View {
     /// Coverage date, then the two things that get misread about this board:
     /// the window is calendar days, and the row's "G" is games appeared in.
     private var captionText: String {
-        var parts: [String] = []
-        if let asOf = viewModel.recentFormAsOf {
-            let through = "through \(asOf.formatted(.dateTime.month(.abbreviated).day()))"
-            // In October the windows still close on the last regular-season
-            // day, which reads as a stale board unless it says so.
-            parts.append(viewModel.offersPhaseChoice ? "Regular season \(through)" : "T" + through.dropFirst())
+        guard let asOf = viewModel.recentFormAsOf else {
+            return String(localized: "Calendar days, not games · G is games played in the window.")
         }
-        parts.append("calendar days, not games")
-        parts.append("G is games played in the window")
-        return parts.joined(separator: " · ") + "."
+        let date = asOf.formatted(.dateTime.month(.abbreviated).day())
+        // In October the windows still close on the last regular-season
+        // day, which reads as a stale board unless it says so.
+        return viewModel.offersPhaseChoice
+            ? String(localized: "Regular season through \(date) · calendar days, not games · G is games played in the window.")
+            : String(localized: "Through \(date) · calendar days, not games · G is games played in the window.")
     }
 
     /// Minimum playing time inside the window. The board used to hard-code this
@@ -194,7 +193,7 @@ struct HotColdView: View {
                         qualifier = level
                         UIImpactFeedbackGenerator(style: .light).impactOccurred()
                     } label: {
-                        let title = "\(level.rawValue) · \(level.description(isPitcher: side == .pitching, windowDays: viewModel.recentWindow.rawValue))"
+                        let title = "\(level.title) · \(level.description(isPitcher: side == .pitching, windowDays: viewModel.recentWindow.rawValue))"
                         if level == qualifier {
                             Label(title, systemImage: "checkmark")
                         } else {
@@ -205,7 +204,7 @@ struct HotColdView: View {
             }
         } label: {
             SavantChip(
-                title: "Qualifier",
+                title: String(localized: "Qualifier"),
                 systemImage: "line.3.horizontal.decrease.circle",
                 trailing: .chevron,
                 isActive: qualifier != .sample
@@ -213,7 +212,7 @@ struct HotColdView: View {
         }
         .menuOrder(.fixed)
         .accessibilityLabel("Minimum playing time")
-        .accessibilityValue(qualifier.rawValue)
+        .accessibilityValue(qualifier.title)
     }
 
     /// Seventeen metrics per side is far past what a segmented row can hold, so
@@ -268,9 +267,10 @@ struct HotColdView: View {
             ContentUnavailableView {
                 Label("No movement to rank yet", systemImage: "chart.line.flattrend.xyaxis")
             } description: {
+                let name = MetricName.localized(metric.label)
                 Text(qualifier == .regulars
-                     ? "Nobody clears the Regulars minimum on \(metric.label) in this window. Try a lower qualifier or a longer window."
-                     : "\(metric.label) doesn't have enough of a prior window to compare against. Try another stat or a longer window.")
+                     ? String(localized: "Nobody clears the Regulars minimum on \(name) in this window. Try a lower qualifier or a longer window.")
+                     : String(localized: "\(name) doesn't have enough of a prior window to compare against. Try another stat or a longer window."))
             }
             .padding(.vertical, 32)
         } else {
@@ -314,7 +314,7 @@ struct HotColdView: View {
                 .clipped()
                 .overlay(alignment: .bottom) {
                     BlurGateUnlock(
-                        headline: "See the full board: every hitter and pitcher ranked by how far they've moved",
+                        headline: String(localized: "See the full board: every hitter and pitcher ranked by how far they've moved"),
                         trigger: .recentForm
                     )
                 }
@@ -346,7 +346,7 @@ struct HotColdView: View {
                 if viewModel.isRecentFormLoading {
                     ProgressView().scaleEffect(0.7)
                 }
-                Text(viewModel.isRecentFormLoading ? "Loading the board…" : "No movement to rank yet")
+                Text(viewModel.isRecentFormLoading ? String(localized: "Loading the board…") : String(localized: "No movement to rank yet"))
                     .font(SavantType.small)
                     .foregroundStyle(SavantPalette.inkTertiary)
                 Spacer(minLength: 0)
@@ -362,7 +362,7 @@ struct HotColdView: View {
     }
 
     private var boardTitle: String {
-        showingCold ? "COLDEST IN THE LEAGUE" : "HOTTEST IN THE LEAGUE"
+        showingCold ? String(localized: "COLDEST IN THE LEAGUE") : String(localized: "HOTTEST IN THE LEAGUE")
     }
 
     private func section(title: String, forms: [RecentForm], ranked: Bool) -> some View {
@@ -448,7 +448,7 @@ struct HotColdView: View {
 
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 4) {
-                    Text(player?.name ?? "Player \(form.playerId)")
+                    Text(player?.name ?? String(localized: "Player \(String(form.playerId))"))
                         .font(SavantType.bodyBold)
                         .foregroundStyle(SavantPalette.ink)
                         .lineLimit(1)
@@ -489,7 +489,7 @@ struct HotColdView: View {
             favorites.toggleFavorite(playerId: form.playerId)
         } label: {
             let following = favorites.isFavorite(playerId: form.playerId)
-            Label(following ? "Unfollow" : "Follow", systemImage: following ? "star.slash" : "star")
+            Label(following ? String(localized: "Unfollow") : String(localized: "Follow"), systemImage: following ? "star.slash" : "star")
         }
     }
 

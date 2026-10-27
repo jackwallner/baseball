@@ -248,8 +248,8 @@ struct TeamComparisonView: View {
 
     private var statGroups: [(title: String, rows: [StatRow])] {
         [
-            ("\(category.rawValue.uppercased()) · ADVANCED", advancedRows),
-            ("\(category.rawValue.uppercased()) · STANDARD", standardRows),
+            (String(localized: "\(category.title.localizedUppercase) · ADVANCED"), advancedRows),
+            (String(localized: "\(category.title.localizedUppercase) · STANDARD"), standardRows),
         ]
         .filter { !$0.1.isEmpty }
     }
@@ -274,7 +274,7 @@ struct TeamComparisonView: View {
                     ContentUnavailableView {
                         Label("No aggregate stats", systemImage: "sum")
                     } description: {
-                        Text("Neither roster has \(category.rawValue.lowercased()) stats for these seasons.")
+                        Text("Neither roster has stats in this category for these seasons.")
                     }
                     .padding(.vertical, 32)
                     .frame(maxWidth: .infinity)
@@ -347,7 +347,7 @@ struct TeamComparisonView: View {
     private func statRow(_ row: StatRow, index: Int) -> some View {
         HStack(spacing: 8) {
             statValue(row.aText, value: row.aValue, other: row.bValue)
-            Text(row.label)
+            Text(MetricName.localized(row.label))
                 .font(SavantType.smallBold)
                 .foregroundStyle(SavantPalette.ink)
                 .frame(width: 96)

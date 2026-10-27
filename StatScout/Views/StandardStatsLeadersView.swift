@@ -193,8 +193,8 @@ struct StandardStatsLeadersView: View {
                     // A board that quietly drops players has to say so, or a
                     // missing name reads as missing data.
                     Text(selectedCategory == .pitching
-                         ? "\(selectedStat) ranks pitchers with 1 IP per team game."
-                         : "\(selectedStat) ranks hitters with 3.1 PA per team game.")
+                         ? String(localized: "\(selectedStat) ranks pitchers with 1 IP per team game.")
+                         : String(localized: "\(selectedStat) ranks hitters with 3.1 PA per team game."))
                         .font(SavantType.micro)
                         .tracking(0.2)
                         .foregroundStyle(SavantPalette.inkTertiary)
@@ -369,15 +369,19 @@ struct StandardStatsLeadersView: View {
                 ContentUnavailableView {
                     Label(
                         isLoadingPostseason
-                            ? "Loading postseason…"
-                            : isLoadingSeason ? "Loading season…" : "No data available",
+                            ? String(localized: "Loading postseason…")
+                            : isLoadingSeason ? String(localized: "Loading season…") : String(localized: "No data available"),
                         systemImage: (isLoadingSeason || isLoadingPostseason) ? "clock" : "chart.bar"
                     )
                 } description: {
                     if isLoadingPostseason {
                         Text("Pulling the latest postseason players.")
                     } else if isLoadingSeason {
-                        Text("Pulling \(season.map(String.init) ?? "this season")'s players.")
+                        if let season {
+                            Text("Pulling the \(String(season)) season's players.")
+                        } else {
+                            Text("Pulling this season's players.")
+                        }
                     } else {
                         Text("No players have \(selectedStat) data for this season.")
                     }
@@ -540,7 +544,7 @@ struct StandardStatsLeaderboardScreen: View {
         // how this title read "2,026".
         .navigationTitle(
             activePhase == .postseason
-                ? "\(stat) · \(String(season)) Postseason"
+                ? String(localized: "\(stat) · \(String(season)) Postseason")
                 : "\(stat) · \(String(season))"
         )
         .navigationBarTitleDisplayMode(.inline)

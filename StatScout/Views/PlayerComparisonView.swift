@@ -332,10 +332,10 @@ struct PlayerComparisonView: View {
                 Button {
                     picker = target
                 } label: {
-                    SavantInlinePill(systemImage: "arrow.triangle.2.circlepath", title: "Change")
+                    SavantInlinePill(systemImage: "arrow.triangle.2.circlepath", title: String(localized: "Change"))
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("Change \(target == .a ? "first" : "second") player")
+                .accessibilityLabel(target == .a ? String(localized: "Change first player") : String(localized: "Change second player"))
             } else if let season = player.season {
                 Text(String(season))
                     .font(SavantType.micro)
@@ -367,8 +367,8 @@ struct PlayerComparisonView: View {
             note = nil
         } else {
             note = catalog.isLoadingHistory
-                ? "Loading past seasons…"
-                : "No \(String(season)) data for \(current.name)."
+                ? String(localized: "Loading past seasons…")
+                : String(localized: "No \(String(season)) data for \(current.name).")
             Task { await catalog.loadHistory?() }
         }
         UIImpactFeedbackGenerator(style: .light).impactOccurred()
@@ -376,7 +376,7 @@ struct PlayerComparisonView: View {
 
     private func categoryCard(category: MetricCategory, metrics: [(label: String, a: Metric?, b: Metric?)]) -> some View {
         VStack(spacing: 0) {
-            SavantSectionBar(title: category.rawValue.uppercased())
+            SavantSectionBar(title: category.title.localizedUppercase)
 
             HStack(spacing: 8) {
                 Text("METRIC")
@@ -405,7 +405,7 @@ struct PlayerComparisonView: View {
 
             ForEach(Array(metrics.enumerated()), id: \.offset) { index, item in
                 HStack(spacing: 8) {
-                    Text(item.label)
+                    Text(MetricName.localized(item.label))
                         .font(SavantType.smallBold)
                         .foregroundStyle(SavantPalette.ink)
                         .frame(width: 72, alignment: .leading)

@@ -79,7 +79,7 @@ struct CompareView: View {
     /// guessable from a greyed-out button.
     private var teamWarning: String? {
         guard isSameTeamContext, let teamA else { return nil }
-        return "Both sides are \(teamFullName(teamA)) in \(String(activeTeamSeasonA)). Change one side's season to compare."
+        return String(localized: "Both sides are \(teamFullName(teamA)) in \(String(activeTeamSeasonA)). Change one side's season to compare.")
     }
 
     /// Clubs with data in a given season, so a slot can't be pointed at a team
@@ -108,13 +108,13 @@ struct CompareView: View {
     /// Why the Compare button is off, when a slot is filled but unusable.
     private var slotWarning: String? {
         if viewModel.isHistoricalLoading, resolvedA == nil || resolvedB == nil {
-            return "Loading past seasons…"
+            return String(localized: "Loading past seasons…")
         }
         if let playerA, resolvedA == nil {
-            return "No \(activeSeasonA) data for \(playerA.name)."
+            return String(localized: "No \(String(activeSeasonA)) data for \(playerA.name).")
         }
         if let playerB, resolvedB == nil {
-            return "No \(activeSeasonB) data for \(playerB.name)."
+            return String(localized: "No \(String(activeSeasonB)) data for \(playerB.name).")
         }
         return nil
     }
@@ -150,7 +150,7 @@ struct CompareView: View {
                         // The same gate every other locked module uses, rather
                         // than this screen's own floating panel.
                         BlurGateUnlock(
-                            headline: "Stack any two players or any two clubs, and any of them against their own past seasons",
+                            headline: String(localized: "Stack any two players or any two clubs, and any of them against their own past seasons"),
                             trigger: .playerComparison
                         )
                         .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
@@ -265,12 +265,12 @@ struct CompareView: View {
     private var yourPlayersCard: some View {
         VStack(spacing: 0) {
             SavantSectionBar(
-                title: "YOUR PLAYERS",
+                title: String(localized: "YOUR PLAYERS"),
                 trailing: AnyView(
                     Button {
                         showingFollowSheet = true
                     } label: {
-                        Label(favorites.playerIds.isEmpty ? "Add" : "Edit", systemImage: "star")
+                        Label(favorites.playerIds.isEmpty ? String(localized: "Add") : String(localized: "Edit"), systemImage: "star")
                             .font(SavantType.micro)
                             .tracking(0.3)
                             .foregroundStyle(SavantPalette.savantRed)
@@ -307,8 +307,8 @@ struct CompareView: View {
                     followedRow(player: player, index: index)
                 }
                 Text(store.isPro
-                     ? "Tap a player to load them into a slot below."
-                     : "Tap a player to see their stats. Head-to-head needs StatScout+.")
+                     ? String(localized: "Tap a player to load them into a slot below.")
+                     : String(localized: "Tap a player to see their stats. Head-to-head needs StatScout+."))
                     .font(SavantType.micro)
                     .tracking(0.3)
                     .foregroundStyle(SavantPalette.inkTertiary)
@@ -452,13 +452,13 @@ struct CompareView: View {
 
     private var playerVsPlayerCard: some View {
         VStack(spacing: 0) {
-            SavantSectionBar(title: "PLAYER VS PLAYER")
+            SavantSectionBar(title: String(localized: "PLAYER VS PLAYER"))
 
             VStack(spacing: 12) {
                 HStack(alignment: .top, spacing: 10) {
                     slotColumn(
                         player: playerA,
-                        placeholder: "Player A",
+                        placeholder: String(localized: "Player A"),
                         season: activeSeasonA,
                         onPickPlayer: { picker = .playerA },
                         onPickSeason: { seasonA = $0 }
@@ -469,7 +469,7 @@ struct CompareView: View {
                         .padding(.top, 40)
                     slotColumn(
                         player: playerB,
-                        placeholder: "Player B",
+                        placeholder: String(localized: "Player B"),
                         season: activeSeasonB,
                         onPickPlayer: { picker = .playerB },
                         onPickSeason: { seasonB = $0 }
@@ -517,13 +517,13 @@ struct CompareView: View {
     /// card above it, because it's the same question one level up.
     private var teamVsTeamCard: some View {
         VStack(spacing: 0) {
-            SavantSectionBar(title: "TEAM VS TEAM")
+            SavantSectionBar(title: String(localized: "TEAM VS TEAM"))
 
             VStack(spacing: 12) {
                 HStack(alignment: .top, spacing: 10) {
                     teamSlotColumn(
                         team: teamA,
-                        placeholder: "Team A",
+                        placeholder: String(localized: "Team A"),
                         season: activeTeamSeasonA,
                         onPickTeam: { teamPicker = .a },
                         onPickSeason: { teamSeasonA = $0 }
@@ -534,7 +534,7 @@ struct CompareView: View {
                         .padding(.top, 40)
                     teamSlotColumn(
                         team: teamB,
-                        placeholder: "Team B",
+                        placeholder: String(localized: "Team B"),
                         season: activeTeamSeasonB,
                         onPickTeam: { teamPicker = .b },
                         onPickSeason: { teamSeasonB = $0 }
@@ -648,7 +648,7 @@ struct CompareView: View {
 
     private var yearOverYearCard: some View {
         VStack(spacing: 0) {
-            SavantSectionBar(title: "YEAR OVER YEAR")
+            SavantSectionBar(title: String(localized: "YEAR OVER YEAR"))
 
             VStack(spacing: 12) {
                 Text("Pick a player to see how their percentile rankings moved across every season.")
@@ -807,7 +807,7 @@ private struct YearCompareDestination: View {
 
             if let onChangePlayer {
                 Button(action: onChangePlayer) {
-                    SavantInlinePill(systemImage: "arrow.triangle.2.circlepath", title: "Change")
+                    SavantInlinePill(systemImage: "arrow.triangle.2.circlepath", title: String(localized: "Change"))
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("Compare a different player's seasons")
@@ -834,8 +834,8 @@ private struct YearCompareDestination: View {
                         Label("Not enough history", systemImage: "calendar.badge.clock")
                     } description: {
                         Text(viewModel.isHistoricalLoading
-                             ? "Loading past seasons for \(route.playerName)…"
-                             : "\(route.playerName) doesn't have multiple seasons of data to compare.")
+                             ? String(localized: "Loading past seasons for \(route.playerName)…")
+                             : String(localized: "\(route.playerName) doesn't have multiple seasons of data to compare."))
                     }
                     .padding(.vertical, 64)
                 } else {
@@ -899,7 +899,7 @@ struct ComparePlayerPicker: View {
             .overlay {
                 if filtered.isEmpty {
                     ContentUnavailableView {
-                        Label(isLoading ? "Loading players…" : "No players", systemImage: "person.slash")
+                        Label(isLoading ? String(localized: "Loading players…") : String(localized: "No players"), systemImage: "person.slash")
                     } description: {
                         if isLoading {
                             Text("Pulling the \(season.map(String.init) ?? "") roster.")
@@ -915,7 +915,7 @@ struct ComparePlayerPicker: View {
             // String(), not the Int: a number interpolated into a
             // LocalizedStringKey picks up the grouping separator and reads
             // "2,026".
-            .navigationTitle(season.map { "Select Player · \(String($0))" } ?? "Select Player")
+            .navigationTitle(season.map { String(localized: "Select Player · \(String($0))") } ?? String(localized: "Select Player"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -969,7 +969,7 @@ struct CompareTeamPicker: View {
             .overlay {
                 if filtered.isEmpty {
                     ContentUnavailableView {
-                        Label(isLoading ? "Loading teams…" : "No teams", systemImage: "flag.slash")
+                        Label(isLoading ? String(localized: "Loading teams…") : String(localized: "No teams"), systemImage: "flag.slash")
                     } description: {
                         if isLoading {
                             Text("Pulling the \(season.map(String.init) ?? "") season.")
@@ -982,7 +982,7 @@ struct CompareTeamPicker: View {
                 }
             }
             .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search teams")
-            .navigationTitle(season.map { "Select Team · \(String($0))" } ?? "Select Team")
+            .navigationTitle(season.map { String(localized: "Select Team · \(String($0))") } ?? String(localized: "Select Team"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

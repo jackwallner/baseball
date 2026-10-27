@@ -128,7 +128,7 @@ final class DashboardViewModel {
             hasLoadedPostseason = true
         } catch {
             if !isTaskCancellation(error) {
-                postseasonErrorMessage = "Couldn't load postseason data. Check your connection and try again."
+                postseasonErrorMessage = String(localized: "Couldn't load postseason data. Check your connection and try again.")
             }
         }
     }
@@ -168,7 +168,7 @@ final class DashboardViewModel {
     // Label shown in the sort button - reflects actual metric being used
     var sortLabel: String {
         guard selectedCategory != nil else { return "xwOBA" }
-        return currentSortMetric ?? "Top Category"
+        return currentSortMetric ?? String(localized: "Top Category")
     }
 
     // Resolved sort metric: user override (if still available) or auto-priority pick.
@@ -275,7 +275,7 @@ final class DashboardViewModel {
     var isLoading = true
     var isHistoricalLoading = false
     var hasLoadedHistorical = false
-    var loadingMessage = "Starting up…"
+    var loadingMessage = String(localized: "Starting up…")
     var loadingProgress = 0.05
     var errorMessage: String?
     var lastFetchFailed = false
@@ -352,7 +352,8 @@ final class DashboardViewModel {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         formatter.timeStyle = .short
-        return "Updated \(formatter.string(from: lastUpdated))"
+        let stamp = formatter.string(from: lastUpdated)
+        return String(localized: "Updated \(stamp)")
     }
 
     /// Fetch per-game logs for a single player. Powers the Recent Form card,
@@ -448,7 +449,7 @@ final class DashboardViewModel {
     /// not exist: they are this season's regular-season curve, with an October
     /// value looked up on it.
     var postseasonReferenceNote: String {
-        "Percentiles vs. \(StatScoutSeason.current) regular season"
+        String(localized: "Percentiles vs. \(String(StatScoutSeason.current)) regular season")
     }
 
     // MARK: - Recent form
@@ -599,7 +600,7 @@ final class DashboardViewModel {
                 // around the Trends board produced an error on a board that was
                 // fine.
                 if !isTaskCancellation(error) {
-                    self.recentFormError = "Couldn't load recent form."
+                    self.recentFormError = String(localized: "Couldn't load recent form.")
                 }
             }
         }
@@ -647,7 +648,7 @@ final class DashboardViewModel {
         /// Short form for the chip; the menu row spells it out.
         var chipLabel: String {
             switch self {
-            case .all: return "Pos"
+            case .all: return String(localized: "Pos")
             case .infield: return "IF"
             case .outfield: return "OF"
             default: return rawValue
@@ -656,18 +657,18 @@ final class DashboardViewModel {
 
         var label: String {
             switch self {
-            case .all: return "All positions"
-            case .infield: return "Infield"
-            case .outfield: return "Outfield"
-            case .catcher: return "Catcher"
-            case .firstBase: return "First base"
-            case .secondBase: return "Second base"
-            case .thirdBase: return "Third base"
-            case .shortstop: return "Shortstop"
-            case .leftField: return "Left field"
-            case .centerField: return "Center field"
-            case .rightField: return "Right field"
-            case .designatedHitter: return "Designated hitter"
+            case .all: return String(localized: "All positions")
+            case .infield: return String(localized: "Infield")
+            case .outfield: return String(localized: "Outfield")
+            case .catcher: return String(localized: "Catcher")
+            case .firstBase: return String(localized: "First base")
+            case .secondBase: return String(localized: "Second base")
+            case .thirdBase: return String(localized: "Third base")
+            case .shortstop: return String(localized: "Shortstop")
+            case .leftField: return String(localized: "Left field")
+            case .centerField: return String(localized: "Center field")
+            case .rightField: return String(localized: "Right field")
+            case .designatedHitter: return String(localized: "Designated hitter")
             }
         }
 
@@ -805,6 +806,14 @@ final class DashboardViewModel {
 
         var id: String { rawValue }
 
+        var title: String {
+            switch self {
+            case .all: return String(localized: "All")
+            case .any: return String(localized: "Min Sample")
+            case .qualified: return String(localized: "Qualified")
+            }
+        }
+
         var minPA: Int {
             switch self {
             case .all: return 0
@@ -825,9 +834,9 @@ final class DashboardViewModel {
         /// so "All" and "Min Sample" don't look like synonyms.
         var description: String {
             switch self {
-            case .all: return "No minimum"
-            case .any: return "10+ PA / 5+ IP"
-            case .qualified: return "Savant qualifier"
+            case .all: return String(localized: "No minimum")
+            case .any: return String(localized: "10+ PA / 5+ IP")
+            case .qualified: return String(localized: "Savant qualifier")
             }
         }
     }
@@ -1185,7 +1194,7 @@ final class DashboardViewModel {
     func load() async {
         hasStartedLoading = true
         isLoading = players.isEmpty
-        loadingMessage = players.isEmpty ? "Loading saved players…" : "Refreshing player data…"
+        loadingMessage = players.isEmpty ? String(localized: "Loading saved players…") : String(localized: "Refreshing player data…")
         loadingProgress = players.isEmpty ? 0.12 : 0.2
 
         let cached: [Player] = await Task.detached { [cache] in
@@ -1199,7 +1208,7 @@ final class DashboardViewModel {
             ingestPlayers(cached)
         }
 
-        loadingMessage = "Checking for updates…"
+        loadingMessage = String(localized: "Checking for updates…")
         loadingProgress = 0.45
         isLoading = players.isEmpty
         errorMessage = nil
@@ -1223,7 +1232,7 @@ final class DashboardViewModel {
                 if !historicalFallback.isEmpty {
                     ingestPlayers(historicalFallback)
                 } else {
-                    errorMessage = "No players found."
+                    errorMessage = String(localized: "No players found.")
                     lastFetchFailed = true
                 }
                 isLoading = false
@@ -1231,19 +1240,19 @@ final class DashboardViewModel {
                 return
             }
 
-            loadingMessage = "Preparing leaderboard…"
+            loadingMessage = String(localized: "Preparing leaderboard…")
             loadingProgress = 0.85
             ingestPlayers(allPlayers)
             try? cache?.savePlayers(current)
 
         } catch is DecodingError {
-            errorMessage = "Data format changed. The app may need an update."
+            errorMessage = String(localized: "Data format changed. The app may need an update.")
             lastFetchFailed = true
         } catch _ as URLError {
-            errorMessage = players.isEmpty ? "Can't reach data feed. Check your connection." : "Showing saved data. Pull to refresh when your connection improves."
+            errorMessage = players.isEmpty ? String(localized: "Can't reach data feed. Check your connection.") : String(localized: "Showing saved data. Pull to refresh when your connection improves.")
             lastFetchFailed = true
         } catch {
-            errorMessage = players.isEmpty ? "Something went wrong loading player data." : "Showing saved data. Pull to refresh to try again."
+            errorMessage = players.isEmpty ? String(localized: "Something went wrong loading player data.") : String(localized: "Showing saved data. Pull to refresh to try again.")
             lastFetchFailed = true
         }
         isLoading = false
@@ -1276,7 +1285,7 @@ final class DashboardViewModel {
     func loadHistoricalIfNeeded() async {
         guard !hasLoadedHistorical, !isHistoricalLoading else { return }
         isHistoricalLoading = true
-        loadingMessage = "Loading past seasons…"
+        loadingMessage = String(localized: "Loading past seasons…")
         loadingProgress = 0.12
 
         let historical: [Player] = await Task.detached { [cache] in
@@ -1286,7 +1295,7 @@ final class DashboardViewModel {
             return ((try? cache?.loadPlayers()) ?? []).filter { ($0.season ?? 0) < StatScoutSeason.current }
         }.value
 
-        loadingMessage = "Preparing season history…"
+        loadingMessage = String(localized: "Preparing season history…")
         loadingProgress = 0.78
 
         if !historical.isEmpty {

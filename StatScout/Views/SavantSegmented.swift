@@ -92,7 +92,7 @@ struct SavantSegmented<Value: Hashable>: View {
                     )
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel(segment.isLocked ? "\(segment.label), requires StatScout+" : segment.label)
+                .accessibilityLabel(segment.isLocked ? String(localized: "\(segment.label), requires StatScout+") : segment.label)
                 .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : [.isButton])
             }
         }
