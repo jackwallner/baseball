@@ -1,0 +1,21 @@
+# Baseball Savvy StatScout
+
+> Baseball Savvy StatScout is a baseball percentile rankings app for iPhone: Statcast-style leaderboards for xwOBA, Barrel% and Sprint Speed. Free, no account.
+
+## App
+
+- [Baseball Percentile Rankings App | Baseball Savvy StatScout](https://jackwallner.com/ios/baseball/index.html.md): Baseball Savvy StatScout is a baseball percentile rankings app for iPhone: Statcast-style leaderboards for xwOBA, Barrel% and Sprint Speed. Free, no account.
+
+## Guides
+
+- [StatScout - Baseball Analytics at a Glance](https://jackwallner.github.io/baseball/baseball-savvy.html.md): Visual percentile rankings, nightly leaderboards, and team rosters. Baseball analytics built for a fast mobile view.
+- [Best Baseball Savant App for iPhone: 5 Compared](https://jackwallner.com/ios/baseball/best-baseball-savant-app.html.md): There is no official Baseball Savant app. Five iPhone apps compared for Statcast percentiles, advanced stats and live baseball, with ratings and trade-offs.
+- [What Is xwOBA? Barrel Rate, Hard-Hit % and Sprint Speed](https://jackwallner.com/ios/baseball/statcast-metrics-explained.html.md): What xwOBA, barrel rate, hard-hit rate and sprint speed mean, with the exact Statcast definitions and what a good number looks like in a 2025 MLB season.
+
+## Optional
+
+- [Baseball Savvy StatScout for Android Privacy Policy](https://jackwallner.github.io/baseball/android-privacy.html.md): Baseball Savvy StatScout for Android Privacy Policy
+- [Baseball Savvy StatScout for Android Terms of Use](https://jackwallner.github.io/baseball/android-terms.html.md): Baseball Savvy StatScout for Android Terms of Use
+- [StatScout Privacy Policy](https://jackwallner.com/ios/baseball/privacy-policy.html.md): Privacy policy for the Baseball Savvy StatScout iPhone app by Jack Wallner.
+- [Support - StatScout](https://jackwallner.com/ios/baseball/support.html.md): Get help with StatScout. Contact support, read FAQs, and learn more about baseball percentile rankings.
+- [StatScout Terms of Use](https://jackwallner.com/ios/baseball/terms.html.md): Terms of use for the Baseball Savvy StatScout iPhone app by Jack Wallner.
