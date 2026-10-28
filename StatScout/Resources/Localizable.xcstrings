@@ -812,7 +812,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ no tiene suficiente periodo previo para comparar. Prueba otra estadística o un periodo más largo."
+            "value": "%@ no tiene suficientes datos del periodo anterior para comparar. Prueba con otra estadística o un periodo más largo."
           }
         },
         "fr": {
@@ -842,7 +842,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ 沒有足夠的前期資料可供比較。請試試其他數據或較長的區間。"
+            "value": "%@ 的前一個區間資料不足，無法比較。請改用其他數據或更長的區間。"
           }
         }
       }
@@ -918,7 +918,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "percentile complessivo %@"
+            "value": "Percentile complessivo di %@"
           }
         },
         "ja": {
@@ -959,19 +959,19 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ classe les frappeurs avec 3,1 PA par match d’équipe."
+            "value": "%@ classe les frappeurs avec 3,1 PA par match de l’équipe."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ classifica i battitori con 3,1 PA per partita di squadra."
+            "value": "%@ classifica i battitori con 3,1 PA per partita della squadra."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@は、チーム試合数あたり3.1打席以上の打者をランク付けします。"
+            "value": "%@は、チーム1試合あたり3.1 PA以上の打者をランク付けします。"
           }
         },
         "pt-BR": {
@@ -983,7 +983,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ 排名納入每場球隊比賽至少 3.1 個打席的打者。"
+            "value": "%@ 的打者排名門檻為每隊每場至少 3.1 打席。"
           }
         }
       }
@@ -1006,19 +1006,19 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ classe les lanceurs avec 1 IP par match d’équipe."
+            "value": "%@ classe les lanceurs avec 1 IP par match de l’équipe."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ classifica i lanciatori con 1 IP per partita di squadra."
+            "value": "%@ classifica i lanciatori con 1 IP per partita della squadra."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@は、チーム試合数あたり1投球回以上の投手をランク付けします。"
+            "value": "%@は、チーム1試合あたり1 IP以上の投手をランク付けします。"
           }
         },
         "pt-BR": {
@@ -1030,7 +1030,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ 排名納入每場球隊比賽至少 1 局的投手。"
+            "value": "%@ 的投手排名門檻為每隊每場至少 1 局。"
           }
         }
       }
@@ -1112,7 +1112,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@ · %2$@(ポストシーズン)"
+            "value": "%1$@ · %2$@年ポストシーズン"
           }
         },
         "pt-BR": {
@@ -1188,7 +1188,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ · ESTÁNDAR"
+            "value": "%@ · TRADICIONALES"
           }
         },
         "fr": {
@@ -1206,7 +1206,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ · 通常指標"
+            "value": "%@ · 標準指標"
           }
         },
         "pt-BR": {
@@ -1247,7 +1247,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@, percentili %2$@ su StatScout %3$@"
+            "value": "%1$@, %2$@ percentili su StatScout %3$@"
           }
         },
         "ja": {
@@ -2557,19 +2557,19 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "3,1 PA / 1 IP par match d’équipe"
+            "value": "3,1 PA / 1 IP par match de l’équipe"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "3,1 PA / 1 IP per partita di squadra"
+            "value": "3,1 PA / 1 IP per partita della squadra"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "チームの1試合あたり3.1打席／1投球回"
+            "value": "チーム1試合あたり3.1 PA／1 IP"
           }
         },
         "pt-BR": {
@@ -2581,7 +2581,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "每場球隊比賽 3.1 打席 / 1 局"
+            "value": "每隊每場比賽 3.1 打席 / 1 局"
           }
         }
       }
@@ -2675,7 +2675,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "第72（2025）→ 第85（2026）"
+            "value": "第72名（2025）→ 第85名（2026）"
           }
         }
       }
@@ -2692,7 +2692,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "UN MARCADOR MÁS PROFUNDO"
+            "value": "UN REGISTRO MÁS COMPLETO DEL JUEGO"
           }
         },
         "fr": {
@@ -2710,7 +2710,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "もっと深いスコアブック"
+            "value": "野球をもっと深く知る"
           }
         },
         "pt-BR": {
@@ -2722,7 +2722,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "更深入的計分簿"
+            "value": "深入探索棒球數據"
           }
         }
       }
@@ -2986,7 +2986,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "AVG subita"
+            "value": "AVG concessa"
           }
         },
         "ja": {
@@ -2998,7 +2998,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "AVG sofrida"
+            "value": "AVG contra"
           }
         },
         "zh-Hant": {
@@ -3162,7 +3162,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sobre el promedio"
+            "value": "Por encima del promedio"
           }
         },
         "fr": {
@@ -3321,7 +3321,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "高度"
+            "value": "高度な指標"
           }
         },
         "pt-BR": {
@@ -3350,7 +3350,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Estadísticas avanzadas y estándar de cada club, una plantilla clasificable por cualquier métrica y periodo, y comparaciones lado a lado de cada equipo."
+            "value": "Estadísticas avanzadas y tradicionales de cada club, plantillas que puedes ordenar por cualquier métrica y periodo, y comparativas en paralelo entre equipos."
           }
         },
         "fr": {
@@ -3368,7 +3368,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "全球団の高度な指標と通常指標、好きな指標と期間でのロースターのランキング、チーム同士の比較。"
+            "value": "全球団の高度な指標と標準指標、指標や期間を選んで順位付けできるロースター、チーム同士の比較。"
           }
         },
         "pt-BR": {
@@ -3538,7 +3538,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cualquier dúo.\nCualquier temporada."
+            "value": "Dos jugadores.\nCualquier temporada."
           }
         },
         "fr": {
@@ -3556,7 +3556,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "好きな2人を。\n好きなシーズンで。"
+            "value": "好きな2人を、\n好きなシーズンで比較。"
           }
         },
         "pt-BR": {
@@ -3697,7 +3697,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "肩の価値"
+            "value": "送球貢献度"
           }
         },
         "pt-BR": {
@@ -3779,25 +3779,25 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vit. sortie moy. contre"
+            "value": "Vit. de sortie moy. contre"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vel. uscita media subita"
+            "value": "Vel. uscita media concessa"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "被平均打球速度"
+            "value": "平均被打球速度"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vel. saída méd. sofrida"
+            "value": "Vel. média de saída contra"
           }
         },
         "zh-Hant": {
@@ -3932,7 +3932,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "バレル%"
+            "value": "バレル率"
           }
         },
         "pt-BR": {
@@ -3944,7 +3944,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "Barrel%"
+            "value": "出色擊球率"
           }
         }
       }
@@ -3973,25 +3973,25 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Barrel% subiti"
+            "value": "Barrel% concessa"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "被バレル%"
+            "value": "被バレル率"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Barrel% sofrido"
+            "value": "Barrel% contra"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "被 Barrel%"
+            "value": "被出色擊球率"
           }
         }
       }
@@ -4008,7 +4008,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Clasificaciones de percentiles de béisbol pensadas para verse rápido en el móvil. Todos los jugadores calificados, todas las métricas, siempre al día."
+            "value": "Rankings de percentiles de béisbol, fáciles de consultar en el móvil. Todos los jugadores calificados, todas las métricas, siempre al día."
           }
         },
         "fr": {
@@ -4020,13 +4020,13 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Classifiche di baseball basate sui percentili, pensate per smartphone. Ogni giocatore qualificato, ogni metrica, sempre aggiornate."
+            "value": "Classifiche di baseball basate sui percentili, pensate per smartphone. Dati sempre aggiornati per ogni giocatore qualificato e ogni metrica."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "スマホで素早く見られる野球のパーセンタイルランキング。規定に達した全選手、全指標を常に最新で。"
+            "value": "スマホで素早く見られる野球のパーセンタイルランキング。規定に達した全選手の全指標を、常に最新の状態で確認できます。"
           }
         },
         "pt-BR": {
@@ -4038,7 +4038,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "專為手機設計的棒球百分位排行。所有合格球員、所有指標，隨時更新。"
+            "value": "專為手機設計的棒球百分位排行，涵蓋所有符合資格的球員與指標，並隨時更新。"
           }
         }
       }
@@ -4102,7 +4102,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bajo el promedio"
+            "value": "Por debajo del promedio"
           }
         },
         "fr": {
@@ -4243,7 +4243,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mejor valor"
+            "value": "Mejor oferta"
           }
         },
         "fr": {
@@ -4290,7 +4290,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Barras más azules: peor que el promedio"
+            "value": "Barras más azules: por debajo del promedio"
           }
         },
         "fr": {
@@ -4302,7 +4302,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Barre più blu: peggio della media"
+            "value": "Barre più blu: sotto la media"
           }
         },
         "ja": {
@@ -4437,19 +4437,19 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Les deux côtés sont %1$@ en %2$@. Changez la saison d’un côté pour comparer."
+            "value": "Les deux côtés correspondent à %1$@ en %2$@. Changez la saison d’un côté pour comparer."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Entrambi i lati sono %1$@ nel %2$@. Cambia la stagione di uno per confrontare."
+            "value": "Hai selezionato %@ per entrambi, nella stagione %@. Cambia la stagione di uno dei due per confrontarli."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "両方が%2$@年の%1$@です。比較するにはどちらかのシーズンを変更してください。"
+            "value": "両方とも%2$@年の%1$@です。比較するにはどちらかのシーズンを変更してください。"
           }
         },
         "pt-BR": {
@@ -4461,7 +4461,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "兩邊都是 %2$@ 的 %1$@。請更改其中一邊的球季以進行比較。"
+            "value": "兩邊都是 %1$@ 的 %2$@ 球季資料。請更改其中一邊的球季再比較。"
           }
         }
       }
@@ -4948,13 +4948,13 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cambia cualquiera de los jugadores y de los años. Mira cada métrica compartida lado a lado, con el ganador marcado al instante."
+            "value": "Cambia a cualquiera de los dos jugadores y la temporada de cada uno. Compara las métricas que comparten en paralelo y descubre al instante quién destaca."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Changez l’un ou l’autre joueur et l’une ou l’autre année. Voyez chaque mesure commune côte à côte, avec le vainqueur indiqué aussitôt."
+            "value": "Changez le joueur ou l’année de chaque côté. Comparez toutes les mesures communes côte à côte, avec le gagnant indiqué aussitôt."
           }
         },
         "it": {
@@ -5342,7 +5342,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "ランキングのシーズンを選択"
+            "value": "ランキング対象のシーズンを選択"
           }
         },
         "pt-BR": {
@@ -5765,7 +5765,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "比較する"
+            "value": "比較相手"
           }
         },
         "pt-BR": {
@@ -5865,7 +5865,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Compare os percentis de qualquer jogador entre duas temporadas. Veja o que mudou, o que se manteve e para onde está indo."
+            "value": "Compare os percentis de qualquer jogador entre duas temporadas. Veja o que mudou, o que se manteve e qual é a tendência."
           }
         },
         "zh-Hant": {
@@ -5888,7 +5888,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Compara dos temporadas lado a lado."
+            "value": "Compara dos temporadas en paralelo."
           }
         },
         "fr": {
@@ -6029,7 +6029,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Comparado con la línea de temporada del mismo equipo."
+            "value": "En comparación con las estadísticas de la temporada del mismo equipo."
           }
         },
         "fr": {
@@ -6041,7 +6041,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Confrontato con la linea stagionale della stessa squadra."
+            "value": "Rispetto ai dati stagionali della stessa squadra."
           }
         },
         "ja": {
@@ -6106,7 +6106,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "聯絡支援"
+            "value": "聯絡客服"
           }
         }
       }
@@ -6358,7 +6358,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "No se pudo cargar la forma reciente"
+            "value": "No se pudo cargar el rendimiento reciente"
           }
         },
         "fr": {
@@ -6382,7 +6382,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Não foi possível carregar a forma recente"
+            "value": "Não foi possível carregar o desempenho recente"
           }
         },
         "zh-Hant": {
@@ -6405,7 +6405,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "No se pudo cargar la forma reciente."
+            "value": "No se pudo cargar el rendimiento reciente."
           }
         },
         "fr": {
@@ -6429,7 +6429,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Não foi possível carregar a forma recente."
+            "value": "Não foi possível carregar o desempenho recente."
           }
         },
         "zh-Hant": {
@@ -6564,7 +6564,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "サブスクリプションの選択肢を読み込めません。通信状況を確認して、もう一度お試しください。"
+            "value": "サブスクリプションプランを読み込めません。通信状況を確認して、もう一度お試しください。"
           }
         },
         "pt-BR": {
@@ -6593,7 +6593,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "No se pudo cargar la forma del equipo."
+            "value": "No se pudo cargar el rendimiento reciente del equipo."
           }
         },
         "fr": {
@@ -6617,7 +6617,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Não foi possível carregar a forma do time."
+            "value": "Não foi possível carregar o desempenho do time."
           }
         },
         "zh-Hant": {
@@ -7081,13 +7081,13 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "データはStatcastが公開しているパーセンタイルのランキングから毎晩更新されます。選手が規定の基準に達していない指標は表示されません。ポストシーズンのバーは、ポストシーズンのパーセンタイルが公開されていないため、10月の数値をレギュラーシーズンの尺度に当てはめて表示しています。"
+            "value": "データは公開されているStatcastのパーセンタイルランキングから毎晩更新されます。選手が規定の基準に達していない指標は表示されません。ポストシーズンの棒グラフは、ポストシーズンのパーセンタイルが公開されていないため、10月の数値をレギュラーシーズンと同じ目盛りで表示します。"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Os dados são atualizados todas as noites a partir dos rankings públicos de percentis do Statcast. Uma métrica fica ausente quando o jogador não atingiu o mínimo exigido. As barras da pós-temporada colocam os números de outubro na escala da temporada regular, porque não há percentis publicados para a pós-temporada."
+            "value": "Os dados são atualizados todas as noites a partir dos rankings públicos de percentis do Statcast. Uma métrica não é exibida quando o jogador não atingiu o mínimo exigido. As barras da pós-temporada colocam os números de outubro na escala da temporada regular, porque não há percentis publicados para a pós-temporada."
           }
         },
         "zh-Hant": {
@@ -7269,7 +7269,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "最近%@下降"
+            "value": "%@は最近低下中"
           }
         },
         "pt-BR": {
@@ -7328,7 +7328,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "初速"
+            "value": "EV"
           }
         }
       }
@@ -7363,7 +7363,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "あらゆる順位づけ"
+            "value": "ランキングを自由自在に"
           }
         },
         "pt-BR": {
@@ -7486,7 +7486,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "La plantilla de cada club, clasificada por cualquier métrica."
+            "value": "La plantilla de cada club, ordenada por cualquier métrica."
           }
         },
         "fr": {
@@ -7545,13 +7545,13 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ogni club.\nOgni angolo."
+            "value": "Ogni squadra.\nOgni prospettiva."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "全球団を。\nあらゆる角度で。"
+            "value": "全球団を、\nあらゆる角度からチェック。"
           }
         },
         "pt-BR": {
@@ -7674,7 +7674,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cada ranking de percentiles, y cada año desde 2015."
+            "value": "Todos los rankings de percentiles y todas las temporadas desde 2015."
           }
         },
         "fr": {
@@ -7721,7 +7721,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "La forma de cada jugador en los últimos 7 / 15 / 30 días. Detecta rachas buenas y malas antes de que lo hagan los totales de la temporada."
+            "value": "Rendimiento de cada jugador en los últimos 7 / 15 / 30 días. Detecta rachas buenas y malas antes de que se reflejen en los totales de la temporada."
           }
         },
         "fr": {
@@ -7745,7 +7745,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "A forma de cada jogador nos últimos 7 / 15 / 30 dias. Perceba sequências boas e ruins antes dos totais da temporada."
+            "value": "O desempenho de cada jogador nos últimos 7 / 15 / 30 dias. Veja quem está em alta ou em baixa antes que os números da temporada mostrem isso."
           }
         },
         "zh-Hant": {
@@ -7786,13 +7786,13 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "プレーオフの全試合を、レギュラーシーズンと同じように記録。試合ログ、最新の調子、シリーズを左右する対戦をチェック。"
+            "value": "プレーオフの全試合を、レギュラーシーズンと同じように記録。試合ログ、直近の調子、シリーズを左右する対戦をチェック。"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cada jogo dos playoffs é acompanhado como os da temporada regular. Registros de jogos, forma atual e os confrontos que decidem a série."
+            "value": "Cada jogo dos playoffs é acompanhado como os da temporada regular. Registros de jogos, desempenho ao vivo e os confrontos que decidem a série."
           }
         },
         "zh-Hant": {
@@ -7845,7 +7845,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "每場季後賽都像例行賽一樣追蹤。看誰在 10 月真正擊出強勁球，而不是 6 月。"
+            "value": "每場季後賽都比照例行賽追蹤，看看誰在 10 月真的擊出強勁的球，而不是只看 6 月的表現。"
           }
         }
       }
@@ -7892,7 +7892,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "所有合格球員皆有排名"
+            "value": "所有符合資格的球員皆列入排名"
           }
         }
       }
@@ -7956,7 +7956,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cada temporada desde 2015, y comparación interanual"
+            "value": "Todas las temporadas desde 2015 y las tendencias interanuales"
           }
         },
         "fr": {
@@ -7968,7 +7968,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ogni stagione dal 2015, e il confronto anno su anno"
+            "value": "Ogni stagione dal 2015, con confronti anno su anno"
           }
         },
         "ja": {
@@ -8109,7 +8109,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vel. di uscita subita"
+            "value": "Vel. di uscita concessa"
           }
         },
         "ja": {
@@ -8121,7 +8121,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vel. de saída sofrida"
+            "value": "Vel. de saída contra"
           }
         },
         "zh-Hant": {
@@ -8150,7 +8150,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "ÉQUIPE FAVORITE"
+            "value": "ÉQUIPE PRÉFÉRÉE"
           }
         },
         "it": {
@@ -8444,13 +8444,13 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "知りたいことを\nすばやく"
+            "value": "知りたい情報を\nすばやく見つける"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Encontre insights\nrapidinho"
+            "value": "Descubra insights\nrapidamente"
           }
         },
         "zh-Hant": {
@@ -8755,7 +8755,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sigue jugadores para tenerlos a un toque de una comparación y verlos en el tablero de Tendencias."
+            "value": "Sigue a los jugadores para tenerlos a mano en las comparaciones y verlos en el tablero de Tendencias."
           }
         },
         "fr": {
@@ -8779,7 +8779,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Siga jogadores para tê-los a um toque de uma comparação e vê-los no quadro de Tendências."
+            "value": "Siga jogadores para compará-los com um toque e vê-los no painel de Tendências."
           }
         },
         "zh-Hant": {
@@ -8808,7 +8808,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Quatre onglets couvrent tous les angles du jeu. Voyez ce qui se passe dans la ligue en quelques secondes."
+            "value": "Quatre onglets couvrent tous les aspects du jeu. Voyez ce qui se passe dans la ligue en quelques secondes."
           }
         },
         "it": {
@@ -8996,7 +8996,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Scouting complet des joueurs"
+            "value": "Analyse complète des joueurs"
           }
         },
         "it": {
@@ -9008,7 +9008,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "選手スカウティング全開放"
+            "value": "選手のスカウティング情報を網羅"
           }
         },
         "pt-BR": {
@@ -9043,7 +9043,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Scouting complet des équipes"
+            "value": "Analyse complète des équipes"
           }
         },
         "it": {
@@ -9055,7 +9055,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "チームのスカウティング全開放"
+            "value": "チームのスカウティング情報を網羅"
           }
         },
         "pt-BR": {
@@ -9114,7 +9114,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "比賽截至"
+            "value": "賽事統計截至"
           }
         }
       }
@@ -9231,7 +9231,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Obtenez le scouting complet de %@."
+            "value": "Obtenez une analyse complète de %@."
           }
         },
         "it": {
@@ -9331,7 +9331,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Barre grigie: vicino alla media"
+            "value": "Barre grigie: nella media"
           }
         },
         "ja": {
@@ -9390,7 +9390,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rasteiras%"
+            "value": "Bolas rasteiras (%)"
           }
         },
         "zh-Hant": {
@@ -9466,7 +9466,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Frappes puissantes%"
+            "value": "Frappes puissantes %"
           }
         },
         "it": {
@@ -9478,13 +9478,13 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "強い打球%"
+            "value": "ハードヒット率"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Contato forte%"
+            "value": "Rebatidas fortes (%)"
           }
         },
         "zh-Hant": {
@@ -9513,25 +9513,25 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Frappes puissantes% contre"
+            "value": "Frappes puissantes % contre"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hard-Hit% subiti"
+            "value": "Hard-Hit% concessa"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "被強い打球%"
+            "value": "被ハードヒット率"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Contato forte% sofrido"
+            "value": "Rebatidas fortes contra (%)"
           }
         },
         "zh-Hant": {
@@ -9995,7 +9995,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "内野手"
+            "value": "内野"
           }
         },
         "pt-BR": {
@@ -10230,7 +10230,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "直近15"
+            "value": "直近15日"
           }
         },
         "pt-BR": {
@@ -10277,7 +10277,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "直近30"
+            "value": "直近30日"
           }
         },
         "pt-BR": {
@@ -10289,7 +10289,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "近 30"
+            "value": "近 30 天"
           }
         }
       }
@@ -10324,7 +10324,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "直近7"
+            "value": "直近7日"
           }
         },
         "pt-BR": {
@@ -10336,7 +10336,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "近 7"
+            "value": "近 7 天"
           }
         }
       }
@@ -10353,13 +10353,13 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Forma de los últimos 7 / 15 / 30 días de cualquier jugador o equipo"
+            "value": "Rendimiento reciente de cualquier jugador o equipo, en periodos de 7 / 15 / 30 días"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Forme sur 7 / 15 / 30 jours de n’importe quel joueur ou équipe"
+            "value": "Forme récente de n’importe quel joueur ou équipe sur 7 / 15 / 30 jours"
           }
         },
         "it": {
@@ -10377,7 +10377,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Forma dos últimos 7 / 15 / 30 dias de qualquer jogador ou time"
+            "value": "Desempenho nos últimos 7 / 15 / 30 dias para qualquer jogador ou time"
           }
         },
         "zh-Hant": {
@@ -10400,19 +10400,19 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Forma de los últimos 7 / 15 / 30 días en cualquier jugador, equipo o ranking"
+            "value": "Rendimiento reciente de cualquier jugador, equipo o ranking, en periodos de 7 / 15 / 30 días"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Forme sur 7 / 15 / 30 jours pour tout joueur, équipe ou classement"
+            "value": "Forme récente de tout joueur, équipe ou classement sur 7 / 15 / 30 jours"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Forma degli ultimi 7 / 15 / 30 giorni su qualsiasi giocatore, squadra o classifica"
+            "value": "Forma degli ultimi 7 / 15 / 30 giorni per qualsiasi giocatore, squadra o classifica"
           }
         },
         "ja": {
@@ -10424,7 +10424,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Forma dos últimos 7 / 15 / 30 dias em qualquer jogador, time ou ranking"
+            "value": "Desempenho nos últimos 7 / 15 / 30 dias para qualquer jogador, time ou ranking"
           }
         },
         "zh-Hant": {
@@ -10447,7 +10447,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Forma de 7 / 15 / 30 días, duelos cara a cara y todas las plantillas. El panorama completo, no solo los totales de la temporada."
+            "value": "Rendimiento de los últimos 7 / 15 / 30 días, duelos cara a cara y todas las plantillas. El panorama completo, no solo los totales de la temporada."
           }
         },
         "fr": {
@@ -10471,7 +10471,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Forma de 7 / 15 / 30 dias, confrontos diretos, todos os elencos. O panorama completo, não só os totais da temporada."
+            "value": "Desempenho nos últimos 7 / 15 / 30 dias, confrontos diretos e todos os elencos. O panorama completo, não só os totais da temporada."
           }
         },
         "zh-Hant": {
@@ -10494,7 +10494,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Últimos 7 / 15 / 30 días en cualquier jugador, equipo o tablero."
+            "value": "Datos de los últimos 7 / 15 / 30 días para cualquier jugador, equipo o ranking."
           }
         },
         "fr": {
@@ -10506,7 +10506,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ultimi 7 / 15 / 30 giorni su qualsiasi giocatore, squadra o classifica."
+            "value": "Andamento negli ultimi 7 / 15 / 30 giorni per qualsiasi giocatore, squadra o classifica."
           }
         },
         "ja": {
@@ -10518,13 +10518,13 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Últimos 7 / 15 / 30 dias em qualquer jogador, time ou quadro."
+            "value": "Dados dos últimos 7 / 15 / 30 dias para qualquer jogador, time ou painel."
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "任何球員、球隊或榜單的近 7 / 15 / 30 天。"
+            "value": "任何球員、球隊或榜單的近 7 / 15 / 30 天數據"
           }
         }
       }
@@ -11411,7 +11411,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Carregando o quadro…"
+            "value": "Carregando o painel…"
           }
         },
         "zh-Hant": {
@@ -11505,7 +11505,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Carrega %@ em um slot de comparação"
+            "value": "Adiciona %@ à comparação"
           }
         },
         "zh-Hant": {
@@ -11628,7 +11628,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vit. sortie max"
+            "value": "Vit. de sortie max"
           }
         },
         "it": {
@@ -11646,7 +11646,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vel. saída máx."
+            "value": "Vel. máx. de saída"
           }
         },
         "zh-Hant": {
@@ -11675,25 +11675,25 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vit. sortie max contre"
+            "value": "Vit. de sortie max contre"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vel. uscita max subita"
+            "value": "Vel. uscita max concessa"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "被最高打球速度"
+            "value": "最高被打球速度"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vel. saída máx. sofrida"
+            "value": "Vel. máx. de saída contra"
           }
         },
         "zh-Hant": {
@@ -11822,7 +11822,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Camp. minimo"
+            "value": "Campione min."
           }
         },
         "ja": {
@@ -11840,7 +11840,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "最小樣本"
+            "value": "最低樣本數"
           }
         }
       }
@@ -11869,7 +11869,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tempo di gioco minimo"
+            "value": "Soglia di qualificazione"
           }
         },
         "ja": {
@@ -12245,7 +12245,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nessun dato %1$@ per %2$@."
+            "value": "Nessun dato di %1$@ per %2$@."
           }
         },
         "ja": {
@@ -12263,7 +12263,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "沒有 %2$@ 在 %1$@ 的資料。"
+            "value": "沒有 %2$@ 的 %1$@ 資料。"
           }
         }
       }
@@ -12451,7 +12451,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "此 Apple ID 沒有找到有效的 StatScout+ 購買項目。"
+            "value": "找不到此 Apple ID 的有效 StatScout+ 購買項目。"
           }
         }
       }
@@ -12468,7 +12468,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sin anuncios ni rastreo."
+            "value": "Sin anuncios ni seguimiento."
           }
         },
         "fr": {
@@ -12662,13 +12662,13 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Aucun match dans les %1$lld jours jusqu’au %2$@"
+            "value": "Aucun match sur les %1$lld jours jusqu’au %2$@"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nessuna partita in %1$lld giorni fino al %2$@"
+            "value": "Nessuna partita nei %1$lld giorni fino al %2$@"
           }
         },
         "ja": {
@@ -12874,7 +12874,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "近 %lld 天沒有打擊比賽"
+            "value": "近 %lld 天沒有打擊出賽紀錄"
           }
         }
       }
@@ -13079,7 +13079,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Aún no hay cambios que ordenar"
+            "value": "Aún no hay cambios en el ranking"
           }
         },
         "fr": {
@@ -13097,19 +13097,19 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "ランク付けできる変動はまだありません"
+            "value": "順位変動はまだありません"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ainda não há movimento para classificar"
+            "value": "Ainda não há mudanças para exibir no ranking"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "尚無可排名的變化"
+            "value": "尚無排名變動"
           }
         }
       }
@@ -13203,7 +13203,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "近 %lld 天沒有投球比賽"
+            "value": "近 %lld 天沒有登板紀錄"
           }
         }
       }
@@ -13244,7 +13244,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Não há dados de jogadores da temporada %@."
+            "value": "Não há dados de jogadores para a temporada %@."
           }
         },
         "zh-Hant": {
@@ -13367,7 +13367,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Aucun joueur suivi pour %1$@ en saison %2$@."
+            "value": "Aucun joueur n’est suivi pour %1$@ pendant la saison %2$@."
           }
         },
         "it": {
@@ -13514,13 +13514,13 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nessun giocatore ha dati %@ per questa stagione."
+            "value": "Nessun giocatore ha dati di %@ per questa stagione."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "今シーズン、%@のデータを持つ選手はいません。"
+            "value": "今シーズン、%@のデータがある選手はいません。"
           }
         },
         "pt-BR": {
@@ -13532,7 +13532,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "本球季沒有球員具備 %@ 資料。"
+            "value": "本球季沒有球員有 %@ 的資料。"
           }
         }
       }
@@ -13567,7 +13567,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "今シーズン、「%@」の指標を持つ選手はいません。"
+            "value": "今シーズン、%@の指標を記録した選手はいません。"
           }
         },
         "pt-BR": {
@@ -13579,7 +13579,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "本球季沒有球員具備「%@」指標。"
+            "value": "本球季沒有球員有「%@」的資料。"
           }
         }
       }
@@ -13884,13 +13884,13 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Aucune donnée de joueur des séries n’est encore disponible."
+            "value": "Aucune donnée sur les joueurs n’est encore disponible pour les séries."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Non ci sono ancora dati dei giocatori dei playoff."
+            "value": "Non sono ancora disponibili dati sui giocatori dei playoff."
           }
         },
         "ja": {
@@ -13955,7 +13955,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "沒有可比較的前期"
+            "value": "沒有可供比較的前一區間"
           }
         }
       }
@@ -13990,7 +13990,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "規定到達の選手なし"
+            "value": "規定到達者なし"
           }
         },
         "pt-BR": {
@@ -14002,7 +14002,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "沒有合格球員"
+            "value": "沒有達標球員"
           }
         }
       }
@@ -14131,7 +14131,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "このロースターの通常指標はありません"
+            "value": "このロースターの基本成績はありません"
           }
         },
         "pt-BR": {
@@ -14160,7 +14160,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "No hay datos de equipos de la temporada %@."
+            "value": "No hay datos de equipos para la temporada %@."
           }
         },
         "fr": {
@@ -14348,19 +14348,19 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ningún equipo tiene datos de jugadores de la postemporada %@."
+            "value": "Ningún equipo tiene datos de jugadores para la postemporada de %@."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Aucune équipe n’a de données de joueurs pour les séries %@."
+            "value": "Aucune équipe n’a de données sur ses joueurs pour les séries %@."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nessuna squadra ha dati dei giocatori per i playoff %@."
+            "value": "Nessuna squadra ha dati sui giocatori per i playoff %@."
           }
         },
         "ja": {
@@ -14395,19 +14395,19 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ningún equipo tiene datos de jugadores de la temporada regular %@."
+            "value": "Ningún equipo tiene datos de jugadores para la temporada regular de %@."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Aucune équipe n’a de données de joueurs pour la saison régulière %@."
+            "value": "Aucune équipe n’a de données sur ses joueurs pour la saison régulière %@."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nessuna squadra ha dati dei giocatori per la stagione regolare %@."
+            "value": "Nessuna squadra ha dati sui giocatori per la stagione regolare %@."
           }
         },
         "ja": {
@@ -14442,13 +14442,13 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nadie alcanza el mínimo de Titulares en %@ en este periodo. Prueba un umbral más bajo o un periodo más largo."
+            "value": "Nadie alcanza el mínimo para estar entre los habituales en %@ durante este periodo. Prueba con un umbral más bajo o un periodo más largo."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Personne n’atteint le minimum requis pour les titulaires sur %@ pendant cette période. Essayez un seuil plus bas ou une période plus longue."
+            "value": "Personne n’atteint le seuil des joueurs réguliers sur %@ pendant cette période. Essayez un seuil plus bas ou une période plus longue."
           }
         },
         "it": {
@@ -14501,7 +14501,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nessuno corrisponde a “%@”."
+            "value": "Nessun risultato per “%@”."
           }
         },
         "ja": {
@@ -14536,7 +14536,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nadie todavía. Toca una estrella para seguir."
+            "value": "Aún no sigues a ningún jugador. Toca una estrella para seguirlo."
           }
         },
         "fr": {
@@ -14548,7 +14548,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nessuno per ora. Tocca una stella per seguire."
+            "value": "Nessuno per ora. Tocca una stella per seguirlo."
           }
         },
         "ja": {
@@ -14566,7 +14566,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "尚無追蹤。點一下星號即可追蹤。"
+            "value": "尚未追蹤任何球員。點一下星號即可追蹤。"
           }
         }
       }
@@ -14595,7 +14595,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Non affiliata, approvata né sponsorizzata da Major League Baseball, MLB Advanced Media, MLBPA o da alcuna squadra. I nomi e le abbreviazioni delle squadre sono usati solo a fini identificativi. Tutti i marchi appartengono ai rispettivi proprietari."
+            "value": "L’app non è affiliata a Major League Baseball, MLB Advanced Media, MLBPA o ad alcuna squadra, né è approvata o sponsorizzata da queste organizzazioni. I nomi e le abbreviazioni delle squadre sono usati solo a fini identificativi. Tutti i marchi appartengono ai rispettivi proprietari."
           }
         },
         "ja": {
@@ -14824,19 +14824,19 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pas encore classé : moins de 3,1 PA ou 1 IP par match d’équipe dans ces séries."
+            "value": "Pas encore classé : sous le seuil de 3,1 PA ou 1 IP par match joué par l’équipe pendant ces séries."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Non ancora in classifica: sotto 3,1 PA o 1 IP per partita di squadra in questi playoff."
+            "value": "Non ancora in classifica: meno di 3,1 PA o 1 IP per partita della squadra in questi playoff."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "未ランク:今季ポストシーズンは、チームの1試合あたり3.1打席または1投球回の規定に未達です。"
+            "value": "規定未達:今季のポストシーズンでは、チーム1試合あたり3.1打席または1投球回の基準に達していません。"
           }
         },
         "pt-BR": {
@@ -14848,7 +14848,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "尚未排名：本季後賽每場球隊比賽未達 3.1 打席或 1 局。"
+            "value": "尚未排名：本季後賽每場球隊比賽未達 3.1 PA 或 1 IP。"
           }
         }
       }
@@ -14895,7 +14895,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "被上壘率"
+            "value": "對手 OBP"
           }
         }
       }
@@ -14942,7 +14942,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "被 OPS"
+            "value": "對手 OPS"
           }
         }
       }
@@ -15071,19 +15071,19 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "規定到達は1人のみ"
+            "value": "規定到達者は1人のみ"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Único qualificado"
+            "value": "Só qualificados"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "僅一位合格"
+            "value": "唯一達標球員"
           }
         }
       }
@@ -15306,7 +15306,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "App Storeでレビューを書きます。"
+            "value": "レビューを書くためにApp Storeを開きます。"
           }
         },
         "pt-BR": {
@@ -15335,7 +15335,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Jardín"
+            "value": "Jardineros"
           }
         },
         "fr": {
@@ -15359,7 +15359,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Outfield"
+            "value": "Campo externo"
           }
         },
         "zh-Hant": {
@@ -15412,7 +15412,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "整體第%1$@百分位，%2$@"
+            "value": "整體第 %1$@ 百分位，%2$@"
           }
         }
       }
@@ -15553,7 +15553,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "整體：第%@百分位"
+            "value": "整體：第 %@ 百分位"
           }
         }
       }
@@ -15788,7 +15788,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "球員 VS 球員"
+            "value": "球員對決"
           }
         }
       }
@@ -15952,7 +15952,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Les centiles comparent un joueur à tous les frappeurs ou lanceurs qualifiés de la MLB, pas seulement à son poste. Le 90e centile signifie que le joueur fait mieux que 90 % de la ligue sur cette mesure, et le 50e correspond à la moyenne. Pour les lanceurs, l’échelle est inversée lorsqu’une valeur plus faible est préférable : un xwOBA concédé faible correspond donc à un centile élevé."
+            "value": "Les centiles comparent un joueur à tous les frappeurs ou lanceurs qualifiés de la MLB, tous postes confondus. Un 90e centile signifie que le joueur fait mieux que 90 % de la ligue sur cette mesure, et le 50e correspond à la moyenne. Pour les lanceurs, l’échelle est inversée lorsqu’une valeur plus faible est préférable : un xwOBA concédé faible correspond donc à un centile élevé."
           }
         },
         "it": {
@@ -15964,13 +15964,13 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "パーセンタイルは、ポジションに関係なくMLBの規定に達したすべての打者または投手と比べた順位です。90パーセンタイルは、その指標でリーグの90%より上という意味で、50がリーグ平均です。投手は値が小さいほど良い指標では尺度が反転するため、被xwOBAが低いほど高いパーセンタイルになります。"
+            "value": "パーセンタイルは、ポジション別ではなく、MLBの規定到達者全体（打者または投手）と比べた位置を示します。90パーセンタイルは、その指標でリーグの選手の90%を上回ることを意味し、50パーセンタイルはリーグ平均です。投手では、値が小さいほど良い指標は尺度を反転するため、被xwOBAが低いほどパーセンタイルは高くなります。"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Os percentis comparam um jogador com todos os rebatedores ou arremessadores qualificados da MLB, não só os da mesma posição. O percentil 90 significa que o jogador é melhor que 90% da liga naquela métrica, e o 50 é a média da liga. Para arremessadores a escala é invertida onde menos é melhor, então um xwOBA sofrido baixo continua sendo um percentil alto."
+            "value": "Os percentis comparam um jogador a todos os rebatedores ou arremessadores qualificados da MLB, não apenas aos da mesma posição. O percentil 90 significa que o jogador supera 90% dos jogadores da liga naquela métrica, e o percentil 50 representa a média da liga. Para arremessadores, a escala se inverte: quanto menor o valor, melhor. Por isso, um xwOBA sofrido baixo ainda corresponde a um percentil alto."
           }
         },
         "zh-Hant": {
@@ -16005,7 +16005,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Percentili vs. stagione regolare %@"
+            "value": "Percentili rispetto alla stagione regolare %@"
           }
         },
         "ja": {
@@ -16052,13 +16052,13 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Percentili vs. stagione regolare %@. Classifica i giocatori con 3,1 PA o 1 IP per partita della squadra."
+            "value": "Percentili rispetto alla stagione regolare %@. Classifica i giocatori con 3,1 PA o 1 IP per ogni partita della squadra."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@年レギュラーシーズンとの比較(パーセンタイル)。チーム試合あたり3.1打席または1投球回以上の選手が対象です。"
+            "value": "%@年レギュラーシーズンとの比較(パーセンタイル)。チーム1試合あたり3.1打席または1投球回以上の選手が対象です。"
           }
         },
         "pt-BR": {
@@ -16070,7 +16070,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "與 %@ 例行賽相比的百分位。每場球隊比賽至少 3.1 打席或 1 局的球員才列入排名。"
+            "value": "與 %@ 例行賽相比的百分位。每場球隊比賽至少 3.1 PA 或 1 IP 的球員才列入排名。"
           }
         }
       }
@@ -16481,7 +16481,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "守備"
+            "value": "ポジション"
           }
         },
         "pt-BR": {
@@ -16669,7 +16669,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "ポストシーズンの反映日"
+            "value": "ポストシーズンの集計対象日"
           }
         },
         "pt-BR": {
@@ -16792,7 +16792,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Los percentiles de postemporada se miden frente a la temporada regular %@"
+            "value": "Los percentiles de postemporada se miden frente a la temporada regular de %@"
           }
         },
         "fr": {
@@ -16904,7 +16904,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "ポストシーズンのチームは準備中です"
+            "value": "ポストシーズンのチームデータは準備中です"
           }
         },
         "pt-BR": {
@@ -17174,7 +17174,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Récupération de l’effectif de %@."
+            "value": "Chargement de l’effectif de %@."
           }
         },
         "it": {
@@ -17186,7 +17186,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@年のロースターを取得中です。"
+            "value": "%@のロースターを取得中です。"
           }
         },
         "pt-BR": {
@@ -17221,7 +17221,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Récupération des joueurs de la saison %@."
+            "value": "Chargement des joueurs de la saison %@."
           }
         },
         "it": {
@@ -17268,7 +17268,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Récupération de la saison %@."
+            "value": "Chargement de la saison %@."
           }
         },
         "it": {
@@ -17315,7 +17315,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Récupération des dernières mesures des séries."
+            "value": "Chargement des dernières stats des séries."
           }
         },
         "it": {
@@ -17362,7 +17362,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Récupération des dernières données sur les joueurs des séries."
+            "value": "Chargement des dernières données sur les joueurs des séries."
           }
         },
         "it": {
@@ -17374,7 +17374,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "最新のポストシーズンの選手を取得中です。"
+            "value": "最新のポストシーズン選手データを取得中です。"
           }
         },
         "pt-BR": {
@@ -17409,7 +17409,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Récupération des joueurs de cette saison."
+            "value": "Chargement des joueurs de cette saison."
           }
         },
         "it": {
@@ -17480,7 +17480,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "購買正在等待核准，核准後將自動解鎖 StatScout+。"
+            "value": "購買尚待核准，核准後將自動解鎖 StatScout+。"
           }
         }
       }
@@ -17597,7 +17597,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Placez %@ à côté de n’importe quelle autre saison et voyez ce qui a bougé."
+            "value": "Comparez %@ à n’importe quelle autre saison pour voir ce qui a changé."
           }
         },
         "it": {
@@ -17668,7 +17668,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "合格"
+            "value": "達標"
           }
         }
       }
@@ -17732,7 +17732,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "POS."
+            "value": "PUESTO"
           }
         },
         "fr": {
@@ -18014,7 +18014,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Clasificado frente a los calificados de MLB"
+            "value": "Clasificación entre los jugadores calificados de MLB"
           }
         },
         "fr": {
@@ -18044,7 +18044,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "與達到 MLB 排名門檻的球員比較"
+            "value": "與 MLB 達標球員比較"
           }
         }
       }
@@ -18108,13 +18108,13 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Las estadísticas de promedio se ponderan por los PA o IP de la plantilla; las acumulativas se suman. Un jugador cambiado en julio aporta toda su temporada, por lo que son agregados de plantilla y no totales oficiales del equipo."
+            "value": "Las estadísticas de promedio se ponderan por los PA o IP de la plantilla; las acumuladas se suman. Si un jugador cambia de equipo en julio, aporta sus estadísticas de toda la temporada, así que son datos agregados de la plantilla y no totales oficiales del equipo."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Les stats de taux sont pondérées par les PA ou IP de l’effectif ; les stats cumulées sont additionnées. Un joueur échangé en juillet apporte toute sa saison : ce sont donc des agrégats d’effectif, pas des totaux officiels d’équipe."
+            "value": "Les stats exprimées en taux sont pondérées par les PA ou IP de l’effectif ; les stats cumulées sont additionnées. Un joueur échangé en juillet apporte toute sa saison : ce sont donc des agrégats d’effectif, pas des totaux officiels d’équipe."
           }
         },
         "it": {
@@ -18126,7 +18126,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "率の指標はロースターの打席数または投球回で加重し、積み上げ指標は合算しています。7月にトレードされた選手はシーズン全体が含まれるため、公式のチーム合計ではなくロースターの集計値です。"
+            "value": "率指標は各選手の打席数または投球回数に応じて加重平均し、累計指標は合算します。7月にトレードされた選手のシーズン成績は全期間分含まれるため、公式のチーム通算成績ではなく、現在のロースターに基づく集計です。"
           }
         },
         "pt-BR": {
@@ -18138,7 +18138,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "比率類數據依名單的打席數或投球局數加權，累計類數據則直接加總。7 月被交易的球員會帶著整季數據，因此這些是名單彙總，並非球隊官方總計。"
+            "value": "比率類數據依名單球員的打席數（PA）或投球局數（IP）加權，累計類數據則直接加總。7 月被交易的球員會帶著整季數據，因此這些是名單彙總，並非球隊官方總計。"
           }
         }
       }
@@ -18161,13 +18161,13 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Reconstruit chaque nuit à partir de données publiques de suivi des lancers, une fois les matchs de la veille publiés."
+            "value": "Reconstruit chaque nuit à partir de données publiques de suivi des lancers, une fois les données des matchs de la veille publiées."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ricostruito ogni notte da dati pubblici di tracciamento dei lanci, appena le partite della sera prima sono pubblicate."
+            "value": "Ricostruito ogni notte a partire dai dati pubblici sul tracciamento dei lanci, una volta pubblicati i dati delle partite della sera prima."
           }
         },
         "ja": {
@@ -18367,7 +18367,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Barras mais vermelhas: melhor que a média"
+            "value": "Barras mais vermelhas: acima da média"
           }
         },
         "zh-Hant": {
@@ -18537,7 +18537,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Saison régulière jusqu’au %@ · jours calendaires, pas matchs · G = matchs joués sur la période."
+            "value": "Saison régulière jusqu’au %@ · en jours calendaires, pas en matchs · G = matchs joués sur la période."
           }
         },
         "it": {
@@ -18578,13 +18578,13 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Titulares"
+            "value": "Habituales"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Titulaires"
+            "value": "Réguliers"
           }
         },
         "it": {
@@ -18625,7 +18625,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Quitar favorito"
+            "value": "Quitar de favoritos"
           }
         },
         "fr": {
@@ -18637,7 +18637,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rimuovi preferito"
+            "value": "Rimuovi dai preferiti"
           }
         },
         "ja": {
@@ -18649,7 +18649,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Remover favorito"
+            "value": "Remover dos favoritos"
           }
         },
         "zh-Hant": {
@@ -18672,7 +18672,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Quitar favorito"
+            "value": "Quitar de favoritos"
           }
         },
         "fr": {
@@ -18684,7 +18684,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rimuovi preferito"
+            "value": "Rimuovi dai preferiti"
           }
         },
         "ja": {
@@ -18696,7 +18696,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Remover favorito"
+            "value": "Remover dos favoritos"
           }
         },
         "zh-Hant": {
@@ -19001,7 +19001,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Jardín derecho"
+            "value": "Jardinero derecho"
           }
         },
         "fr": {
@@ -19025,7 +19025,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Campo direito"
+            "value": "Jardineiro direito"
           }
         },
         "zh-Hant": {
@@ -19095,7 +19095,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Corrido"
+            "value": "Juego de bases"
           }
         },
         "fr": {
@@ -19142,7 +19142,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "−%lld %%"
+            "value": "AHORRA %lld%%"
           }
         },
         "fr": {
@@ -19154,7 +19154,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "−%lld%%"
+            "value": "SCONTO %lld%%"
           }
         },
         "ja": {
@@ -19266,7 +19266,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "被長打率"
+            "value": "對手 SLG"
           }
         }
       }
@@ -19348,7 +19348,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "通常指標"
+            "value": "基本成績"
           }
         },
         "pt-BR": {
@@ -19589,7 +19589,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Salvo offline, funciona na estrada"
+            "value": "Salvo offline para usar em viagens"
           }
         },
         "zh-Hant": {
@@ -19612,7 +19612,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ojea a cada jugador"
+            "value": "Analiza a cada jugador"
           }
         },
         "fr": {
@@ -19659,13 +19659,13 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ojea como un gerente general"
+            "value": "Analiza como un gerente general"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Évaluez comme un GM"
+            "value": "Évaluez comme un DG"
           }
         },
         "it": {
@@ -19706,7 +19706,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ojea la postemporada"
+            "value": "Analiza la postemporada"
           }
         },
         "fr": {
@@ -20065,7 +20065,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "球季與賽季類型"
+            "value": "球季與球季類型"
           }
         }
       }
@@ -20370,7 +20370,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Voyez la forme de chaque équipe sur 7 / 15 / 30 jours"
+            "value": "Voyez la forme de chaque équipe sur les 7 / 15 / 30 derniers jours"
           }
         },
         "it": {
@@ -20411,7 +20411,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mira los últimos 7 / 15 / 30 días de cada equipo"
+            "value": "Mira el rendimiento de cada equipo en los últimos 7 / 15 / 30 días"
           }
         },
         "fr": {
@@ -20423,13 +20423,13 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vedi gli ultimi 7 / 15 / 30 giorni di ogni squadra"
+            "value": "Vedi i dati degli ultimi 7 / 15 / 30 giorni di ogni squadra"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "全チームの直近7/15/30日を見る"
+            "value": "全チームの直近7/15/30日間のデータを見る"
           }
         },
         "pt-BR": {
@@ -20441,7 +20441,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "查看每支球隊近 7 / 15 / 30 天"
+            "value": "查看每支球隊近 7 / 15 / 30 天的表現"
           }
         }
       }
@@ -20488,7 +20488,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "查看 %@ 逐季的演變"
+            "value": "查看 %@ 逐季的變化"
           }
         }
       }
@@ -20505,7 +20505,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mira la forma de los últimos 7 / 15 / 30 días de cualquier jugador"
+            "value": "Mira la forma reciente de cualquier jugador en los últimos 7 / 15 / 30 días"
           }
         },
         "fr": {
@@ -20517,7 +20517,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vedi la forma degli ultimi 7 / 15 / 30 giorni di qualsiasi giocatore"
+            "value": "Vedi la forma di qualsiasi giocatore negli ultimi 7 / 15 / 30 giorni"
           }
         },
         "ja": {
@@ -20552,7 +20552,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mira el tablero completo: todos los bateadores y lanzadores clasificados por cuánto han cambiado"
+            "value": "Mira el tablero completo: todos los bateadores y lanzadores ordenados según cuánto han subido o bajado"
           }
         },
         "fr": {
@@ -20570,7 +20570,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "ボード全体を見る:全打者・全投手を変動の大きさでランキング"
+            "value": "ボード全体を見る:全打者・全投手を成績の変動幅順に表示"
           }
         },
         "pt-BR": {
@@ -20958,7 +20958,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "傳送意見"
+            "value": "傳送意見回饋"
           }
         }
       }
@@ -21146,7 +21146,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "分享 %@ 的百分位"
+            "value": "分享 %@ 的百分位排名"
           }
         }
       }
@@ -21187,7 +21187,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Shortstop"
+            "value": "Interbases"
           }
         },
         "zh-Hant": {
@@ -21445,7 +21445,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ordena estadísticas avanzadas y tradicionales de jugadores y equipos, de xwOBA y Barrel% a AVG, ERA y bases robadas."
+            "value": "Ordena las estadísticas avanzadas y tradicionales de jugadores y equipos, desde xwOBA y Barrel% hasta AVG, ERA y bases robadas."
           }
         },
         "fr": {
@@ -21463,7 +21463,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "xwOBAやBarrel%からAVG、ERA、盗塁まで、選手とチームの高度指標と通常指標を並べ替え。"
+            "value": "xwOBAやBarrel%からAVG、ERA、盗塁まで、選手やチームの高度な指標と基本成績を並べ替え。"
           }
         },
         "pt-BR": {
@@ -21539,7 +21539,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Orden de clasificación"
+            "value": "Sentido del orden"
           }
         },
         "fr": {
@@ -21551,13 +21551,13 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Direzione ordinamento"
+            "value": "Direzione di ordinamento"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "並び順の方向"
+            "value": "並び順"
           }
         },
         "pt-BR": {
@@ -21604,7 +21604,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@順(高い順)"
+            "value": "%@の高い順"
           }
         },
         "pt-BR": {
@@ -21651,7 +21651,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@順(低い順)"
+            "value": "%@の低い順"
           }
         },
         "pt-BR": {
@@ -21757,7 +21757,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "扎實擊球率"
+            "value": "紮實擊球率"
           }
         }
       }
@@ -21804,7 +21804,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "任選兩位球員，比較每個百分位。"
+            "value": "任選兩位球員，逐項比較百分位排名。"
           }
         }
       }
@@ -21874,7 +21874,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Comparez deux joueurs ou deux équipes, puis comparez chacun à ses saisons passées respectives"
+            "value": "Comparez deux joueurs ou deux équipes, puis comparez chacun à ses saisons passées."
           }
         },
         "it": {
@@ -21886,7 +21886,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "好きな選手2人・球団2つを比較。それぞれの過去シーズンとも比較できます"
+            "value": "選手2人または球団2つを比較し、それぞれを過去のシーズンとも比べられます"
           }
         },
         "pt-BR": {
@@ -21898,7 +21898,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "任選兩位球員或兩支球隊比較，也可與自己的過往球季比較"
+            "value": "任選兩位球員或兩支球隊比較，也可與各自過往球季比較"
           }
         }
       }
@@ -21933,7 +21933,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "通常"
+            "value": "基本"
           }
         },
         "pt-BR": {
@@ -21980,7 +21980,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "通常指標はありません"
+            "value": "基本成績はありません"
           }
         },
         "pt-BR": {
@@ -21992,7 +21992,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "沒有標準數據"
+            "value": "無法取得標準數據"
           }
         }
       }
@@ -22291,7 +22291,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Empezar a ojear"
+            "value": "Empezar a analizar"
           }
         },
         "fr": {
@@ -22485,13 +22485,13 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "StatScout ne peut pas se charger"
+            "value": "Impossible de charger StatScout"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "StatScout non riesce a caricare"
+            "value": "Impossibile caricare StatScout"
           }
         },
         "ja": {
@@ -22503,7 +22503,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "O StatScout não consegue carregar"
+            "value": "Não foi possível carregar o StatScout"
           }
         },
         "zh-Hant": {
@@ -22591,7 +22591,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "StatScout+ 利用中"
+            "value": "StatScout+解放済み"
           }
         },
         "pt-BR": {
@@ -22620,19 +22620,19 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "StatScout+ no está disponible para comprar en la región de App Store de esta cuenta por ahora."
+            "value": "StatScout+ no se puede comprar ahora mismo desde la región de App Store asociada a esta cuenta."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "StatScout+ n’est pas disponible à l’achat dans la région App Store de ce compte pour le moment."
+            "value": "StatScout+ n’est pas disponible à l’achat dans la région de l’App Store associée à ce compte pour le moment."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "StatScout+ non è al momento disponibile per l’acquisto nell’area App Store di questo account."
+            "value": "StatScout+ non è al momento disponibile per l’acquisto nella regione dell’App Store associata a questo account."
           }
         },
         "ja": {
@@ -22650,7 +22650,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "StatScout+ 目前無法在此帳號的 App Store 地區購買。"
+            "value": "此 Apple ID 所屬的 App Store 地區目前無法購買 StatScout+。"
           }
         }
       }
@@ -22779,13 +22779,13 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "Statcast品質のデータ"
+            "value": "Statcastレベルのデータ"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Dados com qualidade Statcast"
+            "value": "Dados no padrão Statcast"
           }
         },
         "zh-Hant": {
@@ -22861,13 +22861,13 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Stats : triez la ligue, leaders, meilleurs et pires"
+            "value": "Stats : classez toute la ligue, des leaders aux moins bons."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Stats: ordina la lega, leader, migliori e peggiori"
+            "value": "Statistiche: ordina le classifiche della lega, dai migliori ai peggiori"
           }
         },
         "ja": {
@@ -22879,7 +22879,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Estatísticas: ordene a liga e veja os líderes, os melhores e os piores."
+            "value": "Estatísticas: ordene os jogadores da liga e veja os líderes, os melhores e os piores"
           }
         },
         "zh-Hant": {
@@ -22902,7 +22902,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Aún se cargan las opciones de suscripción. Vuelve a tocar en un momento."
+            "value": "Las opciones de suscripción aún se están cargando. Toca de nuevo dentro de un momento."
           }
         },
         "fr": {
@@ -23108,7 +23108,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "スイートスポット%"
+            "value": "スイートスポット率"
           }
         },
         "pt-BR": {
@@ -23184,7 +23184,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cambia cualquier tablero a Postemporada desde el menú de temporada para ver las estadísticas partido a partido de playoffs y cómo rinde cada plantilla ahora mismo."
+            "value": "Cambia cualquier tablero a Postemporada desde el menú de temporada para ver las estadísticas de cada partido de playoffs y el rendimiento actual de cada plantilla."
           }
         },
         "fr": {
@@ -23208,13 +23208,13 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mude qualquer quadro para Pós-temporada no menu de temporada para ver os registros de jogos e como cada elenco está indo agora."
+            "value": "Mude qualquer quadro para Pós-temporada no menu de temporada para ver o histórico dos jogos e o desempenho atual de cada elenco."
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "在球季選單中將任何榜單切換為季後賽，即可查看比賽紀錄與各名單目前的表現。"
+            "value": "在球季選單中將任何榜單切換為季後賽，即可查看季後賽逐場紀錄與各隊球員目前的表現。"
           }
         }
       }
@@ -23437,7 +23437,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "チームの通常指標"
+            "value": "チームの基本成績"
           }
         },
         "pt-BR": {
@@ -23496,7 +23496,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "球隊 VS 球隊"
+            "value": "球隊對決"
           }
         }
       }
@@ -23619,7 +23619,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tocca un giocatore per caricarlo in uno slot qui sotto."
+            "value": "Tocca un giocatore per aggiungerlo a uno slot qui sotto."
           }
         },
         "ja": {
@@ -23919,7 +23919,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "球隊洞察"
+            "value": "球隊分析"
           }
         }
       }
@@ -23936,7 +23936,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Scouting de equipos: avanzado y estándar, de temporada o reciente"
+            "value": "Análisis de equipos: estadísticas avanzadas y estándar, de temporada o recientes"
           }
         },
         "fr": {
@@ -23948,13 +23948,13 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Scouting delle squadre: avanzato e standard, stagione o recente"
+            "value": "Scouting delle squadre: statistiche avanzate e standard, stagionali o recenti"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "チーム分析:高度な指標・通常指標をシーズン別または直近期間で確認"
+            "value": "チーム分析:高度な指標と基本成績をシーズン別または直近の期間で確認"
           }
         },
         "pt-BR": {
@@ -24060,7 +24060,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "球隊：瀏覽任何名單，看誰正火燙"
+            "value": "球隊：瀏覽任一球隊名單，查看誰手感正熱"
           }
         }
       }
@@ -24277,7 +24277,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "La classifica Tendenze"
+            "value": "La classifica delle tendenze"
           }
         },
         "ja": {
@@ -24318,13 +24318,13 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Le tableau Tendances, la forme récente, les duels directs et chaque saison depuis 2015. Le tableau Statcast complet de chaque joueur."
+            "value": "Le tableau Tendances, la forme récente, les duels directs et toutes les saisons depuis 2015. Le profil Statcast complet de chaque joueur."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "La classifica Tendenze, la forma recente, i confronti diretti e ogni stagione dal 2015. Il quadro Statcast completo di ogni giocatore."
+            "value": "La classifica delle tendenze, la forma recente, i confronti diretti e ogni stagione dal 2015. Il quadro Statcast completo di ogni giocatore."
           }
         },
         "ja": {
@@ -24371,13 +24371,13 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "La classifica Tendenze: chi sale e chi scende nella lega"
+            "value": "La classifica delle tendenze: chi sale e chi scende nella lega"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "トレンドボード:リーグ全体の選手を調子の変化幅でランキング"
+            "value": "トレンドボード:リーグ全体の選手を成績の変動幅順に表示"
           }
         },
         "pt-BR": {
@@ -24389,7 +24389,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "趨勢榜：依變化幅度排名的全聯盟"
+            "value": "趨勢榜：全聯盟球員依變化幅度排名"
           }
         }
       }
@@ -24406,7 +24406,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "El tablero de Tendencias: quién se calienta y quién se enfría en toda la liga"
+            "value": "El tablero de Tendencias: quién está en racha y quién va a la baja en toda la liga"
           }
         },
         "fr": {
@@ -24418,7 +24418,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "La classifica Tendenze: chi si scalda e chi si raffredda in tutta la lega"
+            "value": "La classifica delle tendenze: chi è in crescita e chi è in calo in tutta la lega"
           }
         },
         "ja": {
@@ -24465,7 +24465,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Il leader e l’ultimo della lega in ogni metrica Statcast, affiancati, in un’unica classifica."
+            "value": "Per ogni metrica Statcast, il migliore e il peggiore della lega, affiancati in un’unica classifica."
           }
         },
         "ja": {
@@ -24500,7 +24500,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "El nuevo tablero de Tendencias clasifica a quienes más cambian en la liga, no solo a los nombres que ya están arriba."
+            "value": "El nuevo tablero de Tendencias clasifica a quienes más suben o bajan en la liga, no solo a quienes ya están arriba."
           }
         },
         "fr": {
@@ -24512,25 +24512,25 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "La nuova classifica Tendenze ordina chi cambia di più nella lega, non solo i nomi già in alto."
+            "value": "La nuova classifica delle tendenze ordina chi sta salendo o scendendo di più nella lega, non solo i nomi già in cima."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "新しいトレンドボードは、すでに上位にいる名前だけでなく、リーグで最も変化した選手をランキングします。"
+            "value": "新しいトレンドボードでは、すでに上位にいる選手だけでなく、リーグ全体の選手を成績の変動幅順に表示します。"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "O novo quadro de Tendências classifica quem mais se move na liga, não só os nomes que já estão no topo."
+            "value": "O novo quadro de Tendências classifica os jogadores pelas maiores variações na liga, não só os nomes que já estão no topo."
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "全新趨勢榜會排出全聯盟變化最大的球員，而不只是原本就在頂端的名字。"
+            "value": "全新趨勢榜會排出全聯盟變化幅度最大的球員，不只聚焦原本排名前段的球員。"
           }
         }
       }
@@ -24565,7 +24565,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "プレーオフの試合は終了しましたが、最新の選手成績はまだ反映されていません。"
+            "value": "プレーオフの試合結果は出ていますが、最新の選手成績はまだ反映されていません。"
           }
         },
         "pt-BR": {
@@ -24577,7 +24577,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "季後賽場次已結束，但最新的球員數據尚未更新。"
+            "value": "季後賽比賽已打完，但最新的球員數據尚未更新。"
           }
         }
       }
@@ -24612,7 +24612,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "プレーオフの試合は終了しましたが、最新のチーム成績はまだ反映されていません。"
+            "value": "プレーオフの試合結果は出ていますが、最新のチーム成績はまだ反映されていません。"
           }
         },
         "pt-BR": {
@@ -24624,7 +24624,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "季後賽場次已結束，但最新的球隊數據尚未更新。"
+            "value": "季後賽比賽已打完，但最新的球隊數據尚未更新。"
           }
         }
       }
@@ -24659,13 +24659,13 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "今、リーグ全体の選手を調子の変化幅順にランキング。"
+            "value": "今、リーグ全体の選手を成績の変動幅順に表示。"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "A liga inteira classificada por quem está se movendo, agora mesmo."
+            "value": "A liga inteira, com os jogadores classificados pelas maiores variações do momento."
           }
         },
         "zh-Hant": {
@@ -24718,7 +24718,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "之後 %@。隨時可取消。"
+            "value": "之後為 %@。隨時可取消。"
           }
         }
       }
@@ -25205,7 +25205,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Los totales suman las estadísticas de temporada de la plantilla actual, así que un jugador cambiado en julio aporta las de toda la temporada."
+            "value": "Los totales suman las estadísticas de temporada de la plantilla actual, así que un jugador que cambia de equipo en julio aporta sus estadísticas de toda la temporada."
           }
         },
         "fr": {
@@ -25264,13 +25264,13 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Segui le classifiche di ogni giocatore dal 2015 e le tendenze annuali alla base dei risultati dei leader di oggi."
+            "value": "Segui l’andamento in classifica di ogni giocatore dal 2015 e le tendenze anno su anno dei giocatori in testa oggi."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "2015年以降の全選手の順位と、現在のリーダーを支える年ごとの推移を追跡できます。"
+            "value": "2015年以降の全選手の順位に加え、現在の上位選手の年ごとの推移も追えます。"
           }
         },
         "pt-BR": {
@@ -25282,7 +25282,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "追蹤每位球員自 2015 年以來的排名，以及今日領先者背後的逐年趨勢。"
+            "value": "追蹤每位球員自 2015 年以來的排名，以及目前領先者背後的逐年趨勢。"
           }
         }
       }
@@ -25317,7 +25317,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "この選手の通常指標はありません。"
+            "value": "この選手の基本成績はありません。"
           }
         },
         "pt-BR": {
@@ -25329,7 +25329,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "此球員沒有傳統數據。"
+            "value": "無法取得此球員的傳統數據。"
           }
         }
       }
@@ -25393,7 +25393,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tendencias: quién se calienta y quién se enfría"
+            "value": "Tendencias: quién está en racha y quién va a la baja"
           }
         },
         "fr": {
@@ -25405,7 +25405,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tendenze: chi si scalda e chi si raffredda"
+            "value": "Tendenze: chi è in crescita e chi è in calo"
           }
         },
         "ja": {
@@ -25493,7 +25493,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Essai gratuit"
+            "value": "Essayez gratuitement"
           }
         },
         "it": {
@@ -25781,7 +25781,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sblocca a vita"
+            "value": "Sblocca l’accesso a vita"
           }
         },
         "ja": {
@@ -25793,7 +25793,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Liberar vitalício"
+            "value": "Liberar acesso vitalício"
           }
         },
         "zh-Hant": {
@@ -25963,13 +25963,13 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Débloquez les saisons historiques et les comparaisons d’une année à l’autre."
+            "value": "Débloquez les saisons passées et les comparaisons d’une année à l’autre."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sblocca le stagioni storiche e i confronti anno su anno."
+            "value": "Sblocca le stagioni passate e i confronti anno su anno."
           }
         },
         "ja": {
@@ -26022,7 +26022,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "最近%@上昇"
+            "value": "直近で%@上昇"
           }
         },
         "pt-BR": {
@@ -26128,7 +26128,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "每日更新，永遠最新"
+            "value": "每日更新，資訊保持最新"
           }
         }
       }
@@ -26192,7 +26192,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mejorar a StatScout+"
+            "value": "Pasar a StatScout+"
           }
         },
         "fr": {
@@ -26304,7 +26304,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "量"
+            "value": "累計"
           }
         },
         "pt-BR": {
@@ -26316,7 +26316,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "數量"
+            "value": "累計"
           }
         }
       }
@@ -26533,13 +26533,13 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ponderato per IP sull’intero roster dei lanciatori"
+            "value": "Ponderato in base agli IP di tutti i lanciatori del roster"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "投手陣の投球回で加重"
+            "value": "投手陣の投球回数に応じた加重平均"
           }
         },
         "pt-BR": {
@@ -26551,7 +26551,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "依投手名單的投球局數加權"
+            "value": "依投手名單的投球局數（IP）加權"
           }
         }
       }
@@ -26580,13 +26580,13 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ponderato per PA sull’intero roster dei battitori"
+            "value": "Ponderato in base ai PA di tutti i battitori del roster"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "打者陣の打席数で加重"
+            "value": "打者陣の打席数に応じた加重平均"
           }
         },
         "pt-BR": {
@@ -26598,7 +26598,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "依打者名單的打席數加權"
+            "value": "依打者名單的打席數（PA）加權"
           }
         }
       }
@@ -26739,7 +26739,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "現在誰\n最火燙。"
+            "value": "誰的手感\n現在正熱？"
           }
         }
       }
@@ -26991,7 +26991,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Comparar años carga los datos históricos solo cuando los necesitas."
+            "value": "La función Comparar años carga los datos históricos solo cuando los necesitas."
           }
         },
         "fr": {
@@ -27244,7 +27244,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "ポケットに\nスカウトを"
+            "value": "ポケットの中の\nスカウト"
           }
         },
         "pt-BR": {
@@ -27256,7 +27256,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "你的口袋\n球探"
+            "value": "你的隨身\n球探"
           }
         }
       }
@@ -27279,13 +27279,13 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Votre accès à StatScout+ a expiré. Reprenez-le pour retrouver le tableau Tendances, la forme récente, les duels directs et toutes les saisons passées."
+            "value": "Votre accès à StatScout+ a expiré. Réactivez-le pour retrouver le tableau Tendances, la forme récente, les duels directs et toutes les saisons passées."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Il tuo accesso a StatScout+ è scaduto. Riattivalo per riavere la classifica Tendenze, la forma recente, i confronti diretti e ogni stagione passata."
+            "value": "Il tuo accesso a StatScout+ è scaduto. Riattivalo per tornare a consultare la classifica delle tendenze, la forma recente, i confronti diretti e tutte le stagioni passate."
           }
         },
         "ja": {
@@ -27297,13 +27297,13 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Seu acesso ao StatScout+ expirou. Retome para ter o quadro de Tendências, a forma recente, os confrontos diretos e todas as temporadas passadas."
+            "value": "Seu acesso ao StatScout+ expirou. Retome sua assinatura para ter o quadro de Tendências, a forma recente, os confrontos diretos e todas as temporadas passadas."
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "你的 StatScout+ 已到期。重新啟用即可使用趨勢榜、近期表現、正面對決與所有過往球季。"
+            "value": "你的 StatScout+ 訂閱已到期。重新啟用即可使用趨勢榜、近期表現、正面對決與所有過往球季。"
           }
         }
       }
@@ -27397,7 +27397,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "被 xBA"
+            "value": "對手 xBA"
           }
         }
       }
@@ -27444,7 +27444,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "被 xSLG"
+            "value": "對手 xSLG"
           }
         }
       }
@@ -27491,7 +27491,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "被 xwOBA"
+            "value": "對手 xwOBA"
           }
         }
       }
