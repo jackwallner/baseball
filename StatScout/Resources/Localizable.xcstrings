@@ -19142,19 +19142,19 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "AHORRA %lld %%"
+            "value": "−%lld %%"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "ÉCONOMISEZ %lld %%"
+            "value": "−%lld %%"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "RISPARMIA IL %lld%%"
+            "value": "−%lld%%"
           }
         },
         "ja": {
@@ -19166,7 +19166,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "ECONOMIZE %lld%%"
+            "value": "−%lld%%"
           }
         },
         "zh-Hant": {
