@@ -1,3 +1,3 @@
-Sdílejte percentilovou tabulku libovolného hráče jako obrázek přímo z jeho profilu.
-Žebříčky, vyhledávání a přepínání sezón jsou mnohem rychlejší, hlavně u minulých sezón.
-Žebříčky play-off nyní správně zobrazují říjnové zápasy.
+Nově ve španělštině, francouzštině, italštině, japonštině, portugalštině a tradiční čínštině.
+
+Po aktivaci Pro se vrátíte přesně k hráči nebo sezóně, kterou jste si prohlíželi.

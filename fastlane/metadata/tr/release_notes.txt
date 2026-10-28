@@ -1,3 +1,3 @@
-Herhangi bir oyuncunun yüzdelik tablosunu doğrudan profilinden görsel olarak paylaşın.
-Sıralamalar, arama ve sezon değiştirme çok daha hızlı, özellikle geçmiş sezonlarda.
-Sezon sonu liderlik tabloları artık ekim maçlarını doğru gösteriyor.
+Artık İspanyolca, Fransızca, İtalyanca, Japonca, Portekizce ve Geleneksel Çince dillerinde.
+
+Pro'ya katıldığında doğrudan baktığın oyuncuya ya da sezona dönüyorsun.

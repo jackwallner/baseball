@@ -1,3 +1,3 @@
-Condividi la tabella dei percentili di qualsiasi giocatore come immagine, direttamente dal suo profilo.
-Classifiche, ricerca e cambio di stagione sono molto più veloci, soprattutto per le stagioni passate.
-Le classifiche della postseason ora mostrano correttamente le partite di ottobre.
+Ora in spagnolo, francese, italiano, giapponese, portoghese e cinese tradizionale.
+
+Passando a Pro, torni subito al giocatore o alla stagione che stavi guardando.

@@ -1,3 +1,3 @@
-Udostępnij tablicę percentyli dowolnego zawodnika jako obraz, prosto z jego profilu.
-Rankingi, wyszukiwanie i zmiana sezonu działają dużo szybciej, zwłaszcza dla minionych sezonów.
-Rankingi fazy play-off poprawnie pokazują teraz październikowe mecze.
+Teraz po hiszpańsku, francusku, włosku, japońsku, portugalsku i w chińskim tradycyjnym.
+
+Po dołączeniu do Pro od razu wracasz do przeglądanego zawodnika lub sezonu.

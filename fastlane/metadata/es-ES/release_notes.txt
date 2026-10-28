@@ -1,3 +1,3 @@
-Comparte el panel de percentiles de cualquier jugador como imagen, desde su perfil.
-Las clasificaciones, la búsqueda y el cambio de temporada son mucho más rápidos, sobre todo en temporadas pasadas.
-Las clasificaciones de la postemporada ya muestran bien los partidos de octubre.
+Ahora en español, francés, italiano, japonés, portugués y chino tradicional.
+
+Al unirte a Pro vuelves directamente al jugador o a la temporada que estabas viendo.

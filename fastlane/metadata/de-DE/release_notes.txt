@@ -1,3 +1,3 @@
-Teile die Perzentil-Übersicht jedes Spielers als Bild, direkt aus seinem Profil.
-Bestenlisten, Suche und Saisonwechsel sind deutlich schneller, vor allem bei früheren Saisons.
-Die Postseason-Bestenlisten zeigen die Oktoberspiele jetzt korrekt an.
+Jetzt in Spanisch, Französisch, Italienisch, Japanisch, Portugiesisch und Traditionellem Chinesisch.
+
+Nach dem Wechsel zu Pro landest du direkt wieder bei dem Spieler oder der Saison, die du dir angesehen hast.
