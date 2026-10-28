@@ -6,7 +6,7 @@ Web page: https://jackwallner.com/ios/baseball/best-baseball-savant-app.html
 
 ## Best Baseball Savant app for iPhone (October 2026)
 
-By [Jack Wallner](https://jackwallner.com/). Last updated October 27, 2026.
+By [Jack Wallner](https://jackwallner.com/). Last updated October 28, 2026.
 
 Baseball Savant itself is a website, and a search of the US App Store on October 12, 2026 found no app from MLB or Savant under that name. Best for Savant-style red and blue percentile bars on a phone with no account: Baseball Savvy StatScout. Best for WAR, wRC+ and projections: FanGraphs. Best for live games and video: the MLB app. Best for fantasy and betting tools: Ball Knowers.
 
