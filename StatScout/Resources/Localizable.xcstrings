@@ -31,7 +31,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@ パーセンタイル%2$@"
+            "value": "%1$@ %2$@パーセンタイル"
           }
         },
         "pt-BR": {
@@ -78,7 +78,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@ %2$@、パーセンタイル%3$@"
+            "value": "%1$@ %2$@、%3$@パーセンタイル"
           }
         },
         "pt-BR": {
@@ -924,7 +924,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "総合パーセンタイル%@"
+            "value": "総合%@パーセンタイル"
           }
         },
         "pt-BR": {
@@ -1159,7 +1159,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ · 高度な指標"
+            "value": "%@ · 詳細指標"
           }
         },
         "pt-BR": {
@@ -1188,13 +1188,13 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ · TRADICIONALES"
+            "value": "%@ · ESTÁNDAR"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ · STANDARD"
+            "value": "%@ · CLASSIQUES"
           }
         },
         "it": {
@@ -1206,7 +1206,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ · 標準指標"
+            "value": "%@ · 基本成績"
           }
         },
         "pt-BR": {
@@ -1629,7 +1629,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@:パーセンタイル%2$@"
+            "value": "%1$@:%2$@パーセンタイル"
           }
         },
         "pt-BR": {
@@ -1676,7 +1676,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@:%2$@、パーセンタイル%3$@"
+            "value": "%1$@:%2$@、%3$@パーセンタイル"
           }
         },
         "pt-BR": {
@@ -2757,7 +2757,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "高度な指標"
+            "value": "詳細指標"
           }
         },
         "pt-BR": {
@@ -2998,7 +2998,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "AVG contra"
+            "value": "AVG sofrida"
           }
         },
         "zh-Hant": {
@@ -3315,13 +3315,13 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Avanzato"
+            "value": "Avanzate"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "高度な指標"
+            "value": "詳細"
           }
         },
         "pt-BR": {
@@ -4267,7 +4267,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Melhor valor"
+            "value": "Mais vantajoso"
           }
         },
         "zh-Hant": {
@@ -4884,7 +4884,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "中外野"
+            "value": "中外野手"
           }
         }
       }
@@ -6358,7 +6358,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "No se pudo cargar el rendimiento reciente"
+            "value": "No se pudo cargar la forma reciente"
           }
         },
         "fr": {
@@ -6405,7 +6405,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "No se pudo cargar el rendimiento reciente."
+            "value": "No se pudo cargar la forma reciente."
           }
         },
         "fr": {
@@ -6593,7 +6593,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "No se pudo cargar el rendimiento reciente del equipo."
+            "value": "No se pudo cargar la forma del equipo."
           }
         },
         "fr": {
@@ -7251,7 +7251,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "A la baja en %@ últimamente"
+            "value": "Bajó %@ recientemente"
           }
         },
         "fr": {
@@ -7275,7 +7275,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Queda de %@ recentemente"
+            "value": "Caiu %@ recentemente"
           }
         },
         "zh-Hant": {
@@ -7868,7 +7868,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tous les joueurs qualifiés, classés"
+            "value": "Classement de tous les joueurs qualifiés"
           }
         },
         "it": {
@@ -9366,7 +9366,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rodados%"
+            "value": "% rodados"
           }
         },
         "fr": {
@@ -9460,7 +9460,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Batazos fuertes%"
+            "value": "% batazos fuertes"
           }
         },
         "fr": {
@@ -9507,7 +9507,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Batazos fuertes% en contra"
+            "value": "% batazos fuertes en contra"
           }
         },
         "fr": {
@@ -9960,7 +9960,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "已放入"
+            "value": "已選入"
           }
         }
       }
@@ -9995,13 +9995,13 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "内野"
+            "value": "内野手"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Infield"
+            "value": "Campo interno"
           }
         },
         "zh-Hant": {
@@ -10171,7 +10171,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld der. j"
+            "value": "%lld j"
           }
         },
         "it": {
@@ -10665,7 +10665,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "左外野"
+            "value": "左外野手"
           }
         }
       }
@@ -11411,7 +11411,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Carregando o painel…"
+            "value": "Carregando o quadro…"
           }
         },
         "zh-Hant": {
@@ -12004,7 +12004,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "NOUVEAU DANS STATSCOUT"
+            "value": "NOUVEAUTÉS DE STATSCOUT"
           }
         },
         "it": {
@@ -14865,7 +14865,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "OBP permitido"
+            "value": "OBP en contra"
           }
         },
         "fr": {
@@ -14877,7 +14877,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "OBP subita"
+            "value": "OBP concessa"
           }
         },
         "ja": {
@@ -14912,7 +14912,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "OPS permitido"
+            "value": "OPS en contra"
           }
         },
         "fr": {
@@ -14924,7 +14924,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "OPS subita"
+            "value": "OPS concessa"
           }
         },
         "ja": {
@@ -15335,7 +15335,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Jardineros"
+            "value": "Jardines"
           }
         },
         "fr": {
@@ -16434,7 +16434,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "低い"
+            "value": "低水準"
           }
         },
         "pt-BR": {
@@ -16481,7 +16481,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "守備"
+            "value": "守備位置"
           }
         },
         "pt-BR": {
@@ -18578,13 +18578,13 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Habituales"
+            "value": "Regulares"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Réguliers"
+            "value": "Titulaires"
           }
         },
         "it": {
@@ -18890,7 +18890,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "恢復購買項目"
+            "value": "回復購買項目"
           }
         }
       }
@@ -18937,7 +18937,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "正在恢復…"
+            "value": "正在回復…"
           }
         }
       }
@@ -19001,7 +19001,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Jardinero derecho"
+            "value": "Jardín derecho"
           }
         },
         "fr": {
@@ -19031,7 +19031,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "右外野"
+            "value": "右外野手"
           }
         }
       }
@@ -19175,7 +19175,8 @@
             "value": "省 %lld%%"
           }
         }
-      }
+      },
+      "comment": "Paywall badge on a plan row. Short ALL-CAPS pill; must fit about 14 characters."
     },
     "SEE THE POSTSEASON": {
       "extractionState": "manual",
@@ -19236,7 +19237,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "SLG permitido"
+            "value": "SLG en contra"
           }
         },
         "fr": {
@@ -19248,7 +19249,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "SLG subita"
+            "value": "SLG concessa"
           }
         },
         "ja": {
@@ -19689,7 +19690,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "像球團總經理一樣分析球員"
+            "value": "像總經理一樣分析"
           }
         }
       }
@@ -21727,7 +21728,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Contacto limpio%"
+            "value": "% contacto limpio"
           }
         },
         "fr": {
@@ -21751,7 +21752,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Contato limpo%"
+            "value": "Contato limpo (%)"
           }
         },
         "zh-Hant": {
@@ -23090,7 +23091,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Punto dulce%"
+            "value": "% punto dulce"
           }
         },
         "fr": {
@@ -23114,7 +23115,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ponto ideal%"
+            "value": "Ponto ideal (%)"
           }
         },
         "zh-Hant": {
@@ -23343,7 +23344,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "チームの高度な指標"
+            "value": "チームの詳細指標"
           }
         },
         "pt-BR": {
@@ -25511,7 +25512,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Teste grátis"
+            "value": "Experimente grátis"
           }
         },
         "zh-Hant": {
@@ -25799,7 +25800,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "解鎖終身版"
+            "value": "解鎖終身方案"
           }
         }
       }
@@ -26022,7 +26023,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "直近で%@上昇"
+            "value": "最近%@上昇"
           }
         },
         "pt-BR": {
@@ -26803,7 +26804,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "AÑO TRAS AÑO"
+            "value": "AÑO VS AÑO"
           }
         },
         "fr": {
@@ -27232,7 +27233,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Votre scout\nde poche"
+            "value": "Votre recruteur\nde poche"
           }
         },
         "it": {
@@ -27367,7 +27368,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "xBA permitido"
+            "value": "xBA en contra"
           }
         },
         "fr": {
@@ -27379,7 +27380,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "xBA subita"
+            "value": "xBA concessa"
           }
         },
         "ja": {
@@ -27414,7 +27415,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "xSLG permitido"
+            "value": "xSLG en contra"
           }
         },
         "fr": {
@@ -27426,7 +27427,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "xSLG subita"
+            "value": "xSLG concessa"
           }
         },
         "ja": {
@@ -27461,7 +27462,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "xwOBA permitido"
+            "value": "xwOBA en contra"
           }
         },
         "fr": {
@@ -27473,7 +27474,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "xwOBA subita"
+            "value": "xwOBA concessa"
           }
         },
         "ja": {
