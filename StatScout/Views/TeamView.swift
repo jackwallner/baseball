@@ -193,8 +193,11 @@ struct TeamView: View {
     private var rosterSortLabel: String {
         guard isRosterRecent else { return sortLabel }
         let name = MetricName.localized(sortLabel)
-        let base = rosterRecentRank == .change ? "Δ \(name)" : name
-        return String(localized: "\(base) · \(rosterWindow.rawValue)d")
+        let window = rosterWindow.shortLabel
+        if rosterRecentRank == .change {
+            return String(localized: "Δ \(name) · \(window)")
+        }
+        return String(localized: "\(name) · \(window)")
     }
 
     private var rowDisplayMetric: (label: String?, category: MetricCategory?) {

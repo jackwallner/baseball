@@ -480,11 +480,10 @@ struct PaywallView: View {
         if package.productKind == .lifetime {
             return String(localized: "\(price). One-time purchase. Lifetime access, no subscription.")
         }
-        let renew = StoreService.renewalTerms
         if store.isEligibleForIntroOffer(package), let trial = package.introTrial {
-            return "\(trial.thenSentence(price: price)) \(renew)"
+            return trial.disclosureSentence(price: price)
         }
-        return "\(price). \(renew)"
+        return StoreService.renewalDisclosure(price: price)
     }
 
     // MARK: - Actions
