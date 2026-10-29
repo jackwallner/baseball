@@ -59,7 +59,16 @@ struct StatScoutApp: App {
     var body: some Scene {
         WindowGroup {
             #if DEBUG
-            if DuoScreenshotMode.isSeeded {
+            if ProcessInfo.processInfo.arguments.contains("-SettingsSnapshot") {
+                NavigationStack {
+                    AboutView(lastUpdated: nil)
+                        .navigationTitle("Settings")
+                        .navigationBarTitleDisplayMode(.inline)
+                        .modifier(SavantNavBarPublic())
+                }
+                .environmentObject(store)
+                .preferredColorScheme(.light)
+            } else if DuoScreenshotMode.isSeeded {
                 ContentView(api: PreviewStatcastAPI(includesSamples: false))
                     .environmentObject(store)
                     .preferredColorScheme(.light)

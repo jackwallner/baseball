@@ -39,6 +39,19 @@ final class LocalizationTests: XCTestCase {
         XCTAssertEqual(94.ordinal, "94th")
     }
 
+    func testOneDayTrialUsesSingularCopy() throws {
+        try XCTSkipUnless(Locale.current.language.languageCode?.identifier == "en")
+        let trial = IntroTrial(unit: .day, count: 1)
+        XCTAssertEqual(trial.label, "1-day free trial")
+        XCTAssertEqual(trial.startLabel, "Start 1-day free trial")
+        XCTAssertEqual(trial.thenSentence(price: "$4.99"), "1-day free trial, then $4.99.")
+        let path = try XCTUnwrap(([Bundle.main] + Bundle.allBundles).compactMap {
+            $0.path(forResource: "de", ofType: "lproj")
+        }.first)
+        let german = try XCTUnwrap(Bundle(path: path))
+        XCTAssertEqual(german.localizedString(forKey: "1-day free trial", value: nil, table: nil), "1 Tag gratis testen")
+    }
+
     func testMetricNamesFallBackToTheFeedLabel() {
         XCTAssertEqual(MetricName.localized("Some Future Metric"), "Some Future Metric")
         XCTAssertFalse(MetricName.localized("Sprint Speed").isEmpty)

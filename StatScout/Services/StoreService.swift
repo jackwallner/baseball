@@ -239,6 +239,7 @@ struct IntroTrial {
     /// "7-day free trial"
     var label: String {
         switch (unit, count) {
+        case (.day, 1): return String(localized: "1-day free trial")
         case (.day, _): return String(localized: "\(count)-day free trial")
         case (.month, 1): return String(localized: "1-month free trial")
         case (.month, _): return String(localized: "\(count)-month free trial")
@@ -250,6 +251,7 @@ struct IntroTrial {
     /// "Start 7-day free trial"
     var startLabel: String {
         switch (unit, count) {
+        case (.day, 1): return String(localized: "Start 1-day free trial")
         case (.day, _): return String(localized: "Start \(count)-day free trial")
         case (.month, 1): return String(localized: "Start 1-month free trial")
         case (.month, _): return String(localized: "Start \(count)-month free trial")
@@ -261,6 +263,7 @@ struct IntroTrial {
     /// "7-day free trial, then $29.99 / year."
     func thenSentence(price: String) -> String {
         switch (unit, count) {
+        case (.day, 1): return String(localized: "1-day free trial, then \(price).")
         case (.day, _): return String(localized: "\(count)-day free trial, then \(price).")
         case (.month, 1): return String(localized: "1-month free trial, then \(price).")
         case (.month, _): return String(localized: "\(count)-month free trial, then \(price).")
@@ -271,6 +274,8 @@ struct IntroTrial {
 
     func disclosureSentence(price: String) -> String {
         switch (unit, count) {
+        case (.day, 1):
+            return String(localized: "1-day free trial, then \(price). Auto-renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel in Settings › Apple ID › Subscriptions.")
         case (.day, _):
             return String(localized: "\(count)-day free trial, then \(price). Auto-renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel in Settings › Apple ID › Subscriptions.")
         case (.month, 1):
