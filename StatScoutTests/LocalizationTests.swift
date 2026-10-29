@@ -75,6 +75,9 @@ final class LocalizationTests: XCTestCase {
         XCTAssertEqual(BaseballNumberStyle.format(0.312, decimals: 3, omitLeadingZero: true, locale: german), ",312")
         XCTAssertEqual(BaseballNumberStyle.format(3.25, decimals: 2, locale: german), "3,25")
         XCTAssertEqual(BaseballNumberStyle.format(0.312, decimals: 3, omitLeadingZero: true, locale: english), ".312")
+        XCTAssertEqual(BaseballNumberStyle.localizedDisplay(".312", locale: german), ",312")
+        XCTAssertEqual(BaseballNumberStyle.localizedDisplay("95.4 mph", locale: german), "95,4 mph")
+        XCTAssertEqual(BaseballNumberStyle.localizedDisplay("95,4 mph", locale: german), "95,4 mph")
     }
 
     func testTeamCountUsesLocalePluralRules() throws {

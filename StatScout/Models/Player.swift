@@ -112,9 +112,10 @@ struct Player: Identifiable, Codable, Hashable, Sendable {
         let headline = headlineMetric.map { metric in
             let label = MetricName.localized(metric.label)
             let pctText = metric.percentile.ordinal
-            return metric.value.isEmpty
+            let value = BaseballNumberStyle.localizedDisplay(metric.value)
+            return value.isEmpty
                 ? String(localized: "\(label) \(pctText) percentile")
-                : String(localized: "\(label) \(metric.value), \(pctText) percentile")
+                : String(localized: "\(label) \(value), \(pctText) percentile")
         } ?? String(localized: "\(overallPercentile.ordinal) overall percentile")
         let lines = [
             "\(name) · \(team) \(position)",
@@ -203,6 +204,17 @@ enum BaseballNumberStyle {
             return String(text.dropFirst())
         }
         return text
+    }
+
+    static func localizedDisplay(_ raw: String, locale: Locale = .current) -> String {
+        guard let point = raw.firstIndex(of: "."),
+              raw.index(after: point) < raw.endIndex,
+              raw[raw.index(after: point)].isNumber else { return raw }
+        let prefix = raw[..<point]
+        guard prefix.isEmpty || prefix.allSatisfy({ $0.isNumber || $0 == "-" }) else { return raw }
+        var result = raw
+        result.replaceSubrange(point...point, with: locale.decimalSeparator ?? ".")
+        return result
     }
 
     static func display(_ raw: String) -> String {

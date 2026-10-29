@@ -96,7 +96,7 @@ struct MetricLeadersView: View {
     /// empty cell, fall back to the percentile so the row still carries signal.
     private func displayValue(_ raw: String, percentile: Int) -> String {
         let trimmed = raw.trimmingCharacters(in: .whitespaces)
-        return trimmed.isEmpty ? "\(percentile.ordinal) pct" : trimmed
+        return trimmed.isEmpty ? String(localized: "\(percentile.ordinal) percentile") : BaseballNumberStyle.localizedDisplay(trimmed)
     }
 
     private func categoryCard(_ group: (MetricCategory, [MetricLeaderEntry])) -> some View {

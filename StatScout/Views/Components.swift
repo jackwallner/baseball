@@ -119,11 +119,12 @@ struct MetricBar: View {
 
     private var accessibilityLabel: String {
         let label = MetricName.localized(metric.label)
-        guard isRanked else { return String(localized: "\(label): \(metric.value), not ranked") }
+        let value = BaseballNumberStyle.localizedDisplay(metric.value)
+        guard isRanked else { return String(localized: "\(label): \(value), not ranked") }
         let pctText = metric.percentile.ordinal
-        return metric.value.isEmpty
+        return value.isEmpty
             ? String(localized: "\(label): \(pctText) percentile")
-            : String(localized: "\(label): \(metric.value), \(pctText) percentile")
+            : String(localized: "\(label): \(value), \(pctText) percentile")
     }
 
     var body: some View {
@@ -175,7 +176,7 @@ struct MetricBar: View {
 
             // Value column - far right, fixed width (sized for "30.0 ft/s" / "0.421" range)
             if showValue && !metric.value.isEmpty {
-                Text(metric.value)
+                Text(BaseballNumberStyle.localizedDisplay(metric.value))
                     .font(SavantType.statMed)
                     .foregroundStyle(SavantPalette.ink)
                     .lineLimit(1)
@@ -568,7 +569,7 @@ struct LeaderboardTableRow: View {
     private var displayValueText: String {
         if let valueOverride { return valueOverride }
         guard let metric = displayMetric else { return "-" }
-        if !metric.value.isEmpty { return metric.value }
+        if !metric.value.isEmpty { return BaseballNumberStyle.localizedDisplay(metric.value) }
         // The ordinal is what distinguishes the two: "94th" can't be misread as
         // a rate the way a bare "94" can.
         return metric.percentile.ordinal

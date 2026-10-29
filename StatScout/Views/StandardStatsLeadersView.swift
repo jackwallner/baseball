@@ -178,7 +178,7 @@ struct StandardStatsLeadersView: View {
               ) else {
             return "-"
         }
-        return stat.value
+        return BaseballNumberStyle.localizedDisplay(stat.value)
     }
 
     var body: some View {
