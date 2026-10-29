@@ -2,6 +2,35 @@ import XCTest
 @testable import Baseball_Savvy_StatScout
 
 final class LocalizationTests: XCTestCase {
+    private let shippedLanguages = ["es", "fr", "it", "ja", "pt-BR", "zh-Hant", "ko", "zh-Hans", "de"]
+
+    func testEveryLocalizationIsCompiledIntoTheAppBundle() {
+        let bundles = [Bundle.main] + Bundle.allBundles
+        for language in shippedLanguages {
+            let localizedBundle = bundles.compactMap { bundle -> Bundle? in
+                guard let path = bundle.path(forResource: language, ofType: "lproj") else { return nil }
+                return Bundle(path: path)
+            }.first
+            XCTAssertNotNil(localizedBundle, "Missing compiled \(language).lproj")
+        }
+    }
+
+    func testNewLanguagesTranslateCoreLabels() throws {
+        let expected: [(String, String, String)] = [
+            ("de", "Compare", "Vergleichen"),
+            ("ko", "Compare", "비교"),
+            ("zh-Hans", "Compare", "对比"),
+        ]
+        let bundles = [Bundle.main] + Bundle.allBundles
+        for (language, key, translation) in expected {
+            let bundle = try XCTUnwrap(bundles.compactMap { host -> Bundle? in
+                guard let path = host.path(forResource: language, ofType: "lproj") else { return nil }
+                return Bundle(path: path)
+            }.first)
+            XCTAssertEqual(bundle.localizedString(forKey: key, value: nil, table: nil), translation)
+        }
+    }
+
     func testEnglishOrdinals() throws {
         try XCTSkipUnless(Locale.current.language.languageCode?.identifier == "en")
         XCTAssertEqual(1.ordinal, "1st")
