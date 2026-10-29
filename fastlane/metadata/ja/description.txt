@@ -1,41 +1,38 @@
-Scout the league like a pro.
+Statcastのパーセンタイルで、MLBの選手成績を比べましょう。
+打撃、投球、守備、走塁の指標を色分けしたバーで確認できます。
+データはシーズン中、毎晩更新され、前日の試合まで反映します。
 
-StatScout brings baseball percentile rankings to your iPhone. See where qualified players rank — from xwOBA to Sprint Speed to Outs Above Average — with fast visual red-blue metric bars. 
+パーセンタイルを視覚化
+各指標は横向きのバーと色付きマーカーで表示されます。青は0パーセンタイル、灰色は50パーセンタイル、赤は100パーセンタイルを示し、選手の強みをひと目で確認できます。
 
-VISUAL PERCENTILES
-Every metric displays as a horizontal percentile bar with a colored circle marker. The color shifts continuously from blue (0th percentile) through gray (50th) to red (100th), so you can spot elite performers instantly.
+選手プロフィール
+選手のプロフィールで打撃、投球、守備、走塁のパーセンタイルを確認できます。詳細指標と標準的なシーズン成績を切り替え、毎晩更新されるデータで調子の変化を追えます。
 
-COMPREHENSIVE PLAYER PROFILES
-Tap any player to see their full profile. View percentile rankings across Hitting, Pitching, Fielding, and Running. Switch between advanced metrics and standard season stats. Track performance trends with nightly-updated data.
+STATSCOUTのアップデート
+• トレンド: 7日、15日、30日の期間で好調な選手や調子を落とした選手を確認
+• 選手とシーズンの比較: 2人の選手または2つのシーズンを並べて比較
+• 標準成績: リーグ、チーム、選手の画面で標準成績と詳細指標を並べ替え
+• チーム別ボード: 各チームの打撃、投球、守備、走塁の成績を確認
+• 精度の改善: 資格基準、二刀流選手の成績、指標の順位付けを改善
 
-A MAJOR STATSCOUT UPDATE
-• Trends: see who is heating up or cooling off over 7, 15, and 30 days
-• Player and Season Compare: put any two players or seasons side by side
-• Standard Stats Everywhere: sort traditional and advanced stats across league, team, and player views
-• Team Boards: explore every club with sortable hitting, pitching, fielding, and running stats
-• Better Accuracy: improved qualifiers, two-way player lines, and metric rankings
+毎晩のデータ更新
+シーズン中は毎晩、資格基準を満たす選手のパーセンタイルと標準成績を更新します。データは前日の試合まで反映されます。
 
-NIGHTLY UPDATES
-Our data feed refreshes every night, pulling the latest percentile rankings and standard stats for qualified players. What you see is always current through the previous day's games.
-
-LEADERBOARDS & FILTERS
-Browse the full league leaderboard filtered by Hitting, Pitching, Fielding, or Running. Sort and search across every active player. Tap any row to dive into their full profile.
+ランキングとフィルター
+打撃、投球、守備、走塁でリーグの選手を絞り込みます。現役選手を検索して並べ替え、行をタップするとプロフィールを確認できます。
 
 STATSCOUT+
-Unlock additional analysis with StatScout+:
-• Historical Seasons — load past seasons on demand
-• Player Comparisons — compare any two players side by side
-• Year-Over-Year Tracking — see how a player's metrics changed season to season
+StatScout+では、さらに詳しい分析機能を利用できます。
+• 過去のシーズン: 必要なときに過去のシーズンを表示
+• 選手比較: 2人の選手を並べて比較
+• シーズン間の推移: シーズンごとの指標の変化を確認
 
-Choose Monthly, Yearly (with free trial), or Lifetime — one purchase covers everything.
+月額または年額のサブスクリプション（どちらも7日間の無料トライアル付き）、または買い切りのLifetimeを選べます。購入前に価格が表示され、地域によって異なります。購入確定時にApple IDに請求されます。現行期間の終了24時間前までに解約しない場合、サブスクリプションは自動更新されます。設定 → Apple ID → サブスクリプションでいつでも管理または解約できます。
 
-PRIVACY-FIRST
-No accounts. No sign-up. No ads. No third-party tracking. The app makes only the network requests needed for baseball statistics, player images, and optional purchase verification.
+プライバシー
+アカウント登録は不要です。広告や第三者によるトラッキングはありません。野球データ、選手画像、任意の購入確認に必要なネットワーク通信のみを行います。
 
-Subscription Details
-StatScout+ は自動更新サブスクリプション（月額または年額、どちらも7日間の無料トライアル付き）、または買い切りの Lifetime としてご利用いただけます。価格は購入前にアプリ内に表示され、地域によって異なります。購入確定時に Apple ID に請求されます。現在の期間が終了する24時間以上前に解約しない限り、サブスクリプションは自動更新されます。設定 → Apple ID → サブスクリプションでいつでも管理・解約できます。
+プライバシーポリシー: https://jackwallner.github.io/baseball/privacy-policy.html
+利用規約 (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
 
-Privacy Policy: https://jackwallner.github.io/baseball/privacy-policy.html
-Terms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
-
-StatScout is not affiliated with, endorsed by, or sponsored by Major League Baseball, MLB Advanced Media, the MLBPA, or any individual team. Player names, team names, and statistics are used for identification and informational purposes only.
+StatScoutはMajor League Baseball、MLB Advanced Media、MLBPA、または各球団と提携、承認、後援関係にありません。選手名、チーム名、統計は識別と情報提供のみを目的として使用しています。

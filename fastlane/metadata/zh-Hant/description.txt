@@ -1,41 +1,38 @@
-Scout the league like a pro.
+用 Statcast 百分位快速比較符合資格的 MLB 球員。
+以清楚的色彩指標檢視打擊、投球、守備與跑壘表現。
+球季期間每晚更新資料，內容截至前一天的賽事。
 
-StatScout brings baseball percentile rankings to your iPhone. See where qualified players rank — from xwOBA to Sprint Speed to Outs Above Average — with fast visual red-blue metric bars. 
+視覺化百分位
+每項指標都以水平色彩條和圓點呈現。顏色由藍色（第 0 百分位）經灰色（第 50 百分位）轉為紅色（第 100 百分位），讓球員表現一目了然。
 
-VISUAL PERCENTILES
-Every metric displays as a horizontal percentile bar with a colored circle marker. The color shifts continuously from blue (0th percentile) through gray (50th) to red (100th), so you can spot elite performers instantly.
+球員資料
+開啟球員頁面，查看打擊、投球、守備與跑壘的百分位排名。可切換進階指標與標準賽季成績，也能查看每晚更新的表現趨勢。
 
-COMPREHENSIVE PLAYER PROFILES
-Tap any player to see their full profile. View percentile rankings across Hitting, Pitching, Fielding, and Running. Switch between advanced metrics and standard season stats. Track performance trends with nightly-updated data.
+STATSCOUT 功能更新
+• 趨勢：查看球員最近 7、15、30 天的升溫或降溫情況
+• 球員與賽季比較：並排比較兩位球員或兩個賽季
+• 標準數據：在聯盟、球隊與球員頁面排序傳統及進階數據
+• 球隊榜單：瀏覽各隊打擊、投球、守備與跑壘數據
+• 提升準確度：調整資格門檻、雙向球員成績與指標排名
 
-A MAJOR STATSCOUT UPDATE
-• Trends: see who is heating up or cooling off over 7, 15, and 30 days
-• Player and Season Compare: put any two players or seasons side by side
-• Standard Stats Everywhere: sort traditional and advanced stats across league, team, and player views
-• Team Boards: explore every club with sortable hitting, pitching, fielding, and running stats
-• Better Accuracy: improved qualifiers, two-way player lines, and metric rankings
+每晚更新
+球季期間，資料來源每晚更新符合資格球員的百分位排名與標準成績。資料截至前一天的賽事。
 
-NIGHTLY UPDATES
-Our data feed refreshes every night, pulling the latest percentile rankings and standard stats for qualified players. What you see is always current through the previous day's games.
-
-LEADERBOARDS & FILTERS
-Browse the full league leaderboard filtered by Hitting, Pitching, Fielding, or Running. Sort and search across every active player. Tap any row to dive into their full profile.
+排行榜與篩選
+依打擊、投球、守備或跑壘篩選聯盟榜單。搜尋並排序現役球員，點選球員即可查看完整資料。
 
 STATSCOUT+
-Unlock additional analysis with StatScout+:
-• Historical Seasons — load past seasons on demand
-• Player Comparisons — compare any two players side by side
-• Year-Over-Year Tracking — see how a player's metrics changed season to season
+StatScout+提供更多分析功能：
+• 歷史賽季：隨時載入過往賽季
+• 球員比較：並排比較任兩位球員
+• 跨季追蹤：查看球員各項指標的年度變化
 
-Choose Monthly, Yearly (with free trial), or Lifetime — one purchase covers everything.
+可選擇月訂閱或年訂閱，兩者皆含 7 天免費試用，也可一次買斷 Lifetime。購買前會顯示價格，價格因地區而異。確認購買後由 Apple ID 扣款。除非在目前週期結束前至少 24 小時取消，否則訂閱會自動續訂。可隨時前往「設定 → Apple ID → 訂閱項目」管理或取消。
 
-PRIVACY-FIRST
-No accounts. No sign-up. No ads. No third-party tracking. The app makes only the network requests needed for baseball statistics, player images, and optional purchase verification.
+隱私
+不需建立帳號或註冊。沒有廣告，也不會追蹤你在第三方 App 或網站上的活動。App 僅會為棒球數據、球員圖片與選擇性的購買驗證發出必要的網路請求。
 
-Subscription Details
-StatScout+ 提供自動續訂訂閱（每月或每年，兩者皆含 7 天免費試用）或一次買斷 Lifetime。價格會在購買前顯示於 App 內，並因地區而異。確認購買時將由你的 Apple ID 扣款。除非在目前週期結束前至少 24 小時取消，否則訂閱會自動續訂。你可隨時在「設定 → Apple ID → 訂閱項目」中管理或取消。
+隱私權政策: https://jackwallner.github.io/baseball/privacy-policy.html
+使用條款 (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
 
-Privacy Policy: https://jackwallner.github.io/baseball/privacy-policy.html
-Terms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
-
-StatScout is not affiliated with, endorsed by, or sponsored by Major League Baseball, MLB Advanced Media, the MLBPA, or any individual team. Player names, team names, and statistics are used for identification and informational purposes only.
+StatScout與美國職棒大聯盟（Major League Baseball）、MLB Advanced Media、MLBPA及任何球隊均無關聯、未獲其背書或贊助。球員姓名、球隊名稱與統計資料僅供識別及資訊參考之用。

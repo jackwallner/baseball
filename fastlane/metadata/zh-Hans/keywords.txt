@@ -1,1 +1,1 @@
-xwoba,oaa,wrc,wrcplus,exit,velocity,hitting,pitching,fielding,metrics,analytics,统计,梦幻
+baseball,stats,player,xwoba,oaa,exit,velocity,hitting,pitching,fielding,metrics,analytics,统计

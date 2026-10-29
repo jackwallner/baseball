@@ -1,1 +1,1 @@
-xwoba,oaa,wrc,wrcplus,exit,velocity,hitting,pitching,fielding,metrics,analytics,estadísticas,fantasy
+béisbol,jugador,bateo,pitcheo,fildeo,velocidad,baseball,stats,savant,xwoba,oaa,equipos,rangos

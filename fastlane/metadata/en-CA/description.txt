@@ -1,36 +1,36 @@
-Scout the league like a pro.
-
-StatScout brings baseball percentile rankings to your iPhone. See where qualified players rank — from xwOBA to Sprint Speed to Outs Above Average — with fast visual red-blue metric bars. 
+Compare qualified MLB players using Statcast percentiles.
+Colour-coded bars make batting, pitching, fielding and running metrics easy to scan.
+Updates arrive nightly during the season, through the previous day's games.
 
 VISUAL PERCENTILES
-Every metric displays as a horizontal percentile bar with a colored circle marker. The color shifts continuously from blue (0th percentile) through gray (50th) to red (100th), so you can spot elite performers instantly.
+Each metric appears as a horizontal percentile bar with a colour marker. Its colour moves from blue (0th percentile), through grey (50th), to red (100th), making strong results easy to spot.
 
-COMPREHENSIVE PLAYER PROFILES
-Tap any player to see their full profile. View percentile rankings across Hitting, Pitching, Fielding, and Running. Switch between advanced metrics and standard season stats. Track performance trends with nightly-updated data.
+PLAYER PROFILES
+Open a player to see percentile rankings across Hitting, Pitching, Fielding and Running. Switch between advanced metrics and standard season stats. Review performance trends with nightly-updated data.
 
 A MAJOR STATSCOUT UPDATE
-• Trends: see who is heating up or cooling off over 7, 15, and 30 days
+• Trends: see which players are heating up or cooling off over 7, 15 and 30 days
 • Player and Season Compare: put any two players or seasons side by side
-• Standard Stats Everywhere: sort traditional and advanced stats across league, team, and player views
-• Team Boards: explore every club with sortable hitting, pitching, fielding, and running stats
-• Better Accuracy: improved qualifiers, two-way player lines, and metric rankings
+• Standard Stats Everywhere: sort traditional and advanced stats across league, team and player views
+• Team Boards: explore every club with sortable hitting, pitching, fielding and running stats
+• Better Accuracy: improved qualifiers, two-way player lines and metric rankings
 
 NIGHTLY UPDATES
-Our data feed refreshes every night, pulling the latest percentile rankings and standard stats for qualified players. What you see is always current through the previous day's games.
+During the season, our feed refreshes every night with updated percentile rankings and standard stats for qualified players. Data is current through the previous day's games.
 
 LEADERBOARDS & FILTERS
-Browse the full league leaderboard filtered by Hitting, Pitching, Fielding, or Running. Sort and search across every active player. Tap any row to dive into their full profile.
+Browse league leaderboards filtered by Hitting, Pitching, Fielding or Running. Sort and search active players, then tap a row to open the full profile.
 
 STATSCOUT+
 Unlock additional analysis with StatScout+:
-• Historical Seasons — load past seasons on demand
-• Player Comparisons — compare any two players side by side
-• Year-Over-Year Tracking — see how a player's metrics changed season to season
+• Historical Seasons: load past seasons on demand
+• Player Comparisons: compare any two players side by side
+• Year-Over-Year Tracking: see how metrics changed season to season
 
-Choose Monthly, Yearly (with free trial), or Lifetime — one purchase covers everything.
+Choose Monthly, Yearly with a 7-day free trial, or Lifetime. Prices are shown in the app before purchase and vary by region.
 
 PRIVACY-FIRST
-No accounts. No sign-up. No ads. No third-party tracking. The app makes only the network requests needed for baseball statistics, player images, and optional purchase verification.
+No accounts, sign-up, ads or third-party tracking. The app makes only the network requests needed for baseball statistics, player images and optional purchase verification.
 
 Subscription Details
 StatScout+ is available as an auto-renewing subscription (Monthly or Yearly, both with a 7-day free trial) or as a one-time Lifetime purchase. Prices are shown in the app before you buy and vary by region. Payment is charged to your Apple ID at confirmation. Subscriptions renew automatically unless cancelled at least 24 hours before the end of the current period. Manage or cancel anytime in Settings → Apple ID → Subscriptions.
@@ -38,4 +38,4 @@ StatScout+ is available as an auto-renewing subscription (Monthly or Yearly, bot
 Privacy Policy: https://jackwallner.github.io/baseball/privacy-policy.html
 Terms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
 
-StatScout is not affiliated with, endorsed by, or sponsored by Major League Baseball, MLB Advanced Media, the MLBPA, or any individual team. Player names, team names, and statistics are used for identification and informational purposes only.
+StatScout is not affiliated with, endorsed by, or sponsored by Major League Baseball, MLB Advanced Media, the MLBPA, or any individual team. Player names, team names and statistics are used for identification and informational purposes only.

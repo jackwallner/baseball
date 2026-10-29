@@ -1,1 +1,1 @@
-statcast,savant,野球,統計,パーセンタイル,wrc,xwoba,oaa,選手,sprint,velo,scout,strike,dfs,fantasy,ランキング,比較,打撃
+スタットキャスト,選手,統計,成績,打撃,打者,投手,投球,守備,走塁,比較,分析,チーム,savant,xwoba,oaa,sprint,speed,velo,strike

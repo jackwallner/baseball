@@ -1,1 +1,1 @@
-Barras de percentil Statcast para cada pelotero de la MLB: velocidad de salida, xwOBA, sprint, OAA y más, al día cada noche en temporada. Sigue peloteros gratis.
+Compara percentiles Statcast de jugadores MLB: velocidad de salida, xwOBA, sprint y OAA. Datos al día cada noche durante la temporada. Sigue jugadores gratis.

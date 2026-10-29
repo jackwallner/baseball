@@ -1,41 +1,38 @@
-Scout the league like a pro.
+Compara a los jugadores calificados de MLB con percentiles Statcast.
+Las barras de colores muestran métricas de bateo, pitcheo, fildeo y corrido de bases.
+Los datos se actualizan cada noche durante la temporada, hasta los partidos del día anterior.
 
-StatScout brings baseball percentile rankings to your iPhone. See where qualified players rank — from xwOBA to Sprint Speed to Outs Above Average — with fast visual red-blue metric bars. 
+PERCENTILES VISUALES
+Cada métrica aparece en una barra horizontal con un marcador de color. La escala cambia del azul (percentil 0), pasa por gris (percentil 50) y llega al rojo (percentil 100), para reconocer resultados destacados de un vistazo.
 
-VISUAL PERCENTILES
-Every metric displays as a horizontal percentile bar with a colored circle marker. The color shifts continuously from blue (0th percentile) through gray (50th) to red (100th), so you can spot elite performers instantly.
+PERFILES DE JUGADORES
+Abre el perfil de cualquier jugador para consultar percentiles de bateo, pitcheo, fildeo y corrido de bases. Cambia entre métricas avanzadas y estadísticas estándar de temporada. Revisa tendencias de rendimiento con datos actualizados cada noche.
 
-COMPREHENSIVE PLAYER PROFILES
-Tap any player to see their full profile. View percentile rankings across Hitting, Pitching, Fielding, and Running. Switch between advanced metrics and standard season stats. Track performance trends with nightly-updated data.
+UNA GRAN ACTUALIZACIÓN DE STATSCOUT
+• Tendencias: identifica quién sube o baja de rendimiento en periodos de 7, 15 y 30 días
+• Comparación de jugadores y temporadas: coloca dos jugadores o temporadas lado a lado
+• Estadísticas estándar: ordena estadísticas tradicionales y avanzadas en las vistas de liga, equipo y jugador
+• Tableros de equipos: explora cada club con estadísticas ordenables de bateo, pitcheo, fildeo y corrido de bases
+• Mayor precisión: mejores criterios de clasificación, líneas para jugadores de dos vías y rankings de métricas
 
-A MAJOR STATSCOUT UPDATE
-• Trends: see who is heating up or cooling off over 7, 15, and 30 days
-• Player and Season Compare: put any two players or seasons side by side
-• Standard Stats Everywhere: sort traditional and advanced stats across league, team, and player views
-• Team Boards: explore every club with sortable hitting, pitching, fielding, and running stats
-• Better Accuracy: improved qualifiers, two-way player lines, and metric rankings
+ACTUALIZACIONES NOCTURNAS
+Durante la temporada, el feed actualiza cada noche los percentiles y las estadísticas estándar de los jugadores que cumplen los criterios. Los datos llegan hasta los partidos del día anterior.
 
-NIGHTLY UPDATES
-Our data feed refreshes every night, pulling the latest percentile rankings and standard stats for qualified players. What you see is always current through the previous day's games.
-
-LEADERBOARDS & FILTERS
-Browse the full league leaderboard filtered by Hitting, Pitching, Fielding, or Running. Sort and search across every active player. Tap any row to dive into their full profile.
+TABLAS Y FILTROS
+Explora las tablas de toda la liga con filtros de bateo, pitcheo, fildeo y corrido de bases. Ordena y busca jugadores activos. Toca cualquier nombre para abrir su perfil completo.
 
 STATSCOUT+
-Unlock additional analysis with StatScout+:
-• Historical Seasons — load past seasons on demand
-• Player Comparisons — compare any two players side by side
-• Year-Over-Year Tracking — see how a player's metrics changed season to season
+StatScout+ desbloquea herramientas de análisis adicionales:
+• Temporadas históricas: consulta temporadas anteriores cuando las necesites
+• Comparación de jugadores: compara dos jugadores en la misma vista
+• Seguimiento entre temporadas: revisa cómo cambian las métricas de una temporada a otra
 
-Choose Monthly, Yearly (with free trial), or Lifetime — one purchase covers everything.
+Elige una suscripción mensual o anual, ambas con 7 días de prueba gratis, o una compra única Lifetime. El precio se muestra antes de comprar y varía según la región. El pago se carga a tu Apple ID al confirmar. La suscripción se renueva automáticamente a menos que la canceles al menos 24 horas antes de que termine el periodo actual. Administra o cancela en Configuración → Apple ID → Suscripciones.
 
-PRIVACY-FIRST
-No accounts. No sign-up. No ads. No third-party tracking. The app makes only the network requests needed for baseball statistics, player images, and optional purchase verification.
+PRIVACIDAD
+No necesitas cuenta ni registro. La app no muestra anuncios ni hace seguimiento de terceros. Solo realiza las solicitudes de red necesarias para consultar estadísticas de béisbol, imágenes de jugadores y la verificación opcional de compras.
 
-Subscription Details
-StatScout+ está disponible como suscripción de renovación automática (mensual o anual, ambas con 7 días de prueba gratis) o como compra única Lifetime. Los precios se muestran en la app antes de comprar y varían según la región. El pago se carga a tu Apple ID al confirmar. Las suscripciones se renuevan automáticamente a menos que se cancelen al menos 24 horas antes de que termine el periodo actual. Administra o cancela cuando quieras en Configuración → Apple ID → Suscripciones.
+Política de privacidad: https://jackwallner.github.io/baseball/privacy-policy.html
+Términos de uso (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
 
-Privacy Policy: https://jackwallner.github.io/baseball/privacy-policy.html
-Terms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
-
-StatScout is not affiliated with, endorsed by, or sponsored by Major League Baseball, MLB Advanced Media, the MLBPA, or any individual team. Player names, team names, and statistics are used for identification and informational purposes only.
+StatScout no está afiliada, respaldada ni patrocinada por Major League Baseball, MLB Advanced Media, la MLBPA ni ningún equipo. Los nombres de jugadores y equipos, así como las estadísticas, se usan únicamente con fines de identificación e información.
