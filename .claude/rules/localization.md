@@ -17,8 +17,8 @@ Languages: en (source), es, fr, it, ja, pt-BR, zh-Hant, ko, zh-Hans, de. Chosen 
 - One catalog: `StatScout/Resources/Localizable.xcstrings` (sourceLanguage en, every entry
   `extractionState: manual`, every language `translated`). Keys are the English sentence. It is in
   the `StatScout` target's sources, so Xcode compiles the catalog into each language's `.lproj`.
-  There are no plural variations: count-dependent copy is branched in code with one key each
-  (see `IntroTrial` and `Package.priceLabel` in `StoreService.swift`).
+  The team count uses catalog plural variations. Some count-dependent copy is still branched in
+  code (see `IntroTrial` and `Package.priceLabel` in `StoreService.swift`).
 - `Text("literal")`, `Button`, `Label`, `Section`, `navigationTitle`, `accessibilityLabel` literals localize
   themselves. Copy held in a `String` (view params, enums, view models, errors) must be
   `String(localized: "...")`. A ternary of literals in `Text(...)` does not localize: wrap each branch.

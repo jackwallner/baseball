@@ -179,11 +179,20 @@ def main() -> int:
             if localization is None:
                 problems.append(f"{key!r}: missing {language}")
                 continue
-            if localization.get("stringUnit", {}).get("state") != "translated":
-                problems.append(f"{key!r}: {language} is not marked translated")
-            value = localization.get("stringUnit", {}).get("value", "")
-            if specs(value) != specs(key):
-                problems.append(f"{key!r} [{language}]: format specifiers differ in {value!r}")
+            plural = localization.get("variations", {}).get("plural")
+            if plural is not None:
+                required = {"other"} if language in {"ja", "ko", "zh-Hant", "zh-Hans"} else {"one", "other"}
+                for category in sorted(required - plural.keys()):
+                    problems.append(f"{key!r} [{language}]: missing plural category {category}")
+                units = [variant.get("stringUnit", {}) for variant in plural.values()]
+            else:
+                units = [localization.get("stringUnit", {})]
+            for unit in units:
+                if unit.get("state") != "translated":
+                    problems.append(f"{key!r}: {language} is not marked translated")
+                value = unit.get("value", "")
+                if specs(value) != specs(key):
+                    problems.append(f"{key!r} [{language}]: format specifiers differ in {value!r}")
 
     for problem in problems:
         print(problem)
