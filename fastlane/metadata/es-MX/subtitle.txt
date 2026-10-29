@@ -1,1 +1,1 @@
-Statcast, percentiles y rachas
+Rangos percentiles MLB Statcas

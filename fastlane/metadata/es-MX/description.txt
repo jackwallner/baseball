@@ -21,6 +21,8 @@ Durante la temporada, el feed actualiza cada noche los percentiles y las estadí
 TABLAS Y FILTROS
 Explora las tablas de toda la liga con filtros de bateo, pitcheo, fildeo y corrido de bases. Ordena y busca jugadores activos. Toca cualquier nombre para abrir su perfil completo.
 
+Puedes seguir jugadores gratis.
+
 STATSCOUT+
 StatScout+ desbloquea herramientas de análisis adicionales:
 • Temporadas históricas: consulta temporadas anteriores cuando las necesites

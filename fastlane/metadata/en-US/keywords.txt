@@ -1,1 +1,1 @@
-savant,xwoba,oaa,stats,exit,velocity,hitting,pitching,fielding,metrics,analytics,player,batting
+savant,xwoba,oaa,stats,exit,velocity,hitting,pitching,fielding,playoffs,analytics,player,batting

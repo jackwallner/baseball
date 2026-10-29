@@ -1,1 +1,1 @@
-xwoba,oaa,baseball,exit,velocity,hitting,pitching,fielding,metrics,analytics,statistiques
+xwoba,oaa,wrc,wrcplus,exit,velocity,hitting,pitching,fielding,metrics,analytics,statistiques,fantasy

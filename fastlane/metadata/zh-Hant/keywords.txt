@@ -1,1 +1,1 @@
-大聯盟,統計,成績,打擊,打者,投球,投手,守備,跑壘,比較,趨勢,球隊,xwoba,oaa,baseball,stats
+xwoba,oaa,wrc,wrcplus,exit,velocity,hitting,pitching,fielding,metrics,analytics,統計,夢幻,baseball,stats

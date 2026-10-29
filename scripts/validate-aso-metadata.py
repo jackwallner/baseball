@@ -45,6 +45,8 @@ def validate_locale(locale: str) -> list[str]:
             errors.append(str(error))
             continue
         fields[field] = value
+        if not value.strip():
+            errors.append(f'{locale}/{field}: empty')
         if value != value.strip():
             errors.append(f'{locale}/{field}: leading or trailing whitespace')
         if len(value) > limit:
@@ -79,8 +81,10 @@ def validate_locale(locale: str) -> list[str]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('locales', nargs='+', help='fastlane locale folders to validate')
+    parser.add_argument('locales', nargs='*', help='fastlane locale folders to validate (default: all locales)')
     args = parser.parse_args()
+    if not args.locales:
+        args.locales = sorted(path.name for path in METADATA.iterdir() if path.is_dir() and (path / 'keywords.txt').is_file())
 
     errors = [error for locale in args.locales for error in validate_locale(locale)]
     if errors:
@@ -89,7 +93,8 @@ def main() -> int:
 
     for locale in args.locales:
         counts = {field: len(read_field(locale, field)) for field in LIMITS}
-        print(f'{locale}: ' + ', '.join(f'{field}={count}/{LIMITS[field]}' for field, count in counts.items()))
+        keyword_bytes = len(read_field(locale, 'keywords').encode('utf-8'))
+        print(f'{locale}: ' + ', '.join(f'{field}={count}/{LIMITS[field]}' for field, count in counts.items()) + f', keyword_bytes={keyword_bytes}')
     print(f'Valid: {len(args.locales)} locale(s)')
     return 0
 

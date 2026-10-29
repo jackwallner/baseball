@@ -1,1 +1,1 @@
-Statcast percentiles for every MLB player, with colour-coded bars for xwOBA, exit velocity, sprint speed, OAA and more. Updated nightly in season. Follow players free.
+Statcast percentiles for qualified MLB players. Colour-coded bars for xwOBA, exit velocity, sprint speed, OAA and more. Updated nightly in season. Follow players free.

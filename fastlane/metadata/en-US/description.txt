@@ -21,13 +21,15 @@ During the season, our feed refreshes every night with updated percentile rankin
 LEADERBOARDS & FILTERS
 Browse league leaderboards filtered by Hitting, Pitching, Fielding or Running. Sort and search active players, then tap a row to open the full profile.
 
+Follow players for free.
+
 STATSCOUT+
 Unlock additional analysis with StatScout+:
 • Historical Seasons: load past seasons on demand
 • Player Comparisons: compare any two players side by side
 • Year-Over-Year Tracking: see how metrics changed season to season
 
-Choose Monthly, Yearly with a 7-day free trial, or Lifetime. Prices are shown in the app before purchase and vary by region.
+Choose Monthly or Yearly, both with a 7-day free trial, or Lifetime. Prices are shown in the app before purchase and vary by region.
 
 PRIVACY-FIRST
 No accounts, sign-up, ads or third-party tracking. The app makes only the network requests needed for baseball statistics, player images and optional purchase verification.

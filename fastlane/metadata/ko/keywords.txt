@@ -1,1 +1,1 @@
-통계,기록,선수,타자,투수,수비,주루,팀,시즌,트렌드,savant,xwoba,oaa,baseball,stats
+xwoba,oaa,wrc,wrcplus,exit,velocity,hitting,pitching,fielding,metrics,analytics,통계,판타지,baseball
