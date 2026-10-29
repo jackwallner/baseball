@@ -117,7 +117,7 @@ struct YearComparePreview: View {
 
             mockRow(label: "xwOBA", priorPct: 68, recentPct: 82, delta: 14, priorVal: ".345", recentVal: ".412")
             mockRow(label: "Barrel%", priorPct: 55, recentPct: 79, delta: 24, priorVal: "8.2%", recentVal: "14.1%")
-            mockRow(label: "HardHit%", priorPct: 72, recentPct: 76, delta: 4, priorVal: "42.5%", recentVal: "45.8%")
+            mockRow(label: "Hard-Hit%", priorPct: 72, recentPct: 76, delta: 4, priorVal: "42.5%", recentVal: "45.8%")
             mockRow(label: "Sprint Speed", priorPct: 81, recentPct: 78, delta: -3, priorVal: "28.5 ft/s", recentVal: "28.1 ft/s")
         }
         .background(SavantPalette.surface)
@@ -159,7 +159,7 @@ struct YearComparePreview: View {
         let arrow = isUp ? "↑" : (isDown ? "↓" : "→")
 
         return HStack(spacing: 0) {
-            Text(label)
+            Text(MetricName.localized(label))
                 .font(SavantType.body)
                 .foregroundStyle(SavantPalette.ink)
                 .frame(maxWidth: .infinity, alignment: .leading)

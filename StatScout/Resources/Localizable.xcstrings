@@ -23065,7 +23065,7 @@
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "투수"
+            "value": "투구"
           }
         },
         "zh-Hans": {
@@ -30931,7 +30931,7 @@
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "두 선수의 xwOBA, Barrel%, Sprint Speed 등 모든 Statcast 기록을 맞대결로 비교하세요."
+            "value": "두 선수의 xwOBA, 배럴 타구율, 스프린트 스피드 등 모든 Statcast 기록을 맞대결로 비교하세요."
           }
         },
         "zh-Hans": {
@@ -32101,7 +32101,7 @@
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "StatScout+로 모든 기록에서 선수를 나란히 비교하세요. xwOBA, Barrel%, Sprint Speed 등에서 앞선 선수를 확인할 수 있습니다."
+            "value": "StatScout+로 모든 기록에서 선수를 나란히 비교하세요. xwOBA, 배럴 타구율, 스프린트 스피드 등에서 앞선 선수를 확인할 수 있습니다."
           }
         },
         "zh-Hans": {
@@ -34636,7 +34636,7 @@
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "새 트렌드 보드에서는 이미 유명한 선수가 아니라 리그 전체에서 가장 크게 달라진 선수를 순위로 확인하세요."
+            "value": "새 트렌드 보드에서 상위 선수뿐 아니라 리그 전체에서 기록이 가장 크게 달라진 선수들의 순위를 확인하세요."
           }
         },
         "zh-Hans": {
@@ -38868,6 +38868,266 @@
           "stringUnit": {
             "state": "translated",
             "value": "xwOBA、Barrel%、冲刺速度等"
+          }
+        }
+      }
+    },
+    "1-day free trial": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1-day free trial"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prueba gratis de 1 día"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Essai gratuit d’un jour"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prova gratuita di 1 giorno"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1日間の無料トライアル"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Teste grátis de 1 dia"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 天免費試用"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 Tag gratis testen"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1일 무료 체험"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "免费试用 1 天"
+          }
+        }
+      }
+    },
+    "1-day free trial, then %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1-day free trial, then %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prueba gratis de 1 día, luego %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Essai gratuit d’un jour, puis %@."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prova gratuita di 1 giorno, poi %@."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1日間無料、その後は%@。"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Teste grátis de 1 dia, depois %@."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "免費試用 1 天，之後 %@。"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 Tag gratis, danach %@."
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "무료 1일 체험 후 %@."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "免费试用 1 天，之后 %@。"
+          }
+        }
+      }
+    },
+    "1-day free trial, then %@. Auto-renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel in Settings › Apple ID › Subscriptions.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1-day free trial, then %@. Auto-renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel in Settings › Apple ID › Subscriptions."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prueba gratis de 1 día, luego %@. Se renueva automáticamente salvo que se cancele al menos 24 horas antes del final del periodo actual. Gestiona o cancela en Ajustes › Apple ID › Suscripciones."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Essai gratuit d’un jour, puis %@. Se renouvelle automatiquement sauf annulation au moins 24 heures avant la fin de la période en cours. Gérez ou annulez dans Réglages › Identifiant Apple › Abonnements."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prova gratuita di 1 giorno, poi %@. Si rinnova automaticamente salvo disdetta almeno 24 ore prima della fine del periodo in corso. Gestisci o annulla in Impostazioni › ID Apple › Abbonamenti."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1日間無料、その後は%@。現在の期間が終了する24時間前までに解約しない限り、自動的に更新されます。管理や解約は「設定」›「Apple ID」›「サブスクリプション」から行えます。"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Teste grátis de 1 dia, depois %@. Renova automaticamente, a menos que seja cancelada pelo menos 24 horas antes do fim do período atual. Gerencie ou cancele em Ajustes › ID Apple › Assinaturas."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "免費試用 1 天，之後 %@。除非在目前期間結束前至少 24 小時取消，否則將自動續訂。可在「設定」›「Apple ID」›「訂閱項目」中管理或取消。"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 Tag gratis, danach %@. Automatische Verlängerung, sofern du nicht mindestens 24 Stunden vor Ende des aktuellen Zeitraums kündigst. Verwalte oder kündige unter Einstellungen › Apple ID › Abonnements."
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "무료 1일 체험 후 %@. 기존 결제 기간이 끝나기 최소 24시간 전에 취소하지 않으면 자동 갱신됩니다. 설정 › Apple ID › 구독에서 관리하거나 취소할 수 있습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "免费试用 1 天，之后 %@。除非至少在当前周期结束前 24 小时取消，否则会自动续订。请前往“设置”› Apple ID ›“订阅”管理或取消。"
+          }
+        }
+      }
+    },
+    "Start 1-day free trial": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start 1-day free trial"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Empezar prueba gratis de 1 día"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Commencer l’essai gratuit d’un jour"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inizia la prova gratuita di 1 giorno"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1日間の無料トライアルを始める"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Começar teste grátis de 1 dia"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "開始 1 天免費試用"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 Tag gratis testen"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1일 무료 체험 시작"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "开始免费试用 1 天"
           }
         }
       }

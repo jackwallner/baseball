@@ -209,7 +209,7 @@ struct UpdateShowcaseView: View {
                 .accessibilityIdentifier("updateShowcaseFinish")
             } else {
                 VStack(spacing: 7) {
-                    Text(store.isLapsed ? "Put the full scouting toolkit back in your lineup." : "Unlock Trends, recent form, comparisons, and every season back to 2015.")
+                    Text(store.isLapsed ? String(localized: "Put the full scouting toolkit back in your lineup.") : String(localized: "Unlock Trends, recent form, comparisons, and every season back to 2015."))
                         .font(SavantType.small)
                         .foregroundStyle(SavantPalette.inkSecondary)
                         .multilineTextAlignment(.center)
@@ -368,9 +368,9 @@ private struct StatsShowcaseGraphic: View {
         ShowcaseCard(title: String(localized: "EVERY WAY TO RANK"), trailing: String(localized: "30 CLUBS")) {
             VStack(spacing: 12) {
                 HStack(spacing: 7) {
-                    filterPill("Advanced", selected: true)
-                    filterPill("Standard", selected: false)
-                    filterPill("Teams", selected: false)
+                    filterPill(String(localized: "Advanced"), selected: true)
+                    filterPill(String(localized: "Standard"), selected: false)
+                    filterPill(String(localized: "Teams"), selected: false)
                 }
                 .padding(.horizontal, 12)
                 .padding(.top, 12)
