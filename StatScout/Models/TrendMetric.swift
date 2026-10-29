@@ -19,9 +19,9 @@ struct TrendMetric: Identifiable, Hashable, Sendable {
     var id: String { key }
 
     func format(_ value: Double) -> String {
-        let text = String(format: "%.\(decimals)f", value)
+        let text = BaseballNumberStyle.format(value, decimals: decimals, omitLeadingZero: decimals == 3)
         // Savant writes rate stats without the leading zero (.312, not 0.312).
-        return (decimals == 3 ? text.replacingOccurrences(of: "0.", with: ".") : text) + unit
+        return text + unit
     }
 
     /// The traditional line, which the rollup derives from summed counts rather

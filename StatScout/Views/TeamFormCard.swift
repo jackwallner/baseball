@@ -298,15 +298,15 @@ struct TeamRankingsCard: View {
     /// printed a team's xBA as "0.25" next to a player's ".250", and bat speed
     /// as "69.60" with a meaningless trailing zero and no unit.
     private func formattedValue(_ v: Double, label: String) -> String {
-        if label.hasSuffix("%") { return String(format: "%.1f%%", v) }
-        if label.hasSuffix("Spin") { return String(format: "%.0f rpm", v) }
-        if label == "Swing Length" { return String(format: "%.2f ft", v) }
+        if label.hasSuffix("%") { return BaseballNumberStyle.format(v, decimals: 1) + "%" }
+        if label.hasSuffix("Spin") { return BaseballNumberStyle.format(v, decimals: 0) + " rpm" }
+        if label == "Swing Length" { return BaseballNumberStyle.format(v, decimals: 2) + " ft" }
         if label.contains("EV") || label.contains("Velo") || label == "Bat Speed" {
-            return String(format: "%.1f mph", v)
+            return BaseballNumberStyle.format(v, decimals: 1) + " mph"
         }
         // Rate stats, xwOBA, xBA, xSLG, xISO and the traditional slash line.
-        if v < 10 { return BaseballNumberStyle.display(String(format: "%.3f", v)) }
-        return String(format: "%.1f", v)
+        if v < 10 { return BaseballNumberStyle.format(v, decimals: 3, omitLeadingZero: true) }
+        return BaseballNumberStyle.format(v, decimals: 1)
     }
 
     // MARK: - Recent

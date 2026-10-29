@@ -57,6 +57,26 @@ final class LocalizationTests: XCTestCase {
         XCTAssertFalse(MetricName.localized("Sprint Speed").isEmpty)
     }
 
+    func testRosterCountUsesLocalePluralRules() throws {
+        let path = try XCTUnwrap(([Bundle.main] + Bundle.allBundles).compactMap {
+            $0.path(forResource: "es", ofType: "lproj")
+        }.first)
+        let bundle = try XCTUnwrap(Bundle(path: path))
+        let locale = Locale(identifier: "es")
+        let one = 1
+        let two = 2
+        XCTAssertEqual(String(localized: "\(one) tracked · \(String(2026))", bundle: bundle, locale: locale), "1 seguido · 2026")
+        XCTAssertEqual(String(localized: "\(two) tracked · \(String(2026))", bundle: bundle, locale: locale), "2 seguidos · 2026")
+    }
+
+    func testBaseballNumbersUseLocaleDecimalSeparator() {
+        let german = Locale(identifier: "de_DE")
+        let english = Locale(identifier: "en_US")
+        XCTAssertEqual(BaseballNumberStyle.format(0.312, decimals: 3, omitLeadingZero: true, locale: german), ",312")
+        XCTAssertEqual(BaseballNumberStyle.format(3.25, decimals: 2, locale: german), "3,25")
+        XCTAssertEqual(BaseballNumberStyle.format(0.312, decimals: 3, omitLeadingZero: true, locale: english), ".312")
+    }
+
     func testTeamCountUsesLocalePluralRules() throws {
         let path = try XCTUnwrap(([Bundle.main] + Bundle.allBundles).compactMap {
             $0.path(forResource: "es", ofType: "lproj")

@@ -535,13 +535,13 @@ struct TeamStandardCard: View {
     private func format(_ label: String, _ value: Double) -> String {
         switch label {
         case "AVG", "OBP", "SLG", "OPS":
-            return String(format: "%.3f", value).replacingOccurrences(of: "0.", with: ".")
+            return BaseballNumberStyle.format(value, decimals: 3, omitLeadingZero: true)
         case "ERA", "WHIP", "K/9", "BB/9":
-            return String(format: "%.2f", value)
+            return BaseballNumberStyle.format(value, decimals: 2)
         case "IP":
-            return String(format: "%.1f", value)
+            return BaseballNumberStyle.format(value, decimals: 1)
         default:
-            return String(format: "%.0f", value)
+            return BaseballNumberStyle.format(value, decimals: 0)
         }
     }
 

@@ -196,6 +196,15 @@ struct Metric: Identifiable, Codable, Hashable, Sendable {
 /// in that shape is a rate printed this way (AVG, OBP, SLG, OPS, FLD%, xBA,
 /// xSLG, xISO, xwOBA); ERA and WHIP use two places and keep their zero.
 enum BaseballNumberStyle {
+    static func format(_ value: Double, decimals: Int, omitLeadingZero: Bool = false, locale: Locale = .current) -> String {
+        let text = String(format: "%.*f", locale: locale, decimals, value)
+        let separator = locale.decimalSeparator ?? "."
+        if omitLeadingZero && text.hasPrefix("0" + separator) {
+            return String(text.dropFirst())
+        }
+        return text
+    }
+
     static func display(_ raw: String) -> String {
         guard raw.count == 5, raw.hasPrefix("0."),
               raw.dropFirst(2).allSatisfy(\.isNumber) else { return raw }

@@ -2766,63 +2766,159 @@
       "extractionState": "manual",
       "localizations": {
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld tracked · %@"
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld tracked · %@"
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld tracked · %@"
+                }
+              }
+            }
           }
         },
         "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$lld seguidos · %2$@"
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%1$lld seguidos · %2$@"
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%1$lld seguido · %2$@"
+                }
+              }
+            }
           }
         },
         "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$lld suivis · %2$@"
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%1$lld suivis · %2$@"
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%1$lld suivi · %2$@"
+                }
+              }
+            }
           }
         },
         "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$lld monitorati · %2$@"
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%1$lld monitorati · %2$@"
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%1$lld monitorato · %2$@"
+                }
+              }
+            }
           }
         },
         "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$lld人を追跡 · %2$@"
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%1$lld人を追跡 · %2$@"
+                }
+              }
+            }
           }
         },
         "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$lld acompanhados · %2$@"
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%1$lld acompanhados · %2$@"
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%1$lld acompanhado · %2$@"
+                }
+              }
+            }
           }
         },
         "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "追蹤 %1$lld 人 · %2$@"
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "追蹤 %1$lld 人 · %2$@"
+                }
+              }
+            }
           }
         },
         "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld erfasst · %@"
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld erfasst · %@"
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld erfasst · %@"
+                }
+              }
+            }
           }
         },
         "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld명 추적 · %@"
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld명 추적 · %@"
+                }
+              }
+            }
           }
         },
         "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "已追踪 %lld · %@"
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "已追踪 %lld · %@"
+                }
+              }
+            }
           }
         }
       }
@@ -36705,37 +36801,37 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Desbloquea Trends, forma reciente, comparaciones y todas las temporadas desde 2015."
+            "value": "Desbloquea Tendencias, forma reciente, comparaciones y todas las temporadas desde 2015."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Débloquez Trends, la forme récente, les comparaisons et toutes les saisons depuis 2015."
+            "value": "Débloquez Tendances, la forme récente, les comparaisons et toutes les saisons depuis 2015."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sblocca Trends, forma recente, confronti e tutte le stagioni dal 2015."
+            "value": "Sblocca le tendenze, la forma recente, i confronti e tutte le stagioni dal 2015."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "Trends、最近の調子、比較、2015年以降の全シーズンを利用できます。"
+            "value": "トレンド、最近の調子、比較、2015年以降の全シーズンを利用できます。"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Desbloqueie Trends, forma recente, comparações e todas as temporadas desde 2015."
+            "value": "Desbloqueie Tendências, forma recente, comparações e todas as temporadas desde 2015."
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "解鎖 Trends、近期狀態、比較功能，以及 2015 年以來的所有球季。"
+            "value": "解鎖趨勢榜、近期表現、比較功能，以及 2015 年以來的所有球季。"
           }
         },
         "de": {

@@ -483,9 +483,9 @@ struct TrendArrow: View {
     private var text: String {
         if isFlat { return "0" }
         let magnitude = abs(delta)
-        let formatted = String(format: "%.\(decimals)f", magnitude)
+        let formatted = BaseballNumberStyle.format(magnitude, decimals: decimals, omitLeadingZero: decimals == 3)
         // Rate stats are written Savant-style, without the leading zero.
-        return decimals == 3 ? formatted.replacingOccurrences(of: "0.", with: ".") : formatted
+        return formatted
     }
 
     var body: some View {

@@ -168,7 +168,7 @@ struct StandardStatsLeadersView: View {
     private func statDisplay(for player: Player) -> String {
         if Self.derivedStats.contains(selectedStat) {
             guard let value = numericStat(for: player) else { return "-" }
-            return String(format: "%.1f%%", value)
+            return BaseballNumberStyle.format(value, decimals: 1) + "%"
         }
         guard let stats = player.standardStats,
               let stat = stats.stat(

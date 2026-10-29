@@ -154,16 +154,16 @@ enum RecentMetricKey {
     /// Matches the player page's conventions, Savant writes rate stats without
     /// the leading zero, and a speed carries its unit.
     static func format(_ value: Double, label: String) -> String {
-        if label.hasSuffix("%") { return String(format: "%.1f%%", value) }
-        if label.hasSuffix("Spin") { return String(format: "%.0f", value) }
-        if label == "Swing Length" { return String(format: "%.2f", value) }
+        if label.hasSuffix("%") { return BaseballNumberStyle.format(value, decimals: 1) + "%" }
+        if label.hasSuffix("Spin") { return BaseballNumberStyle.format(value, decimals: 0) }
+        if label == "Swing Length" { return BaseballNumberStyle.format(value, decimals: 2) }
         if label.contains("EV") || label.contains("Velo") || label == "Bat Speed" {
-            return String(format: "%.1f", value)
+            return BaseballNumberStyle.format(value, decimals: 1)
         }
         if value < 10 {
-            return String(format: "%.3f", value).replacingOccurrences(of: "0.", with: ".")
+            return BaseballNumberStyle.format(value, decimals: 3, omitLeadingZero: true)
         }
-        return String(format: "%.1f", value)
+        return BaseballNumberStyle.format(value, decimals: 1)
     }
 }
 

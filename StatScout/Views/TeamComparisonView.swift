@@ -138,25 +138,25 @@ enum TeamAggregate {
     static func formatStandard(_ label: String, _ value: Double) -> String {
         switch label {
         case "AVG", "OBP", "SLG", "OPS":
-            return String(format: "%.3f", value).replacingOccurrences(of: "0.", with: ".")
+            return BaseballNumberStyle.format(value, decimals: 3, omitLeadingZero: true)
         case "ERA", "WHIP", "K/9", "BB/9":
-            return String(format: "%.2f", value)
+            return BaseballNumberStyle.format(value, decimals: 2)
         case "IP":
-            return String(format: "%.1f", value)
+            return BaseballNumberStyle.format(value, decimals: 1)
         default:
-            return String(format: "%.0f", value)
+            return BaseballNumberStyle.format(value, decimals: 0)
         }
     }
 
     static func formatAdvanced(_ value: Double, label: String) -> String {
-        if label.hasSuffix("%") { return String(format: "%.1f%%", value) }
-        if label.hasSuffix("Spin") { return String(format: "%.0f rpm", value) }
-        if label == "Swing Length" { return String(format: "%.2f ft", value) }
+        if label.hasSuffix("%") { return BaseballNumberStyle.format(value, decimals: 1) + "%" }
+        if label.hasSuffix("Spin") { return BaseballNumberStyle.format(value, decimals: 0) + " rpm" }
+        if label == "Swing Length" { return BaseballNumberStyle.format(value, decimals: 2) + " ft" }
         if label.contains("EV") || label.contains("Velo") || label == "Bat Speed" {
-            return String(format: "%.1f mph", value)
+            return BaseballNumberStyle.format(value, decimals: 1) + " mph"
         }
-        if value < 10 { return String(format: "%.3f", value).replacingOccurrences(of: "0.", with: ".") }
-        return String(format: "%.1f", value)
+        if value < 10 { return BaseballNumberStyle.format(value, decimals: 3, omitLeadingZero: true) }
+        return BaseballNumberStyle.format(value, decimals: 1)
     }
 }
 
