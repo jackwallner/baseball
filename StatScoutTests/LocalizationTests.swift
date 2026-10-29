@@ -56,4 +56,16 @@ final class LocalizationTests: XCTestCase {
         XCTAssertEqual(MetricName.localized("Some Future Metric"), "Some Future Metric")
         XCTAssertFalse(MetricName.localized("Sprint Speed").isEmpty)
     }
+
+    func testTeamCountUsesLocalePluralRules() throws {
+        let path = try XCTUnwrap(([Bundle.main] + Bundle.allBundles).compactMap {
+            $0.path(forResource: "es", ofType: "lproj")
+        }.first)
+        let bundle = try XCTUnwrap(Bundle(path: path))
+        let locale = Locale(identifier: "es")
+        let one = 1
+        let two = 2
+        XCTAssertEqual(String(localized: "\(one) teams", bundle: bundle, locale: locale), "1 equipo")
+        XCTAssertEqual(String(localized: "\(two) teams", bundle: bundle, locale: locale), "2 equipos")
+    }
 }
