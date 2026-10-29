@@ -1053,19 +1053,19 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ Temporada regular"
+            "value": "Temporada regular %@"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ Saison régulière"
+            "value": "Saison régulière %@"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ Stagione regolare"
+            "value": "Stagione regolare %@"
           }
         },
         "ja": {
@@ -1077,7 +1077,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ Temporada regular"
+            "value": "Temporada regular %@"
           }
         },
         "zh-Hant": {
@@ -2200,7 +2200,7 @@
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@. 기존 결제 기간이 끝나기 최소 24시간 전에 취소하지 않으면 자동 갱신됩니다. 설정 › Apple ID › 구독에서 관리하거나 취소할 수 있습니다."
+            "value": "%@. 현재 결제 기간이 끝나기 최소 24시간 전에 취소하지 않으면 자동 갱신됩니다. 설정 › Apple ID › 구독에서 관리하거나 취소할 수 있습니다."
           }
         },
         "zh-Hans": {
@@ -3141,7 +3141,7 @@
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "무료 %lld일 체험 후 %@. 기존 결제 기간이 끝나기 최소 24시간 전에 취소하지 않으면 자동 갱신됩니다. 설정 › Apple ID › 구독에서 관리하거나 취소할 수 있습니다."
+            "value": "무료 %lld일 체험 후 %@. 현재 결제 기간이 끝나기 최소 24시간 전에 취소하지 않으면 자동 갱신됩니다. 설정 › Apple ID › 구독에서 관리하거나 취소할 수 있습니다."
           }
         },
         "zh-Hans": {
@@ -3336,7 +3336,7 @@
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "무료 %lld개월 체험 후 %@. 기존 결제 기간이 끝나기 최소 24시간 전에 취소하지 않으면 자동 갱신됩니다. 설정 › Apple ID › 구독에서 관리하거나 취소할 수 있습니다."
+            "value": "무료 %lld개월 체험 후 %@. 현재 결제 기간이 끝나기 최소 24시간 전에 취소하지 않으면 자동 갱신됩니다. 설정 › Apple ID › 구독에서 관리하거나 취소할 수 있습니다."
           }
         },
         "zh-Hans": {
@@ -3531,7 +3531,7 @@
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "무료 %lld년 체험 후 %@. 기존 결제 기간이 끝나기 최소 24시간 전에 취소하지 않으면 자동 갱신됩니다. 설정 › Apple ID › 구독에서 관리하거나 취소할 수 있습니다."
+            "value": "무료 %lld년 체험 후 %@. 현재 결제 기간이 끝나기 최소 24시간 전에 취소하지 않으면 자동 갱신됩니다. 설정 › Apple ID › 구독에서 관리하거나 취소할 수 있습니다."
           }
         },
         "zh-Hans": {
@@ -3791,7 +3791,7 @@
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "무료 1개월 체험 후 %@. 기존 결제 기간이 끝나기 최소 24시간 전에 취소하지 않으면 자동 갱신됩니다. 설정 › Apple ID › 구독에서 관리하거나 취소할 수 있습니다."
+            "value": "무료 1개월 체험 후 %@. 현재 결제 기간이 끝나기 최소 24시간 전에 취소하지 않으면 자동 갱신됩니다. 설정 › Apple ID › 구독에서 관리하거나 취소할 수 있습니다."
           }
         },
         "zh-Hans": {
@@ -3986,7 +3986,7 @@
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "무료 1년 체험 후 %@. 기존 결제 기간이 끝나기 최소 24시간 전에 취소하지 않으면 자동 갱신됩니다. 설정 › Apple ID › 구독에서 관리하거나 취소할 수 있습니다."
+            "value": "무료 1년 체험 후 %@. 현재 결제 기간이 끝나기 최소 24시간 전에 취소하지 않으면 자동 갱신됩니다. 설정 › Apple ID › 구독에서 관리하거나 취소할 수 있습니다."
           }
         },
         "zh-Hans": {
@@ -5806,7 +5806,7 @@
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "기존 결제 기간이 끝나기 최소 24시간 전에 취소하지 않으면 자동 갱신됩니다. 설정 › Apple ID › 구독에서 관리하거나 취소할 수 있습니다."
+            "value": "현재 결제 기간이 끝나기 최소 24시간 전에 취소하지 않으면 자동 갱신됩니다. 설정 › Apple ID › 구독에서 관리하거나 취소할 수 있습니다."
           }
         },
         "zh-Hans": {
@@ -26872,7 +26872,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "重新开通 %@ 的 StatScout+"
+            "value": "以 %@ 重新开通 StatScout+"
           }
         }
       }
@@ -39152,7 +39152,7 @@
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "무료 1일 체험 후 %@. 기존 결제 기간이 끝나기 최소 24시간 전에 취소하지 않으면 자동 갱신됩니다. 설정 › Apple ID › 구독에서 관리하거나 취소할 수 있습니다."
+            "value": "무료 1일 체험 후 %@. 현재 결제 기간이 끝나기 최소 24시간 전에 취소하지 않으면 자동 갱신됩니다. 설정 › Apple ID › 구독에서 관리하거나 취소할 수 있습니다."
           }
         },
         "zh-Hans": {
