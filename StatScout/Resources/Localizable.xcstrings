@@ -11365,7 +11365,7 @@
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "정규 시즌처럼 모든 포스트시즌 경기를 추적하세요. 6월뿐 아니라 10월에도 실제로 강한 타구를 만드는 선수를 확인하세요."
+            "value": "정규 시즌처럼 모든 포스트시즌 경기를 추적하세요. 6월이 아닌 10월에 실제로 강한 타구를 만드는 선수를 확인하세요."
           }
         },
         "zh-Hans": {
@@ -22698,7 +22698,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Los percentiles comparan a un jugador con todos los bateadores o lanzadores calificados de la MLB, no solo con los de su posición. El percentil 90 significa que el jugador supera al 90 % de la liga en esa métrica, y el 50 es el promedio de la liga. Para los lanzadores, la escala se invierte porque un valor menor es mejor, así que un xwOBA permitido bajo sigue siendo un percentil alto."
+            "value": "Los percentiles comparan a un jugador con todos los bateadores o lanzadores calificados de la MLB, no solo con los de su posición. El percentil 90 significa que el jugador supera al 90 % de la liga en esa métrica, y el 50 es el promedio de la liga. Para los lanzadores, la escala se invierte en las métricas donde un valor menor es mejor, así que un xwOBA permitido bajo sigue siendo un percentil alto."
           }
         },
         "fr": {
@@ -22722,13 +22722,13 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Os percentis comparam um jogador a todos os rebatedores ou arremessadores qualificados da MLB, não apenas aos da mesma posição. O percentil 90 significa que o jogador supera 90% dos jogadores da liga naquela métrica, e o percentil 50 representa a média da liga. Para arremessadores, a escala se inverte: quanto menor o valor, melhor. Por isso, uma xwOBA sofrida baixa ainda corresponde a um percentil alto."
+            "value": "Os percentis comparam um jogador a todos os rebatedores ou arremessadores qualificados da MLB, não apenas aos da mesma posição. O percentil 90 significa que o jogador supera 90% dos jogadores da liga naquela métrica, e o percentil 50 representa a média da liga. Para arremessadores, a escala se inverte nas métricas em que um valor menor é melhor. Por isso, uma xwOBA sofrida baixa ainda corresponde a um percentil alto."
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "百分位排名會將球員與 MLB 所有達到資格門檻的打者或投手相比，而非僅與同一守位的球員比較。第 90 百分位代表該指標表現優於聯盟 90% 的球員；第 50 百分位則代表聯盟平均。投手的百分位尺度則相反，數值越低越好，因此投手讓對手的 xwOBA 越低，百分位排名就越高。"
+            "value": "百分位排名會將球員與 MLB 所有達到資格門檻的打者或投手相比，而非僅與同一守位的球員比較。第 90 百分位代表該指標表現優於聯盟 90% 的球員；第 50 百分位則代表聯盟平均。投手指標中數值越低越好的項目會反轉百分位尺度，因此投手讓對手的 xwOBA 越低，百分位排名就越高。"
           }
         },
         "de": {
@@ -28579,7 +28579,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "球季數字告訴你誰很強，StatScout+ 告訴你誰現在最強，還能幫你證明。"
+            "value": "球季數字告訴你誰很強，StatScout+ 告訴你誰現在表現出色，還能幫你證明。"
           }
         },
         "de": {
