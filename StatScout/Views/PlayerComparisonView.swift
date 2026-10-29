@@ -462,7 +462,7 @@ struct PlayerComparisonView: View {
                     }
                     // Says what the number is when it isn't the raw stat, so a
                     // percentile can't be misread as a rate.
-                    Text(hasValue ? "" : "PERCENTILE")
+                    Text(hasValue ? "" : String(localized: "PERCENTILE"))
                         .font(SavantType.micro)
                         .tracking(0.4)
                         .foregroundStyle(SavantPalette.inkTertiary)

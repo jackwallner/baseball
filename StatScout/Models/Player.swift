@@ -173,7 +173,12 @@ enum SeasonLabel {
 
     /// Longer form for prose and subtitles ("2026 Postseason").
     static func text(_ season: Int, phase: SeasonPhase) -> String {
-        String(localized: "\(String(season)) \(phase.label)")
+        switch phase {
+        case .regular:
+            return String(localized: "\(String(season)) Regular Season")
+        case .postseason:
+            return String(localized: "\(String(season)) Postseason")
+        }
     }
 }
 

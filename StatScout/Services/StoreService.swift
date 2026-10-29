@@ -268,6 +268,21 @@ struct IntroTrial {
         case (.year, _): return String(localized: "\(count)-year free trial, then \(price).")
         }
     }
+
+    func disclosureSentence(price: String) -> String {
+        switch (unit, count) {
+        case (.day, _):
+            return String(localized: "\(count)-day free trial, then \(price). Auto-renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel in Settings › Apple ID › Subscriptions.")
+        case (.month, 1):
+            return String(localized: "1-month free trial, then \(price). Auto-renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel in Settings › Apple ID › Subscriptions.")
+        case (.month, _):
+            return String(localized: "\(count)-month free trial, then \(price). Auto-renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel in Settings › Apple ID › Subscriptions.")
+        case (.year, 1):
+            return String(localized: "1-year free trial, then \(price). Auto-renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel in Settings › Apple ID › Subscriptions.")
+        case (.year, _):
+            return String(localized: "\(count)-year free trial, then \(price). Auto-renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel in Settings › Apple ID › Subscriptions.")
+        }
+    }
 }
 
 extension CustomerInfo {
@@ -433,15 +448,14 @@ final class StoreService: NSObject, ObservableObject {
     /// are present at the point of purchase.
     var yearlyCTADisclosureText: String? {
         guard let yearly = yearlyPackage else { return nil }
-        let renew = Self.renewalTerms
         if isEligibleForIntroOffer(yearly), let trial = yearly.introTrial {
-            return "\(trial.thenSentence(price: yearly.priceLabel)) \(renew)"
+            return trial.disclosureSentence(price: yearly.priceLabel)
         }
-        return "\(yearly.priceLabel). \(renew)"
+        return Self.renewalDisclosure(price: yearly.priceLabel)
     }
 
-    static var renewalTerms: String {
-        String(localized: "Auto-renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel in Settings › Apple ID › Subscriptions.")
+    static func renewalDisclosure(price: String) -> String {
+        String(localized: "\(price). Auto-renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel in Settings › Apple ID › Subscriptions.")
     }
 
     var onboardingMonthlyCTALabel: String {
@@ -455,11 +469,10 @@ final class StoreService: NSObject, ObservableObject {
 
     var onboardingMonthlyDisclosureText: String? {
         guard let monthly = monthlyPackage else { return nil }
-        let renew = Self.renewalTerms
         if isEligibleForIntroOffer(monthly), let trial = monthly.introTrial {
-            return "\(trial.thenSentence(price: monthly.priceLabel)) \(renew)"
+            return trial.disclosureSentence(price: monthly.priceLabel)
         }
-        return "\(monthly.priceLabel). \(renew)"
+        return Self.renewalDisclosure(price: monthly.priceLabel)
     }
 
     /// The monthly package, when present. Used as the anchor when computing

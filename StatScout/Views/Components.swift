@@ -647,7 +647,7 @@ struct LeaderboardTableRow: View {
             case .absent:
                 EmptyView()
             case .unavailable:
-                Text("N/A")
+                Text(String(localized: "N/A"))
                     .font(SavantType.micro)
                     .foregroundStyle(SavantPalette.inkTertiary)
                     .frame(width: 46, alignment: .trailing)
