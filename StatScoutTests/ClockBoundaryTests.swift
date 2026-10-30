@@ -184,6 +184,30 @@ final class ClockBoundaryTests: XCTestCase {
         XCTAssertEqual(kept.map(\.gameDate), [onCutoff.gameDate])
     }
 
+    /// F-05 (2026-10-30 bug hunt): the profile's cutoff was local midnight
+    /// while game dates are Eastern midnight, so west of New York the oldest
+    /// day fell outside: Pacific users saw 14 days labelled 15. The window is
+    /// now exactly 15 game dates ending on the data-through day in every zone.
+    func testProfileWindowHoldsNDatesEndingOnTheDataThroughDayInEveryZone() throws {
+        let dataThrough = local(utc, 2026, 9, 27)
+        let dates = (0..<16).map { offset -> String in
+            let day = utc.date(byAdding: .day, value: -offset, to: dataThrough)!
+            return DateFormatter.iso(day, utc)
+        }
+        let logs = try dates.map { try log($0) }
+        XCTAssertEqual(dates.last, "2026-09-12")
+        let zones = ["America/Los_Angeles", "America/Chicago", "America/Denver", "Pacific/Honolulu",
+                     "America/New_York", "Europe/Berlin", "Asia/Tokyo"]
+        for zone in zones {
+            var calendar = Calendar(identifier: .gregorian)
+            calendar.timeZone = TimeZone(identifier: zone)!
+            let anchor = try XCTUnwrap(Date.fromPostgresDate("2026-09-27", calendar: calendar))
+            let window = RecentFormWindow.logs(logs, days: 15, endingOn: anchor, calendar: calendar)
+            XCTAssertEqual(window.count, 15, zone)
+            XCTAssertEqual(window.map(\.gameDate).min(), try log("2026-09-13").gameDate, zone)
+        }
+    }
+
     // MARK: Weekly delta
 
     func testWeeklyDeltaWindowEdge() {
