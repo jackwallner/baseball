@@ -20,6 +20,10 @@ targets:
     platform: iOS
     sources:
       - path: StatScout
+        # The plist below is the shipped copy; the JSON is only the export
+        # script's input and doubled the app's size.
+        excludes:
+          - Data/players-historical.json
     resources:
       - StatScout/PrivacyInfo.xcprivacy
       - StatScout/Data/players-historical.plist

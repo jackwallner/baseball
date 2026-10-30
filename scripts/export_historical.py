@@ -1,8 +1,16 @@
 #!/usr/bin/env python3
-"""Export all pre-2026 player data from Supabase into a bundled JSON file."""
+"""Export every season before the app's current one into a bundled JSON file.
+
+The cutoff is read from `StatScoutSeason.current`, so the rollover stays the
+one-line change StoreService.swift promises.
+"""
 import json
 import os
+import re
 import urllib.request
+
+with open("StatScout/Services/StoreService.swift") as f:
+    CURRENT_SEASON = int(re.search(r"static let current = (\d{4})", f.read()).group(1))
 
 SUPABASE_URL = os.environ["SUPABASE_URL"]
 KEY = os.environ["SUPABASE_ANON_KEY"]
@@ -21,7 +29,7 @@ all_players = []
 
 while True:
     req = urllib.request.Request(
-        f"{url}?select=*&season=lt.2026&order=id.asc&limit={page_size}&offset={offset}",
+        f"{url}?select=*&season=lt.{CURRENT_SEASON}&order=id.asc&limit={page_size}&offset={offset}",
         headers=headers,
     )
     with urllib.request.urlopen(req) as resp:

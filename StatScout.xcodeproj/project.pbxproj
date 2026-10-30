@@ -18,6 +18,7 @@
 		189D1222312FEE374CFA4DEE /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147A7B626DB00162FDED79EA /* SettingsView.swift */; };
 		194BDDCA1D45B8E71852DF10 /* StandardStatsLeadersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9CBAD749A639F5A5ADCF10B /* StandardStatsLeadersView.swift */; };
 		1C05ED9E954E365E79E177AC /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57A36C805E9D0AB83292B6F7 /* PaywallView.swift */; };
+		1C1FB11FC33A0210A42B31CD /* SeasonContextRegressionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF2C1E34FF706174254DC582 /* SeasonContextRegressionTests.swift */; };
 		1D3DC396F2A1B8C199616A3E /* PlayerShareCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DE4C45AF67381478971E92 /* PlayerShareCard.swift */; };
 		2143DB27E4B8D137F0FA7AB7 /* PurchaseFailureCopyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89D6FE8BD9E23822F9D32E2E /* PurchaseFailureCopyTests.swift */; };
 		27A3E5CEECF37B31B4AEAC1D /* PostseasonQualifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 162CE726AA6021FE1263539E /* PostseasonQualifier.swift */; };
@@ -59,7 +60,6 @@
 		97ADF393CE14DE856A50A0B5 /* StatScoutApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECB59368024F23FBC63D833E /* StatScoutApp.swift */; };
 		A211C246D1B8BD2A42CF97B0 /* StatDirectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 651F39025F6839FC272B2181 /* StatDirectionTests.swift */; };
 		A6741F572242D827B65EF326 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64CFDB4111B83AFFDDABB591 /* DashboardView.swift */; };
-		A7D62E93A01EF924FE5CEF0B /* players-historical.json in Resources */ = {isa = PBXBuildFile; fileRef = 11CC376E01BC54EAB941E7A7 /* players-historical.json */; };
 		AB2B246F8DF32AF7AF3AEE0B /* StatScoutComprehensiveUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BC5EE3CB654E37FE99FE844 /* StatScoutComprehensiveUITests.swift */; };
 		ABBBBE498E9A1E517A147E40 /* PaywallScreenshotMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 572A0EB8383B16EB9207EE2A /* PaywallScreenshotMode.swift */; };
 		AC4568CDBDB8D9DD78A080F9 /* ReviewPromptTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = C62780264C15B926A095378C /* ReviewPromptTracker.swift */; };
@@ -118,7 +118,6 @@
 		06457404302098EA3F0EE221 /* RobotoCondensed-Black.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "RobotoCondensed-Black.ttf"; sourceTree = "<group>"; };
 		07F9CF50790B71E26FBB32C3 /* Localization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Localization.swift; sourceTree = "<group>"; };
 		0C2D78846A3531791CF22EA6 /* UpgradeCTATests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpgradeCTATests.swift; sourceTree = "<group>"; };
-		11CC376E01BC54EAB941E7A7 /* players-historical.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "players-historical.json"; sourceTree = "<group>"; };
 		13A6D136EE3F7A2B36956CA4 /* YearComparePreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YearComparePreview.swift; sourceTree = "<group>"; };
 		147A7B626DB00162FDED79EA /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		15914E954BD86B91C09E5C88 /* StatcastAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatcastAPI.swift; sourceTree = "<group>"; };
@@ -196,6 +195,7 @@
 		C4A643A0893CC93A640AE0CD /* ClockBoundaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClockBoundaryTests.swift; sourceTree = "<group>"; };
 		C62780264C15B926A095378C /* ReviewPromptTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewPromptTracker.swift; sourceTree = "<group>"; };
 		C7699F37BE47BC9BE5A5A4B1 /* StatScoutTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = StatScoutTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		CF2C1E34FF706174254DC582 /* SeasonContextRegressionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeasonContextRegressionTests.swift; sourceTree = "<group>"; };
 		D8A66FC0340626BB4D22AA18 /* PaywallFunnelUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallFunnelUITests.swift; sourceTree = "<group>"; };
 		E07A772C0BC9828B22A7CE51 /* FavoritesStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesStore.swift; sourceTree = "<group>"; };
 		E2D1812126A525283A3CEC7F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -253,6 +253,7 @@
 				B1A56B3A0FC30C451F518C1E /* PostseasonQualifierTests.swift */,
 				89D6FE8BD9E23822F9D32E2E /* PurchaseFailureCopyTests.swift */,
 				ABD86AFA956A34A31F84B507 /* ReviewPromptTrackerTests.swift */,
+				CF2C1E34FF706174254DC582 /* SeasonContextRegressionTests.swift */,
 				3E672B9C8F60D5640DC5EA6D /* StandardStatsQualifierTests.swift */,
 				B2EAE4FBE4CF576F735F06C7 /* StandardStatsTests.swift */,
 				651F39025F6839FC272B2181 /* StatDirectionTests.swift */,
@@ -268,7 +269,6 @@
 		573687D8C3B5EAED5A9F54E1 /* Data */ = {
 			isa = PBXGroup;
 			children = (
-				11CC376E01BC54EAB941E7A7 /* players-historical.json */,
 				18DC891CB6C0193D0FAAE5FE /* players-historical.plist */,
 				2BF12CF754F018EFD7BE7729 /* SampleData.swift */,
 			);
@@ -534,7 +534,6 @@
 				F65F628FCC2C7A7A8316B80C /* RobotoMono-Bold.ttf in Resources */,
 				8AACC70C985608C1AF59DC5F /* RobotoMono-Medium.ttf in Resources */,
 				480E08FF400735E6EA0F0F7A /* RobotoMono-Regular.ttf in Resources */,
-				A7D62E93A01EF924FE5CEF0B /* players-historical.json in Resources */,
 				F7175DB88FA0286F66E2A8ED /* players-historical.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -579,6 +578,7 @@
 				4E8714E7B4C269F6EF91AEE3 /* PostseasonQualifierTests.swift in Sources */,
 				2143DB27E4B8D137F0FA7AB7 /* PurchaseFailureCopyTests.swift in Sources */,
 				8D59F7C29E73159B2CC488A4 /* ReviewPromptTrackerTests.swift in Sources */,
+				1C1FB11FC33A0210A42B31CD /* SeasonContextRegressionTests.swift in Sources */,
 				D701F13035200994D96A5350 /* StandardStatsQualifierTests.swift in Sources */,
 				13627AAB67147D0AE5954433 /* StandardStatsTests.swift in Sources */,
 				A211C246D1B8BD2A42CF97B0 /* StatDirectionTests.swift in Sources */,
@@ -682,7 +682,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = StatScout/StatScout.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CURRENT_PROJECT_VERSION = 195;
+				CURRENT_PROJECT_VERSION = 196;
 				DEVELOPMENT_TEAM = YXG4MP6W39;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = StatScout/Info.plist;
@@ -803,7 +803,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = StatScout/StatScout.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 195;
+				CURRENT_PROJECT_VERSION = 196;
 				DEVELOPMENT_TEAM = YXG4MP6W39;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = StatScout/Info.plist;
