@@ -61,13 +61,17 @@ enum TeamAggregate {
             let stats = (player.standardStats ?? []).filter {
                 $0.resolvedCategory(playerType: player.playerType) == category
             }
+            // Box-score innings are thirds ("162.1" is 162 1/3), so they are
+            // summed and used as weights as real innings, never as decimals.
             func raw(_ label: String) -> Double? {
                 stats.stat(label, category: category, playerType: player.playerType)
                     .flatMap { DashboardViewModel.rawNumeric($0.value) }
+                    .map { label.uppercased() == "IP" ? PostseasonQualifier.innings($0) : $0 }
             }
             for stat in stats {
                 let label = stat.label.uppercased()
-                guard let value = DashboardViewModel.rawNumeric(stat.value) else { continue }
+                guard let parsed = DashboardViewModel.rawNumeric(stat.value) else { continue }
+                let value = label == "IP" ? PostseasonQualifier.innings(parsed) : parsed
                 if let weightKey = rateWeights[label] {
                     guard let weight = raw(weightKey), weight > 0 else { continue }
                     var entry = weighted[label] ?? (0, 0)
@@ -82,6 +86,9 @@ enum TeamAggregate {
 
         for (label, entry) in weighted where entry.den > 0 {
             totals[label] = entry.num / entry.den
+        }
+        if let innings = totals["IP"] {
+            totals["IP"] = PostseasonQualifier.boxScore(innings)
         }
         return totals
     }

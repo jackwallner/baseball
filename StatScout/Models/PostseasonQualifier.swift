@@ -47,6 +47,13 @@ struct PostseasonQualifier {
         return whole + outs / 3
     }
 
+    /// Real innings (4.667) back to box-score notation (4.2).
+    static func boxScore(_ innings: Double) -> Double {
+        let outs = (innings * 3).rounded()
+        let whole = (outs / 3).rounded(.towardZero)
+        return whole + (outs - whole * 3) / 10
+    }
+
     private static func number(_ label: String, _ category: MetricCategory, _ player: Player) -> Double? {
         guard let stat = player.standardStats?.stat(label, category: category, playerType: player.playerType) else {
             return nil

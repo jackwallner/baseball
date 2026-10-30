@@ -41,10 +41,9 @@ struct FollowPlayersSheet: View {
 
     private var candidates: [Player] {
         let query = searchText.trimmingCharacters(in: .whitespaces).lowercased()
-        let wanted: String = listSide.playerType
-        let sameSide: [Player] = allPlayers.filter { player in
-            (player.playerType ?? "batter") == wanted
-        }
+        // Two-way players (Ohtani) belong on both lists, the rule the boards use.
+        let wanted: MetricCategory = listSide == .pitching ? .pitching : .hitting
+        let sameSide: [Player] = allPlayers.filter { $0.matchesPlayerType(for: wanted) }
         let matching: [Player] = query.isEmpty ? sameSide : sameSide.filter { player in
             player.name.lowercased().contains(query) || player.team.lowercased().contains(query)
         }

@@ -839,7 +839,10 @@ private struct YearCompareDestination: View {
                     }
                     .padding(.vertical, 64)
                 } else {
+                    // A new player from "Change" starts on his own seasons,
+                    // not the previous player's picks.
                     YearComparisonView(history: history)
+                        .id(route.playerId)
                 }
                 // Clears the floating tab bar.
                 Color.clear.frame(height: 88)

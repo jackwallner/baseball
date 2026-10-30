@@ -85,6 +85,9 @@ struct DashboardView: View {
             PostseasonCard(
                 creative: creative,
                 onOpenPostseason: {
+                    // The postseason only exists on the live season, and the
+                    // phase change is refused anywhere else.
+                    viewModel.selectSeason(StatScoutSeason.current)
                     viewModel.selectPhase(.postseason)
                     // It did its job; switching back shouldn't bring it back.
                     seenPostseason = PostseasonCampaign.identifier

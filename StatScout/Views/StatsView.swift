@@ -228,6 +228,7 @@ private struct BestWorstBoard: View {
                     )
                         .blur(radius: 8)
                         .allowsHitTesting(false)
+                        .accessibilityHidden(true)
                     BlurGateUnlock(
                         headline: String(localized: "See who leads and who trails on every metric in the league"),
                         trigger: .bestWorst

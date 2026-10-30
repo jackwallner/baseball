@@ -231,7 +231,7 @@ struct YearComparisonView: View {
 
             columnHeader
 
-            ForEach(Array(items.enumerated()), id: \.element.metricLabel) { idx, item in
+            ForEach(Array(items.enumerated()), id: \.element.id) { idx, item in
                 comparisonRow(item: item, isAlt: idx % 2 == 1)
             }
         }
@@ -345,14 +345,18 @@ struct YearComparisonView: View {
     // MARK: - Comparisons Builder
 
     private func buildComparisons(p1: Player, p2: Player) -> [MetricComparison] {
-        let metrics1 = Dictionary(grouping: p1.metrics) { $0.label }
-        let metrics2 = Dictionary(grouping: p2.metrics) { $0.label }
-        let allLabels = Set(metrics1.keys).union(metrics2.keys)
+        // Label and side: a two-way player carries K%, Whiff% and the rest
+        // under both Hitting and Pitching, and keying by label alone dropped
+        // whichever side came second.
+        struct Key: Hashable { let label: String; let category: MetricCategory }
+        let metrics1 = Dictionary(grouping: p1.metrics) { Key(label: $0.label, category: $0.category) }
+        let metrics2 = Dictionary(grouping: p2.metrics) { Key(label: $0.label, category: $0.category) }
+        let allKeys = Set(metrics1.keys).union(metrics2.keys)
 
-        return allLabels.compactMap { label in
-            guard let m1 = metrics1[label]?.first, let m2 = metrics2[label]?.first else { return nil }
+        return allKeys.compactMap { key in
+            guard let m1 = metrics1[key]?.first, let m2 = metrics2[key]?.first else { return nil }
             return MetricComparison(
-                metricLabel: label,
+                metricLabel: key.label,
                 category: m1.category,
                 percentileA: m1.percentile,
                 percentileB: m2.percentile,
@@ -371,6 +375,7 @@ struct YearComparisonView: View {
 private struct MetricComparison {
     let metricLabel: String
     let category: MetricCategory
+    var id: String { "\(category.rawValue)-\(metricLabel)" }
     let percentileA: Int
     let percentileB: Int
     let valueA: String
