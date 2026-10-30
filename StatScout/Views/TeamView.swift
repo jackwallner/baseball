@@ -257,8 +257,18 @@ struct TeamView: View {
         viewModel?.recentFormByWindow[rosterWindow.rawValue] != nil
     }
 
+    /// The rollup only covers the live season, so on a past year the roster
+    /// ranks on the season line and the Recent control is not offered.
     private var isRosterRecent: Bool {
-        rosterMode == .recent && store.isPro
+        rosterMode == .recent && store.isPro && displaySeason == StatScoutSeason.current
+    }
+
+    private var isRosterWindowLoading: Bool {
+        viewModel?.recentFormLoadingWindows.contains(rosterWindow.rawValue) == true
+    }
+
+    private var isRosterWindowEmpty: Bool {
+        viewModel?.recentFormEmptyWindows.contains(rosterWindow.rawValue) == true
     }
 
     private var filteredPlayers: [Player] {
@@ -493,7 +503,9 @@ struct TeamView: View {
             // pair used to share a line and read as one four-choice control.
             VStack(spacing: 8) {
                 sidePicker
-                rosterModePicker
+                if displaySeason == StatScoutSeason.current {
+                    rosterModePicker
+                }
                 if isRosterRecent {
                     SavantSegmented(
                         segments: RecentWindow.allCases.map { .init(value: $0, label: $0.segmentLabel) },
@@ -746,6 +758,26 @@ struct TeamView: View {
                         ? String(localized: "No players match the selected category for this team.")
                         : String(localized: "Try a different search term.")
                 )
+            } else if isRosterRecent && !hasRecentData && !isRosterWindowLoading,
+                      let error = viewModel?.recentFormError {
+                VStack(spacing: 10) {
+                    Text(error)
+                        .font(SavantType.small)
+                        .foregroundStyle(SavantPalette.inkSecondary)
+                    Button("Try Again") {
+                        Task { await viewModel?.reloadRecentForm(window: rosterWindow) }
+                    }
+                    .font(SavantType.small)
+                    .tint(SavantPalette.linkBlue)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 32)
+            } else if isRosterRecent && !hasRecentData && !isRosterWindowLoading && isRosterWindowEmpty {
+                Text("No games in the last \(rosterWindow.rawValue) days")
+                    .font(SavantType.small)
+                    .foregroundStyle(SavantPalette.inkSecondary)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 32)
             } else if isRosterRecent && !hasRecentData {
                 HStack(spacing: 10) {
                     ProgressView().scaleEffect(0.75)

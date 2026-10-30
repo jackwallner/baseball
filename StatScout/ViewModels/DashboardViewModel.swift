@@ -454,12 +454,20 @@ final class DashboardViewModel {
 
     // MARK: - Recent form
 
-    /// Rolling windows keyed by length, cached per season so flipping between
-    /// 7 / 15 / 30 doesn't refetch what's already in hand.
+    /// Rolling windows keyed by length, so flipping between 7 / 15 / 30
+    /// doesn't refetch what's already in hand.
+    ///
+    /// Always the live season, whatever the Stats tab is showing. The rollup
+    /// only exists for it, and a window is a "right now" read: following
+    /// `selectedSeason` left Trends empty on every past year and let a team
+    /// page on 2024 evict the live windows Trends was holding.
     var recentFormByWindow: [Int: [Int: RecentForm]] = [:]
     var recentFormLoadingWindows: Set<Int> = []
+    /// Windows whose last fetch came back with no rows. Not cached as data
+    /// (the next ask fetches again), but terminal for the caller that asked,
+    /// so a roster waiting on it stops spinning.
+    var recentFormEmptyWindows: Set<Int> = []
     var recentFormError: String?
-    private var recentFormSeason: Int?
     /// In-flight fetches, keyed by window, owned by the model rather than by
     /// the `.task` that asked for them.
     ///
@@ -534,14 +542,6 @@ final class DashboardViewModel {
 
     func loadRecentFormIfNeeded(window: RecentWindow? = nil) async {
         let target = window ?? recentWindow
-        // Season changed under us, the cache describes a different year.
-        if recentFormSeason != selectedSeason {
-            for task in recentFormTasks.values { task.cancel() }
-            recentFormTasks.removeAll()
-            recentFormLoadingWindows.removeAll()
-            recentFormByWindow.removeAll()
-            recentFormSeason = selectedSeason
-        }
         guard recentFormByWindow[target.rawValue] == nil else { return }
 
         // Join the fetch that's already running rather than returning as if
@@ -552,8 +552,9 @@ final class DashboardViewModel {
         }
 
         recentFormLoadingWindows.insert(target.rawValue)
+        recentFormEmptyWindows.remove(target.rawValue)
         recentFormError = nil
-        let season = selectedSeason
+        let season = StatScoutSeason.current
         let task = Task { @MainActor [weak self] in
             guard let self else { return }
             defer {
@@ -565,10 +566,6 @@ final class DashboardViewModel {
                     season: season,
                     windowDays: target.rawValue
                 )
-                // The season can move under a long fetch (the loader lands on
-                // the newest year with data). Dropping a stale answer is better
-                // than caching last year's board under this year's key.
-                guard season == self.selectedSeason else { return }
                 // Only the windows built on the newest anchor date. The rollup
                 // used to leave a player's last window behind when he stopped
                 // playing, so a July "last 7 days" could rank on a board headed
@@ -586,12 +583,14 @@ final class DashboardViewModel {
                 // An empty answer isn't cached. Early in a season the rollup
                 // genuinely has nothing yet, and caching that would pin the
                 // board to "no movement" for the rest of the launch.
-                guard !byPlayer.isEmpty else { return }
+                guard !byPlayer.isEmpty else {
+                    self.recentFormEmptyWindows.insert(target.rawValue)
+                    return
+                }
                 self.recentFormByWindow[target.rawValue] = byPlayer
                 // Keep the Settings coverage line and the Trends "Through …"
                 // header reading off the same answer once a window has landed.
-                if season == StatScoutSeason.current,
-                   let asOf = byPlayer.values.compactMap(\.asOf).max() {
+                if let asOf = byPlayer.values.compactMap(\.asOf).max() {
                     self.dataThrough = asOf
                 }
             } catch {
@@ -1266,7 +1265,7 @@ final class DashboardViewModel {
             // is the signal that the rollup moved while we were backgrounded.
             let cacheIsStale = cachedRecentFormAsOf.map { coverage > $0 } ?? false
             dataThrough = coverage
-            if cacheIsStale, selectedSeason == StatScoutSeason.current {
+            if cacheIsStale {
                 await refreshCachedRecentFormWindows()
             }
         }

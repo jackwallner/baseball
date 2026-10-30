@@ -28,6 +28,12 @@ struct TeamRankingsCard: View {
 
     @State private var side: Side = .batting
     @State private var mode: Mode = .season
+
+    /// Game logs only reach back a few weeks from today, so a past season's
+    /// window was always empty. Off the live season the card is Season only.
+    private var isLiveSeason: Bool { season == StatScoutSeason.current }
+
+    private var shownMode: Mode { isLiveSeason ? mode : .season }
     @State private var windowDays: Int = 15
     @State private var logs: [PlayerGameLog] = []
     @State private var loading = false
@@ -87,8 +93,10 @@ struct TeamRankingsCard: View {
             // is the shape the Trends header already uses.
             VStack(spacing: 8) {
                 sidePicker
-                modePicker
-                if mode.usesRecent {
+                if isLiveSeason {
+                    modePicker
+                }
+                if shownMode.usesRecent {
                     windowPicker
                 }
             }
@@ -96,7 +104,7 @@ struct TeamRankingsCard: View {
             .padding(.vertical, 8)
             .background(SavantPalette.surfaceAlt)
 
-            switch mode {
+            switch shownMode {
             case .season: seasonBars
             case .recent: recentSection
             case .both: bothSection
@@ -109,7 +117,7 @@ struct TeamRankingsCard: View {
                 .stroke(SavantPalette.hairline, lineWidth: 0.5)
         )
         .task(id: "\(team)-\(season)-\(phase.rawValue)-\(mode.rawValue)-\(store.isPro)") {
-            if mode.usesRecent, store.isPro { await load() }
+            if shownMode.usesRecent, store.isPro { await load() }
         }
         .onAppear { rebuildCurves() }
         .onChange(of: players.count) { _, _ in rebuildCurves() }

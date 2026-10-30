@@ -24,6 +24,12 @@ struct TeamStandardCard: View {
 
     @State private var side: TeamRankingsCard.Side = .batting
     @State private var showingRecent = false
+
+    /// Game logs only reach back a few weeks from today, so a past season's
+    /// window was always empty. Off the live season the card is Season only.
+    private var isLiveSeason: Bool { season == StatScoutSeason.current }
+
+    private var showsRecent: Bool { showingRecent && isLiveSeason }
     @State private var windowDays: Int = 15
     @State private var logs: [PlayerGameLog] = []
     @State private var loading = false
@@ -80,15 +86,17 @@ struct TeamStandardCard: View {
                     segments: TeamRankingsCard.Side.allCases.map { .init(value: $0, label: $0.label) },
                     selection: $side
                 )
-                SavantSegmented(
-                    segments: [
-                        .init(value: false, label: String(localized: "Season")),
-                        .init(value: true, label: String(localized: "Recent"), isLocked: !store.isPro),
-                    ],
-                    selection: $showingRecent,
-                    onLockedTap: { requested in onUpgradeTap { showingRecent = requested } }
-                )
-                if showingRecent {
+                if isLiveSeason {
+                    SavantSegmented(
+                        segments: [
+                            .init(value: false, label: String(localized: "Season")),
+                            .init(value: true, label: String(localized: "Recent"), isLocked: !store.isPro),
+                        ],
+                        selection: $showingRecent,
+                        onLockedTap: { requested in onUpgradeTap { showingRecent = requested } }
+                    )
+                }
+                if showsRecent {
                     SavantSegmented(
                         segments: RecentWindow.allCases.map { .init(value: $0, label: $0.segmentLabel) },
                         selection: Binding(
@@ -102,7 +110,7 @@ struct TeamStandardCard: View {
             .padding(.vertical, 8)
             .background(SavantPalette.surfaceAlt)
 
-            if showingRecent {
+            if showsRecent {
                 recentContent
             } else {
                 seasonContent
@@ -114,8 +122,8 @@ struct TeamStandardCard: View {
             RoundedRectangle(cornerRadius: SavantGeo.radiusCard)
                 .stroke(SavantPalette.hairline, lineWidth: 0.5)
         )
-        .task(id: "\(team)-\(season)-\(phase.rawValue)-\(showingRecent)-\(store.isPro)") {
-            if showingRecent, store.isPro { await load() }
+        .task(id: "\(team)-\(season)-\(phase.rawValue)-\(showsRecent)-\(store.isPro)") {
+            if showsRecent, store.isPro { await load() }
         }
     }
 
@@ -395,13 +403,17 @@ struct TeamStandardCard: View {
                 let category = $0.resolvedCategory(playerType: player.playerType)
                 return category == side.category || category == .fielding
             }
+            // Box-score innings are thirds ("162.1" is 162 1/3), so they are
+            // summed and used as weights as real innings, never as decimals.
             func raw(_ label: String) -> Double? {
                 stats.stat(label, category: side.category, playerType: player.playerType)
                     .flatMap { DashboardViewModel.rawNumeric($0.value) }
+                    .map { label.uppercased() == "IP" ? PostseasonQualifier.innings($0) : $0 }
             }
             for stat in stats {
                 let label = stat.label.uppercased()
-                guard let value = DashboardViewModel.rawNumeric(stat.value) else { continue }
+                guard let parsed = DashboardViewModel.rawNumeric(stat.value) else { continue }
+                let value = label == "IP" ? PostseasonQualifier.innings(parsed) : parsed
                 if let weightKey = Self.rateWeights[label] {
                     guard let weight = raw(weightKey), weight > 0 else { continue }
                     var entry = weighted[label] ?? (0, 0)
@@ -416,6 +428,9 @@ struct TeamStandardCard: View {
 
         for (label, entry) in weighted where entry.den > 0 {
             totals[label] = entry.num / entry.den
+        }
+        if let innings = totals["IP"] {
+            totals["IP"] = PostseasonQualifier.boxScore(innings)
         }
         return totals
     }

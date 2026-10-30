@@ -97,8 +97,9 @@ struct HotColdView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(SavantPalette.canvas)
-        // Window and season, the two things that change which board this is.
-        // Entitlement used to be in this id as a workaround for a load that
+        // The window is the one thing that changes which board this is. The
+        // season is always the live one (the model never follows the Stats
+        // tab's year here), so it is not in the id. Entitlement used to be in this id as a workaround for a load that
         // silently dropped itself when the task was cancelled mid-flight; the
         // fetch is owned by the view model now and survives that, so the id can
         // say what it actually means again. RootTabView also re-asks on arrival
@@ -108,7 +109,7 @@ struct HotColdView: View {
         // league leader, and a fabricated one would be a lie in the one place
         // we're asking to be trusted. It's a single request against the
         // pre-aggregated rollup table, the same one Pro reads.
-        .task(id: "\(viewModel.recentWindow.rawValue)-\(viewModel.selectedSeason)") {
+        .task(id: viewModel.recentWindow.rawValue) {
             await viewModel.loadRecentFormIfNeeded()
         }
         .onChange(of: side) { _, _ in
@@ -546,7 +547,7 @@ struct HotColdView: View {
     private var teaserRows: [TeaserRow] {
         let count = 18
         let seedSuffix = "\(metric.key)-\(showingCold)-\(viewModel.recentWindow.rawValue)"
-        let roster = viewModel.players(forSeason: viewModel.selectedSeason)
+        let roster = viewModel.players(forSeason: StatScoutSeason.current)
             .filter { ($0.playerType ?? "batter") == side.playerType }
         let names: [(String, String, String)]
         if roster.count >= count {
