@@ -124,11 +124,59 @@ struct PlayerProfileView: View {
     }
 
     private var displayedPlayer: Player {
-        guard let season = activeSeason else { return player }
-        if activePhase == .postseason {
-            return player
-        }
-        return history.first { $0.season == season } ?? player
+        Self.seasonRow(
+            player: player,
+            history: history,
+            selectedSeason: selectedPercentileSeason,
+            phase: activePhase
+        ) ?? Self.emptyRow(player, season: activeSeason)
+    }
+
+    /// True while a picked past season has no row yet because history is
+    /// still loading, so the cards say "loading" rather than "no data".
+    private var isAwaitingSeasonRow: Bool {
+        (isHistoricalLoading || (!hasLoadedHistorical && loadHistorical != nil))
+            && Self.seasonRow(
+                player: player,
+                history: history,
+                selectedSeason: selectedPercentileSeason,
+                phase: activePhase
+            ) == nil
+    }
+
+    /// The row a profile shows for the season picked in its menu, or nil
+    /// when the player has no row for that year. `player` stands in only when
+    /// nothing was picked: falling back to it for a picked year drew a 2025
+    /// rookie's numbers under a 2022 label, on the card and the shared image.
+    static func seasonRow(
+        player: Player,
+        history: [Player],
+        selectedSeason: Int?,
+        phase: SeasonPhase
+    ) -> Player? {
+        guard phase != .postseason, let season = selectedSeason ?? player.season else { return player }
+        if let row = history.first(where: { $0.season == season }) { return row }
+        return selectedSeason == nil || player.season == season ? player : nil
+    }
+
+    /// The player with nothing to rank, so a season without a row lands on
+    /// the cards' existing empty states and no share image is drawn.
+    private static func emptyRow(_ player: Player, season: Int?) -> Player {
+        Player(
+            playerId: player.playerId,
+            name: player.name,
+            team: player.team,
+            position: player.position,
+            handedness: player.handedness,
+            imageURL: player.imageURL,
+            updatedAt: player.updatedAt,
+            season: season,
+            playerType: player.playerType,
+            source: player.source,
+            metrics: [],
+            standardStats: nil,
+            games: []
+        )
     }
 
     private var seasonLabel: String {
@@ -252,7 +300,7 @@ struct PlayerProfileView: View {
                 ToolbarItem(placement: .topBarTrailing) { compareButton }
             }
         }
-        .task(id: "\(displayedPlayer.id)-\(activePhase.rawValue)") {
+        .task(id: "\(displayedPlayer.id)-\(displayedPlayer.metrics.count)-\(activePhase.rawValue)") {
             shareImage = renderShareImage()
         }
         .sheet(isPresented: $showPercentileInfo) {
@@ -604,6 +652,17 @@ struct PlayerProfileView: View {
         .padding(.top, 12)
     }
 
+    private var seasonRowLoadingRow: some View {
+        HStack(spacing: 10) {
+            ProgressView().scaleEffect(0.75)
+            Text(historicalLoadingMessage)
+                .font(SavantType.small)
+                .foregroundStyle(SavantPalette.inkSecondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 32)
+    }
+
     private func emptyStateCard(icon: String, title: String, description: String) -> some View {
         VStack(spacing: 12) {
             ContentUnavailableView {
@@ -748,7 +807,9 @@ struct PlayerProfileView: View {
                 }
             }
 
-            if groupedMetrics.isEmpty {
+            if isAwaitingSeasonRow {
+                seasonRowLoadingRow
+            } else if groupedMetrics.isEmpty {
                 emptyStateCard(
                     icon: "chart.bar",
                     title: String(localized: "No metrics available"),
@@ -801,16 +862,11 @@ struct PlayerProfileView: View {
     }
 
     private var recentWindow: RecentFormWindow? {
-        // Start of day, as the team card and the backend rollup count it, so
-        // the hour the profile is opened can't decide whether a game is in.
-        let calendar = Calendar.current
-        let anchor = min(recentAnchor ?? .now, .now)
-        let cutoff = calendar.date(
-            byAdding: .day,
-            value: -(recentWindowDays - 1),
-            to: calendar.startOfDay(for: anchor)
-        ) ?? anchor
-        let windowLogs = recentLogs.filter { $0.gameDate >= cutoff }
+        let windowLogs = RecentFormWindow.logs(
+            recentLogs,
+            days: recentWindowDays,
+            endingOn: min(recentAnchor ?? .now, .now)
+        )
         guard !windowLogs.isEmpty else { return nil }
         return RecentFormWindow.build(label: "Last \(recentWindowDays)", days: recentWindowDays, logs: windowLogs)
     }
@@ -1031,7 +1087,11 @@ struct PlayerProfileView: View {
         recentLoadError = nil
         do {
             recentLogs = try await fetch(player.playerId, season)
+            recentLoadError = nil
         } catch {
+            // A superseded load (the window flipped mid-fetch) is not a
+            // failure, and its late error would sit above the next load's bars.
+            if isTaskCancellation(error) { return }
             // Distinguish "no games" from "fetch failed", otherwise a network
             // error renders as an honest-looking "No games in the last N days".
             recentLogs = []
@@ -1211,7 +1271,9 @@ struct PlayerProfileView: View {
                 }
             }
 
-            if (displayedPlayer.standardStats ?? []).isEmpty {
+            if isAwaitingSeasonRow {
+                seasonRowLoadingRow
+            } else if (displayedPlayer.standardStats ?? []).isEmpty {
                 emptyStateCard(
                     icon: "chart.bar",
                     title: String(localized: "Standard stats unavailable"),

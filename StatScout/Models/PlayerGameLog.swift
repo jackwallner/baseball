@@ -71,9 +71,12 @@ struct PlayerGameLog: Codable, Hashable, Sendable {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.dateFormat = "yyyy-MM-dd"
-        formatter.timeZone = TimeZone(identifier: "America/New_York")
+        formatter.timeZone = gameDateZone
         return formatter
     }()
+
+    /// The zone game dates are parsed in: MLB's schedule day.
+    static let gameDateZone = TimeZone(identifier: "America/New_York")!
 }
 
 /// Aggregated stats over a window (last 7/15/30 days).
@@ -160,6 +163,30 @@ struct RecentFormWindow {
             value: -(days - 1),
             to: calendar.startOfDay(for: anchor)
         ) ?? anchor
+        return logs.filter { $0.gameDate >= start }
+    }
+
+    /// A profile's logs for the `days` calendar days ending on `anchor`'s day
+    /// in `calendar` (the data-through date, local midnight).
+    ///
+    /// Game dates are Eastern midnight, so the cutoff is that same day at
+    /// Eastern midnight too. A local-midnight cutoff fell hours after the
+    /// oldest game for anyone west of New York, which dropped it: Pacific users
+    /// saw 14 days labelled 15. Start of day, so the hour the profile is
+    /// opened can't decide whether a game is in.
+    static func logs(
+        _ logs: [PlayerGameLog],
+        days: Int,
+        endingOn anchor: Date,
+        calendar: Calendar = .current
+    ) -> [PlayerGameLog] {
+        var eastern = Calendar(identifier: .gregorian)
+        eastern.timeZone = PlayerGameLog.gameDateZone
+        let day = calendar.dateComponents([.year, .month, .day], from: anchor)
+        guard let anchorDay = eastern.date(from: day),
+              let start = eastern.date(byAdding: .day, value: -(days - 1), to: anchorDay) else {
+            return logs
+        }
         return logs.filter { $0.gameDate >= start }
     }
 
