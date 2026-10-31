@@ -1,43 +1,46 @@
-Explore Statcast percentiles for qualified MLB players.
-Compare hitters, pitchers, fielders and runners with clear, color-coded metric bars.
-Updated nightly during the season, through the previous day's games.
+Baseball Savvy StatScout is an MLB advanced stats app for iPhone. See every qualified player's Statcast percentile rankings as color-coded bars, rank the league by xwOBA, Barrel%, sprint speed or Range (OAA), and follow your players. The current season is free, with no account and no ads.
 
 VISUAL PERCENTILES
-Each metric appears as a horizontal percentile bar with a color marker. Its color moves from blue (0th percentile), through gray (50th), to red (100th), making strong results easy to spot.
+Every metric appears as a horizontal percentile bar with a colored marker. The color runs from blue at the 0th percentile through gray at the 50th to red at the 100th, so the league's best and worst results stand out at a glance.
+
+HITTING, PITCHING, FIELDING AND RUNNING
+Statcast metrics are grouped into four categories: expected stats such as xwOBA, xBA, xSLG and xERA, plus Barrel%, Hard-Hit%, Whiff%, Chase%, bat speed, fastball velocity and spin, Range (OAA), arm strength, sprint speed and more.
 
 PLAYER PROFILES
-Open a player to see percentile rankings across Hitting, Pitching, Fielding and Running. Switch between advanced metrics and standard season stats. Review performance trends with nightly-updated data.
+Open any player for percentile rankings across the categories that apply to him. Switch between Advanced and Standard stats, and share a percentile card as an image.
 
-A MAJOR STATSCOUT UPDATE
-• Trends: see which players are heating up or cooling off over 7, 15 and 30 days
-• Player and Season Compare: put any two players or seasons side by side
-• Standard Stats Everywhere: sort traditional and advanced stats across league, team and player views
-• Team Boards: explore every club with sortable hitting, pitching, fielding and running stats
-• Better Accuracy: improved qualifiers, two-way player lines and metric rankings
+LEADERBOARDS
+Rank the league by any Statcast metric or by traditional stats such as AVG, HR, RBI, OPS, ERA, WHIP and K/9. Filter by position or by qualifier level, and search for any player by name.
+
+TEAMS
+All 30 clubs, grouped by division. Each team page has Advanced, Standard and Roster views, with hitters and pitchers ranked by the stat you pick. Choose a favorite team to open it first.
+
+POSTSEASON
+Once the playoffs begin, switch the boards from the regular season to the postseason.
+
+FOLLOWING
+Follow players and a favorite team for free.
 
 NIGHTLY UPDATES
-During the season, our feed refreshes every night with updated percentile rankings and standard stats for qualified players. Data is current through the previous day's games.
-
-LEADERBOARDS & FILTERS
-Browse league leaderboards filtered by Hitting, Pitching, Fielding or Running. Sort and search active players, then tap a row to open the full profile.
-
-Follow players for free.
+During the season, the numbers refresh every night through the previous day's games. The app shows the date the data is current through.
 
 STATSCOUT+
-Unlock additional analysis with StatScout+:
-• Historical Seasons: load past seasons on demand
-• Player Comparisons: compare any two players side by side
-• Year-Over-Year Tracking: see how metrics changed season to season
+The current season's leaderboards, player profiles, team pages and Following are free. StatScout+ adds:
+- Trends: players heating up or cooling off over the last 7, 15 or 30 days, for hitters and pitchers
+- Recent Form: the same 7, 15 and 30 day windows on player profiles and team rosters
+- Compare: any two players, any two teams, or one player year over year
+- Best & Worst: the league leader and trailer on every metric
+- Past Seasons: every season back to 2015
 
-Choose Monthly or Yearly, both with a 7-day free trial, or Lifetime. Prices are shown in the app before purchase and vary by region.
+Choose Monthly, Yearly or Lifetime. Subscriptions include a free trial for eligible new subscribers, and the app shows its length before you start. Any plan unlocks everything.
 
-PRIVACY-FIRST
-No accounts, sign-up, ads or third-party tracking. The app makes only the network requests needed for baseball statistics, player images and optional purchase verification.
+PRIVACY
+No account or sign-up. No ads and no cross-app tracking. The app makes only the network requests needed for baseball statistics and purchase verification.
 
 Subscription Details
-StatScout+ is available as an auto-renewing subscription (Monthly or Yearly, both with a 7-day free trial) or as a one-time Lifetime purchase. Prices are shown in the app before you buy and vary by region. Payment is charged to your Apple ID at confirmation. Subscriptions renew automatically unless canceled at least 24 hours before the end of the current period. Manage or cancel anytime in Settings → Apple ID → Subscriptions.
+StatScout+ is available as an auto-renewing subscription (Monthly or Yearly) or as a one-time Lifetime purchase. Prices are shown in the app before you buy and vary by region. Payment is charged to your Apple ID at confirmation. Subscriptions renew automatically unless canceled at least 24 hours before the end of the current period. Manage or cancel anytime in Settings > Apple ID > Subscriptions.
 
-Privacy Policy: https://jackwallner.github.io/baseball/privacy-policy.html
-Terms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+Statistics come from public baseball data sources, including Statcast. StatScout is not affiliated with, endorsed by, or sponsored by Major League Baseball, MLB Advanced Media, the MLBPA, or any individual team. Player names, team names and statistics are used for identification and informational purposes only.
 
-StatScout is not affiliated with, endorsed by, or sponsored by Major League Baseball, MLB Advanced Media, the MLBPA, or any individual team. Player names, team names and statistics are used for identification and informational purposes only.
+Terms (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+Privacy: https://jackwallner.com/ios/baseball/privacy-policy.html
