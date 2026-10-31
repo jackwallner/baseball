@@ -7,7 +7,7 @@ HITTING, PITCHING, FIELDING AND RUNNING
 Statcast metrics are grouped into four categories: expected stats such as xwOBA, xBA, xSLG and xERA, plus Barrel%, Hard-Hit%, Whiff%, Chase%, bat speed, fastball velocity and spin, Range (OAA), arm strength, sprint speed and more.
 
 PLAYER PROFILES
-Open any player for percentile rankings across the categories that apply to him. Switch between Advanced and Standard stats, and share a percentile card as an image.
+Open any player for percentile rankings across the categories that apply to that player. Switch between Advanced and Standard stats, and share a percentile card as an image.
 
 LEADERBOARDS
 Rank the league by any Statcast metric or by traditional stats such as AVG, HR, RBI, OPS, ERA, WHIP and K/9. Filter by position or by qualifier level, and search for any player by name.
@@ -24,21 +24,18 @@ Follow players and a favorite team for free.
 NIGHTLY UPDATES
 During the season, the numbers refresh every night through the previous day's games. The app shows the date the data is current through.
 
-STATSCOUT+
-The current season's leaderboards, player profiles, team pages and Following are free. StatScout+ adds:
-- Trends: players heating up or cooling off over the last 7, 15 or 30 days, for hitters and pitchers
-- Recent Form: the same 7, 15 and 30 day windows on player profiles and team rosters
-- Compare: any two players, any two teams, or one player year over year
-- Best & Worst: the league leader and trailer on every metric
-- Past Seasons: every season back to 2015
+FREE AND STATSCOUT+
+The current season's leaderboards, player profiles, team pages and Following are free and do not expire. StatScout+ is an optional upgrade, as a monthly or yearly subscription or a one-time lifetime purchase. Subscriptions include a free trial for eligible new subscribers, and the app shows its length before you start. StatScout+ adds:
+• Trends: players heating up or cooling off over the last 7, 15 or 30 days, for hitters and pitchers
+• Recent Form: the same 7, 15 and 30 day windows on player profiles and team rosters
+• Compare: any two players, any two teams, or one player year over year
+• Best & Worst: the league leader and trailer on every metric
+• Past Seasons: every season back to 2015
 
-Choose Monthly, Yearly or Lifetime. Subscriptions include a free trial for eligible new subscribers, and the app shows its length before you start. Any plan unlocks everything.
+Prices appear in the app before you buy and vary by region. Subscriptions renew automatically unless canceled at least 24 hours before the current period ends. Manage or cancel in Settings > Apple ID > Subscriptions.
 
 PRIVACY
 No account or sign-up. No ads and no cross-app tracking. The app makes only the network requests needed for baseball statistics and purchase verification.
-
-Subscription Details
-StatScout+ is available as an auto-renewing subscription (Monthly or Yearly) or as a one-time Lifetime purchase. Prices are shown in the app before you buy and vary by region. Payment is charged to your Apple ID at confirmation. Subscriptions renew automatically unless canceled at least 24 hours before the end of the current period. Manage or cancel anytime in Settings > Apple ID > Subscriptions.
 
 Statistics come from public baseball data sources, including Statcast. StatScout is not affiliated with, endorsed by, or sponsored by Major League Baseball, MLB Advanced Media, the MLBPA, or any individual team. Player names, team names and statistics are used for identification and informational purposes only.
 
