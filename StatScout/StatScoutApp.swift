@@ -474,11 +474,11 @@ struct OnboardingCards: View {
             }
 
             // --- Fixed 24pt footer slot BELOW the button, identical every page.
-            // On the last page it carries Restore (or the loading state); on the
-            // others it is empty. Its constant height is what keeps the button's
+            // On the last page it carries Restore (or the loading state, until a
+            // failed load gives up); on the others it is empty. Its constant height is what keeps the button's
             // bottom edge, and therefore its Y, pinned across pages.
             Group {
-                if isLastPage, !dataReady {
+                if isLastPage, !dataReady, !viewModel.lastFetchFailed {
                     HStack(spacing: 8) {
                         ProgressView()
                             .progressViewStyle(.circular)

@@ -1222,15 +1222,7 @@ final class DashboardViewModel {
                 // No current data (offseason / cold cache / offline). Fall back to
                 // bundled historical so the app is usable instead of trapped on an
                 // empty state; season gating still applies via isSeasonLocked.
-                let historicalFallback: [Player] = await Task.detached { [cache] in
-                    if let cache = cache as? TwoTierPlayerCache {
-                        return cache.loadHistoricalPlayers()
-                    }
-                    return (try? cache?.loadPlayers()) ?? []
-                }.value
-                if !historicalFallback.isEmpty {
-                    ingestPlayers(historicalFallback)
-                } else {
+                if await !ingestBundledHistory() {
                     errorMessage = String(localized: "No players found.")
                     lastFetchFailed = true
                 }
@@ -1248,9 +1240,12 @@ final class DashboardViewModel {
             errorMessage = String(localized: "Data format changed. The app may need an update.")
             lastFetchFailed = true
         } catch _ as URLError {
+            // Offline with nothing saved: the bundled seasons still make a board.
+            if players.isEmpty { _ = await ingestBundledHistory() }
             errorMessage = players.isEmpty ? String(localized: "Can't reach data feed. Check your connection.") : String(localized: "Showing saved data. Pull to refresh when your connection improves.")
             lastFetchFailed = true
         } catch {
+            if players.isEmpty { _ = await ingestBundledHistory() }
             errorMessage = players.isEmpty ? String(localized: "Something went wrong loading player data.") : String(localized: "Showing saved data. Pull to refresh to try again.")
             lastFetchFailed = true
         }
@@ -1279,6 +1274,20 @@ final class DashboardViewModel {
         if offersPhaseChoice, selectedPhase == .postseason {
             await reloadPostseason()
         }
+    }
+
+    /// Puts the bundled history on the board when nothing current is available.
+    /// Returns false when there is none either.
+    private func ingestBundledHistory() async -> Bool {
+        let historical: [Player] = await Task.detached { [cache] in
+            if let cache = cache as? TwoTierPlayerCache {
+                return cache.loadHistoricalPlayers()
+            }
+            return (try? cache?.loadPlayers()) ?? []
+        }.value
+        guard !historical.isEmpty else { return false }
+        ingestPlayers(historical)
+        return true
     }
 
     func loadHistoricalIfNeeded() async {

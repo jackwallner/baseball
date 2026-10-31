@@ -162,6 +162,18 @@ final class DashboardViewModelTests: XCTestCase {
     }
 
     @MainActor
+    func testOfflineFirstLaunchShowsBundledHistory() async throws {
+        let directory = FileManager.default.temporaryDirectory.appending(path: UUID().uuidString)
+        let cache = TwoTierPlayerCache(directory: directory)
+        try XCTSkipIf(cache.loadHistoricalPlayers().isEmpty, "bundled history missing")
+        let vm = DashboardViewModel(provider: MockProvider(error: URLError(.notConnectedToInternet)), cache: cache)
+        await vm.load()
+        XCTAssertTrue(vm.isReady, "A first launch with no connection should still show the bundled seasons")
+        XCTAssertTrue(vm.errorMessage?.contains("Showing saved data") == true)
+        XCTAssertTrue(vm.lastFetchFailed)
+    }
+
+    @MainActor
     func testSortLabelReflectsCategory() async {
         // Fixtures sit on the current season: past seasons are StatScout+ gated,
         // so a non-Pro VM would never snap `selectedSeason` onto them and
