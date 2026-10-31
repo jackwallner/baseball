@@ -756,7 +756,7 @@ struct ConfigMissingView: View {
                 .font(SavantType.body)
                 .foregroundStyle(SavantPalette.inkSecondary)
                 .multilineTextAlignment(.center)
-            if let supportURL = URL(string: "https://jackwallner.github.io/baseball/support.html") {
+            if let supportURL = URL(string: "https://jackwallner.com/ios/baseball/support.html") {
                 Link("Contact Support", destination: supportURL)
                     .buttonStyle(.borderedProminent)
                     .tint(SavantPalette.savantRed)
