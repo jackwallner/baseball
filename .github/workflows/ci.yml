@@ -27,12 +27,28 @@ jobs:
         run: brew install xcodegen
       - name: Generate project
         run: xcodegen generate
+      # Unit tests only, with no `|| true`, and a resolved simulator. The old step
+      # named a device the runner no longer has and swallowed the failure, so it
+      # reported green while running nothing. StatScoutUITests stays local: see the
+      # same step in hockey's CI.
       - name: Build and test
         run: |
+          set -euo pipefail
+          UDID=$(xcrun simctl list devices available --json | python3 -c "
+          import json, sys
+          devices = json.load(sys.stdin)['devices']
+          for runtime in sorted(devices, reverse=True):
+              for device in devices[runtime]:
+                  if device.get('isAvailable') and device['name'].startswith('iPhone'):
+                      print(device['udid'])
+                      raise SystemExit
+          raise SystemExit('no available iPhone simulator on this runner')
+          ")
           xcodebuild -project StatScout.xcodeproj \
             -scheme StatScout \
-            -destination 'platform=iOS Simulator,name=iPhone 16' \
-            test || true
+            -destination "id=$UDID" \
+            -only-testing:StatScoutTests \
+            test
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
