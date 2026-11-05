@@ -1,0 +1,42 @@
+{
+  "ja": {
+    "01_stats_hitting.png": "2015年からの全選手を\nランキングで",
+    "02_player_profile.png": "選手の成績が\nひと目でわかる",
+    "03_trends.png": "いま上昇中の\n選手をチェック",
+    "04_compare.png": "選手の実力を\n並べて比較",
+    "05_team.png": "お気に入りチームの\n成績をすぐにチェック",
+    "06_year_compare.png": "2015年からの成績を\nシーズンごとに比較",
+    "07_standard_running.png": "おなじみの成績も\nすばやくランキング",
+    "08_teams_index.png": "全30チームの\n成績をチェック"
+  },
+  "es-MX": {
+    "01_stats_hitting.png": "Todos los jugadores desde 2015\nEn el ranking",
+    "02_player_profile.png": "El perfil de cada jugador\nDe un vistazo",
+    "03_trends.png": "Los jugadores en ascenso\nAhora mismo",
+    "04_compare.png": "Compara jugadores\nCara a cara",
+    "05_team.png": "Tu equipo\nA un toque",
+    "06_year_compare.png": "Compara temporadas\nDesde 2015",
+    "07_standard_running.png": "Las estadísticas de siempre\nAl instante",
+    "08_teams_index.png": "Los 30 equipos\nEn un solo lugar"
+  },
+  "zh-Hant": {
+    "01_stats_hitting.png": "2015 年以來的球員\n一覽排行榜",
+    "02_player_profile.png": "球員數據\n一眼掌握",
+    "03_trends.png": "誰的表現升溫\n即時掌握",
+    "04_compare.png": "球員數據\n並排比較",
+    "05_team.png": "心儀球隊的數據\n一點就看",
+    "06_year_compare.png": "2015 年以來的球季\n逐年比較",
+    "07_standard_running.png": "熟悉的數據\n快速排行",
+    "08_teams_index.png": "30 支球隊\n數據一手掌握"
+  },
+  "ko": {
+    "01_stats_hitting.png": "2015년부터 모든 선수\n순위로 한눈에",
+    "02_player_profile.png": "선수의 기록을\n한눈에 확인",
+    "03_trends.png": "지금 상승세인\n선수를 확인",
+    "04_compare.png": "선수들의 기록을\n나란히 비교",
+    "05_team.png": "응원하는 팀의 기록\n한 번에 확인",
+    "06_year_compare.png": "2015년부터 시즌 기록을\n연도별로 비교",
+    "07_standard_running.png": "익숙한 기본 기록도\n빠르게 순위 확인",
+    "08_teams_index.png": "30개 팀의 기록을\n한곳에서 확인"
+  }
+}
