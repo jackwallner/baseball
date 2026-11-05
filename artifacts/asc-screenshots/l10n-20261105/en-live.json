@@ -1,0 +1,63 @@
+{
+ "phone": {
+  "display_type": "APP_IPHONE_67",
+  "frames": [
+   {
+    "file": "01_stats_hitting.png",
+    "md5": "a5b8acc23d49634e374059c2e581892d",
+    "url": "https://is1-ssl.mzstatic.com/image/thumb/nM27-aZbGg21zkRLCmO_MA/1320x2868bb.png",
+    "w": 1320,
+    "h": 2868
+   },
+   {
+    "file": "02_player_profile.png",
+    "md5": "616ec90fd90c84af1b85522016915408",
+    "url": "https://is1-ssl.mzstatic.com/image/thumb/UVG_C22zRdi81ZAWe1nYAw/1320x2868bb.png",
+    "w": 1320,
+    "h": 2868
+   },
+   {
+    "file": "03_trends.png",
+    "md5": "b56be3b05b0d9696eae4d1e83898f735",
+    "url": "https://is1-ssl.mzstatic.com/image/thumb/B_082-VExkT3Ex2-aZaEFA/1320x2868bb.png",
+    "w": 1320,
+    "h": 2868
+   },
+   {
+    "file": "04_compare.png",
+    "md5": "b73c022b820dd166aa9aa2140050ed71",
+    "url": "https://is1-ssl.mzstatic.com/image/thumb/l0jGMAkVjlya2rnlm5-zWw/1320x2868bb.png",
+    "w": 1320,
+    "h": 2868
+   },
+   {
+    "file": "05_team.png",
+    "md5": "8c252a084940112dd20c9d56a8052399",
+    "url": "https://is1-ssl.mzstatic.com/image/thumb/0ZLH2djuTXZkSxEnApsh4Q/1320x2868bb.png",
+    "w": 1320,
+    "h": 2868
+   },
+   {
+    "file": "06_year_compare.png",
+    "md5": "c2dcf727cfc098353654c5899efad1f1",
+    "url": "https://is1-ssl.mzstatic.com/image/thumb/wkL9vP6Ys8n7_ZBYJsH9Ug/1320x2868bb.png",
+    "w": 1320,
+    "h": 2868
+   },
+   {
+    "file": "07_standard_running.png",
+    "md5": "9785aebf6a4739ce303b63026eb9bccb",
+    "url": "https://is1-ssl.mzstatic.com/image/thumb/iCfp_bimKoG8tUFErWE94w/1320x2868bb.png",
+    "w": 1320,
+    "h": 2868
+   },
+   {
+    "file": "08_teams_index.png",
+    "md5": "1c5b4a6755151824182d4e8afcbaa286",
+    "url": "https://is1-ssl.mzstatic.com/image/thumb/RydjggF_ELErPXKJfyOnhg/1320x2868bb.png",
+    "w": 1320,
+    "h": 2868
+   }
+  ]
+ }
+}

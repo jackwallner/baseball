@@ -1,0 +1,58 @@
+{
+ "repo": "baseball",
+ "github": "jackwallner/baseball",
+ "bundle": "com.jackwallner.baseball",
+ "family": "statscout",
+ "asc_id": "6763945657",
+ "live_version": "1.5.5",
+ "targets": [
+  {
+   "rank": 26,
+   "store_locale": "ja",
+   "lang": "ja",
+   "apple_languages": "(ja)",
+   "apple_locale": "ja_JP",
+   "regions": [
+    "Japan"
+   ],
+   "customers": 23.0
+  },
+  {
+   "rank": 46,
+   "store_locale": "es-MX",
+   "lang": "es",
+   "apple_languages": "(es)",
+   "apple_locale": "es_MX",
+   "regions": [
+    "Mexico",
+    "Venezuela",
+    "Dominican Republic"
+   ],
+   "customers": 29.0
+  },
+  {
+   "rank": 56,
+   "store_locale": "zh-Hant",
+   "lang": "zh-Hant",
+   "apple_languages": "(zh-Hant)",
+   "apple_locale": "zh_TW",
+   "regions": [
+    "Taiwan"
+   ],
+   "customers": 11.0
+  },
+  {
+   "rank": 75,
+   "store_locale": "ko",
+   "lang": "ko",
+   "apple_languages": "(ko)",
+   "apple_locale": "ko_KR",
+   "regions": [
+    "South Korea"
+   ],
+   "customers": 8.0
+  }
+ ],
+ "store_locales_missing": [],
+ "dest": "artifacts/asc-screenshots/l10n-20261105"
+}
