@@ -28,6 +28,9 @@ struct StatsView: View {
     @State private var board: StatsBoard = .advanced
     @State private var standardStat = "AVG"
     @State private var standardSortDescending = true
+#if DEBUG
+    @State private var screenshotBoardConfigured = false
+#endif
     @State private var paywallTrigger: PaywallTrigger?
     @State private var pendingUnlock = PendingUnlockAction()
 
@@ -105,6 +108,17 @@ struct StatsView: View {
         }
         .onChange(of: store.isPro) { _, isPro in
             if paywallTrigger == nil { pendingUnlock.resume(isPro: isPro) }
+        }
+        .task {
+#if DEBUG
+            if ProcessInfo.processInfo.arguments.contains("-StoreScreenshotStandardRunning"), !screenshotBoardConfigured {
+                screenshotBoardConfigured = true
+                viewModel.selectedCategory = .running
+                board = .standard
+                standardStat = "SB"
+                standardSortDescending = true
+            }
+#endif
         }
     }
 

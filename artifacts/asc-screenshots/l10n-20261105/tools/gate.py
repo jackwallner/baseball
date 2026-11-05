@@ -119,6 +119,15 @@ def main() -> int:
                 failures.append(f'HEADER {name}: unchanged English')
             if frame['file'] not in english:
                 failures.append(f'HEADER {name}: missing English reference ({english_locale})')
+            for extra in frame.get('extra_text', []):
+                extra_key = f"{frame['file']}#{extra['key']}"
+                extra_text = headers.get(args.locale, {}).get(extra_key, '')
+                if not extra_text.strip():
+                    failures.append(f'HEADER {name}: empty {extra_key}')
+                if normalize(extra_text) and normalize(extra_text) == normalize(english.get(extra_key, '')):
+                    failures.append(f'HEADER {name}: unchanged English {extra_key}')
+                if extra_key not in english:
+                    failures.append(f'HEADER {name}: missing English reference ({extra_key})')
             path = output / frame['file']
             if path.is_file():
                 with Image.open(path) as im:
@@ -156,10 +165,16 @@ def main() -> int:
             raise ValueError(result.stderr.strip())
         leaks = []
         for item in json.loads(result.stdout):
+            names = raw_frames[Path(item['path'])]
             for line in item['lines']:
-                if normalize(line) in sources:
-                    for name in raw_frames[Path(item['path'])]:
-                        leaks.append(f'LEAK {name}: {line}')
+                normalized = normalize(line)
+                if normalized not in sources:
+                    continue
+                # Victor Scott II's avatar initials look like the comparison separator to OCR.
+                if normalized == 'vs' and names and all(name == 'phone/07_standard_running.png' for name in names):
+                    continue
+                for name in names:
+                    leaks.append(f'LEAK {name}: {line}')
         failures.extend(leaks[:40])
         if len(leaks) > 40:
             failures.append(f'OCR {len(leaks) - 40} additional leaks suppressed')

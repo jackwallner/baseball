@@ -68,6 +68,10 @@ struct StatScoutApp: App {
                 }
                 .environmentObject(store)
                 .preferredColorScheme(.light)
+            } else if ScreenshotFixtureAPI.isEnabled {
+                ContentView(api: ScreenshotFixtureAPI())
+                    .environmentObject(store)
+                    .preferredColorScheme(.light)
             } else if DuoScreenshotMode.isSeeded {
                 ContentView(api: PreviewStatcastAPI(includesSamples: false))
                     .environmentObject(store)

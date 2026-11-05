@@ -20,6 +20,7 @@
 		1C05ED9E954E365E79E177AC /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57A36C805E9D0AB83292B6F7 /* PaywallView.swift */; };
 		1C1FB11FC33A0210A42B31CD /* SeasonContextRegressionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF2C1E34FF706174254DC582 /* SeasonContextRegressionTests.swift */; };
 		1D3DC396F2A1B8C199616A3E /* PlayerShareCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DE4C45AF67381478971E92 /* PlayerShareCard.swift */; };
+		1FB545854A9DB3D62BBF0E2C /* LocalizedStoreScreenshotUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CEE11C418A15993E9920188 /* LocalizedStoreScreenshotUITests.swift */; };
 		2143DB27E4B8D137F0FA7AB7 /* PurchaseFailureCopyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89D6FE8BD9E23822F9D32E2E /* PurchaseFailureCopyTests.swift */; };
 		27A3E5CEECF37B31B4AEAC1D /* PostseasonQualifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 162CE726AA6021FE1263539E /* PostseasonQualifier.swift */; };
 		2982FDAC3BB6B93C02FB73E8 /* UpdateShowcaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E9F9A3189DDAB0CFADFCF3 /* UpdateShowcaseTests.swift */; };
@@ -69,6 +70,7 @@
 		B56324087E4F4F901D6586E5 /* PlayerProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AD97C159FCE484C7AA9DDDF /* PlayerProfileView.swift */; };
 		B7206DA461865E379BE3029D /* MetricRankingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00934226FB4C12145112549C /* MetricRankingView.swift */; };
 		B82ABFD1F3A3EDEC4CB20F27 /* TeamStandardCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAD45B2E53DDFC8BEC30D957 /* TeamStandardCard.swift */; };
+		BD22CEDA849E920ECC9C23B3 /* StoreScreenshotLocales.json in Resources */ = {isa = PBXBuildFile; fileRef = 86BEB9A2FCE00B1BC4D6E43B /* StoreScreenshotLocales.json */; };
 		C080C107A1B4ABFAC0DCE3E9 /* YearComparisonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7021023A2FAE67C688618334 /* YearComparisonView.swift */; };
 		C0B5ED98CED5C19CF7179A7A /* PlayerGameLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52830F232CD201E1DAC22F7C /* PlayerGameLog.swift */; };
 		C2B134691749FA08C2DFDA6A /* CompareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 924C787B5EA5949F5BB19DF5 /* CompareView.swift */; };
@@ -83,6 +85,7 @@
 		DBAED006FBC8ACCE2A4D49FD /* StoreService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F817C1759417F135E7CD20C2 /* StoreService.swift */; };
 		DD94DB0E328E4A929185BC69 /* PaywallFunnelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D3ACCAE6ED2788F0378F5DF /* PaywallFunnelTests.swift */; };
 		DE3E81E46D644C2617940B7E /* PlayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC2DEECB438987B32405C3A /* PlayerTests.swift */; };
+		E4F4F9DCDD33436ED0A01207 /* ScreenshotFixtureAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB398BC306011F6DBC28935E /* ScreenshotFixtureAPI.swift */; };
 		ED016CD796655DB5AAC68847 /* PlayerShareCardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4217AB45E328A9DF3C935F4A /* PlayerShareCardTests.swift */; };
 		F341C68173E63893D81C1AD6 /* PaywallScreenshotHarness.swift in Sources */ = {isa = PBXBuildFile; fileRef = C09B5BA2F2442F748C0FC062 /* PaywallScreenshotHarness.swift */; };
 		F3563F2B7F48DF97E111BC47 /* PaywallFunnelUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8A66FC0340626BB4D22AA18 /* PaywallFunnelUITests.swift */; };
@@ -166,6 +169,7 @@
 		82D4BEC37C8EF5436239336D /* RecentFormCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentFormCard.swift; sourceTree = "<group>"; };
 		84613D1270C1E46CDDD09A6D /* LocalizationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationTests.swift; sourceTree = "<group>"; };
 		863BFF7A316DFA39C2BC952C /* TrendQualifierTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrendQualifierTests.swift; sourceTree = "<group>"; };
+		86BEB9A2FCE00B1BC4D6E43B /* StoreScreenshotLocales.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = StoreScreenshotLocales.json; sourceTree = "<group>"; };
 		8742D48A80166C1A9F4F905A /* PlayerShareCardUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerShareCardUITests.swift; sourceTree = "<group>"; };
 		880A0DD853D22AB060960F5D /* PerformanceBudgetTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerformanceBudgetTests.swift; sourceTree = "<group>"; };
 		89D6FE8BD9E23822F9D32E2E /* PurchaseFailureCopyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurchaseFailureCopyTests.swift; sourceTree = "<group>"; };
@@ -180,6 +184,7 @@
 		96E9F9A3189DDAB0CFADFCF3 /* UpdateShowcaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateShowcaseTests.swift; sourceTree = "<group>"; };
 		9AD97C159FCE484C7AA9DDDF /* PlayerProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerProfileView.swift; sourceTree = "<group>"; };
 		9C04FC271035959EFD5300A2 /* SavantModules.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavantModules.swift; sourceTree = "<group>"; };
+		9CEE11C418A15993E9920188 /* LocalizedStoreScreenshotUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizedStoreScreenshotUITests.swift; sourceTree = "<group>"; };
 		A023C87BB9DBC5AECE6E44F7 /* UpdateShowcaseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateShowcaseView.swift; sourceTree = "<group>"; };
 		A0F3B0A1BCB8A4DEF203DB61 /* StatScoutUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = StatScoutUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A6DFC3237D3CB5ADC1082AD7 /* RobotoMono-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "RobotoMono-Regular.ttf"; sourceTree = "<group>"; };
@@ -197,6 +202,7 @@
 		C7699F37BE47BC9BE5A5A4B1 /* StatScoutTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = StatScoutTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CF2C1E34FF706174254DC582 /* SeasonContextRegressionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeasonContextRegressionTests.swift; sourceTree = "<group>"; };
 		D8A66FC0340626BB4D22AA18 /* PaywallFunnelUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallFunnelUITests.swift; sourceTree = "<group>"; };
+		DB398BC306011F6DBC28935E /* ScreenshotFixtureAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotFixtureAPI.swift; sourceTree = "<group>"; };
 		E07A772C0BC9828B22A7CE51 /* FavoritesStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesStore.swift; sourceTree = "<group>"; };
 		E2D1812126A525283A3CEC7F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		ECB59368024F23FBC63D833E /* StatScoutApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatScoutApp.swift; sourceTree = "<group>"; };
@@ -288,10 +294,12 @@
 		7EDC7D0E9E4273221B5AFF44 /* StatScoutUITests */ = {
 			isa = PBXGroup;
 			children = (
+				9CEE11C418A15993E9920188 /* LocalizedStoreScreenshotUITests.swift */,
 				D8A66FC0340626BB4D22AA18 /* PaywallFunnelUITests.swift */,
 				8742D48A80166C1A9F4F905A /* PlayerShareCardUITests.swift */,
 				7D6EF83C10DB1C4887277F68 /* SeasonPickerUITests.swift */,
 				5BC5EE3CB654E37FE99FE844 /* StatScoutComprehensiveUITests.swift */,
+				86BEB9A2FCE00B1BC4D6E43B /* StoreScreenshotLocales.json */,
 			);
 			path = StatScoutUITests;
 			sourceTree = "<group>";
@@ -341,6 +349,7 @@
 				E07A772C0BC9828B22A7CE51 /* FavoritesStore.swift */,
 				346E3D39DDC5F6FDD387016B /* PlayerCache.swift */,
 				C62780264C15B926A095378C /* ReviewPromptTracker.swift */,
+				DB398BC306011F6DBC28935E /* ScreenshotFixtureAPI.swift */,
 				15914E954BD86B91C09E5C88 /* StatcastAPI.swift */,
 				F817C1759417F135E7CD20C2 /* StoreService.swift */,
 			);
@@ -435,6 +444,7 @@
 			buildConfigurationList = 1A40E0275A1654AF28D537F3 /* Build configuration list for PBXNativeTarget "StatScoutUITests" */;
 			buildPhases = (
 				9D4C1E692D360F6632EF43DD /* Sources */,
+				2A848EFE525D935B34DD5A34 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -538,6 +548,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		2A848EFE525D935B34DD5A34 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BD22CEDA849E920ECC9C23B3 /* StoreScreenshotLocales.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
@@ -627,6 +645,7 @@
 				CAF8B7DDD2BFFDE89C2DCE58 /* SavantMenus.swift in Sources */,
 				FE17DDC74A43A910CD4A1CE8 /* SavantModules.swift in Sources */,
 				56EA8C43A6C48A00D0DE3E48 /* SavantSegmented.swift in Sources */,
+				E4F4F9DCDD33436ED0A01207 /* ScreenshotFixtureAPI.swift in Sources */,
 				189D1222312FEE374CFA4DEE /* SettingsView.swift in Sources */,
 				194BDDCA1D45B8E71852DF10 /* StandardStatsLeadersView.swift in Sources */,
 				97ADF393CE14DE856A50A0B5 /* StatScoutApp.swift in Sources */,
@@ -651,6 +670,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1FB545854A9DB3D62BBF0E2C /* LocalizedStoreScreenshotUITests.swift in Sources */,
 				F3563F2B7F48DF97E111BC47 /* PaywallFunnelUITests.swift in Sources */,
 				6CA89104D9DFA86F1773C83C /* PlayerShareCardUITests.swift in Sources */,
 				7FB54B900D718DB5EA583C97 /* SeasonPickerUITests.swift in Sources */,
@@ -682,7 +702,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = StatScout/StatScout.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CURRENT_PROJECT_VERSION = 197;
+				CURRENT_PROJECT_VERSION = 199;
 				DEVELOPMENT_TEAM = YXG4MP6W39;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = StatScout/Info.plist;
@@ -803,7 +823,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = StatScout/StatScout.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 197;
+				CURRENT_PROJECT_VERSION = 199;
 				DEVELOPMENT_TEAM = YXG4MP6W39;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = StatScout/Info.plist;

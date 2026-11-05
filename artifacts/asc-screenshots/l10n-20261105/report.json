@@ -1,0 +1,25 @@
+{
+  "locales": ["ja", "es-MX", "zh-Hant", "ko"],
+  "frames": 6,
+  "gate": {
+    "ja": "PASS",
+    "es-MX": "PASS",
+    "zh-Hant": "PASS",
+    "ko": "PASS"
+  },
+  "gh_sim_jobs": 6,
+  "app_code_changed": [
+    {"path": "StatScout/Resources/Localizable.xcstrings", "debug_only": false},
+    {"path": "StatScout/Services/ScreenshotFixtureAPI.swift", "debug_only": true},
+    {"path": "StatScout/StatScoutApp.swift", "debug_only": true},
+    {"path": "StatScout/Views/StatsView.swift", "debug_only": true}
+  ],
+  "defects": [
+    "Compare's vs separator lacked ja, es, and zh-Hant translations; catalog entries were added and localization validation passed."
+  ],
+  "left_out": [
+    "04_compare.png: captured before the separator fix and still shows English UI text; omitted until a fresh localized capture.",
+    "08_teams_index.png: the 2026 screenshot fixture shows four active clubs, not the 30 claimed by the English frame."
+  ],
+  "adapter": "xcuitest"
+}

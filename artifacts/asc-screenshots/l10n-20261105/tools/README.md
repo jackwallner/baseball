@@ -1,5 +1,24 @@
 # Screenshot localization kit
 
+## StatScout capture
+
+```sh
+KIT=artifacts/asc-screenshots/l10n-20261105
+python3 -m venv "$KIT/.venv"
+"$KIT/.venv/bin/python" -m pip install pillow numpy
+"$KIT/tools/build.sh"
+"$KIT/tools/fetch_live.py"
+"$KIT/tools/capture.sh"                 # all target locales in one iPhone job
+"$KIT/tools/capture.sh" ja es-MX        # selected locales plus en-US baseline
+"$KIT/tools/compose.sh"                 # reskin, sheet, gate, and copy target PNGs
+```
+
+The app uses its DEBUG screenshot fixture, with bundled demo rows and history.
+Capture requires no Supabase or RevenueCat credentials. Generated raws, output,
+and review sheets stay under the kit's ignored folders.
+
+The general compositor notes below apply to this adapter too.
+
 ```sh
 cd l10n-kit
 /usr/bin/python3 -m venv .venv

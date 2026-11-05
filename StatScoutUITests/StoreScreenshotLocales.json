@@ -1,0 +1,77 @@
+[
+  {
+    "store": "en-US",
+    "language": "en",
+    "region": "en_US",
+    "scenes": [
+      1,
+      2,
+      3,
+      5,
+      6,
+      7
+    ],
+    "seasonPicker": "Season and season type",
+    "yearCompare": "Year Compare"
+  },
+  {
+    "store": "ja",
+    "language": "ja",
+    "region": "ja_JP",
+    "scenes": [
+      1,
+      2,
+      3,
+      5,
+      6,
+      7
+    ],
+    "seasonPicker": "シーズンとシーズン種別",
+    "yearCompare": "年別比較"
+  },
+  {
+    "store": "es-MX",
+    "language": "es",
+    "region": "es_MX",
+    "scenes": [
+      1,
+      2,
+      3,
+      5,
+      6,
+      7
+    ],
+    "seasonPicker": "Temporada y tipo de temporada",
+    "yearCompare": "Comparar años"
+  },
+  {
+    "store": "zh-Hant",
+    "language": "zh-Hant",
+    "region": "zh_TW",
+    "scenes": [
+      1,
+      2,
+      3,
+      5,
+      6,
+      7
+    ],
+    "seasonPicker": "球季與球季類型",
+    "yearCompare": "逐年比較"
+  },
+  {
+    "store": "ko",
+    "language": "ko",
+    "region": "ko_KR",
+    "scenes": [
+      1,
+      2,
+      3,
+      5,
+      6,
+      7
+    ],
+    "seasonPicker": "시즌 및 시즌 종류",
+    "yearCompare": "연도별 비교"
+  }
+]
