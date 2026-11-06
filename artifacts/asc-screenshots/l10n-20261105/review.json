@@ -148,6 +148,12 @@
       "file": "05_team.png",
       "what": "The floating tab bar covers the final swing-length metric row and the roster-weighting footer. Confirmed at full resolution for es-MX and visible in the other locale sheets. The selected frame should show the metric unobstructed.",
       "severity": "minor"
+    },
+    {
+      "locale": "all",
+      "file": "Compare frame",
+      "what": "Left out because its capture predates the separator translation fix. Recapture and restore it. The team directory frame stays out, recorded in report.json, because the fixture has four clubs.",
+      "severity": "blocker"
     }
   ],
   "unsure": [
