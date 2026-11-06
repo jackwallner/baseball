@@ -230,6 +230,80 @@
           ]
         },
         {
+          "file": "04_compare.png",
+          "base": "en-live/phone/04_compare.png",
+          "raw": "04",
+          "screen": [
+            111,
+            408,
+            1098,
+            2385
+          ],
+          "radius": 44,
+          "header_box": [
+            70,
+            0,
+            1180,
+            385
+          ],
+          "header_lines": [
+            {
+              "box": [
+                90,
+                58,
+                1140,
+                110
+              ],
+              "font": "AvenirNext-Heavy",
+              "color": [
+                11,
+                18,
+                32
+              ],
+              "max_size": 86,
+              "min_size": 44,
+              "align": "left"
+            },
+            {
+              "box": [
+                90,
+                162,
+                1140,
+                106
+              ],
+              "font": "AvenirNext-HeavyItalic",
+              "color": [
+                215,
+                25,
+                32
+              ],
+              "max_size": 82,
+              "min_size": 44,
+              "align": "left"
+            }
+          ],
+          "extra_text": [
+            {
+              "key": "description",
+              "box": [
+                92,
+                276,
+                1140,
+                68
+              ],
+              "font": "AvenirNext-DemiBold",
+              "color": [
+                42,
+                51,
+                64
+              ],
+              "max_size": 50,
+              "min_size": 23,
+              "align": "left"
+            }
+          ]
+        },
+        {
           "file": "05_team.png",
           "base": "en-live/phone/05_team.png",
           "raw": "05",

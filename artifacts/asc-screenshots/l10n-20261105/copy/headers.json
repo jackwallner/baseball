@@ -9,6 +9,8 @@
     "01_stats_hitting.png#description": "Percentile rankings, refreshed nightly.",
     "02_player_profile.png#description": "One screen. Every metric that matters.",
     "03_trends.png#description": "Ranked by how far they've moved, not where they sit.",
+    "04_compare.png": "Settle it.\nSide by side.",
+    "04_compare.png#description": "Any two players, any two seasons.",
     "05_team.png#description": "All 30 rosters, hitting through running.",
     "06_year_compare.png#description": "Percentile by percentile, year over year.",
     "07_standard_running.png#description": "AVG, ERA, SB: the box score, sorted."
@@ -23,6 +25,8 @@
     "01_stats_hitting.png#description": "パーセンタイルを毎晩更新",
     "02_player_profile.png#description": "すべての指標を1画面で確認",
     "03_trends.png#description": "変動幅で順位を表示",
+    "04_compare.png": "決着をつけよう\n並べて比較",
+    "04_compare.png#description": "2人の選手を2つのシーズンで比較",
     "05_team.png#description": "30球団の打撃から走塁まで",
     "06_year_compare.png#description": "パーセンタイルで年別比較",
     "07_standard_running.png#description": "AVG、ERA、SBをランキング"
@@ -37,6 +41,8 @@
     "01_stats_hitting.png#description": "Percentiles actualizados cada noche",
     "02_player_profile.png#description": "Cada dato importante en una pantalla",
     "03_trends.png#description": "Jugadores ordenados por su cambio reciente",
+    "04_compare.png": "Decide el debate\nCara a cara",
+    "04_compare.png#description": "Compara a dos jugadores en dos temporadas",
     "05_team.png#description": "30 plantillas, bateo y juego de bases",
     "06_year_compare.png#description": "Compara percentiles, temporada por temporada",
     "07_standard_running.png#description": "AVG, ERA y SB, en orden"
@@ -51,6 +57,8 @@
     "01_stats_hitting.png#description": "百分位排名每晚更新",
     "02_player_profile.png#description": "所有重要數據，一個畫面看完",
     "03_trends.png#description": "依球員近期數據變化幅度排名",
+    "04_compare.png": "一較高下\n並排比較",
+    "04_compare.png#description": "比較兩位球員的兩個球季",
     "05_team.png#description": "30 支球隊，從打擊到跑壘",
     "06_year_compare.png#description": "逐項百分位，逐季比較",
     "07_standard_running.png#description": "打擊率、防禦率、盜壘快速排行"
@@ -65,6 +73,8 @@
     "01_stats_hitting.png#description": "백분위 순위는 매일 밤 갱신",
     "02_player_profile.png#description": "모든 지표를 한 화면에서",
     "03_trends.png#description": "선수들의 최근 기록 변화 폭으로 정렬",
+    "04_compare.png": "승부를 가려요\n나란히 비교",
+    "04_compare.png#description": "두 선수의 두 시즌을 나란히 비교",
     "05_team.png#description": "30개 팀의 타격부터 주루까지",
     "06_year_compare.png#description": "백분위로 시즌별 기록 비교",
     "07_standard_running.png#description": "AVG, ERA, SB 순위를 한눈에"

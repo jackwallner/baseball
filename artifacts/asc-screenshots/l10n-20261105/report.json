@@ -1,25 +1,52 @@
 {
-  "locales": ["ja", "es-MX", "zh-Hant", "ko"],
-  "frames": 6,
+  "locales": [
+    "ja",
+    "es-MX",
+    "zh-Hant",
+    "ko"
+  ],
+  "frames": 7,
   "gate": {
     "ja": "PASS",
     "es-MX": "PASS",
     "zh-Hant": "PASS",
     "ko": "PASS"
   },
-  "gh_sim_jobs": 6,
+  "gh_sim_jobs": 11,
   "app_code_changed": [
-    {"path": "StatScout/Resources/Localizable.xcstrings", "debug_only": false},
-    {"path": "StatScout/Services/ScreenshotFixtureAPI.swift", "debug_only": true},
-    {"path": "StatScout/StatScoutApp.swift", "debug_only": true},
-    {"path": "StatScout/Views/StatsView.swift", "debug_only": true}
+    {
+      "path": "StatScout/Services/ScreenshotFixtureAPI.swift",
+      "debug_only": true
+    },
+    {
+      "path": "StatScout/Views/RootTabView.swift",
+      "debug_only": false
+    },
+    {
+      "path": "StatScout/Views/TeamView.swift",
+      "debug_only": false
+    }
   ],
   "defects": [
-    "Compare's vs separator lacked ja, es, and zh-Hant translations; catalog entries were added and localization validation passed."
+    "01_stats_hitting.png: ScreenshotFixtureAPI now uses current-season demo rows only, so 2025 uses the bundled season history and shows Juan Soto once.",
+    "05_team.png: the capture test scrolls Swing Length and the roster-weighting footer above the floating tab bar and checks both elements are unobscured.",
+    "04_compare.png: restored the missing frame with localized comparison headers; the existing localized vs labels are visible in each target capture."
   ],
   "left_out": [
-    "04_compare.png: captured before the separator fix and still shows English UI text; omitted until a fresh localized capture.",
-    "08_teams_index.png: the 2026 screenshot fixture shows four active clubs, not the 30 claimed by the English frame."
+    "08_teams_index.png: the 2026 screenshot fixture has four active clubs, not the 30 shown by the English frame."
   ],
-  "adapter": "xcuitest"
+  "adapter": "xcuitest",
+  "unsure": [],
+  "localization_check": {
+    "result": "PASS",
+    "keys": 602,
+    "languages": 9,
+    "problems": 0
+  },
+  "unit_tests": {
+    "scheme": "StatScout",
+    "result": "PASS",
+    "passed": 178
+  },
+  "visual_review": "Viewed the four locale comparison sheets once. All 28 target PNGs are present across seven frames."
 }
