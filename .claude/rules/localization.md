@@ -53,3 +53,12 @@ Languages: en (source), es, fr, it, ja, pt-BR, zh-Hant, ko, zh-Hans, de. Chosen 
    `-hasCompletedOnboarding YES`. The paywall is SwiftUI (`PaywallView`), not a RevenueCat dashboard
    paywall, so its copy lives in this catalog. Simulators never configure RevenueCat, so the plan cards
    and prices cannot be screenshotted there.
+
+## Language row
+
+Settings has a Language row that names the running localization in itself
+(`Bundle.main.preferredLocalizations`) and opens `openSettingsURLString`, Apple's
+route for a per-app language change. iOS hides the app's Language option on a
+device with one preferred language unless `UIPrefersShowingLanguageSettings` is
+YES in `Info.plist`, so keep that key. The simulator's Settings opens at its root
+for this link; check the landing on a real iPhone.

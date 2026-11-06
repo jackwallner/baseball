@@ -71,5 +71,7 @@
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 	</array>
+	<key>UIPrefersShowingLanguageSettings</key>
+	<true/>
 </dict>
 </plist>
