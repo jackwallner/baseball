@@ -7,12 +7,16 @@
       1,
       2,
       3,
+      4,
       5,
       6,
       7
     ],
-    "seasonPicker": "Season and season type",
-    "yearCompare": "Year Compare"
+    "yearCompare": "Year Compare",
+    "teamFooter": "Weighted by PA across the hitting roster",
+    "swingLength": "Swing Length",
+    "versus": "vs",
+    "seasonPicker": "Season and season type"
   },
   {
     "store": "ja",
@@ -22,12 +26,16 @@
       1,
       2,
       3,
+      4,
       5,
       6,
       7
     ],
-    "seasonPicker": "シーズンとシーズン種別",
-    "yearCompare": "年別比較"
+    "yearCompare": "年別比較",
+    "teamFooter": "打者陣の打席数に応じた加重平均",
+    "swingLength": "スイング長",
+    "versus": "対",
+    "seasonPicker": "シーズンとシーズン種別"
   },
   {
     "store": "es-MX",
@@ -37,12 +45,16 @@
       1,
       2,
       3,
+      4,
       5,
       6,
       7
     ],
-    "seasonPicker": "Temporada y tipo de temporada",
-    "yearCompare": "Comparar años"
+    "yearCompare": "Comparar años",
+    "teamFooter": "Ponderado por PA en toda la plantilla de bateadores",
+    "swingLength": "Longitud del swing",
+    "versus": "contra",
+    "seasonPicker": "Temporada y tipo de temporada"
   },
   {
     "store": "zh-Hant",
@@ -52,12 +64,16 @@
       1,
       2,
       3,
+      4,
       5,
       6,
       7
     ],
-    "seasonPicker": "球季與球季類型",
-    "yearCompare": "逐年比較"
+    "yearCompare": "逐年比較",
+    "teamFooter": "依打者名單的打席數（PA）加權",
+    "swingLength": "揮棒長度",
+    "versus": "對",
+    "seasonPicker": "球季與球季類型"
   },
   {
     "store": "ko",
@@ -67,11 +83,15 @@
       1,
       2,
       3,
+      4,
       5,
       6,
       7
     ],
-    "seasonPicker": "시즌 및 시즌 종류",
-    "yearCompare": "연도별 비교"
+    "yearCompare": "연도별 비교",
+    "teamFooter": "타자 로스터의 PA 기준 가중치",
+    "swingLength": "스윙 길이",
+    "versus": "대",
+    "seasonPicker": "시즌 및 시즌 종류"
   }
 ]

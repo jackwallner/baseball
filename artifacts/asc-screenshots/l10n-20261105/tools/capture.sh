@@ -31,14 +31,25 @@ restore() { cp "$BACKUP" "$TEST_CONFIG"; rm -f "$BACKUP"; }
 trap restore EXIT
 
 "$PY" - "$KIT/app.json" "$ROOT/StatScout/Resources/Localizable.xcstrings" "$KIT/frames.json" "$TEST_CONFIG" "${LOCALES[@]}" <<'PY'
-import json, sys
+import json, os, sys
 from pathlib import Path
 
 app_path, catalog_path, frames_path, dest, *requested = sys.argv[1:]
 app = json.load(open(app_path, encoding='utf-8'))
 catalog = json.load(open(catalog_path, encoding='utf-8'))
 frames = json.load(open(frames_path, encoding='utf-8'))
-scenes = [int(frame['raw']) for frame in frames['sets']['phone']['frames']]
+all_scenes = [int(frame['raw']) for frame in frames['sets']['phone']['frames']]
+scene_filter = os.environ.get('SCREENSHOT_SCENES', '')
+if scene_filter.strip():
+    requested_scenes = {int(value.strip()) for value in scene_filter.split(',') if value.strip()}
+    unknown_scenes = requested_scenes - set(all_scenes)
+    if unknown_scenes:
+        raise SystemExit(f'Unknown scenes: {sorted(unknown_scenes)}')
+    scenes = [scene for scene in all_scenes if scene in requested_scenes]
+else:
+    scenes = all_scenes
+if not scenes:
+    raise SystemExit('No screenshot scenes selected')
 allowed = {item['store_locale'] for item in app['targets']}
 wanted = set(' '.join(requested).replace(',', ' ').split())
 if wanted - allowed:
@@ -62,9 +73,13 @@ def localized(key, lang):
     return value(node) or key
 
 keys = {
-    'seasonPicker': 'Season and season type', 'yearCompare': 'Year Compare',
+    'seasonPicker': 'Season and season type',
+    'yearCompare': 'Year Compare',
+    'teamFooter': 'Weighted by PA across the hitting roster',
+    'swingLength': 'Swing Length',
+    'versus': 'vs',
 }
-records = [dict(store='en-US', language='en', region='en_US', scenes=scenes, **{k: v for k, v in keys.items()})]
+records = []
 for target in app['targets']:
     if target['store_locale'] not in wanted:
         continue
@@ -78,9 +93,16 @@ for target in app['targets']:
 Path(dest).write_text(json.dumps(records, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 PY
 
-for locale in en-US "${LOCALES[@]}"; do
-  rm -rf "$KIT/raw/$locale/phone"
-done
+"$PY" - "$TEST_CONFIG" "$KIT/raw" <<'PY'
+import json, sys
+from pathlib import Path
+
+locales = json.loads(Path(sys.argv[1]).read_text(encoding='utf-8'))
+root = Path(sys.argv[2])
+for locale in locales:
+    for scene in locale['scenes']:
+        (root / locale['store'] / 'phone' / f'{scene:02d}.png').unlink(missing_ok=True)
+PY
 
 ID_FILE="$(mktemp)"
 cd "$ROOT"

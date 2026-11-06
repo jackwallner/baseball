@@ -1,33 +1,37 @@
 #if DEBUG
 import Foundation
 
-/// Offline store captures use the app's bundled demo players and rolling-form rows.
+/// Store captures use current-season demo rows and the bundled history for past seasons.
 struct ScreenshotFixtureAPI: StatcastProviding {
     private static let playerIDOverrides = [1: 592450, 669203: 677951]
+    static let launchArgument = "-ScreenshotData"
 
     static var isEnabled: Bool {
-        ProcessInfo.processInfo.arguments.contains("-StoreScreenshotData")
+        let arguments = ProcessInfo.processInfo.arguments
+        return arguments.contains(launchArgument) || arguments.contains("-StoreScreenshotData")
     }
 
     private var players: [Player] {
-        SampleData.players.map { player in
-            guard let playerId = Self.playerIDOverrides[player.playerId] else { return player }
-            return Player(
-                playerId: playerId,
-                name: player.name,
-                team: player.team,
-                position: player.position,
-                handedness: player.handedness,
-                imageURL: player.imageURL,
-                updatedAt: player.updatedAt,
-                season: player.season,
-                playerType: player.playerType,
-                source: player.source,
-                metrics: player.metrics,
-                standardStats: player.standardStats,
-                games: player.games
-            )
-        }
+        SampleData.players
+            .filter { $0.season == StatScoutSeason.current }
+            .map { player in
+                guard let playerId = Self.playerIDOverrides[player.playerId] else { return player }
+                return Player(
+                    playerId: playerId,
+                    name: player.name,
+                    team: player.team,
+                    position: player.position,
+                    handedness: player.handedness,
+                    imageURL: player.imageURL,
+                    updatedAt: player.updatedAt,
+                    season: player.season,
+                    playerType: player.playerType,
+                    source: player.source,
+                    metrics: player.metrics,
+                    standardStats: player.standardStats,
+                    games: player.games
+                )
+            }
     }
 
     func fetchPlayers() async throws -> [Player] {

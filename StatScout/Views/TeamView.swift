@@ -380,6 +380,7 @@ struct TeamView: View {
                 Color.clear.frame(height: 88)
             }
         }
+        .accessibilityIdentifier("team-screen-scroll")
         .scrollBounceBehavior(.basedOnSize)
         .scrollDismissesKeyboard(.interactively)
         .background(SavantPalette.canvas.ignoresSafeArea())

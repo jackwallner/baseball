@@ -9,7 +9,8 @@ python3 -m venv "$KIT/.venv"
 "$KIT/tools/build.sh"
 "$KIT/tools/fetch_live.py"
 "$KIT/tools/capture.sh"                 # all target locales in one iPhone job
-"$KIT/tools/capture.sh" ja es-MX        # selected locales plus en-US baseline
+"$KIT/tools/capture.sh" ja es-MX        # selected locales
+SCREENSHOT_SCENES=01,04,05 "$KIT/tools/capture.sh"  # selected frames, all target locales
 "$KIT/tools/compose.sh"                 # reskin, sheet, gate, and copy target PNGs
 ```
 

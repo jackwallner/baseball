@@ -251,6 +251,8 @@ struct RootTabView: View {
         .overlay(Capsule().stroke(SavantPalette.hairline, lineWidth: 0.5))
         .shadow(color: .black.opacity(0.10), radius: 12, y: 4)
         .padding(.bottom, 12)
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("floating-tab-bar")
     }
 
     private var statsTab: some View {
