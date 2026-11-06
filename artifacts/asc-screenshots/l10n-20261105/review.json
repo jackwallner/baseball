@@ -1,0 +1,160 @@
+{
+  "verdict": "FIX",
+  "header_fixes": [
+    {
+      "locale": "ja",
+      "file": "01_stats_hitting.png",
+      "before": "2015年からの全選手を\nランキングで",
+      "after": "2015年からの全選手を\nランキングで確認",
+      "why": "Complete the Japanese phrase with an action while preserving the English meaning. Copy corrected; PNG still requires rendering by the orchestrator because reskin.py requires absent raws and cannot reuse the existing screen."
+    },
+    {
+      "locale": "ja",
+      "file": "01_stats_hitting.png",
+      "before": "百分位排名每晚更新",
+      "after": "パーセンタイルを毎晩更新",
+      "why": "Supporting line: Replace Chinese text with Japanese and use the catalog term パーセンタイル. Copy corrected; PNG still requires rendering by the orchestrator because reskin.py requires absent raws and cannot reuse the existing screen."
+    },
+    {
+      "locale": "ja",
+      "file": "06_year_compare.png",
+      "before": "百分位でシーズンごとに比較",
+      "after": "パーセンタイルで年別比較",
+      "why": "Supporting line: Use the catalog term パーセンタイル instead of 百分位. Copy corrected; PNG still requires rendering by the orchestrator because reskin.py requires absent raws and cannot reuse the existing screen."
+    },
+    {
+      "locale": "es-MX",
+      "file": "01_stats_hitting.png",
+      "before": "Todos los jugadores desde 2015\nEn el ranking",
+      "after": "Jugadores desde 2015\nTodos en el ranking",
+      "why": "Balance the two lines while retaining all players since 2015. Copy corrected; PNG still requires rendering by the orchestrator because reskin.py requires absent raws and cannot reuse the existing screen."
+    },
+    {
+      "locale": "es-MX",
+      "file": "02_player_profile.png",
+      "before": "El perfil de cada jugador\nDe un vistazo",
+      "after": "Cada jugador\nDe un vistazo",
+      "why": "Balance the two lines and keep the at-a-glance player meaning. Copy corrected; PNG still requires rendering by the orchestrator because reskin.py requires absent raws and cannot reuse the existing screen."
+    },
+    {
+      "locale": "es-MX",
+      "file": "03_trends.png",
+      "before": "Ordenados por cuánto cambian, no por su posición",
+      "after": "Jugadores ordenados por su cambio reciente",
+      "why": "Supporting line: Remove contrastive negation and explicitly name the players. Copy corrected; PNG still requires rendering by the orchestrator because reskin.py requires absent raws and cannot reuse the existing screen."
+    },
+    {
+      "locale": "es-MX",
+      "file": "05_team.png",
+      "before": "Las 30 plantillas, de bateo a velocidad",
+      "after": "30 plantillas, bateo y juego de bases",
+      "why": "Supporting line: Use the catalog term Juego de bases for Running instead of velocidad. Copy corrected; PNG still requires rendering by the orchestrator because reskin.py requires absent raws and cannot reuse the existing screen."
+    },
+    {
+      "locale": "es-MX",
+      "file": "07_standard_running.png",
+      "before": "Las estadísticas de siempre\nAl instante",
+      "after": "Estadísticas de siempre\nA toda velocidad",
+      "why": "Balance the lines and preserve the English speed promise. Copy corrected; PNG still requires rendering by the orchestrator because reskin.py requires absent raws and cannot reuse the existing screen."
+    },
+    {
+      "locale": "zh-Hant",
+      "file": "01_stats_hitting.png",
+      "before": "2015 年以來的球員\n一覽排行榜",
+      "after": "2015 年起所有球員\n完整排名一覽",
+      "why": "Replace the unnatural 一覽排行榜 word order and restore the all-players meaning. Copy corrected; PNG still requires rendering by the orchestrator because reskin.py requires absent raws and cannot reuse the existing screen."
+    },
+    {
+      "locale": "zh-Hant",
+      "file": "03_trends.png",
+      "before": "誰的表現升溫\n即時掌握",
+      "after": "近期表現上升的球員\n掌握最新動態",
+      "why": "Name the players instead of using 誰 and avoid suggesting a real-time data feed. Copy corrected; PNG still requires rendering by the orchestrator because reskin.py requires absent raws and cannot reuse the existing screen."
+    },
+    {
+      "locale": "zh-Hant",
+      "file": "03_trends.png",
+      "before": "依變化幅度排名，不看目前名次",
+      "after": "依球員近期數據變化幅度排名",
+      "why": "Supporting line: Remove contrastive negation while preserving ranking by change. Copy corrected; PNG still requires rendering by the orchestrator because reskin.py requires absent raws and cannot reuse the existing screen."
+    },
+    {
+      "locale": "ko",
+      "file": "01_stats_hitting.png",
+      "before": "2015년부터 모든 선수\n순위로 한눈에",
+      "after": "2015년 이후 모든 선수\n순위를 한눈에",
+      "why": "Make the Korean phrase natural by using 순위를 한눈에. Copy corrected; PNG still requires rendering by the orchestrator because reskin.py requires absent raws and cannot reuse the existing screen."
+    },
+    {
+      "locale": "ko",
+      "file": "03_trends.png",
+      "before": "순위가 아닌 변화 폭으로 정렬",
+      "after": "선수들의 최근 기록 변화 폭으로 정렬",
+      "why": "Supporting line: Remove contrastive negation and explicitly name the players. Copy corrected; PNG still requires rendering by the orchestrator because reskin.py requires absent raws and cannot reuse the existing screen."
+    },
+    {
+      "locale": "ko",
+      "file": "07_standard_running.png",
+      "before": "AVG, ERA, SB를 빠르게 순위로",
+      "after": "AVG, ERA, SB 순위를 한눈에",
+      "why": "Supporting line: Replace the incomplete phrase 빠르게 순위로 with natural Korean. Copy corrected; PNG still requires rendering by the orchestrator because reskin.py requires absent raws and cannot reuse the existing screen."
+    }
+  ],
+  "ui_defects": [
+    {
+      "locale": "ja",
+      "file": "01_stats_hitting.png",
+      "what": "The selected 2025 ranking repeats Juan Soto at ranks 2 (NYM, .429) and 5 (NYY, .410). Rank 4 shows .404 above rank 5 at .410 despite the descending xwOBA sort indicator. This visibly contradicts the ranked-player promise and mixes player-season records.",
+      "severity": "blocker"
+    },
+    {
+      "locale": "ja",
+      "file": "05_team.png",
+      "what": "The floating tab bar covers the final swing-length metric row and the roster-weighting footer. Confirmed at full resolution for es-MX and visible in the other locale sheets. The selected frame should show the metric unobstructed.",
+      "severity": "minor"
+    },
+    {
+      "locale": "es-MX",
+      "file": "01_stats_hitting.png",
+      "what": "The selected 2025 ranking repeats Juan Soto at ranks 2 (NYM, .429) and 5 (NYY, .410). Rank 4 shows .404 above rank 5 at .410 despite the descending xwOBA sort indicator. This visibly contradicts the ranked-player promise and mixes player-season records.",
+      "severity": "blocker"
+    },
+    {
+      "locale": "es-MX",
+      "file": "05_team.png",
+      "what": "The floating tab bar covers the final swing-length metric row and the roster-weighting footer. Confirmed at full resolution for es-MX and visible in the other locale sheets. The selected frame should show the metric unobstructed.",
+      "severity": "minor"
+    },
+    {
+      "locale": "zh-Hant",
+      "file": "01_stats_hitting.png",
+      "what": "The selected 2025 ranking repeats Juan Soto at ranks 2 (NYM, .429) and 5 (NYY, .410). Rank 4 shows .404 above rank 5 at .410 despite the descending xwOBA sort indicator. This visibly contradicts the ranked-player promise and mixes player-season records.",
+      "severity": "blocker"
+    },
+    {
+      "locale": "zh-Hant",
+      "file": "05_team.png",
+      "what": "The floating tab bar covers the final swing-length metric row and the roster-weighting footer. Confirmed at full resolution for es-MX and visible in the other locale sheets. The selected frame should show the metric unobstructed.",
+      "severity": "minor"
+    },
+    {
+      "locale": "ko",
+      "file": "01_stats_hitting.png",
+      "what": "The selected 2025 ranking repeats Juan Soto at ranks 2 (NYM, .429) and 5 (NYY, .410). Rank 4 shows .404 above rank 5 at .410 despite the descending xwOBA sort indicator. This visibly contradicts the ranked-player promise and mixes player-season records.",
+      "severity": "blocker"
+    },
+    {
+      "locale": "ko",
+      "file": "05_team.png",
+      "what": "The floating tab bar covers the final swing-length metric row and the roster-weighting footer. Confirmed at full resolution for es-MX and visible in the other locale sheets. The selected frame should show the metric unobstructed.",
+      "severity": "minor"
+    }
+  ],
+  "unsure": [
+    "Viewed all four locale comparison sheets, one phone set per locale, covering all 24 target PNGs against the six configured live English frames. Full frames were opened only to confirm the Japanese wrong-language subtitle, the es-MX team overlap, and the zh-Hant trends wording.",
+    "Raw captures are absent. Raw-screen matching, raw OCR and the Swift/CoreText gate were not run. The host has no swiftc. sheet.py used Pillow only for its comparison labels; all screenshot pixels were unchanged.",
+    "All 14 copy corrections are pending PNG rendering and visual fit verification on the orchestrator. No target PNG was changed. The original rendered Japanese first-frame subtitle remains Chinese until that render.",
+    "No further English UI leaks against the searched catalog entries, clipped headers, header seams, inconsistent phone alignment, or inappropriate dates were visible. Player and club names, stat abbreviations and imperial baseball units were treated as proper names or domain notation. Public athlete names are expected content, with no private user data visible.",
+    "The omitted 04_compare.png and 08_teams_index.png remain outside frames.json and were not reviewed as target screenshots. report.json documents why they were withheld."
+  ]
+}

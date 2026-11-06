@@ -14,49 +14,49 @@
     "07_standard_running.png#description": "AVG, ERA, SB: the box score, sorted."
   },
   "ja": {
-    "01_stats_hitting.png": "2015年からの全選手を\nランキングで",
+    "01_stats_hitting.png": "2015年からの全選手を\nランキングで確認",
     "02_player_profile.png": "選手の成績が\nひと目でわかる",
     "03_trends.png": "いま上昇中の\n選手をチェック",
     "05_team.png": "お気に入りチームの\n成績をすぐにチェック",
     "06_year_compare.png": "2015年からの成績を\nシーズンごとに比較",
     "07_standard_running.png": "おなじみの成績も\nすばやくランキング",
-    "01_stats_hitting.png#description": "百分位排名每晚更新",
+    "01_stats_hitting.png#description": "パーセンタイルを毎晩更新",
     "02_player_profile.png#description": "すべての指標を1画面で確認",
     "03_trends.png#description": "変動幅で順位を表示",
     "05_team.png#description": "30球団の打撃から走塁まで",
-    "06_year_compare.png#description": "百分位でシーズンごとに比較",
+    "06_year_compare.png#description": "パーセンタイルで年別比較",
     "07_standard_running.png#description": "AVG、ERA、SBをランキング"
   },
   "es-MX": {
-    "01_stats_hitting.png": "Todos los jugadores desde 2015\nEn el ranking",
-    "02_player_profile.png": "El perfil de cada jugador\nDe un vistazo",
+    "01_stats_hitting.png": "Jugadores desde 2015\nTodos en el ranking",
+    "02_player_profile.png": "Cada jugador\nDe un vistazo",
     "03_trends.png": "Los jugadores en ascenso\nAhora mismo",
     "05_team.png": "Tu equipo\nA un toque",
     "06_year_compare.png": "Compara temporadas\nDesde 2015",
-    "07_standard_running.png": "Las estadísticas de siempre\nAl instante",
+    "07_standard_running.png": "Estadísticas de siempre\nA toda velocidad",
     "01_stats_hitting.png#description": "Percentiles actualizados cada noche",
     "02_player_profile.png#description": "Cada dato importante en una pantalla",
-    "03_trends.png#description": "Ordenados por cuánto cambian, no por su posición",
-    "05_team.png#description": "Las 30 plantillas, de bateo a velocidad",
+    "03_trends.png#description": "Jugadores ordenados por su cambio reciente",
+    "05_team.png#description": "30 plantillas, bateo y juego de bases",
     "06_year_compare.png#description": "Compara percentiles, temporada por temporada",
     "07_standard_running.png#description": "AVG, ERA y SB, en orden"
   },
   "zh-Hant": {
-    "01_stats_hitting.png": "2015 年以來的球員\n一覽排行榜",
+    "01_stats_hitting.png": "2015 年起所有球員\n完整排名一覽",
     "02_player_profile.png": "球員數據\n一眼掌握",
-    "03_trends.png": "誰的表現升溫\n即時掌握",
+    "03_trends.png": "近期表現上升的球員\n掌握最新動態",
     "05_team.png": "心儀球隊的數據\n一點就看",
     "06_year_compare.png": "2015 年以來的球季\n逐年比較",
     "07_standard_running.png": "熟悉的數據\n快速排行",
     "01_stats_hitting.png#description": "百分位排名每晚更新",
     "02_player_profile.png#description": "所有重要數據，一個畫面看完",
-    "03_trends.png#description": "依變化幅度排名，不看目前名次",
+    "03_trends.png#description": "依球員近期數據變化幅度排名",
     "05_team.png#description": "30 支球隊，從打擊到跑壘",
     "06_year_compare.png#description": "逐項百分位，逐季比較",
     "07_standard_running.png#description": "打擊率、防禦率、盜壘快速排行"
   },
   "ko": {
-    "01_stats_hitting.png": "2015년부터 모든 선수\n순위로 한눈에",
+    "01_stats_hitting.png": "2015년 이후 모든 선수\n순위를 한눈에",
     "02_player_profile.png": "선수의 기록을\n한눈에 확인",
     "03_trends.png": "지금 상승세인\n선수를 확인",
     "05_team.png": "응원하는 팀의 기록\n한 번에 확인",
@@ -64,9 +64,9 @@
     "07_standard_running.png": "익숙한 기본 기록도\n빠르게 순위 확인",
     "01_stats_hitting.png#description": "백분위 순위는 매일 밤 갱신",
     "02_player_profile.png#description": "모든 지표를 한 화면에서",
-    "03_trends.png#description": "순위가 아닌 변화 폭으로 정렬",
+    "03_trends.png#description": "선수들의 최근 기록 변화 폭으로 정렬",
     "05_team.png#description": "30개 팀의 타격부터 주루까지",
     "06_year_compare.png#description": "백분위로 시즌별 기록 비교",
-    "07_standard_running.png#description": "AVG, ERA, SB를 빠르게 순위로"
+    "07_standard_running.png#description": "AVG, ERA, SB 순위를 한눈에"
   }
 }
