@@ -415,12 +415,12 @@ struct TeamView: View {
             await viewModel?.loadRecentFormIfNeeded(window: rosterWindow)
         }
         .sheet(isPresented: $showingTrial, onDismiss: {
-            pendingUnlock.dismiss(isPro: store.isPro, purchasePending: store.purchasePending)
+            pendingUnlock.dismiss(isPro: store.isPro, pendingPurchases: store.pendingPurchaseCount)
         }) {
             TrialPitchSheet(trigger: .teamView)
         }
         .sheet(item: $trialTrigger, onDismiss: {
-            pendingUnlock.dismiss(isPro: store.isPro, purchasePending: store.purchasePending)
+            pendingUnlock.dismiss(isPro: store.isPro, pendingPurchases: store.pendingPurchaseCount)
         }) { trigger in
             TrialPitchSheet(trigger: trigger)
         }
@@ -469,7 +469,7 @@ struct TeamView: View {
                 phase: currentPhase,
                 fetchTeamGameLogs: fetchTeamGameLogs,
                 onUpgradeTap: { action in
-                    pendingUnlock.set(action)
+                    pendingUnlock.set(pendingPurchases: store.pendingPurchaseCount, action)
                     // Explicit tap, always answer it; the gate only caps
                     // automatic pop-ups.
                     showingTrial = true
@@ -489,7 +489,7 @@ struct TeamView: View {
             phase: currentPhase,
             fetchTeamGameLogs: fetchTeamGameLogs,
             onUpgradeTap: { action in
-                pendingUnlock.set(action)
+                pendingUnlock.set(pendingPurchases: store.pendingPurchaseCount, action)
                 showingTrial = true
             }
         )
@@ -617,7 +617,7 @@ struct TeamView: View {
             },
             selection: $rosterMode,
             onLockedTap: { mode in
-                pendingUnlock.set { rosterMode = mode }
+                pendingUnlock.set(pendingPurchases: store.pendingPurchaseCount) { rosterMode = mode }
                 trialTrigger = .recentForm
             }
         )
@@ -962,7 +962,7 @@ struct TeamView: View {
             isLocked: { viewModel.isSeasonLocked($0) },
             onSelectSeason: { season in
                 if viewModel.isSeasonLocked(season) {
-                    pendingUnlock.set { viewModel.selectSeason(season) }
+                    pendingUnlock.set(pendingPurchases: store.pendingPurchaseCount) { viewModel.selectSeason(season) }
                     trialTrigger = .lockedSeason(season)
                 } else {
                     viewModel.selectSeason(season)

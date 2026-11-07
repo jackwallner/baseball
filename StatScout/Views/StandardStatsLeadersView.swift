@@ -584,7 +584,7 @@ struct DrillDownSeasonPill: ViewModifier {
             isLocked: { viewModel.isSeasonLocked($0) },
             onSelectSeason: { picked in
                 if viewModel.isSeasonLocked(picked) {
-                    pendingUnlock.set {
+                    pendingUnlock.set(pendingPurchases: store.pendingPurchaseCount) {
                         season = picked
                         if picked != StatScoutSeason.current { phase = .regular }
                     }
@@ -630,7 +630,7 @@ struct DrillDownSeasonPill: ViewModifier {
             }
         }
         .sheet(item: $paywallTrigger, onDismiss: {
-            pendingUnlock.dismiss(isPro: store.isPro, purchasePending: store.purchasePending)
+            pendingUnlock.dismiss(isPro: store.isPro, pendingPurchases: store.pendingPurchaseCount)
         }) { trigger in
             TrialPitchSheet(trigger: trigger)
         }
