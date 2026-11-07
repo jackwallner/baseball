@@ -76,6 +76,10 @@ struct PlayerProfileView: View {
     @State private var standardWindow: RecentWindow = .fortnight
     @State private var favorites = FavoritesStore.shared
     @State private var shareImage: PlayerShareImage?
+    /// `onAppear` fires again when a drill-down pops back to this profile.
+    /// That is the same open, so it must not count toward the pitch or the
+    /// review moment a second time.
+    @State private var hasCountedOpen = false
 
     private let profileOpenCountKey = "profileOpenCount"
 
@@ -340,6 +344,8 @@ struct PlayerProfileView: View {
             )
         }
         .onAppear {
+            guard !hasCountedOpen else { return }
+            hasCountedOpen = true
             // Defer the first-impression pitch: a user verifying one stat from a
             // group chat shouldn't hit a subscription story before scrolling a
             // single row. Show it from the *second* profile open onward (Pro-only
