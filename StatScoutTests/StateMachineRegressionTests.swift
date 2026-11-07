@@ -126,6 +126,58 @@ final class StateMachineRegressionTests: XCTestCase {
         XCTAssertNotNil(vm.playerHistories[3]?.first { $0.season == past }, "a past-season row is not the feed's to prune")
     }
 
+    // MARK: B3: a failed refresh unsets the postseason phase
+
+    private func postseasonVM(_ p: SequencedStatcastProvider) async -> DashboardViewModel {
+        p.currentPlayersByCall = [[player(1)]]
+        let vm = DashboardViewModel(provider: p)
+        vm.selectedSeason = StatScoutSeason.current
+        await vm.load()
+        vm.selectPhase(.postseason)
+        return vm
+    }
+
+    func testOfflineResumeKeepsTheSelectedPostseasonBoard() async {
+        let p = SequencedStatcastProvider()
+        p.postseasonThroughByCall = [.success(Date())]
+        let vm = await postseasonVM(p)
+        XCTAssertTrue(vm.offersPhaseChoice)
+        XCTAssertEqual(vm.selectedPhase, .postseason)
+
+        p.offline = true
+        await vm.load()
+        XCTAssertTrue(vm.lastFetchFailed, "precondition: the refresh did fail")
+        XCTAssertEqual(vm.selectedPhase, .postseason, "an offline resume must not change the board the user picked")
+        XCTAssertTrue(vm.offersPhaseChoice, "the Postseason choice vanished from the season menu")
+    }
+
+    /// The quiet variant: the feed succeeds, only the through-date request
+    /// times out, and no banner would explain a flip.
+    func testThroughDateTimeoutKeepsTheSelectedPostseasonBoard() async {
+        let p = SequencedStatcastProvider()
+        p.postseasonThroughByCall = [.success(Date()), .failure(URLError(.timedOut))]
+        let vm = await postseasonVM(p)
+        XCTAssertEqual(vm.selectedPhase, .postseason)
+
+        await vm.load()
+        XCTAssertEqual(p.postseasonThroughCalls, 2)
+        XCTAssertFalse(vm.lastFetchFailed)
+        XCTAssertEqual(vm.selectedPhase, .postseason)
+        XCTAssertTrue(vm.offersPhaseChoice)
+    }
+
+    /// Control: a successful answer of "no postseason" still clears the phase.
+    func testThroughDateOfNilStillHidesThePostseason() async {
+        let p = SequencedStatcastProvider()
+        p.postseasonThroughByCall = [.success(Date()), .success(nil)]
+        let vm = await postseasonVM(p)
+        XCTAssertEqual(vm.selectedPhase, .postseason)
+
+        await vm.load()
+        XCTAssertEqual(vm.selectedPhase, .regular)
+        XCTAssertFalse(vm.offersPhaseChoice)
+    }
+
     // MARK: B1: pop-back to a profile counts as another profile open
 
     @MainActor
