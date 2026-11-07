@@ -344,8 +344,6 @@ struct PlayerProfileView: View {
             )
         }
         .onAppear {
-            guard !hasCountedOpen else { return }
-            hasCountedOpen = true
             // Defer the first-impression pitch: a user verifying one stat from a
             // group chat shouldn't hit a subscription story before scrolling a
             // single row. Show it from the *second* profile open onward (Pro-only

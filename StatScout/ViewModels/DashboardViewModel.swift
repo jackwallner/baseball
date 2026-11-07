@@ -1271,11 +1271,9 @@ final class DashboardViewModel {
         // last known value rather than failing the load. A failed request is
         // not "the playoffs haven't started", so it must not take a selected
         // Postseason board away.
-        do {
-            postseasonThrough = try await provider.fetchPostseasonThroughDate(
-                season: StatScoutSeason.current
-            )
-        } catch {}
+        postseasonThrough = try? await provider.fetchPostseasonThroughDate(
+            season: StatScoutSeason.current
+        )
         if !offersPhaseChoice { selectedPhase = .regular }
         if offersPhaseChoice, selectedPhase == .postseason {
             await reloadPostseason()
@@ -1380,7 +1378,7 @@ final class DashboardViewModel {
     /// they no longer carry was pruned by the pipeline and leaves the board.
     private func mergePlayers(replacing replacements: [Player], authoritativeFor season: Int? = nil) -> [Player] {
         var merged: [String: Player] = [:]
-        for player in playerHistories.values.flatMap({ $0 }) where season == nil || player.season != season {
+        for player in playerHistories.values.flatMap({ $0 }) {
             merged[player.id] = player
         }
         for player in replacements {

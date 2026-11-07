@@ -27,7 +27,7 @@ struct PendingUnlockAction {
     mutating func dismiss(isPro: Bool, pendingPurchases: Int) {
         offerIsPresented = false
         resume(isPro: isPro)
-        if pendingPurchases == pendingPurchasesAtOffer { action = nil }
+        if pendingPurchases == 0 { action = nil }
     }
 }
 
