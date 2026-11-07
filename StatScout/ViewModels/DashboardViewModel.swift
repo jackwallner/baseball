@@ -1267,11 +1267,15 @@ final class DashboardViewModel {
             }
         }
 
-        // Same treatment: one row, after first paint, and a failure just leaves
-        // the postseason out rather than failing the load.
-        postseasonThrough = try? await provider.fetchPostseasonThroughDate(
-            season: StatScoutSeason.current
-        )
+        // Same treatment: one row, after first paint, and a failure keeps the
+        // last known value rather than failing the load. A failed request is
+        // not "the playoffs haven't started", so it must not take a selected
+        // Postseason board away.
+        do {
+            postseasonThrough = try await provider.fetchPostseasonThroughDate(
+                season: StatScoutSeason.current
+            )
+        } catch {}
         if !offersPhaseChoice { selectedPhase = .regular }
         if offersPhaseChoice, selectedPhase == .postseason {
             await reloadPostseason()
