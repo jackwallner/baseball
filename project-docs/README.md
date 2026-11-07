@@ -16,6 +16,7 @@ Developer notes and historical audits for this repository. The published site re
 - [audit823.md](audits/audit823.md): Baseball Savvy StatScout audit
 - [ios27StatScout.md](audits/ios27StatScout.md): iOS 27 compatibility audit: Baseball StatScout
 - [state-machines-2026-11-06.md](audits/state-machines-2026-11-06.md): State machine audit: 3 bugs proved by test, 1 code path, with repro suite (`state-machines-2026-11-06-repro.swift`)
+- [state-machines-2026-11-06-review.md](audits/state-machines-2026-11-06-review.md): Independent review of the state machine audit: verdicts, corrected ranking and method changes
 
 ## Marketing
 

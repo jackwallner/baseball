@@ -1,0 +1,62 @@
+# Review of the 2026-11-06 state machine audit
+
+Independent review of `state-machines-2026-11-06.md` and its repro suite, from committed code at `aaa17f4e` (clean tree, nothing to stash). Every claim was re-derived from the code; the audit's reasoning was not reused. No app code was changed.
+
+**Summary: 4 claims reviewed. 1 CONFIRMED, 3 CONFIRMED-MINOR, 0 NOT A BUG, 0 UNVERIFIED. False-positive rate 0 of 4 on existence; severity overstated on 3 of 4 (B1's rating-ask half, B2, C1).** Of the 6 product calls, 5 hold as product calls and 1 (PC1) is misfiled: it breaks its own doc comment.
+
+Evidence run: `gh-sim test --scheme StatScout --only StatScoutTests/StateMachineAuditRepro --only StatScoutTests/StateMachineReviewChecks` with dummy `SUPABASE_URL`/`SUPABASE_ANON_KEY` xcargs, run `baseball@20261106-154313-8126-claude-imacc474-1106-154845-15025` (Xcode 27.1, iPhone 17, iOS 27.2). Result: 10 tests, 7 passed, 3 failed. The repro suite reproduced exactly as recorded (3 controls pass, 3 claims fail with the recorded strings), and all 4 review checks passed. `test.log` also carries the assertions after the first in each failing test, which the audit could not see: B3's `offersPhaseChoice` assertion fails too, and B1's `positiveMomentCount` is 1, not 0. The review checks are listed in the appendix; both test files were removed from the test target afterwards.
+
+## Claims
+
+| ID | Verdict | User route | Impact | Evidence |
+|---|---|---|---|---|
+| B1 | CONFIRMED | Any device, free user. Stats tab, tap a player (first profile ever on this install). On the Advanced tab tap any percentile row (a `NavigationLink(value: MetricRoute)` shown to free users in Season mode), then Back. The "Full Player Scouting" pitch slides up over the profile. | Every new free user who drills into a metric on their first profile, once per install: the deliberate first-profile deferral is lost at the most sensitive moment. After that the counter is already 2+, so the steady-state effect is smaller: each Back from a drill-down is one more automatic pitch over the same profile, inside the existing 2-per-session cap. The audit's "early rating ask" half is negligible: the ask can never run in session 1 (`appLaunchCount >= 2`) and the 3-open threshold is lifetime, so nearly every user passes it legitimately within days. | `PlayerProfileView.swift:342-357`: the counter and pitch run in `onAppear`, which fires again when a pushed child pops back. The promise at `:343-346` is "Show it from the *second* profile open onward". Push sites `:973`, `:1002`, `:1034`, destination `RootTabView.swift:554`. Tabs are a ZStack with `opacity` (`RootTabView.swift:176-185`), so tab switches do not re-fire `onAppear`; only pops do. Gate: `StoreService.swift:62-77`, cap 2 per trigger per process, marked in `TrialPitchSheet.swift:141`. Rating gate: `ReviewPromptTracker.swift:122-135`. Repro: `testReturningToOneProfileFromADrillDownIsNotANewProfileOpen` failed, counter 3 not 1, and `positiveMomentCount` 1 not 0; control `testControlOpeningTheProfileTwiceCountsTwice` passed. The test drives a real `NavigationStack` with the real `PlayerProfileView`, so it is UI-level evidence of the `onAppear` re-fire, not a service call. |
+| B2 | CONFIRMED-MINOR | In season only. Use the app on day N (writes `players-current.json`, valid 48 h). The pipeline prunes a player below the qualifier overnight. Open the app on day N+1 (cold launch or foreground): the pruned player stays on the Stats board, Teams and Compare pickers for that whole session. Pull to refresh does not drop him. The next cold launch is clean. | Users who launch within 48 h of a previous session in season, a few fringe rows per prune, one session each. Rows carry last night's server percentiles, so the cost is one stale near-qualifier row, not wrong ranks for anyone else. Zero exposure now: the season is over and the prune only runs on an in-season refresh. | `DashboardViewModel.swift:1206-1208` ingests the cache when the board is empty; `:1219` merges the feed over `playerHistories` (`mergePlayers`, `:1372-1381`), which keeps every id the feed no longer returns; `:1237` then saves only the feed, so the disk cache heals and the next cold launch is clean. Server prune: `backend/ingest.py:1795-1815`. The backend comment describes the table, not the app; the app-side promise is the onboarding copy "Every qualified player ranked" and "Updated daily, always fresh" (`StatScoutApp.swift:607,609`). Repro (in-process refresh): `testRefreshDropsAPlayerTheServerPruned` failed (`[1, 2]` not `[1]`), control passed. Review check (cold launch through the real `TwoTierPlayerCache`, then a relaunch): `testB2ColdLaunchKeepsPrunedRowForOneSessionThenHeals` passed: [1, 2] on the first cold launch, [1] on the next. |
+| B3 | CONFIRMED-MINOR | Any device. Stats tab, season pill, Postseason (offered on 2026 while `postseasonThrough` is set, which stays true all offseason). Background, then foreground with no signal, or with any failure of the one-row through-date request. The board flips to Regular Season and the Postseason choice disappears until a later load succeeds (next foreground or pull to refresh). | Only users who picked Postseason in this process (the phase is not persisted) and resume with a failed request. Postseason interest is low in November and gone by spring. Cost: lost selection, two taps to restore once online. The second variant matters more than the audit says: when only the through-date request times out, the feed succeeds and no banner explains the flip. | `DashboardViewModel.swift:1270-1273`: `postseasonThrough = try? await ...` writes nil on any throw, then `if !offersPhaseChoice { selectedPhase = .regular }`. Doc at `:74-75` defines nil as "playoffs haven't started", which a failed request is not; the comment at `:1268` promises only that a failure does not fail the load. Sibling coverage fetch keeps its value on failure (`:1258`). Foreground reload: `StatScoutApp.swift:149-151`; pull to refresh `DashboardView.swift:41-43`. Repro (offline): `testOfflineResumeKeepsTheSelectedPostseasonBoard` failed (`regular` not `postseason`, and the choice vanished), control passed. Review check (online, only through-date times out, no banner): `testB3OnlineButThroughDateTimesOutResetsPhase` passed: `lastFetchFailed` false, `errorMessage` nil, phase Regular, choice hidden. |
+| C1 | CONFIRMED-MINOR | Needs a Family Sharing child Apple ID (Ask to Buy) or a payment that StoreKit defers. Stats tab, locked past season, Try Free, Apple sheet returns pending, close. Tap a different locked season (2023), "Maybe later". Later buy from Settings, or the parent approves: the board switches to 2023 on its own. | Near zero reach (StatScout's buyers are adult fans; a child account that hits Ask to Buy and then declines another pitch in the same process). Cost near zero: the action that fires is one the user explicitly tapped, and it only runs once they are Pro. Do not prioritize. | `TrialPitchSheet.swift:3` promises the action is kept "until entitlement activation or dismissal"; `:20-24` keeps it on dismissal while `purchasePending` is true. `purchasePending` is written only at `StoreService.swift:641` (next purchase start), `:668`, `:684`, `:690` (set on pending) and `:801` (cleared only with an active entitlement), so after a pending purchase that is never approved it stays true for the process; nothing else can clear it (`private(set)`, `:356`). The struct half is proven headless: `testC1StalePendingFlagKeepsALaterDismissedAction` passed (the later action fires on Pro), control passed. The flag's staleness rests on that exhaustive writer list; a RevenueCat seam in `StoreService` would let a test drive it end to end. |
+
+## Ranked survivors
+
+1. **B1** (CONFIRMED). Widest reach and the only one a user sees as an interruption: a new free user's first profile gets the pitch the code deliberately withholds. Fix by counting opens per navigation push rather than per `onAppear`. Drop the audit's rating-ask framing; it does not change who gets asked or when in any material way.
+2. **B2** (CONFIRMED-MINOR). Silent stale rows, one session per prune, in season only. Fix before Opening Day 2027 if convenient; nothing to do this offseason.
+3. **B3** (CONFIRMED-MINOR). Small and self-healing, but cheap to fix (keep the last value when the request throws, as the coverage fetch already does).
+4. **C1** (CONFIRMED-MINOR). Real deviation from the doc comment, negligible reach and cost.
+
+The audit's order (B1, B2, B3, C1) is right. Its impact text overstates B1 ("an early rating ask") and B2 ("for the whole session ... cleared by killing the app" is right, but it omits that the cache self-heals, so exposure is exactly one session per prune).
+
+## Product calls
+
+| # | Review |
+|---|---|
+| PC1 | Misfiled. The doc comment at `StoreService.swift:510-512` promises "Unknown eligibility resolves to true", but `refreshIntroEligibility` (`:783-793`) stores `status == .eligible`, so a RevenueCat `.unknown` result is stored as `false` and reads as ineligible; only a missing key reads as eligible. That is code breaking its own documented rule, a minor bug candidate (trial wording only; Apple still applies the trial at purchase). Not verified headless: it needs the SDK's failure output. |
+| PC2 | Holds. Eligibility is read once per offering load; a same-process lapse is rare. |
+| PC3 | Holds; documented pacing (`RootTabView.swift:138-143`). |
+| PC4 | Holds by code (`StoreService.swift:653` is the only `recordConversion` call in the purchase path; `apply` never records). Analytics only. |
+| PC5 | Holds; documented one-line rollover (`StoreService.swift:34-38`). |
+| PC6 | Holds as stated. The app relies on RevenueCat's cached `CustomerInfo` for offline cold launches; not verified here either. |
+
+## Missed issues
+
+None serious within the audit's scope. Two notes:
+
+- `PlayerComparisonView.swift:196` records a review moment in `onAppear`, the same pattern as B1. Pop-backs re-record it; the effect is only on the pending flag, which the 30-day cooldown already paces. Not worth a separate claim.
+- Repro suite hygiene: `ReproProvider.postseasonThroughByCall` is documented "nil entry means throw" but returns nil instead. No test relies on that path (B3 uses `offline`), so no result is affected.
+
+## Method changes
+
+The audit had no false positives, so the changes target calibration rather than existence:
+
+1. **Trace a persisted counter's lifetime before claiming its impact.** `profileOpenCount` is lifetime and the rating ask is gated on a second launch; checking `ReviewPromptTracker.canRequestReview` would have shown B1's rating half is negligible and that the pitch half is mostly a once-per-install effect.
+2. **Follow the cache through the next cold launch.** B2's impact needed one more step: `savePlayers(current)` heals the disk copy, which bounds exposure to one session per prune.
+3. **Test the quiet variant, not only the loud one.** B3's offline case shows a banner; the online-timeout case flips the board with no message, which is the stronger argument.
+4. **Check who can reach a path before ranking it.** C1 needs a child account and a declined pitch in the same process; its "low" rating should have read "negligible, do not fix alone".
+5. **Read the doc comment next to every product call.** PC1 contradicts the comment directly above it; a product call should cite a documented rule that the code actually follows.
+6. **Make test fakes match their docs**, so a later test that uses the documented behaviour does not pass for the wrong reason.
+
+## Appendix: review checks
+
+`StateMachineReviewChecks` (run once, then removed from the test target):
+
+- `testC1StalePendingFlagKeepsALaterDismissedAction`: `set(A)`, `dismiss(isPro: false, purchasePending: true)`, `set(B)`, `dismiss(isPro: false, purchasePending: true)`, `resume(isPro: true)` fires B. Control `testC1ControlMaybeLaterWithoutPendingDropsTheAction`: with the flag false nothing fires.
+- `testB3OnlineButThroughDateTimesOutResetsPhase`: feed succeeds, through-date returns a date then throws `URLError(.timedOut)`; asserts `lastFetchFailed == false`, `errorMessage == nil`, phase reset to Regular, choice hidden.
+- `testB2ColdLaunchKeepsPrunedRowForOneSessionThenHeals`: a temp-directory `TwoTierPlayerCache` seeded with players 1 and 2, feed returns 1; a fresh view model shows [1, 2]; a second fresh view model over the same cache shows [1].
