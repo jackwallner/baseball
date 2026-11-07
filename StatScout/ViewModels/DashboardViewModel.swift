@@ -1216,7 +1216,9 @@ final class DashboardViewModel {
         do {
             let current = try await provider.fetchCurrentPlayers()
             let fallbackPlayers = cached.isEmpty ? playerHistories.values.flatMap { $0 } : cached
-            let allPlayers = current.isEmpty ? fallbackPlayers : mergePlayers(replacing: current)
+            let allPlayers = current.isEmpty
+                ? fallbackPlayers
+                : mergePlayers(replacing: current, authoritativeFor: StatScoutSeason.current)
 
             guard !allPlayers.isEmpty else {
                 // No current data (offseason / cold cache / offline). Fall back to
@@ -1369,9 +1371,12 @@ final class DashboardViewModel {
         _teamCacheKey = currentTeamCacheKey
     }
 
-    private func mergePlayers(replacing replacements: [Player]) -> [Player] {
+    /// Overlays `replacements` on the loaded rows. With `authoritativeFor`, the
+    /// replacements are that season's whole qualified set: a row of that season
+    /// they no longer carry was pruned by the pipeline and leaves the board.
+    private func mergePlayers(replacing replacements: [Player], authoritativeFor season: Int? = nil) -> [Player] {
         var merged: [String: Player] = [:]
-        for player in playerHistories.values.flatMap({ $0 }) {
+        for player in playerHistories.values.flatMap({ $0 }) where season == nil || player.season != season {
             merged[player.id] = player
         }
         for player in replacements {
