@@ -18,6 +18,7 @@ Developer notes and historical audits for this repository. The published site re
 - [state-machines-2026-11-06.md](audits/state-machines-2026-11-06.md): State machine audit: 3 bugs proved by test, 1 code path, with repro suite (`state-machines-2026-11-06-repro.swift`)
 - [state-machines-2026-11-06-review.md](audits/state-machines-2026-11-06-review.md): Independent review of the state machine audit: verdicts, corrected ranking and method changes
 - [state-machines-2026-11-06-fixes.md](audits/state-machines-2026-11-06-fixes.md): Fixes for the state machine audit: 4 fixed with regression tests, 1 held for Jack
+- [state-machines-2026-11-06-verify.md](audits/state-machines-2026-11-06-verify.md): Independent verification of the state machine fixes: PASS, 189/189 tests, fail-without-fix proved
 
 ## Marketing
 
