@@ -116,7 +116,7 @@ struct TeamsView: View {
             TrialPitchSheet(trigger: .teamView)
         }
         .sheet(item: $lockedSeasonTrigger, onDismiss: {
-            pendingUnlock.dismiss(isPro: store.isPro, purchasePending: store.purchasePending)
+            pendingUnlock.dismiss(isPro: store.isPro, pendingPurchases: store.pendingPurchaseCount)
         }) { trigger in
             TrialPitchSheet(trigger: trigger)
         }
@@ -181,7 +181,7 @@ struct TeamsView: View {
             isLocked: { viewModel.isSeasonLocked($0) },
             onSelectSeason: { season in
                 if viewModel.isSeasonLocked(season) {
-                    pendingUnlock.set { viewModel.selectSeason(season) }
+                    pendingUnlock.set(pendingPurchases: store.pendingPurchaseCount) { viewModel.selectSeason(season) }
                     lockedSeasonTrigger = .lockedSeason(season)
                 } else {
                     viewModel.selectSeason(season)

@@ -102,7 +102,7 @@ struct StatsView: View {
         // TrialPitchSheet (its CTA starts the yearly trial directly), not the
         // full multi-plan PaywallView.
         .sheet(item: $paywallTrigger, onDismiss: {
-            pendingUnlock.dismiss(isPro: store.isPro, purchasePending: store.purchasePending)
+            pendingUnlock.dismiss(isPro: store.isPro, pendingPurchases: store.pendingPurchaseCount)
         }) { trigger in
             TrialPitchSheet(trigger: trigger)
         }
@@ -160,7 +160,7 @@ struct StatsView: View {
                 if viewModel.isSeasonLocked(season) {
                     // Explicit tap on a locked year, always answer it; the
                     // gate only caps automatic pop-ups.
-                    pendingUnlock.set { viewModel.selectSeason(season) }
+                    pendingUnlock.set(pendingPurchases: store.pendingPurchaseCount) { viewModel.selectSeason(season) }
                     paywallTrigger = .lockedSeason(season)
                 } else {
                     viewModel.selectSeason(season)

@@ -1,13 +1,20 @@
 import SwiftUI
 
 /// Keeps an explicit locked action until entitlement activation or dismissal.
+///
+/// A dismissal keeps the action only when a purchase went pending while this
+/// offer was up. `pendingPurchases` is `StoreService.pendingPurchaseCount`:
+/// Apple sends no event when an Ask to Buy is declined, so a pending flag would
+/// stay set for the whole process and arm every later dismissed offer.
 struct PendingUnlockAction {
     private var action: (() -> Void)?
     private var offerIsPresented = false
+    private var pendingPurchasesAtOffer = 0
 
-    mutating func set(_ action: @escaping () -> Void) {
+    mutating func set(pendingPurchases: Int, _ action: @escaping () -> Void) {
         self.action = action
         offerIsPresented = true
+        pendingPurchasesAtOffer = pendingPurchases
     }
 
     mutating func resume(isPro: Bool) {
@@ -17,10 +24,10 @@ struct PendingUnlockAction {
         action?()
     }
 
-    mutating func dismiss(isPro: Bool, purchasePending: Bool) {
+    mutating func dismiss(isPro: Bool, pendingPurchases: Int) {
         offerIsPresented = false
         resume(isPro: isPro)
-        if !purchasePending { action = nil }
+        if pendingPurchases == pendingPurchasesAtOffer { action = nil }
     }
 }
 

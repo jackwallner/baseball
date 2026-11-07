@@ -57,11 +57,11 @@ final class PendingUnlockActionTests: XCTestCase {
     func testEntitlementWaitsForOfferDismissalBeforeOpeningAnotherSheet() {
         var pending = PendingUnlockAction()
         var openedPicker = false
-        pending.set { openedPicker = true }
+        pending.set(pendingPurchases: 0) { openedPicker = true }
 
         pending.resume(isPro: true)
         XCTAssertFalse(openedPicker)
-        pending.dismiss(isPro: true, purchasePending: false)
+        pending.dismiss(isPro: true, pendingPurchases: 0)
         XCTAssertTrue(openedPicker)
     }
 
@@ -69,11 +69,11 @@ final class PendingUnlockActionTests: XCTestCase {
         var pending = PendingUnlockAction()
         var selectedSeason = 2026
         var resumes = 0
-        pending.set { selectedSeason = 2023; resumes += 1 }
+        pending.set(pendingPurchases: 0) { selectedSeason = 2023; resumes += 1 }
 
         pending.resume(isPro: false)
         XCTAssertEqual(selectedSeason, 2026)
-        pending.dismiss(isPro: true, purchasePending: false)
+        pending.dismiss(isPro: true, pendingPurchases: 0)
         pending.resume(isPro: true)
         XCTAssertEqual(selectedSeason, 2023)
         XCTAssertEqual(resumes, 1)
@@ -82,9 +82,9 @@ final class PendingUnlockActionTests: XCTestCase {
     func testDismissalWithoutPurchaseDoesNotResumeOnALaterUpgrade() {
         var pending = PendingUnlockAction()
         var openedComparison = false
-        pending.set { openedComparison = true }
+        pending.set(pendingPurchases: 0) { openedComparison = true }
 
-        pending.dismiss(isPro: false, purchasePending: false)
+        pending.dismiss(isPro: false, pendingPurchases: 0)
         pending.resume(isPro: true)
         XCTAssertFalse(openedComparison)
     }
@@ -92,9 +92,9 @@ final class PendingUnlockActionTests: XCTestCase {
     func testPendingApprovalRetainsTheComparisonAfterDismissal() {
         var pending = PendingUnlockAction()
         var openedComparison = 0
-        pending.set { openedComparison += 1 }
+        pending.set(pendingPurchases: 0) { openedComparison += 1 }
 
-        pending.dismiss(isPro: false, purchasePending: true)
+        pending.dismiss(isPro: false, pendingPurchases: 1)
         pending.resume(isPro: false)
         XCTAssertEqual(openedComparison, 0)
         pending.resume(isPro: true)
@@ -106,19 +106,19 @@ final class PendingUnlockActionTests: XCTestCase {
     func testBothModeIsPreservedRatherThanDefaultingToRecent() {
         var pending = PendingUnlockAction()
         var mode = PlayerProfileView.FormDisplayMode.season
-        pending.set { mode = .both }
+        pending.set(pendingPurchases: 0) { mode = .both }
 
-        pending.dismiss(isPro: true, purchasePending: false)
+        pending.dismiss(isPro: true, pendingPurchases: 0)
         XCTAssertEqual(mode, .both)
     }
 
     func testLatestLockedActionReplacesEarlierRequest() {
         var pending = PendingUnlockAction()
         var selectedSeason = 2026
-        pending.set { selectedSeason = 2024 }
-        pending.set { selectedSeason = 2022 }
+        pending.set(pendingPurchases: 0) { selectedSeason = 2024 }
+        pending.set(pendingPurchases: 0) { selectedSeason = 2022 }
 
-        pending.dismiss(isPro: true, purchasePending: false)
+        pending.dismiss(isPro: true, pendingPurchases: 0)
         XCTAssertEqual(selectedSeason, 2022)
     }
 
@@ -135,8 +135,8 @@ final class PendingUnlockActionTests: XCTestCase {
                 cache: InMemoryPlayerCache(seed: [player])
             )
             var pending = PendingUnlockAction()
-            pending.set { viewModel.selectSeason(season) }
-            pending.dismiss(isPro: false, purchasePending: true)
+            pending.set(pendingPurchases: 0) { viewModel.selectSeason(season) }
+            pending.dismiss(isPro: false, pendingPurchases: 1)
 
             if proStateFirst { viewModel.applyProState(true) }
             pending.resume(isPro: true)

@@ -178,6 +178,40 @@ final class StateMachineRegressionTests: XCTestCase {
         XCTAssertFalse(vm.offersPhaseChoice)
     }
 
+    // MARK: C1: a stale pending purchase keeps a later dismissed action
+
+    /// Ask to Buy on offer A is never approved. Offer B is dismissed with
+    /// "Maybe later". A later purchase must not fire B.
+    func testUnapprovedAskToBuyDoesNotArmALaterDismissedOffer() {
+        var pending = PendingUnlockAction()
+        var fired: [String] = []
+        var pendingPurchases = 0
+
+        pending.set(pendingPurchases: pendingPurchases) { fired.append("A") }
+        pendingPurchases += 1  // Ask to Buy on offer A
+        pending.dismiss(isPro: false, pendingPurchases: pendingPurchases)
+
+        pending.set(pendingPurchases: pendingPurchases) { fired.append("B") }
+        pending.dismiss(isPro: false, pendingPurchases: pendingPurchases)  // Maybe later
+        pending.resume(isPro: true)
+
+        XCTAssertEqual(fired, [], "a dismissed offer with no purchase of its own must not fire on a later upgrade")
+    }
+
+    /// Control: a second offer whose own purchase goes pending keeps its action.
+    func testAskToBuyOnTheSecondOfferStillKeepsItsAction() {
+        var pending = PendingUnlockAction()
+        var fired: [String] = []
+        var pendingPurchases = 1  // an older unapproved Ask to Buy
+
+        pending.set(pendingPurchases: pendingPurchases) { fired.append("B") }
+        pendingPurchases += 1
+        pending.dismiss(isPro: false, pendingPurchases: pendingPurchases)
+        pending.resume(isPro: true)
+
+        XCTAssertEqual(fired, ["B"])
+    }
+
     // MARK: B1: pop-back to a profile counts as another profile open
 
     @MainActor

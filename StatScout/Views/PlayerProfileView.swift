@@ -325,7 +325,7 @@ struct PlayerProfileView: View {
         // Sizing and the drag indicator belong to the sheet itself now, so every
         // entry point in the app presents an identically-shaped pitch.
         .sheet(item: $trialPitchTrigger, onDismiss: {
-            pendingUnlock.dismiss(isPro: store.isPro, purchasePending: store.purchasePending)
+            pendingUnlock.dismiss(isPro: store.isPro, pendingPurchases: store.pendingPurchaseCount)
         }) { trigger in
             TrialPitchSheet(trigger: trigger)
         }
@@ -419,7 +419,7 @@ struct PlayerProfileView: View {
             if store.isPro {
                 showingPlayerPicker = true
             } else {
-                pendingUnlock.set { showingPlayerPicker = true }
+                pendingUnlock.set(pendingPurchases: store.pendingPurchaseCount) { showingPlayerPicker = true }
                 trialPitchTrigger = .playerComparison
             }
         } label: {
@@ -705,7 +705,7 @@ struct PlayerProfileView: View {
                 if season != StatScoutSeason.free && !store.isPro {
                     // Explicit tap on a locked season, always answer it.
                     // PaywallGate only caps automatic pop-ups.
-                    pendingUnlock.set { selectPercentileSeason(season) }
+                    pendingUnlock.set(pendingPurchases: store.pendingPurchaseCount) { selectPercentileSeason(season) }
                     trialPitchTrigger = .lockedSeason(season)
                 } else {
                     selectPercentileSeason(season)
@@ -740,7 +740,7 @@ struct PlayerProfileView: View {
             },
             selection: $formDisplayMode,
             onLockedTap: { mode in
-                pendingUnlock.set { formDisplayMode = mode }
+                pendingUnlock.set(pendingPurchases: store.pendingPurchaseCount) { formDisplayMode = mode }
                 trialPitchTrigger = .recentForm
             }
         )
@@ -1319,7 +1319,7 @@ struct PlayerProfileView: View {
             },
             selection: $standardMode,
             onLockedTap: { mode in
-                pendingUnlock.set { standardMode = mode }
+                pendingUnlock.set(pendingPurchases: store.pendingPurchaseCount) { standardMode = mode }
                 trialPitchTrigger = .recentForm
             }
         )
