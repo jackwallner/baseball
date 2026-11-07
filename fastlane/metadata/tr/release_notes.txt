@@ -1,3 +1,1 @@
-Artık İspanyolca, Fransızca, İtalyanca, Japonca, Portekizce ve Geleneksel Çince dillerinde.
-
-Pro'ya katıldığında doğrudan baktığın oyuncuya ya da sezona dönüyorsun.
+Artık uygulamanın dilini Ayarlar'dan değiştirebilirsiniz. Bu güncelleme düzeltmeler ve iyileştirmeler de içeriyor.
