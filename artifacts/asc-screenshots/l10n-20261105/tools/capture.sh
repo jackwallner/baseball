@@ -80,8 +80,9 @@ keys = {
     'versus': 'vs',
 }
 records = []
-for target in app['targets']:
-    if target['store_locale'] not in wanted:
+baseline = dict(store_locale='en-US', lang='en', apple_languages='(en)', apple_locale='en_US')
+for target in [baseline] + app['targets']:
+    if target['store_locale'] not in wanted and target['store_locale'] != 'en-US':
         continue
     lang = target['lang']
     language = target['apple_languages'].strip('()').split()[0]
