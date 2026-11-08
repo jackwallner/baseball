@@ -143,6 +143,8 @@ struct RecentFormCard: View {
                     .blur(radius: 8)
                     .disabled(true)
                     .allowsHitTesting(false)
+                    // Illustrative placeholder numbers, not real data.
+                    .accessibilityHidden(true)
                 BlurGateUnlock(
                     headline: String(localized: "See last 7 / 15 / 30 day form for any player"),
                     trigger: .recentForm

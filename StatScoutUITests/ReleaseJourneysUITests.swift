@@ -27,7 +27,7 @@ final class ReleaseJourneysUITests: XCTestCase {
 
     func testFirstRunOnboardingToStats() {
         QA.launch(app, arguments: ["-ScreenshotData", "-hasCompletedOnboarding", "NO"])
-        let continueButton = app.buttons["Continue"]
+        let continueButton = button("Continue", "Weiter")
         XCTAssertTrue(continueButton.waitForExistence(timeout: 30), "Onboarding should open")
         QA.checkpoint(app, "onboarding-first-page")
 
@@ -38,32 +38,32 @@ final class ReleaseJourneysUITests: XCTestCase {
             QA.checkpoint(app, "onboarding-page-\(page)")
         }
 
-        let getStarted = app.buttons["Get Started"].firstMatch
+        let getStarted = button("Get Started", "Loslegen")
         XCTAssertTrue(getStarted.waitForExistence(timeout: 20), "The last onboarding page should offer Get Started")
         QA.checkpoint(app, "onboarding-offer")
         getStarted.tap()
 
-        XCTAssertTrue(app.buttons["Search"].waitForExistence(timeout: 30), "Stats should open after onboarding")
+        XCTAssertTrue(button("Search", "Suchen").waitForExistence(timeout: 30), "Stats should open after onboarding")
         QA.checkpoint(app, "stats-first-value")
     }
 
     func testOnboardingSkipReachesStats() {
         QA.launch(app, arguments: ["-ScreenshotData", "-hasCompletedOnboarding", "NO"])
-        let skip = app.buttons["Skip"]
+        let skip = button("Skip", "Überspringen")
         XCTAssertTrue(skip.waitForExistence(timeout: 30), "Onboarding should offer Skip")
         skip.tap()
-        XCTAssertTrue(app.buttons["Search"].waitForExistence(timeout: 30), "Stats should open after Skip")
+        XCTAssertTrue(button("Search", "Suchen").waitForExistence(timeout: 30), "Stats should open after Skip")
         QA.checkpoint(app, "stats-after-skip")
     }
 
     func testPaywallShownAndDismissed() {
         QA.launch(app, arguments: returning)
-        let upgrade = app.buttons.matching(NSPredicate(format: "label ENDSWITH %@", "unlock all features")).firstMatch
+        let upgrade = app.buttons.matching(NSPredicate(format: "label ENDSWITH %@ OR label ENDSWITH %@", "unlock all features", "alle Funktionen freischalten")).firstMatch
         XCTAssertTrue(upgrade.waitForExistence(timeout: 30), "A free user should see the upgrade button")
         QA.checkpoint(app, "stats-free")
         upgrade.tap()
 
-        let close = app.buttons["Close"]
+        let close = button("Close", "Schließen")
         XCTAssertTrue(close.waitForExistence(timeout: 20), "The paywall should open with a Close button")
         QA.checkpoint(app, "paywall")
         close.tap()
@@ -74,11 +74,11 @@ final class ReleaseJourneysUITests: XCTestCase {
 
     func testReturnVisitAcrossTabs() {
         QA.launch(app, arguments: returning)
-        XCTAssertTrue(app.buttons["Search"].waitForExistence(timeout: 30), "Stats should open")
+        XCTAssertTrue(button("Search", "Suchen").waitForExistence(timeout: 30), "Stats should open")
         QA.checkpoint(app, "stats-return")
 
         QA.relaunch(app)
-        XCTAssertTrue(app.buttons["Search"].waitForExistence(timeout: 30), "Stats should reopen without onboarding")
+        XCTAssertTrue(button("Search", "Suchen").waitForExistence(timeout: 30), "Stats should reopen without onboarding")
         QA.checkpoint(app, "stats-after-relaunch")
 
         openTab("Trends")
@@ -86,8 +86,8 @@ final class ReleaseJourneysUITests: XCTestCase {
         openTab("Teams")
         XCTAssertTrue(app.buttons["team-NYY"].waitForExistence(timeout: 20), "Teams should list clubs")
         QA.checkpoint(app, "teams")
-        openTab("Compare")
-        XCTAssertTrue(app.staticTexts["YOUR PLAYERS"].waitForExistence(timeout: 20), "Compare should open")
+        openTab("Compare", "Vergleichen")
+        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label IN %@", ["YOUR PLAYERS", "DEINE SPIELER"])).firstMatch.waitForExistence(timeout: 20), "Compare should open")
         QA.checkpoint(app, "compare")
     }
 
@@ -107,42 +107,47 @@ final class ReleaseJourneysUITests: XCTestCase {
     func testCoreLoopFollowPlayerSurvivesRelaunch() {
         let name = "Aaron Judge"
         QA.launch(app, arguments: returning)
-        XCTAssertTrue(app.buttons["Search"].waitForExistence(timeout: 30), "Stats should open")
+        XCTAssertTrue(button("Search", "Suchen").waitForExistence(timeout: 30), "Stats should open")
         QA.checkpoint(app, "stats")
 
         openProfile("Judge", as: name)
         // Earlier journeys share this install; start from not following.
-        if app.buttons["Unfollow \(name)"].exists {
-            app.buttons["Unfollow \(name)"].tap()
+        if unfollow(name).exists {
+            unfollow(name).tap()
         }
-        let follow = app.buttons["Follow \(name)"]
+        let follow = button("Follow \(name)", "\(name) folgen")
         XCTAssertTrue(follow.waitForExistence(timeout: 10), "An unfollowed player should offer Follow")
         QA.checkpoint(app, "profile-not-following")
 
         follow.tap()
-        XCTAssertTrue(app.buttons["Unfollow \(name)"].waitForExistence(timeout: 10), "Following should flip the button to Unfollow")
+        XCTAssertTrue(unfollow(name).waitForExistence(timeout: 10), "Following should flip the button to Unfollow")
         QA.checkpoint(app, "profile-following")
 
-        openTab("Compare")
+        openTab("Compare", "Vergleichen")
         XCTAssertTrue(followedRow(name).waitForExistence(timeout: 20), "\(name) should be listed under YOUR PLAYERS")
         QA.checkpoint(app, "compare-your-players")
 
         QA.relaunch(app)
-        XCTAssertTrue(app.buttons["Search"].waitForExistence(timeout: 30), "Stats should reopen after the relaunch")
-        openTab("Compare")
+        XCTAssertTrue(button("Search", "Suchen").waitForExistence(timeout: 30), "Stats should reopen after the relaunch")
+        openTab("Compare", "Vergleichen")
         XCTAssertTrue(followedRow(name).waitForExistence(timeout: 20), "\(name) should still be followed after a relaunch")
         QA.checkpoint(app, "compare-your-players-after-relaunch")
 
         openTab("Stats")
         openProfile("Judge", as: name)
-        XCTAssertTrue(app.buttons["Unfollow \(name)"].waitForExistence(timeout: 10), "The profile should still show Unfollow after a relaunch")
+        XCTAssertTrue(unfollow(name).waitForExistence(timeout: 10), "The profile should still show Unfollow after a relaunch")
         QA.checkpoint(app, "profile-following-after-relaunch")
     }
 
     // MARK: - Helpers
 
-    private func openTab(_ title: String) {
-        let tab = app.buttons[title].firstMatch
+    /// The button whose label is the English or the German string.
+    private func button(_ english: String, _ german: String) -> XCUIElement {
+        app.buttons.matching(NSPredicate(format: "label IN %@", [english, german])).firstMatch
+    }
+
+    private func openTab(_ title: String, _ german: String? = nil) {
+        let tab = button(title, german ?? title)
         XCTAssertTrue(tab.waitForExistence(timeout: 20), "\(title) tab should exist")
         tab.tap()
     }
@@ -152,7 +157,7 @@ final class ReleaseJourneysUITests: XCTestCase {
     private func openProfile(_ query: String, as name: String, journey: String = #function) {
         let field = app.textFields["dashboardSearchField"]
         if !field.exists {
-            let search = app.buttons["Search"]
+            let search = button("Search", "Suchen")
             XCTAssertTrue(search.waitForExistence(timeout: 20), "Stats should offer Search")
             search.tap()
         }
@@ -164,18 +169,23 @@ final class ReleaseJourneysUITests: XCTestCase {
         XCTAssertTrue(row.waitForExistence(timeout: 20), "Search should find \(name)")
         row.tap()
 
-        XCTAssertTrue(profileFollowButton(name).waitForExistence(timeout: 20), "\(name)'s profile should open")
-        let maybeLater = app.buttons["Maybe later"]
-        if maybeLater.waitForExistence(timeout: 4) {
+        // From the second open of an install the trial pitch covers the profile.
+        let maybeLater = button("Maybe later", "Vielleicht später")
+        if maybeLater.waitForExistence(timeout: 6) {
             QA.checkpoint(app, "trial-pitch", journey: journey)
             maybeLater.tap()
             XCTAssertTrue(maybeLater.waitForNonExistence(timeout: 10), "The trial pitch should dismiss")
         }
+        XCTAssertTrue(profileFollowButton(name).waitForExistence(timeout: 20), "\(name)'s profile should open")
         QA.checkpoint(app, "profile", journey: journey)
     }
 
+    private func unfollow(_ name: String) -> XCUIElement {
+        button("Unfollow \(name)", "\(name) nicht mehr folgen")
+    }
+
     private func profileFollowButton(_ name: String) -> XCUIElement {
-        app.buttons.matching(NSPredicate(format: "label IN %@", ["Follow \(name)", "Unfollow \(name)"])).firstMatch
+        app.buttons.matching(NSPredicate(format: "label IN %@", ["Follow \(name)", "Unfollow \(name)", "\(name) folgen", "\(name) nicht mehr folgen"])).firstMatch
     }
 
     private func followedRow(_ name: String) -> XCUIElement {

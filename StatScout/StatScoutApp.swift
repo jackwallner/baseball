@@ -125,6 +125,9 @@ struct ContentView: View {
             RootTabView(viewModel: viewModel)
                 .disabled(!hasCompletedOnboarding || showUpdateShowcase)
                 .allowsHitTesting(hasCompletedOnboarding && !showUpdateShowcase)
+                // Covered by a full-screen overlay: keep it out of the
+                // accessibility tree so its tab bar isn't read through it.
+                .accessibilityHidden(!hasCompletedOnboarding || showUpdateShowcase)
 
             if !hasCompletedOnboarding {
                 OnboardingCards(viewModel: viewModel, hasCompletedOnboarding: $hasCompletedOnboarding)

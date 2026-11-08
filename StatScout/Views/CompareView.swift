@@ -136,7 +136,9 @@ struct CompareView: View {
                 // Only the comparison cards blur. Following is free, so putting
                 // the whole page behind the gate would have hidden the one
                 // thing a free user can actually do here.
-                ZStack(alignment: .bottom) {
+                // The gate sits at the top of the cards so its button is on
+                // screen, not under the floating tab bar below the fold.
+                ZStack(alignment: .top) {
                     VStack(spacing: 12) {
                         playerVsPlayerCard
                         teamVsTeamCard
@@ -145,6 +147,8 @@ struct CompareView: View {
                     .blur(radius: store.isPro ? 0 : 5)
                     .disabled(!store.isPro)
                     .allowsHitTesting(store.isPro)
+                    // Locked and blurred: the gate below is what to read.
+                    .accessibilityHidden(!store.isPro)
 
                     if !store.isPro {
                         // The same gate every other locked module uses, rather
