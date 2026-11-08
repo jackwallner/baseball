@@ -62,6 +62,10 @@ def english_sources(catalog: Path, lang: str) -> Dict[str, str]:
     if not source_lang.startswith('en'):
         raise ValueError('catalog sourceLanguage must be English')
     result = {}
+    native = set()
+    for entry in data.get('strings', {}).values():
+        locales = entry.get('localizations', {})
+        native.update(normalize(v) for v in translated_values(locales.get(lang) or locales.get(lang.split('-')[0], {})))
     for key, entry in data.get('strings', {}).items():
         locales = entry.get('localizations', {})
         translation = locales.get(lang)
@@ -71,7 +75,8 @@ def english_sources(catalog: Path, lang: str) -> Dict[str, str]:
         source_values = translated_values(locales.get(source_lang, {})) or [key]
         if values and any(normalize(v) not in {normalize(s) for s in source_values} for v in values):
             for text in [key] + source_values:
-                if normalize(text):
+                # Text that is also a real target-language string (Italian "POS." for rank) is no leak.
+                if normalize(text) and normalize(text) not in native:
                     result[normalize(text)] = text
     return result
 

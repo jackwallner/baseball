@@ -8,16 +8,21 @@
  ],
  "frames": 7,
  "gate": {
-  "de-DE": "NOT RUN",
-  "fr-FR": "NOT RUN",
-  "it": "NOT RUN",
-  "pt-BR": "NOT RUN",
-  "zh-Hans": "NOT RUN"
+  "de-DE": "PASS",
+  "fr-FR": "PASS",
+  "it": "PASS",
+  "pt-BR": "PASS",
+  "zh-Hans": "PASS"
  },
- "gh_sim_jobs": 1,
- "app_code_changed": [],
+ "gh_sim_jobs": 2,
+ "app_code_changed": [
+  {
+   "path": "StatScout/Views/RootTabView.swift",
+   "debug_only": true
+  }
+ ],
  "defects": [
-  "Captures blocked: the single en-US plus de-DE gh-sim job sat queued on GitHub for 3+ hours behind other sessions (5 runs at once account-wide). Headers and capture.sh (en-US baseline added) are committed; run tools/capture.sh then tools/compose.sh to finish."
+  "The first job (en-US + de-DE) predates the playercompare route, so its frame 4 was an empty picker; the later all-locale job replaced it."
  ],
  "left_out": [
   "08_teams_index.png: the screenshot fixture has four active clubs, not the 30 shown by the English frame."
