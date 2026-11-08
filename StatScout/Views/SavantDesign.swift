@@ -275,14 +275,23 @@ struct ReadableColumn: ViewModifier {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     static let maxWidth: CGFloat = 720
 
+    /// One view tree for both size classes. An if/else here gave the content a
+    /// new identity on every fold or unfold, which reset all of its `@State`:
+    /// Compare's picks, an open comparison pushed from them, the profile's
+    /// open count. A nil frame width is layout-neutral, so compact is unchanged.
+    static func widths(for sizeClass: UserInterfaceSizeClass?) -> (column: CGFloat?, container: CGFloat?) {
+        sizeClass == .regular ? (maxWidth, .infinity) : (nil, nil)
+    }
+
     func body(content: Content) -> some View {
-        if horizontalSizeClass == .regular {
-            content
-                .frame(maxWidth: Self.maxWidth)
-                .frame(maxWidth: .infinity)
-                .background(SavantPalette.canvas.ignoresSafeArea())
-        } else {
-            content
-        }
+        let widths = Self.widths(for: horizontalSizeClass)
+        content
+            .frame(maxWidth: widths.column)
+            .frame(maxWidth: widths.container)
+            .background(
+                SavantPalette.canvas
+                    .opacity(horizontalSizeClass == .regular ? 1 : 0)
+                    .ignoresSafeArea()
+            )
     }
 }
