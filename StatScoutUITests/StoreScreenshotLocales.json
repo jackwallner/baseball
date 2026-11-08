@@ -12,16 +12,16 @@
       6,
       7
     ],
+    "seasonPicker": "Season and season type",
     "yearCompare": "Year Compare",
     "teamFooter": "Weighted by PA across the hitting roster",
     "swingLength": "Swing Length",
-    "versus": "vs",
-    "seasonPicker": "Season and season type"
+    "versus": "vs"
   },
   {
-    "store": "ja",
-    "language": "ja",
-    "region": "ja_JP",
+    "store": "de-DE",
+    "language": "de",
+    "region": "de_DE",
     "scenes": [
       1,
       2,
@@ -31,16 +31,16 @@
       6,
       7
     ],
-    "yearCompare": "年別比較",
-    "teamFooter": "打者陣の打席数に応じた加重平均",
-    "swingLength": "スイング長",
-    "versus": "対",
-    "seasonPicker": "シーズンとシーズン種別"
+    "seasonPicker": "Saison und Saisonart",
+    "yearCompare": "Jahresvergleich",
+    "teamFooter": "Gewichtet nach PA im Schlag-Kader",
+    "swingLength": "Schwunglänge",
+    "versus": "gegen"
   },
   {
-    "store": "es-MX",
-    "language": "es",
-    "region": "es_MX",
+    "store": "fr-FR",
+    "language": "fr",
+    "region": "fr_FR",
     "scenes": [
       1,
       2,
@@ -50,16 +50,16 @@
       6,
       7
     ],
-    "yearCompare": "Comparar años",
-    "teamFooter": "Ponderado por PA en toda la plantilla de bateadores",
-    "swingLength": "Longitud del swing",
-    "versus": "contra",
-    "seasonPicker": "Temporada y tipo de temporada"
+    "seasonPicker": "Saison et type de saison",
+    "yearCompare": "Comparer les années",
+    "teamFooter": "Pondéré selon les PA de l’effectif de frappeurs",
+    "swingLength": "Longueur du swing",
+    "versus": "vs"
   },
   {
-    "store": "zh-Hant",
-    "language": "zh-Hant",
-    "region": "zh_TW",
+    "store": "it",
+    "language": "it",
+    "region": "it_IT",
     "scenes": [
       1,
       2,
@@ -69,16 +69,16 @@
       6,
       7
     ],
-    "yearCompare": "逐年比較",
-    "teamFooter": "依打者名單的打席數（PA）加權",
-    "swingLength": "揮棒長度",
-    "versus": "對",
-    "seasonPicker": "球季與球季類型"
+    "seasonPicker": "Stagione e tipo di stagione",
+    "yearCompare": "Confronto tra anni",
+    "teamFooter": "Ponderato in base ai PA di tutti i battitori del roster",
+    "swingLength": "Lunghezza dello swing",
+    "versus": "vs"
   },
   {
-    "store": "ko",
-    "language": "ko",
-    "region": "ko_KR",
+    "store": "pt-BR",
+    "language": "pt-BR",
+    "region": "pt_BR",
     "scenes": [
       1,
       2,
@@ -88,10 +88,29 @@
       6,
       7
     ],
-    "yearCompare": "연도별 비교",
-    "teamFooter": "타자 로스터의 PA 기준 가중치",
-    "swingLength": "스윙 길이",
-    "versus": "대",
-    "seasonPicker": "시즌 및 시즌 종류"
+    "seasonPicker": "Temporada e tipo de temporada",
+    "yearCompare": "Comparar anos",
+    "teamFooter": "Ponderado por PA em todo o elenco de rebatedores",
+    "swingLength": "Comprimento do swing",
+    "versus": "vs"
+  },
+  {
+    "store": "zh-Hans",
+    "language": "zh-Hans",
+    "region": "zh_CN",
+    "scenes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "seasonPicker": "赛季和赛季类型",
+    "yearCompare": "年度对比",
+    "teamFooter": "按打者阵容的 PA 加权",
+    "swingLength": "挥棒长度",
+    "versus": "对"
   }
 ]

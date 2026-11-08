@@ -18,7 +18,7 @@ final class LocalizedStoreScreenshotUITests: XCTestCase {
 
         for locale in locales {
             for scene in locale.scenes {
-                let route = [1: "stats", 2: "player", 3: "trends", 4: "compare", 5: "team", 6: "player", 7: "stats"][scene]!
+                let route = [1: "stats", 2: "player", 3: "trends", 4: "playercompare", 5: "team", 6: "player", 7: "stats"][scene]!
                 let app = launch(locale, route: route, scene: scene)
 
                 switch scene {
@@ -34,9 +34,9 @@ final class LocalizedStoreScreenshotUITests: XCTestCase {
                 case 3:
                     waitFor("xwOBA", in: app)
                 case 4:
+                    waitFor("Aaron Judge", in: app)
                     waitFor("Shohei Ohtani", in: app)
-                    waitFor("Bobby Witt Jr.", in: app)
-                    waitFor(locale.versus, in: app)
+                    waitFor("xwOBA", in: app)
                 case 5:
                     selectSeason(2025, in: app, locale: locale)
                     revealTeamFooter(in: app, locale: locale)
