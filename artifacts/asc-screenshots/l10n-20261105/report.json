@@ -1,52 +1,26 @@
 {
-  "locales": [
-    "ja",
-    "es-MX",
-    "zh-Hant",
-    "ko"
-  ],
-  "frames": 7,
-  "gate": {
-    "ja": "PASS",
-    "es-MX": "PASS",
-    "zh-Hant": "PASS",
-    "ko": "PASS"
-  },
-  "gh_sim_jobs": 11,
-  "app_code_changed": [
-    {
-      "path": "StatScout/Services/ScreenshotFixtureAPI.swift",
-      "debug_only": true
-    },
-    {
-      "path": "StatScout/Views/RootTabView.swift",
-      "debug_only": false
-    },
-    {
-      "path": "StatScout/Views/TeamView.swift",
-      "debug_only": false
-    }
-  ],
-  "defects": [
-    "01_stats_hitting.png: ScreenshotFixtureAPI now uses current-season demo rows only, so 2025 uses the bundled season history and shows Juan Soto once.",
-    "05_team.png: the capture test scrolls Swing Length and the roster-weighting footer above the floating tab bar and checks both elements are unobscured.",
-    "04_compare.png: restored the missing frame with localized comparison headers; the existing localized vs labels are visible in each target capture."
-  ],
-  "left_out": [
-    "08_teams_index.png: the 2026 screenshot fixture has four active clubs, not the 30 shown by the English frame."
-  ],
-  "adapter": "xcuitest",
-  "unsure": [],
-  "localization_check": {
-    "result": "PASS",
-    "keys": 602,
-    "languages": 9,
-    "problems": 0
-  },
-  "unit_tests": {
-    "scheme": "StatScout",
-    "result": "PASS",
-    "passed": 178
-  },
-  "visual_review": "Viewed the four locale comparison sheets once. All 28 target PNGs are present across seven frames."
+ "locales": [
+  "de-DE",
+  "fr-FR",
+  "it",
+  "pt-BR",
+  "zh-Hans"
+ ],
+ "frames": 7,
+ "gate": {
+  "de-DE": "NOT RUN",
+  "fr-FR": "NOT RUN",
+  "it": "NOT RUN",
+  "pt-BR": "NOT RUN",
+  "zh-Hans": "NOT RUN"
+ },
+ "gh_sim_jobs": 1,
+ "app_code_changed": [],
+ "defects": [
+  "Captures blocked: the single en-US plus de-DE gh-sim job sat queued on GitHub for 3+ hours behind other sessions (5 runs at once account-wide). Headers and capture.sh (en-US baseline added) are committed; run tools/capture.sh then tools/compose.sh to finish."
+ ],
+ "left_out": [
+  "08_teams_index.png: the screenshot fixture has four active clubs, not the 30 shown by the English frame."
+ ],
+ "adapter": "xcuitest"
 }
