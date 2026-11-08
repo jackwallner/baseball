@@ -113,6 +113,13 @@ struct RootTabView: View {
         case "trends": selection = Tab.trends.rawValue
         case "teams": selection = Tab.teams.rawValue
         case "compare": selection = Tab.compare.rawValue
+        case "playercompare":
+            selection = Tab.stats.rawValue
+            let players = viewModel.filteredPlayers
+            if let a = players.first(where: { $0.name == "Aaron Judge" }),
+               let b = players.first(where: { $0.name == "Shohei Ohtani" }) {
+                statsPath.append(ComparisonRoute(playerA: a, playerB: b))
+            }
         case "team":
             selection = Tab.teams.rawValue
             teamsPath.append(TeamDestination(abbr: "NYY"))
