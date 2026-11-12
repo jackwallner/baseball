@@ -4,13 +4,13 @@
 
 Web page: https://jackwallner.com/ios/baseball/best-baseball-savant-app.html
 
-## Best Baseball Savant app for iPhone (October 2026)
+## Best Baseball Savant app for iPhone (November 2026)
 
-By [Jack Wallner](https://jackwallner.com/). Last updated October 28, 2026.
+By [Jack Wallner](https://jackwallner.com/). Last updated November 11, 2026.
 
-Baseball Savant itself is a website, and a search of the US App Store on October 12, 2026 found no app from MLB or Savant under that name. Best for Savant-style red and blue percentile bars on a phone with no account: Baseball Savvy StatScout. Best for WAR, wRC+ and projections: FanGraphs. Best for live games and video: the MLB app. Best for fantasy and betting tools: Ball Knowers.
+Baseball Savant itself is a website, and a search of the US App Store on November 11, 2026 found no app from MLB or Savant under that name. Best for Savant-style red and blue percentile bars on a phone with no account: Baseball Savvy StatScout. Best for WAR, wRC+ and projections: FanGraphs. Best for live games and video: the MLB app. Best for fantasy and betting tools: Ball Knowers.
 
-**How we compared.** I read each app's App Store listing, pulled its rating, update date and supported devices from Apple's lookup on October 12, 2026, and opened the apps on a Mac to see what a new user gets before signing in. I could not get past the sign-in screen in Ball Knowers or HOF, and I read the MLB app from its listing only. Jack Wallner makes Baseball Savvy StatScout, so read its entries with that in mind.
+**How we compared.** I read each app's App Store listing and pulled its rating, update date and supported devices from Apple's lookup on November 11, 2026. On October 12, 2026 I opened the apps on a Mac to see what a new user gets before signing in. I could not get past the sign-in screen in Ball Knowers or HOF, and I read the MLB app from its listing only. Jack Wallner makes Baseball Savvy StatScout, so read its entries with that in mind.
 
 ## How do the Baseball Savant-style apps compare?
 
@@ -18,13 +18,13 @@ StatScout is the closest match to Baseball Savant's percentile bars, FanGraphs h
 
 | App | Best for | Price model | Apple Watch | iPad | Account | Rating (count) | Last updated |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Baseball Savvy StatScout | Savant-style percentile bars for every qualified player | Free + subscription or one-time purchase | No | Yes | No account | 5.00 (4) | Oct 10, 2026 |
-| FanGraphs | WAR, wRC+, FIP, projections, articles | Free + membership | No | Yes | No for the free tier; sign-in for membership | 4.76 (387) | Aug 25, 2026 |
-| MLB | Live games, video, highlights, alerts | Free + subscription | Yes | Yes | Sign-in for follows and subscriptions (per its listing) | 4.69 (950,607) | Oct 5, 2026 |
-| Ball Knowers: Fantasy Baseball | Fantasy and betting tools with Statcast-style visuals | Free + subscription (3-day trial) | No | Yes | Yes, sign-in screen on launch | 4.85 (55) | Jul 8, 2026 |
-| HOF: Sports Stats & Data | Prop and parlay research across 15 leagues | Free + subscription | No | Yes | Yes, web login before content | 4.86 (10,690) | Oct 5, 2026 |
+| Baseball Savvy StatScout | Savant-style percentile bars for every qualified player | Free + subscription or one-time purchase | No | No (iPhone only) | No account | 5.00 (4) | Nov 9, 2026 |
+| FanGraphs | WAR, wRC+, FIP, projections, articles | Free + membership | No | Yes | No for the free tier; sign-in for membership | 4.76 (409) | Oct 27, 2026 |
+| MLB | Live games, video, highlights, alerts | Free + subscription | Yes | Yes | Sign-in for follows and subscriptions (per its listing) | 4.69 (957,843) | Nov 4, 2026 |
+| Ball Knowers: Fantasy Baseball | Fantasy and betting tools with Statcast-style visuals | Free + subscription (3-day trial) | No | No (iPhone only) | Yes, sign-in screen on launch | 4.85 (55) | Jul 8, 2026 |
+| HOF: Sports Stats & Data | Prop and parlay research across 15 leagues | Free + subscription | No | Yes | Yes, web login before content | 4.86 (10,809) | Nov 11, 2026 |
 
-Ratings and update dates come from Apple's public App Store lookup on October 12, 2026 (US storefront). StatScout has only a handful of ratings, so its 5.00 says little yet. Apple Watch and iPad columns come from each listing's supported devices.
+Ratings and update dates come from Apple's public App Store lookup on November 11, 2026 (US storefront). StatScout has only a handful of ratings, so its 5.00 says little yet. Apple Watch and iPad columns come from each listing's Compatibility section; "No (iPhone only)" means there is no iPad version, though the app still runs on an iPad at phone size.
 
 ## Is there an official Baseball Savant app?
 
@@ -36,7 +36,7 @@ StatScout shows a 0 to 100 percentile bar for each metric for every qualified pl
 
 ## FanGraphs
 
-FanGraphs puts its leaderboards, player pages, ZiPS playoff odds, standings and articles in an app, and the free tier works without signing in. A player page has Quick, Stats, Splits, Game Log and Heat Maps tabs, and the search field opens on a trending-players list. In my check, the player pages showed stat tables and no Savant-style percentile sliders. The trade-off is density: the tables are wide for a phone, and membership is the route to the premium features.
+FanGraphs puts its leaderboards, player pages, playoff odds, standings and articles in an app, and when I checked on Oct 12, 2026 the free tier worked without signing in. A player page has Quick, Stats, Splits, Game Log and Heat Maps tabs, and the search field opens on a trending-players list. In that check, the player pages showed stat tables and no Savant-style percentile sliders. The trade-off is density: the tables are wide for a phone, and membership is the route to the premium features.
 
 ## MLB
 
@@ -65,7 +65,7 @@ For Savant-style percentile bars on your phone with no account, pick StatScout. 
 
 ### Is there an official Baseball Savant app?
 
-Not that I could find. A search of the US App Store on October 12, 2026 returned no app published by MLB under the Baseball Savant name. Savant is a website at baseballsavant.mlb.com that works in a phone browser.
+Not that I could find. A search of the US App Store on November 11, 2026 returned no app published by MLB under the Baseball Savant name. Savant is a website at baseballsavant.mlb.com that works in a phone browser.
 
 ### Which app shows Statcast percentile rankings on iPhone?
 
@@ -77,7 +77,7 @@ No. The MLB app is built around live video, audio, highlights and alerts. Baseba
 
 ### Do I need an account to use these apps?
 
-StatScout needs none. FanGraphs works without signing in for its free tier. Ball Knowers and HOF both asked me to sign in before showing content.
+StatScout needs none. FanGraphs worked without signing in for its free tier when I checked on Oct 12, 2026. Ball Knowers and HOF both asked me to sign in before showing content.
 
 ### How current is the data in StatScout?
 
