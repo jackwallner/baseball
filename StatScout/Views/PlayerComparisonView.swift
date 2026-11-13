@@ -184,6 +184,7 @@ struct PlayerComparisonView: View {
                             .frame(height: SavantGeo.hairline)
                     }
                     .offset(y: -8)
+                    .modifier(GateOverlayInset())
                 }
                 .background(SavantPalette.canvas.ignoresSafeArea())
                 .sheet(isPresented: $showingTrial) {
