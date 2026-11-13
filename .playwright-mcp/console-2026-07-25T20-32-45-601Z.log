@@ -1,0 +1,517 @@
+[   16111ms] [WARNING] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: WebSocket is closed before the connection is established. @ http://127.0.0.1:3200/:12
+[   23115ms] [WARNING] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: WebSocket is closed before the connection is established. @ http://127.0.0.1:3200/:12
+[   50631ms] [WARNING] Blocked aria-hidden on an element because its descendant retained focus. The focus must not be hidden from assistive technology users. Avoid using aria-hidden on a focused element or its ancestor. Consider using the inert attribute instead, which will also prevent focus. For more details, see the aria-hidden section of the WAI-ARIA specification at https://w3c.github.io/aria/#aria-hidden.
+Element with focus: <button.flex h-[30px] w-[30px] shrink-0 cursor-pointer items-center justify-center rounded-md border-none bg-transparent text-[#8e8e93] [transition:background_0.15s_ease,color_0.15s_ease] hover:bg-white/8 hover:text-white>
+Ancestor with aria-hidden: <aside.fixed z-35 min-w-0 overflow-hidden bg-panel-bg text-white/90 backdrop-blur-[18px] [font-family:-apple-system,system-ui,sans-serif] [transition:transform_0.25s_ease,opacity_0.2s_ease] flex flex-col top-0 bottom-0 left-0 rounded-none border-0 border-r border-white/10 shadow-[8px_0_32px_rgba(0,0,0,0.35)]> @ http://127.0.0.1:3200/:0
+[  109105ms] [ERROR] Failed to load resource: net::ERR_INCOMPLETE_CHUNKED_ENCODING @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  109110ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  109114ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/devicekit-chrome?chrome=phone11&image=X_Power%20BTN:0
+[  109115ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/devicekit-chrome?chrome=phone11&image=Mute%20BTN:0
+[  109115ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/devicekit-chrome?chrome=phone11&image=PhoneComposite:0
+[  109115ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/devicekit-chrome?chrome=phone11&image=Vol%20BTN:0
+[  109115ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  109117ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  109117ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  109118ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  109118ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  109119ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  109121ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  109121ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  109123ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  109124ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  109126ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  109127ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  109127ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  109128ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  109129ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  109129ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  109133ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  109135ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  109135ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  109137ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  109137ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  109138ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  109139ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  109139ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  109140ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  109143ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  109143ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  109146ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  109148ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  109149ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  109149ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  109150ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  109150ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  110114ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  110115ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  111100ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  111117ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  111118ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  111596ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  112107ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  112107ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  112119ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  112120ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  113108ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  113122ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  113124ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  114126ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  114127ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  115104ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  115105ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  115115ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  115128ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  115128ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  116135ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  116135ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  116595ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  117120ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  117142ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  117142ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  118103ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  118103ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  118144ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  118145ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  119136ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  119164ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  119165ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  120171ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  120174ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  121102ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  121102ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  121141ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  121173ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  121176ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  121595ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  122176ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  122179ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  123148ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  123181ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  123183ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  124113ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  124113ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  124183ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  124188ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  125152ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  125192ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  125194ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  126197ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  126202ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  126594ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  127101ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  127105ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  127162ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  127202ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  127209ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  128206ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  128213ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  129174ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  129211ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  129224ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  130103ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  130103ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  130214ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  130227ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  131191ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  131218ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  131247ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  131593ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  132225ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  132260ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  133102ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  133102ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  133211ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  133227ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  133270ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  134233ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  134286ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  135228ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  135236ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  135305ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  136112ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  136112ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  136242ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  136349ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  136592ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  137245ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  137272ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  137373ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  138268ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  138391ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  139163ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  139164ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  139274ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  139297ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  139449ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  140285ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  140505ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  141293ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  141332ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  141541ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  141592ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  142101ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  142101ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  142299ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  142687ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  143304ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  143438ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  143772ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  144308ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  144877ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  145104ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  145108ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  145311ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  145555ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  145980ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  146317ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  146614ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  147081ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  147329ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  147758ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  148100ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  148101ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  148273ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  148333ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  149340ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  149438ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  150318ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  150345ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  150627ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  151107ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  151107ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  151349ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  151592ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  152161ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  152358ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  152897ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  153347ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  153363ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  154104ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  154105ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  154367ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  154745ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  155389ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  155430ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  156181ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  156407ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  156592ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  157099ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  157100ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  157410ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  158422ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  158427ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  159195ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  159425ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  160134ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  160183ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  160432ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  161327ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  161437ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  161592ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  162445ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  163104ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  163109ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  163450ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  164468ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  165472ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  165521ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  165973ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  166104ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  166104ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  166498ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  166592ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  167501ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  168510ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  168510ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  169100ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  169101ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  169339ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  169513ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  170524ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  171531ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  171592ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  171997ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  172116ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  172131ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  172539ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  173544ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  173622ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  174567ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  175100ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  175101ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  175577ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  176582ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  176593ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  176653ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  177587ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  178105ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  178106ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  178590ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  179597ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  180185ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  180601ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  181100ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  181100ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  181592ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  181606ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  182330ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  182628ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  183644ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  184103ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  184104ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  184652ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  185005ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  185659ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  186595ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  186663ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  187103ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  187103ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  187177ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  187668ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  188673ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  189677ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  190104ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  190104ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  190220ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  190661ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  190683ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  191594ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  191688ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  192691ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  193110ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  193120ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  193696ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  194705ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  195348ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  195709ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  195884ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  196100ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  196102ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  196592ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  196712ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  197716ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  198722ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  199101ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  199101ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  199343ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  199725ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  200728ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  201593ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  201732ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  202014ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  202099ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  202104ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  202419ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  202739ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  203743ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  204753ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  205180ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  205181ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  205531ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  205758ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  206593ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  206760ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  207764ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  208100ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  208101ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  208403ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  208767ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  209773ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  210639ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  210792ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  211106ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  211107ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  211593ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  211795ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  212804ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  213038ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  213808ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  214100ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  214101ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  214739ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  214814ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  215821ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  216593ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  216824ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  217100ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  217101ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  217827ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  218761ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  218833ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  219836ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  219938ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  220100ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  220103ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  220840ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  221595ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  221843ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  222850ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  223100ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  223102ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  223854ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  224348ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  224860ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  225866ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  226100ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  226101ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  226597ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  226870ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  226881ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  227878ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  228643ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  228884ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  229104ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  229105ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  229887ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  230897ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  231077ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  231594ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  231903ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  232105ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  232105ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  232906ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  233200ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  233911ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  234928ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  235102ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  235106ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  235107ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  235943ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  236593ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  236954ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  237496ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  237962ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  238100ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  238101ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  238967ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  239339ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  239971ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  240010ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  240976ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  241100ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  241102ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  241594ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  241984ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  243000ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  243862ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  244011ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  244102ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  244102ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  244193ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  245022ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  246029ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  246593ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  247036ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  247103ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  247103ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  247137ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  248044ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  249053ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  249871ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  250057ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  250100ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  250102ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  251062ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  251593ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  252071ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  253079ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  253100ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  253101ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  253720ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  254084ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  254320ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  255088ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  256096ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  256104ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  256107ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  256593ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  257104ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  257403ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  258107ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  259101ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  259102ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  259110ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  259363ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  260127ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  261134ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  261592ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  262110ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  262110ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  262137ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  262170ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  263140ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  264144ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  265101ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  265101ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  265147ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  265218ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  265422ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  266153ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  266596ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  267156ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  267677ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  268105ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  268105ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  268158ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  269168ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  270173ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  270421ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  271102ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  271102ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  271176ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  271597ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  272186ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  272307ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  273191ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  274105ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  274105ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  274194ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  274713ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  275196ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  275835ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  276200ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  276593ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  277101ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  277103ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  277204ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  278210ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  279219ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  280101ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  280102ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  280188ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  280222ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  281227ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  281502ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  281593ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  282243ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  283071ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  283101ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  283102ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  283247ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  284253ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  284546ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  285258ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  286101ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  286101ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  286261ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  286593ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  287115ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  287266ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  288275ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  289103ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  289103ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  289278ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  290287ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  291145ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/exec-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:12
+[  291305ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  291594ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api/memory:0
+[  292100ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  292101ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  292309ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  292465ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19
+[  293313ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  294318ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  295107ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/camera/status:0
+[  295107ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/grid/api?limit=60&offset=0:0
+[  295322ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/stream.mjpeg?raw=1:0
+[  296037ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3200/helper/28BD4914-A110-4D08-9296-B0ED713F9A70/ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3200/:19

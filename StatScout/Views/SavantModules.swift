@@ -50,6 +50,7 @@ struct PlayerIdentityStrip: View {
         .padding(.vertical, SavantGeo.padPage)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(SavantPalette.savantNavy)
+        .modifier(BandInset())
     }
 }
 
@@ -91,6 +92,7 @@ struct TeamIdentityStrip: View {
         .padding(.vertical, SavantGeo.padPage)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(SavantPalette.savantNavy)
+        .modifier(BandInset())
     }
 }
 

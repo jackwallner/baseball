@@ -1,0 +1,25 @@
+- generic [ref=e2]:
+  - generic [ref=e4]:
+    - heading "No simulators available" [level=1] [ref=e5]
+    - paragraph [ref=e6]:
+      - text: Create a simulator in Xcode, or start one with
+      - code [ref=e7]: bunx serve-sim --detach
+      - text: .
+  - region "serve-sim notifications alt+T"
+  - complementary [ref=e8]:
+    - generic [ref=e9]:
+      - button "Close devices sidebar" [pressed] [ref=e10] [cursor=pointer]
+      - link "Open serve-sim" [ref=e13] [cursor=pointer]:
+        - /url: https://github.com/EvanBacon/serve-sim
+        - text: serve-sim
+    - textbox [ref=e19]:
+      - /placeholder: Search
+    - generic [ref=e21]:
+      - generic [ref=e22]: Available
+      - generic "Loading simulators" [ref=e23]
+  - separator "Resize simulators sidebar" [ref=e108]
+  - generic:
+    - button "Open devices sidebar" [pressed]
+    - link "Open serve-sim":
+      - /url: https://github.com/EvanBacon/serve-sim
+      - text: serve-sim

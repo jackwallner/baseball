@@ -248,6 +248,8 @@ struct PaywallView: View {
                 .padding(.horizontal, 20)
                 .padding(.top, 16)
                 .padding(.bottom, 20)
+                .frame(maxWidth: 560)
+                .frame(maxWidth: .infinity)
             }
         }
         .ignoresSafeArea(edges: .top)
@@ -300,6 +302,7 @@ struct PaywallView: View {
                     .minimumScaleFactor(0.9)
                     .padding(.horizontal, 22)
             }
+            .frame(maxWidth: 560)
             .padding(.top, isCompactHeight ? 40 : 64)
             .padding(.bottom, isCompactHeight ? 14 : 22)
             .frame(maxWidth: .infinity)
