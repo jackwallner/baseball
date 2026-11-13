@@ -145,6 +145,7 @@ struct ContentView: View {
         .onAppear {
             viewModel.applyProState(store.isPro)
             #if DEBUG
+            DuoScreenshotMode.applyRequestedOrientation()
             if DuoScreenshotMode.isSeeded { viewModel.applyProState(true) }
             #endif
             evaluateUpdateShowcase()

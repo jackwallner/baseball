@@ -268,6 +268,24 @@ struct StatScoutTheme {
     }
 }
 
+/// Insets a full-bleed navy band to the card margin when the width is regular, so
+/// it reads as the first card of the column instead of a bar that stops short of
+/// the screen edges. Compact width keeps the edge-to-edge band.
+struct BandInset: ViewModifier {
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    func body(content: Content) -> some View {
+        if horizontalSizeClass == .regular {
+            content
+                .clipShape(RoundedRectangle(cornerRadius: SavantGeo.radiusCard))
+                .padding(.horizontal, 12)
+                .padding(.top, 12)
+        } else {
+            content
+        }
+    }
+}
+
 /// Caps screen content to a readable column when the horizontal size class is
 /// regular (iPhone Duo inner display, iPad, wide windows). Compact width is
 /// untouched, so a folded or ordinary iPhone lays out exactly as before.
@@ -284,5 +302,17 @@ struct ReadableColumn: ViewModifier {
         } else {
             content
         }
+    }
+}
+
+/// On wide layouts, sits a bottom gate card inside the column margin and lifts it
+/// clear of the floating tab bar. Compact width is unchanged.
+struct GateOverlayInset: ViewModifier {
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    func body(content: Content) -> some View {
+        content
+            .padding(.horizontal, horizontalSizeClass == .regular ? 12 : 0)
+            .padding(.bottom, horizontalSizeClass == .regular ? 84 : 0)
     }
 }

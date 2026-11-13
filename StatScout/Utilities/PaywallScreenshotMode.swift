@@ -22,6 +22,7 @@ enum PaywallScreenshotMode: String {
 
 #if DEBUG
 import SwiftUI
+import UIKit
 
 /// Seeded launch for iPhone Duo screenshot runs: `-DuoSeed` uses the bundled
 /// history (no Supabase, no RevenueCat), skips onboarding and the update
@@ -38,6 +39,22 @@ enum DuoScreenshotMode {
         defaults.set(true, forKey: "hasCompletedOnboarding")
         defaults.set(UpdateShowcaseCampaign.identifier, forKey: UpdateShowcaseCampaign.storageKey)
         defaults.removeObject(forKey: "favoriteTeam")
+    }
+
+    /// `-ForceLandscape` rotates an iPad capture run, since a headless
+    /// simulator launches in portrait and has no rotate gesture. The scene is
+    /// not always connected at first appearance, so it retries for a few seconds.
+    @MainActor static func applyRequestedOrientation() {
+        guard ProcessInfo.processInfo.arguments.contains("-ForceLandscape") else { return }
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 1_000_000_000)
+            for scene in UIApplication.shared.connectedScenes {
+                guard let scene = scene as? UIWindowScene else { continue }
+                scene.requestGeometryUpdate(.iOS(interfaceOrientations: .landscapeRight)) { _ in }
+            }
+            UIDevice.current.setValue(UIInterfaceOrientation.landscapeRight.rawValue, forKey: "orientation")
+            UIViewController.attemptRotationToDeviceOrientation()
+        }
     }
 }
 #endif
