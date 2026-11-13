@@ -355,6 +355,11 @@ struct PlayerProfileView: View {
             if !store.isPro, opens >= 2, PaywallGate.shared.shouldPresent(.playerScouting) {
                 trialPitchTrigger = .playerScouting
             }
+            #if DEBUG
+            if ProcessInfo.processInfo.arguments.contains("-ShowTrialPitch") {
+                trialPitchTrigger = .playerScouting
+            }
+            #endif
             // Engaged browsing: a positive moment for the system rating
             // prompt. The tracker keeps it out of the first session.
             if opens >= 3 {
