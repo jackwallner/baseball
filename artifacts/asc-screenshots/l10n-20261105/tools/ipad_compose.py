@@ -21,10 +21,10 @@ CANVAS = (2064, 2752)
 BG = (14, 42, 80)
 BEZEL = (10, 14, 26)
 FRAMES = [
-    ("01_stats_hitting.png", "stats"),
-    ("02_player_profile.png", "player"),
-    ("03_trends.png", "trends"),
-    ("04_compare.png", "playercompare"),
+    ("01_stats_hitting.png", "01"),
+    ("02_player_profile.png", "02"),
+    ("03_trends.png", "03"),
+    ("04_compare.png", "04"),
 ]
 LINES = [
     {"role": "line1", "box": [141, 100, 1782, 170], "font": "AvenirNext-Heavy", "color": [255, 255, 255], "max": 135},
@@ -54,7 +54,7 @@ def jobs_for(locale: str, headers: dict, out_dir: Path) -> list:
 
 def main() -> None:
     headers_all = json.load(open(KIT / "copy/headers.json", encoding="utf-8"))
-    locales = sys.argv[1:] or [k for k in headers_all if (KIT / "raw/ipad" / k).is_dir()]
+    locales = sys.argv[1:] or [k for k in headers_all if (KIT / "raw" / k / "ipad").is_dir()]
     for locale in locales:
         headers = headers_all[locale]
         with tempfile.TemporaryDirectory() as tmp:
@@ -79,7 +79,7 @@ def main() -> None:
                 ImageDraw.Draw(canvas).rounded_rectangle(
                     (x - BEZEL_PAD, y - BEZEL_PAD, x + w + BEZEL_PAD - 1, y + h + BEZEL_PAD - 1),
                     radius=84, fill=BEZEL)
-                raw = Image.open(KIT / "raw/ipad" / locale / f"{route}.png")
+                raw = Image.open(KIT / "raw" / locale / "ipad" / f"{route}.png")
                 paste_screen(canvas, raw, SCREEN, 58)
                 for job in jobs:
                     if job["frame"] != index:

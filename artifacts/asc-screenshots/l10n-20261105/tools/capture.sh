@@ -30,7 +30,7 @@ cp "$TEST_CONFIG" "$BACKUP"
 restore() { cp "$BACKUP" "$TEST_CONFIG"; rm -f "$BACKUP"; }
 trap restore EXIT
 
-"$PY" - "$KIT/app.json" "$ROOT/StatScout/Resources/Localizable.xcstrings" "$KIT/frames.json" "$TEST_CONFIG" "${LOCALES[@]}" <<'PY'
+"$PY" - "${CAPTURE_APP_JSON:-$KIT/app.json}" "$ROOT/StatScout/Resources/Localizable.xcstrings" "$KIT/frames.json" "$TEST_CONFIG" "${LOCALES[@]}" <<'PY'
 import json, os, sys
 from pathlib import Path
 
@@ -95,19 +95,19 @@ Path(dest).write_text(json.dumps(records, ensure_ascii=False, indent=2) + '\n', 
 PY
 
 "$PY" - "$TEST_CONFIG" "$KIT/raw" <<'PY'
-import json, sys
+import json, os, sys
 from pathlib import Path
 
 locales = json.loads(Path(sys.argv[1]).read_text(encoding='utf-8'))
 root = Path(sys.argv[2])
 for locale in locales:
     for scene in locale['scenes']:
-        (root / locale['store'] / 'phone' / f'{scene:02d}.png').unlink(missing_ok=True)
+        (root / locale['store'] / os.environ.get('CAPTURE_KIND', 'phone') / f'{scene:02d}.png').unlink(missing_ok=True)
 PY
 
 ID_FILE="$(mktemp)"
 cd "$ROOT"
-gh-sim test --scheme StatScoutUITests --device "iPhone 17 Pro Max" \
+gh-sim test --scheme StatScoutUITests --device "${CAPTURE_DEVICE:-iPhone 17 Pro Max}" \
   --only StatScoutUITests/LocalizedStoreScreenshotUITests \
   --xcarg SUPABASE_URL=https://example.invalid \
   --xcarg SUPABASE_ANON_KEY=store-screenshot-fixture \
@@ -116,7 +116,7 @@ ID="$(cat "$ID_FILE")"
 rm -f "$ID_FILE"
 
 "$PY" - "$HOME/.gh-sim/results/$ID/attachments" "$KIT/raw" "$TEST_CONFIG" <<'PY'
-import json, re, shutil, sys
+import json, os, re, shutil, sys
 from pathlib import Path
 
 attachments, destination, config = map(Path, sys.argv[1:])
@@ -133,7 +133,7 @@ for entry in manifest:
         if not match or match.group(1) not in allowed or not source.is_file() or source.suffix.lower() != '.png':
             continue
         locale, scene = match.groups()
-        target = destination / locale / 'phone' / f'{scene}.png'
+        target = destination / locale / os.environ.get('CAPTURE_KIND', 'phone') / f'{scene}.png'
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(source, target)
         seen.add((locale, scene))

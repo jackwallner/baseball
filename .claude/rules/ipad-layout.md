@@ -47,3 +47,11 @@ The paywall content is capped at 560pt and centered. If `gh-sim get` reports no
 result artifact, run `gh run download <runid> -R jackwallner/gh-sim -n result -D ~/.gh-sim/results/<id>`.
 Landscape rotation never worked on a headless gh-sim run here (frames stay
 portrait), so landscape is covered by the width caps only. Verify it on a device.
+
+## iPad store screenshots (13-inch, 2064x2752)
+
+- Capture with the same UI test as the iPhone set: `CAPTURE_DEVICE="iPad Pro 13-inch (M5)" CAPTURE_KIND=ipad SCREENSHOT_SCENES=1,2,3,4 artifacts/asc-screenshots/l10n-20261105/tools/capture.sh [locales]`. It writes `raw/<locale>/ipad/NN.png`. Plain `gh-sim launch` frames show the 2026 season with three players, so use the test (it selects 2025).
+- `capture.sh` only knows the `app.json` targets (de-DE, fr-FR, it, pt-BR, zh-Hans) plus en-US. For ja, es-MX, zh-Hant and ko pass `CAPTURE_APP_JSON` pointing at a copy of `app.json` whose `targets` lists them (`lang`, `apple_languages`, `apple_locale`).
+- A failed job leaves the raws deleted. Recover from the result dir with `tools/ipad_sort.py <result_id>`.
+- `tools/ipad_compose.py [locales]` composes `out/ipad/<locale>/01..04` with the iPhone headlines. Upload to the draft with `asc screenshots upload --app 6763945657 --version <v> --path <dir of locale folders> --device-type IPAD_PRO_3GEN_129`.
+- Profile, Trends and Compare leave empty space under the 720pt column on iPad. Replace them with fuller scenes (5, 6 or 7) if App Review or conversion data asks for it.
