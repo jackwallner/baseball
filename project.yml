@@ -56,13 +56,15 @@ targets:
           if ! command -v xcodegen &> /dev/null; then
             echo "warning: xcodegen not found. Install via 'brew install xcodegen'."
           fi
-          if [ -z "$SUPABASE_URL" ]; then
-            echo "error: SUPABASE_URL not set."
-            exit 1
-          fi
-          if [ -z "$SUPABASE_ANON_KEY" ]; then
-            echo "error: SUPABASE_ANON_KEY not set."
-            exit 1
+          if [ "$PLATFORM_NAME" != "iphonesimulator" ]; then
+            if [ -z "$SUPABASE_URL" ]; then
+              echo "error: SUPABASE_URL not set."
+              exit 1
+            fi
+            if [ -z "$SUPABASE_ANON_KEY" ]; then
+              echo "error: SUPABASE_ANON_KEY not set."
+              exit 1
+            fi
           fi
     entitlements:
       path: StatScout/StatScout.entitlements
