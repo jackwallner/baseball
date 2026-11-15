@@ -165,7 +165,10 @@ final class ReleaseJourneysUITests: XCTestCase {
         field.tap()
         field.typeText(query)
 
-        let row = app.staticTexts[name].firstMatch
+        // The leaderboard row is one button ("1, Aaron Judge, RF, NYY, .463").
+        // Matching it, not the bare name, keeps a followed player's copy in the
+        // inactive Compare tab from catching the tap.
+        let row = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@ AND label CONTAINS %@", "1, ", name)).firstMatch
         XCTAssertTrue(row.waitForExistence(timeout: 20), "Search should find \(name)")
         row.tap()
 
