@@ -188,6 +188,10 @@ struct RootTabView: View {
                     .opacity(selection == tab.rawValue ? 1 : 0)
                     .allowsHitTesting(selection == tab.rawValue)
                     .accessibilityHidden(selection != tab.rawValue)
+                    // Parked far off screen as well, so accessibility audits and UI
+                    // tests, which still list a hidden tab at full size and report
+                    // it tappable, find nothing of it where the visible tab draws.
+                    .offset(x: selection == tab.rawValue ? 0 : 10_000)
             }
 
             floatingTabBar
