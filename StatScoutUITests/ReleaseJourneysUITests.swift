@@ -170,8 +170,8 @@ final class ReleaseJourneysUITests: XCTestCase {
         row.tap()
 
         // From the second open of an install the trial pitch covers the profile.
-        let maybeLater = button("Maybe later", "Vielleicht später")
-        if maybeLater.waitForExistence(timeout: 6) {
+        let maybeLater = app.buttons["trialPitchMaybeLater"]
+        if maybeLater.waitForExistence(timeout: 10) {
             QA.checkpoint(app, "trial-pitch", journey: journey)
             maybeLater.tap()
             XCTAssertTrue(maybeLater.waitForNonExistence(timeout: 10), "The trial pitch should dismiss")
@@ -185,7 +185,7 @@ final class ReleaseJourneysUITests: XCTestCase {
     }
 
     private func profileFollowButton(_ name: String) -> XCUIElement {
-        app.buttons.matching(NSPredicate(format: "label IN %@", ["Follow \(name)", "Unfollow \(name)", "\(name) folgen", "\(name) nicht mehr folgen"])).firstMatch
+        app.buttons["profileFollowButton"]
     }
 
     private func followedRow(_ name: String) -> XCUIElement {

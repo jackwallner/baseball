@@ -232,6 +232,7 @@ struct TrialPitchSheet: View {
                 Link("Terms", destination: StatScoutLegal.termsURL)
                 Link("Privacy", destination: StatScoutLegal.privacyURL)
                 Button("Maybe later") { dismiss() }
+                    .accessibilityIdentifier("trialPitchMaybeLater")
             }
             .font(SavantType.micro)
             .tracking(0.3)

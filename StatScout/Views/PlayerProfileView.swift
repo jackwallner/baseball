@@ -380,6 +380,7 @@ struct PlayerProfileView: View {
                 .foregroundStyle(isFavorite ? Color.yellow : .white)
         }
         .accessibilityLabel(isFavorite ? String(localized: "Unfollow \(player.name)") : String(localized: "Follow \(player.name)"))
+        .accessibilityIdentifier("profileFollowButton")
     }
 
     /// Shares the season board on screen as an image. Hidden until there is a
