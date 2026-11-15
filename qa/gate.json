@@ -15,5 +15,6 @@
     "ipad-landscape"
   ],
   "persona_overrides": {},
-  "slot": null
+  "slot": null,
+  "host": "local"
 }
