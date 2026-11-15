@@ -92,6 +92,7 @@ enum ReviewPromptTracker {
         #if DEBUG
         return ProcessInfo.processInfo.arguments.contains("-FASTLANE_SNAPSHOT")
             || ProcessInfo.processInfo.environment["SCREENSHOT_MODE"] == "1"
+            || ScreenshotFixtureAPI.isEnabled
         #else
         return false
         #endif
