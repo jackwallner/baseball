@@ -139,7 +139,7 @@ struct TrialPitchSheet: View {
         // current phone, which is the size this pitch has always been, and
         // two-thirds on the smallest, where it needs to be. Drags up to full
         // height for large accessibility text.
-        .presentationDetents([.height(460), .large])
+        .presentationDetents([.height(520), .large])
         .presentationDragIndicator(.visible)
         // Tick the session cap on the *pitch* sheet too, not just the full
         // PaywallView. Otherwise PaywallGate.shouldPresent(.playerScouting)

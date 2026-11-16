@@ -258,8 +258,10 @@ struct RootTabView: View {
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 7)
-        .background(.ultraThinMaterial.opacity(0.8), in: Capsule())
+        .background(.regularMaterial, in: Capsule())
         .overlay(Capsule().stroke(SavantPalette.hairline, lineWidth: 0.5))
+        // Four labels in a fixed capsule: past this size they truncate.
+        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
         .shadow(color: .black.opacity(0.10), radius: 12, y: 4)
         .padding(.bottom, 12)
         .accessibilityElement(children: .contain)
@@ -387,8 +389,12 @@ private struct HomeTabToolbar: ViewModifier {
             paywallTrigger = store.defaultUpgradeTrigger
         } label: {
             HStack(spacing: 4) {
-                Image(systemName: "crown.fill")
-                    .font(.system(size: 10, weight: .bold))
+                // A long label (German "Gratis testen") would squeeze the
+                // centred title down to "Te…", so it drops the crown.
+                if ctaLabel.count <= 10 {
+                    Image(systemName: "crown.fill")
+                        .font(.system(size: 10, weight: .bold))
+                }
                 Text(ctaLabel)
                     .font(SavantType.micro)
                     .tracking(0.4)

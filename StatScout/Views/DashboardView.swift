@@ -17,6 +17,7 @@ struct DashboardView: View {
             ScrollView {
                 LazyVStack(spacing: 0, pinnedViews: []) {
                     unifiedControlBar
+                        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                     if !viewModel.players.isEmpty {
                         activeSortChip
                         if isSearching || !viewModel.searchText.isEmpty {
@@ -462,6 +463,7 @@ struct DashboardView: View {
                 .frame(minHeight: 200)
             } else {
                 sortHeader
+                    .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                 let sortMetric = viewModel.currentSortMetricForDisplay
                 LazyVStack(spacing: 0) {
                     ForEach(Array(viewModel.leaderboard.enumerated()), id: \.element.id) { index, player in
@@ -480,6 +482,8 @@ struct DashboardView: View {
                         .buttonStyle(.plain)
                     }
                 }
+                // A board row is one fixed-height line: name, team, value.
+                .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
             }
         }
         .background(SavantPalette.surface)

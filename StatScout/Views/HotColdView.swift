@@ -318,6 +318,7 @@ struct HotColdView: View {
                         headline: String(localized: "See the full board: every hitter and pitcher ranked by how far they've moved"),
                         trigger: .recentForm
                     )
+                    .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                 }
         }
         .background(SavantPalette.surface)

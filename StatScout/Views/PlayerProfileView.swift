@@ -276,6 +276,9 @@ struct PlayerProfileView: View {
         }
         .scrollBounceBehavior(.basedOnSize)
         .background(SavantPalette.canvas.ignoresSafeArea())
+        // Percentile bars, value columns and the section tabs are fixed-width
+        // rows; past this size their labels truncate.
+        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
         // First-tap activation: profile renders immediately (no full-screen
         // paywall blocking it), and a native half-sheet TrialPitchSheet
         // floats on top with a "Maybe later" dismiss. PaywallGate caps this

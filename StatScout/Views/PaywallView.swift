@@ -292,7 +292,7 @@ struct PaywallView: View {
                     .foregroundStyle(.white)
                     .multilineTextAlignment(.center)
                     .lineLimit(2)
-                    .minimumScaleFactor(0.9)
+                    .minimumScaleFactor(0.6)
 
                 Text(trigger.subtitle)
                     .font(SavantType.small)
