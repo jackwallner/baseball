@@ -114,6 +114,8 @@ struct TrialPitchSheet: View {
         }
     }
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     var body: some View {
         VStack(spacing: 0) {
             // The ScrollView is a safety net for Dynamic Type and the smallest
@@ -139,7 +141,7 @@ struct TrialPitchSheet: View {
         // current phone, which is the size this pitch has always been, and
         // two-thirds on the smallest, where it needs to be. Drags up to full
         // height for large accessibility text.
-        .presentationDetents([.height(520), .large])
+        .presentationDetents(dynamicTypeSize.isAccessibilitySize ? [.large] : [.height(520), .large])
         .presentationDragIndicator(.visible)
         // Tick the session cap on the *pitch* sheet too, not just the full
         // PaywallView. Otherwise PaywallGate.shouldPresent(.playerScouting)
