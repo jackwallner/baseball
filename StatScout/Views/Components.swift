@@ -780,7 +780,9 @@ struct PlusDirectCTA: View {
                 .font(SavantType.priceLead)
                 .foregroundStyle(SavantPalette.ink)
                 .multilineTextAlignment(.center)
-                .frame(height: 20)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+                .frame(minHeight: 20)
 
             Button(action: buy) {
                 label
