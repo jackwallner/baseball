@@ -52,6 +52,7 @@ struct RootTabView: View {
     @State private var teamsPath = NavigationPath()
     @State private var statsPath = NavigationPath()
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     init(viewModel: DashboardViewModel) {
         _viewModel = State(initialValue: viewModel)
@@ -59,6 +60,12 @@ struct RootTabView: View {
 
     var body: some View {
         tabView
+            // Reduce Motion: the app's own animations (tab pill, chips, bars,
+            // list changes) switch off. System pushes and sheets already
+            // crossfade on their own.
+            .transaction { transaction in
+                if reduceMotion { transaction.animation = nil }
+            }
             .tint(SavantPalette.savantRed)
             .onReceive(NotificationCenter.default.publisher(for: .statscoutPositiveMomentForReview)) { _ in
                 scheduleReviewRequestAfterPositiveMoment()
@@ -335,7 +342,7 @@ private struct TabBarButton: View {
                     .tracking(0.2)
                     .fontWeight(.semibold)
             }
-            .foregroundStyle(isSelected ? SavantPalette.savantRed : SavantPalette.inkSecondary)
+            .foregroundStyle(isSelected ? Color(red: 0.72, green: 0.06, blue: 0.11) : SavantPalette.inkSecondary)
             .frame(width: 78, height: 52)
             .background(
                 isSelected ? SavantPalette.savantRed.opacity(0.12) : .clear,
