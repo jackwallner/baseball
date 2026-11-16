@@ -390,7 +390,9 @@ struct PaywallView: View {
             Text(selectedPackage?.priceLabel ?? " ")
                 .font(SavantType.priceLead)
                 .foregroundStyle(SavantPalette.ink)
-                .frame(height: 20)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+                .frame(minHeight: 20)
 
             Button(action: startPurchase) {
                 ZStack {
