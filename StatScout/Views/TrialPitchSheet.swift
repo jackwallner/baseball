@@ -124,6 +124,9 @@ struct TrialPitchSheet: View {
                 VStack(spacing: 14) {
                     hero
                     benefitList
+                    // At accessibility sizes the footer is taller than the
+                    // benefits, so it scrolls with them instead of covering them.
+                    if dynamicTypeSize.isAccessibilitySize { footer }
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 18)
@@ -131,7 +134,7 @@ struct TrialPitchSheet: View {
             }
             .scrollBounceBehavior(.basedOnSize)
 
-            footer
+            if !dynamicTypeSize.isAccessibilitySize { footer }
         }
         .background(SavantPalette.canvas.ignoresSafeArea())
         // A fixed height rather than a fraction, because what has to fit is a
@@ -197,7 +200,7 @@ struct TrialPitchSheet: View {
                         Text(benefit.detail)
                             .font(SavantType.small)
                             .foregroundStyle(SavantPalette.inkSecondary)
-                            .lineLimit(2)
+                            .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 2)
                             .fixedSize(horizontal: false, vertical: true)
                     }
 
