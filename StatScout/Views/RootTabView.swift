@@ -175,6 +175,9 @@ struct RootTabView: View {
         }
     }
 
+    /// Measured height of the floating bar, reserved under every tab.
+    @State private var tabBarHeight: CGFloat = 70
+
     /// Hand-rolled tab bar rather than `TabView`.
     ///
     /// On iOS 26 a `TabView` always draws its own Liquid Glass "platter" behind
@@ -191,6 +194,10 @@ struct RootTabView: View {
         ZStack(alignment: .bottom) {
             ForEach(Tab.allCases) { tab in
                 tabContent(tab)
+                    // The bar is an overlay, so each tab's frame ends above it:
+                    // content scrolls inside that frame and never sits under a
+                    // tab label at rest, which a short screen (iPhone Duo) did.
+                    .padding(.bottom, tabBarHeight)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .opacity(selection == tab.rawValue ? 1 : 0)
                     .allowsHitTesting(selection == tab.rawValue)
@@ -202,7 +209,12 @@ struct RootTabView: View {
             }
 
             floatingTabBar
+                .background(GeometryReader { proxy in
+                    Color.clear.preference(key: TabBarHeightKey.self, value: proxy.size.height)
+                })
         }
+        .background(SavantPalette.canvas.ignoresSafeArea())
+        .onPreferenceChange(TabBarHeightKey.self) { tabBarHeight = $0 }
         .ignoresSafeArea(edges: .bottom)
         // Every tab stays mounted, so a tab's own `.task` fires once at launch
         // and never again. Trends is the one that depends on a fetch it doesn't
@@ -605,4 +617,9 @@ private struct StandardDestinations: ViewModifier {
                     .modifier(SavantNavBar())
             }
     }
+}
+
+private struct TabBarHeightKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = max(value, nextValue()) }
 }
