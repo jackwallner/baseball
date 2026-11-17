@@ -1,1 +1,1 @@
-StatScout: Béisbol Statcast
+StatScout: Béisbol

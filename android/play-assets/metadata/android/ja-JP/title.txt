@@ -1,1 +1,1 @@
-StatScout: MLB野球データ分析
+StatScout: 野球データ分析

@@ -115,3 +115,5 @@ AVD is temporary and holds only our debug app.
 - Screenshot captures use the QA build on Pro (`--ez onboarded true --ez
   forcePro true --ei tab <n>`) with System UI demo mode. The emulator is slow;
   wait for content before capturing.
+
+- 2026-11-16: Football was suspended on Play (Impersonation) for league names in localized titles and short descriptions. This app's titles and shorts were stripped of league marks and Statcast the same day by API and sent for review; `scripts/validate-play-listing.py` now fails on any league name there. Never put the league acronym in a title or short description.

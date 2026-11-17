@@ -1,1 +1,1 @@
-StatScout: Statistiques MLB
+StatScout: Stats baseball

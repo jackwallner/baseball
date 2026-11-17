@@ -1,1 +1,1 @@
-StatScout: MLB棒球數據統計
+StatScout: 棒球數據統計
