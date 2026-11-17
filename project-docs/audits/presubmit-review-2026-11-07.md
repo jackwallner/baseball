@@ -1,14 +1,27 @@
-# Pre-submit review: StatScout 1.5.6 (2026-11-07)
+# Pre-submit review: StatScout 1.5.6 (2026-11-07, deep pass 2026-11-08)
 
-Scope: app sources changed since the live version 1.5.5 (`0b46acdd^`, last commit before the 1.5.6 bump) to `origin/main` `5e5644d2` (MARKETING_VERSION 1.5.6, build 202). Files: StoreService, DashboardViewModel, TrialPitchSheet (`PendingUnlockAction`), PlayerProfileView, StatsView, TeamView, TeamsView, StandardStatsLeadersView, CompareView, RecentFormCard, RootTabView, SettingsView, StatScoutApp, Info.plist, Localizable.xcstrings.
+Scope: app changes from the live 1.5.5 (last 1.5.5 commit `8c88a5e`, bumped to 1.5.6 in `0b46acd`) to
+`origin/main` `5e5644d`, plus a deep pass over every user-reachable path on `origin/main`: purchase,
+restore, paywalls and pitches, onboarding, the update showcase, persistence (favorites, player cache,
+review tracker), iPhone Duo layouts and localization. StatScout has no notifications, widgets, App
+Intents or SwiftData/CoreData, so those checks do not apply. No simulator or local xcodebuild was used.
 
-Checked: force unwraps and indexing in the diff (none added), the pending-purchase counter that replaced `purchasePending` (every call site passes the count on `set` and `dismiss`; no stale reference left), the authoritative current-season merge (paged fetch reads every page, nil-season and past-season rows are kept, empty fetch falls back to cache), the postseason-through failure path (keeps the last value), the once-per-open profile counter (only the pitch and review counting sit behind the guard), the `playercompare` route (inside `#if DEBUG`), the Language row (opens the app's own iOS Settings page, strings translated in all 10 locales), and the trial sheet's Terms and Privacy links. No hard-coded prices, other-platform links or health claims in the diff. Every catalog key has all 9 non-English localizations.
+Diff since 1.5.5: pending-purchase counter for `PendingUnlockAction`, authoritative current-season
+merge, kept postseason date on a failed fetch, single count per profile open, Settings Language row
+plus `UIPrefersShowingLanguageSettings`, accessibility hiding of blurred gates, Compare gate moved to
+the top, DEBUG-only `playercompare` Duo tour route. All read correct.
 
-No P0 or P1 findings.
-
-| Severity | File:line | What happens | Status |
+| Severity | Location | What happens | Status |
 |---|---|---|---|
-| P2 | StatScout/ViewModels/DashboardViewModel.swift:1387 | The current-season fetch is now authoritative, so a current row that fails `Lenient` decoding drops off the board instead of showing its cached copy. A wholly failed page still throws, so this only hits individual malformed rows. | Not fixed: intended behavior of the prune, not a defect. |
-| P2 | StatScout/Views/TrialPitchSheet.swift:30 | After a purchase goes pending (Ask to Buy), the tapped locked action stays armed for the life of the view and runs when Pro activates later, even if that purchase came from another screen. | Not fixed: designed to complete the original tap; harmless. |
+| P1 | `StatScout/Views/SavantDesign.swift:274` | `ReadableColumn` (wraps every tab root and pushed screen) branched on horizontal size class with `if/else`. On an iPhone Duo each fold or unfold gave the content a new identity and reset its `@State`: Compare's chosen players and seasons cleared, an open player or team comparison popped back to the root, a player profile counted a second open (and could raise the trial pitch again), and Teams re-pushed the favorite team after the user had backed out. | Fixed: one view tree, size-class-driven frame widths and background opacity. Regression test `StatScoutTests/ReadableColumnTests.swift` hosts the modifier and flips size class. |
+| P2 | `StatScout/ViewModels/DashboardViewModel.swift:560` | When a recent-form fetch is cancelled and replaced for the same window, the cancelled task's `defer` removes the new task's loading flag and task entry. The spinner can drop early and a second caller can start a duplicate fetch. Data is still correct once the new fetch lands. | Not fixed: cosmetic, no wrong data. |
+| P2 | `StatScout/ViewModels/DashboardViewModel.swift:985` | `rawNumeric` (and `PostseasonQualifier.number`) accept "inf"/"nan" from the feed. No path converts such a value to `Int` today, so nothing crashes. | Not fixed: hardening only. |
 
-Tests: the gate ran 189 unit tests green on this commit, and `StateMachineRegressionTests` covers the pending counter, the merge prune, the postseason failure path and the profile counter. gh-sim not run (per instructions, GitHub's queue is hours deep). No code changed in this review.
+Checked and clean: RevenueCat offering lookup with retry, yearly/monthly/lifetime package mapping,
+trial eligibility copy (unknown eligibility defaults to eligible, as intended), purchase pending,
+cancelled and already-owned paths, restore on the paywall, onboarding and Settings, `isPro` from any
+active entitlement plus product fallback, every paywall and pitch dismissible with Terms and Privacy
+links, prices only from StoreKit, no other-platform links, no health claims, DEBUG hooks
+(`FORCE_PRO`, screenshot modes, Duo tour, RevenueCat probe) compiled out of Release, onboarding and
+update showcase flags persisted in `@AppStorage`, review prompt gating, and localization
+(`Tools/Localization/check.py`: 604 keys, 9 languages, 0 problems).
