@@ -147,9 +147,7 @@ final class ReleaseJourneysUITests: XCTestCase {
     }
 
     private func openTab(_ title: String, _ german: String? = nil) {
-        let tab = button(title, german ?? title)
-        XCTAssertTrue(tab.waitForExistence(timeout: 20), "\(title) tab should exist")
-        tab.tap()
+        QA.openTab(app, [title, german ?? title])
     }
 
     /// Searches Stats for `query`, opens the matching player and clears the
@@ -162,8 +160,7 @@ final class ReleaseJourneysUITests: XCTestCase {
             search.tap()
         }
         XCTAssertTrue(field.waitForExistence(timeout: 10), "The search field should open")
-        field.tap()
-        field.typeText(query)
+        QA.type(query, into: field, in: app)
 
         // The leaderboard row is one button ("1, Aaron Judge, RF, NYY, .463").
         // Matching it, not the bare name, keeps a followed player's copy in the
