@@ -7117,6 +7117,71 @@
         }
       }
     },
+    "No connection. Connect to load this season.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No connection. Connect to load this season."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin conexión. Conéctate para cargar esta temporada."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas de connexion. Connectez-vous pour charger cette saison."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nessuna connessione. Collegati per caricare questa stagione."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "接続がありません。このシーズンを読み込むには接続してください。"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sem conexão. Conecte-se para carregar esta temporada."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "沒有網路連線。請連線以載入此球季。"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keine Verbindung. Verbinde dich, um diese Saison zu laden."
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "연결되지 않았습니다. 이 시즌을 불러오려면 연결하세요."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有网络连接。请联网以加载本赛季。"
+          }
+        }
+      }
+    },
     "Cancel": {
       "extractionState": "manual",
       "localizations": {

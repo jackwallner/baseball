@@ -34,9 +34,7 @@ struct FollowPlayersSheet: View {
 
     private var followed: [Player] {
         // Ordered by when they were followed, matching the Trends board.
-        favorites.playerIds.compactMap { id in
-            allPlayers.first { $0.playerId == id }
-        }
+        viewModel.followedPlayers(ids: favorites.playerIds)
     }
 
     private var candidates: [Player] {
