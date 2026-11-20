@@ -617,6 +617,19 @@ final class DashboardViewModel {
         return seasonIndex[season] ?? []
     }
 
+    /// Followed players in the order given. A player resolves to his row in the
+    /// selected season when he has one, else his newest row, so a season change
+    /// never makes a followed player vanish from the list.
+    func followedPlayers(ids: [Int]) -> [Player] {
+        let roster = Dictionary(
+            players(forSeason: selectedSeason).map { ($0.playerId, $0) },
+            uniquingKeysWith: { first, _ in first }
+        )
+        return ids.compactMap { id in
+            roster[id] ?? playerHistories[id]?.first ?? players.first { $0.playerId == id }
+        }
+    }
+
     private func uniquePlayers(_ players: [Player]) -> [Player] {
         var seen = Set<Int>()
         return players.filter { seen.insert($0.playerId).inserted }
@@ -1242,13 +1255,25 @@ final class DashboardViewModel {
             errorMessage = String(localized: "Data format changed. The app may need an update.")
             lastFetchFailed = true
         } catch _ as URLError {
-            // Offline with nothing saved: the bundled seasons still make a board.
+            // Offline: the last saved board, however old, beats an empty one.
+            await ingestExpiredCurrentIfMissing()
             if players.isEmpty { _ = await ingestBundledHistory() }
-            errorMessage = players.isEmpty ? String(localized: "Can't reach data feed. Check your connection.") : String(localized: "Showing saved data. Pull to refresh when your connection improves.")
+            if players.isEmpty {
+                errorMessage = String(localized: "Can't reach data feed. Check your connection.")
+            } else if seasonPlayers.isEmpty {
+                // Past seasons are on hand but the selected one (a free user's
+                // current season) has no rows, so nothing is being shown.
+                errorMessage = String(localized: "No connection. Connect to load this season.")
+            } else {
+                errorMessage = String(localized: "Showing saved data. Pull to refresh when your connection improves.")
+            }
             lastFetchFailed = true
         } catch {
+            await ingestExpiredCurrentIfMissing()
             if players.isEmpty { _ = await ingestBundledHistory() }
-            errorMessage = players.isEmpty ? String(localized: "Something went wrong loading player data.") : String(localized: "Showing saved data. Pull to refresh to try again.")
+            errorMessage = seasonPlayers.isEmpty
+                ? String(localized: "Something went wrong loading player data.")
+                : String(localized: "Showing saved data. Pull to refresh to try again.")
             lastFetchFailed = true
         }
         isLoading = false
@@ -1280,6 +1305,18 @@ final class DashboardViewModel {
         if offersPhaseChoice, selectedPhase == .postseason {
             await reloadPostseason()
         }
+    }
+
+    /// When the current season has no rows (the saved file is past its 48 hours
+    /// and the request just failed), puts the expired copy on the board.
+    private func ingestExpiredCurrentIfMissing() async {
+        guard seasonIndex[StatScoutSeason.current]?.isEmpty ?? true else { return }
+        let expired: [Player] = await Task.detached { [cache] in
+            (try? (cache as? TwoTierPlayerCache)?.loadExpiredCurrentPlayers()) ?? []
+        }.value
+        guard !expired.isEmpty else { return }
+        if players.isEmpty { _ = await ingestBundledHistory() }
+        ingestPlayers(playerHistories.values.flatMap { $0 } + expired)
     }
 
     /// Puts the bundled history on the board when nothing current is available.

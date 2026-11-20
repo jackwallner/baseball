@@ -169,7 +169,10 @@ final class DashboardViewModelTests: XCTestCase {
         let vm = DashboardViewModel(provider: MockProvider(error: URLError(.notConnectedToInternet)), cache: cache)
         await vm.load()
         XCTAssertTrue(vm.isReady, "A first launch with no connection should still show the bundled seasons")
-        XCTAssertTrue(vm.errorMessage?.contains("Showing saved data") == true)
+        // A free user's current season has no rows here, so the card must say
+        // so rather than claim to be showing saved data (catalog B1, 2026-11-20).
+        XCTAssertTrue(vm.seasonPlayers.isEmpty)
+        XCTAssertEqual(vm.errorMessage, "No connection. Connect to load this season.")
         XCTAssertTrue(vm.lastFetchFailed)
     }
 

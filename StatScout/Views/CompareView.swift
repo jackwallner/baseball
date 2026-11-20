@@ -119,13 +119,10 @@ struct CompareView: View {
         return nil
     }
 
-    /// The followed players that exist in the selected season, in the order
-    /// they were followed.
+    /// The followed players, in the order they were followed. A player who did
+    /// not play the selected season shows his newest season instead.
     private var followedPlayers: [Player] {
-        let roster = viewModel.players(forSeason: viewModel.selectedSeason)
-        return favorites.playerIds.compactMap { id in
-            roster.first { $0.playerId == id }
-        }
+        viewModel.followedPlayers(ids: favorites.playerIds)
     }
 
     var body: some View {

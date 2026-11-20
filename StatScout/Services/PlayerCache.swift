@@ -22,8 +22,15 @@ struct DiskPlayerCache: PlayerCaching {
     }
 
     func loadPlayers() throws -> [Player] {
+        try loadPlayers(ignoringAge: false)
+    }
+
+    /// `ignoringAge` returns an expired file too: the last board the user saw,
+    /// for when the network is down and nothing fresher can arrive.
+    func loadPlayers(ignoringAge: Bool) throws -> [Player] {
         let attributes = try FileManager.default.attributesOfItem(atPath: fileURL.path)
-        if let maxAge = maxAge,
+        if !ignoringAge,
+           let maxAge = maxAge,
            let modified = attributes[.modificationDate] as? Date,
            Date().timeIntervalSince(modified) > maxAge {
             throw URLError(.resourceUnavailable)
@@ -78,6 +85,11 @@ struct TwoTierPlayerCache: PlayerCaching {
 
     func loadCurrentPlayers() throws -> [Player] {
         try current.loadPlayers()
+    }
+
+    /// The saved current season even past its 48 hours, for an offline launch.
+    func loadExpiredCurrentPlayers() throws -> [Player] {
+        try current.loadPlayers(ignoringAge: true)
     }
 
     /// Past seasons, read straight from the app bundle every time.

@@ -126,6 +126,68 @@ final class StateMachineRegressionTests: XCTestCase {
         XCTAssertNotNil(vm.playerHistories[3]?.first { $0.season == past }, "a past-season row is not the feed's to prune")
     }
 
+    // MARK: 2026-11-20 catalog B1: offline launch after the saved file expired
+
+    /// A free user last opened the app three days ago and is now offline. The
+    /// saved current-season file is past its 48 hours, but it is still the last
+    /// board they saw and must show, not an empty "Showing saved data" card.
+    func testOfflineLaunchAfterTwoDaysStillShowsTheLastSavedBoard() async throws {
+        let directory = FileManager.default.temporaryDirectory.appending(path: UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let cache = TwoTierPlayerCache(directory: directory)
+        try cache.savePlayers([player(1), player(2)])
+        let file = directory.appending(path: "players-current.json")
+        try FileManager.default.setAttributes(
+            [.modificationDate: Date().addingTimeInterval(-72 * 60 * 60)],
+            ofItemAtPath: file.path
+        )
+        XCTAssertThrowsError(try cache.loadCurrentPlayers(), "precondition: the file is expired")
+
+        let p = SequencedStatcastProvider()
+        p.offline = true
+        let vm = DashboardViewModel(provider: p, cache: cache)
+        vm.selectedSeason = StatScoutSeason.current
+        await vm.load()
+
+        XCTAssertEqual(vm.seasonPlayers.map(\.playerId).sorted(), [1, 2],
+                       "the expired board must still show when the network is down")
+        XCTAssertTrue(vm.lastFetchFailed)
+    }
+
+    /// Nothing saved for the selected season: the card must not claim to be
+    /// showing saved data when it shows nothing.
+    func testOfflineWithNoRowsForTheSelectedSeasonDoesNotClaimSavedData() async {
+        let past = StatScoutSeason.current - 1
+        let p = SequencedStatcastProvider()
+        p.offline = true
+        let vm = DashboardViewModel(provider: p, cache: InMemoryPlayerCache(seed: [player(3, season: past)]))
+        vm.selectedSeason = StatScoutSeason.current
+        await vm.load()
+
+        XCTAssertTrue(vm.seasonPlayers.isEmpty, "precondition: nothing for the selected season")
+        XCTAssertNotNil(vm.errorMessage)
+        XCTAssertFalse(vm.errorMessage?.contains("Showing saved data") ?? false,
+                       "an empty board said it was showing saved data")
+    }
+
+    // MARK: 2026-11-20 catalog B2: followed players across season changes
+
+    func testFollowedPlayersSurviveASeasonTheyDidNotPlay() async {
+        let past = StatScoutSeason.current - 5
+        let vm = DashboardViewModel(provider: SequencedStatcastProvider(), cache: nil)
+        vm.playerHistories = [
+            1: [player(1), player(1, season: past)],
+            2: [player(2)],
+            3: [player(3, season: past)],
+        ]
+        vm.selectedSeason = past
+
+        let followed = vm.followedPlayers(ids: [2, 1, 3, 99])
+        XCTAssertEqual(followed.map(\.playerId), [2, 1, 3], "follow order kept, unknown id skipped")
+        XCTAssertEqual(followed[1].season, past, "a player with a row in the selected season uses it")
+        XCTAssertEqual(followed[0].season, StatScoutSeason.current, "a player who missed that season shows his newest")
+    }
+
     // MARK: B3: a failed refresh unsets the postseason phase
 
     private func postseasonVM(_ p: SequencedStatcastProvider) async -> DashboardViewModel {
