@@ -20,6 +20,7 @@ Developer notes and historical audits for this repository. The published site re
 - [state-machines-2026-11-06-fixes.md](audits/state-machines-2026-11-06-fixes.md): Fixes for the state machine audit: 4 fixed with regression tests, 1 held for Jack
 - [state-machines-2026-11-06-verify.md](audits/state-machines-2026-11-06-verify.md): Independent verification of the state machine fixes: PASS, 189/189 tests, fail-without-fix proved
 - [presubmit-review-2026-11-07.md](audits/presubmit-review-2026-11-07.md): Pre-submit review of 1.5.6 with deep pass: 1 P1 fixed (Duo fold state reset), 2 P2 open
+- [2026-11-20-bug-ux.html](audits/2026-11-20-bug-ux.html): Bug and UX catalog, 2026-11-20: 7 bugs (2 medium, 5 low; 6 confirmed), 10 UX items, October audit items rechecked. Catalog only, nothing fixed.
 
 ## Marketing
 
