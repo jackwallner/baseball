@@ -1,0 +1,15 @@
+StatScout is a read-only baseball statistics viewer with no user accounts or sign-in.
+
+Core flow:
+1. Launch app — new users see onboarding; returning users land on leaderboard
+2. Scroll leaderboard of ~800+ players with percentile rankings
+3. Tap player for profile with visual metric bars, standard stats, and year compare
+4. Filter by Hitting, Pitching, Fielding, Running categories
+5. Browse Teams tab for team rosters
+6. Metrics tab shows best/worst performers per category
+
+Pro features (IAP via RevenueCat):
+- Historical seasons, player comparisons, year-over-year tracking
+- Test with Sandbox account via RevenueCat
+
+Known: Light mode only. No shadows. No accounts. No social features.
