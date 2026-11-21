@@ -18,6 +18,10 @@ struct AboutView: View {
     /// told an October user the data was two weeks stale.
     var postseasonThrough: Date?
     @State private var paywallTrigger: PaywallTrigger?
+    /// What the last Restore tap reported. `store.lastError` is shared with the
+    /// launch-time offering and status refreshes, which fail offline for
+    /// subscribers too, so it is only shown here once Restore has asked.
+    @State private var restoreError: String?
 
     private var version: String {
         let short = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
@@ -116,7 +120,11 @@ struct AboutView: View {
 
                 Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline)
                 Button {
-                    Task { await store.restorePurchases() }
+                    Task {
+                        restoreError = nil
+                        await store.restorePurchases()
+                        restoreError = store.lastError
+                    }
                 } label: {
                     HStack {
                         Image(systemName: "arrow.clockwise")
@@ -130,7 +138,7 @@ struct AboutView: View {
                 }
                 .buttonStyle(.plain)
 
-                if let error = store.lastError {
+                if let error = restoreError {
                     Rectangle().fill(SavantPalette.divider).frame(height: SavantGeo.hairline)
                     Text(error)
                         .font(SavantType.small)
