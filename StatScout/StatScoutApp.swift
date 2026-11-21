@@ -575,7 +575,11 @@ struct OnboardingCards: View {
                 await store.ensureProductsLoaded()
             }
             guard let monthly = store.monthlyPackage else {
-                trialError = String(localized: "Still loading subscription options. Tap again in a moment.")
+                // After a failed load the store holds the reason ("Check your
+                // connection"). Only an offering that is still on its way has
+                // nothing to report, and only that case says to tap again.
+                trialError = store.lastError
+                    ?? String(localized: "Still loading subscription options. Tap again in a moment.")
                 return
             }
             do {
