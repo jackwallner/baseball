@@ -485,6 +485,11 @@ final class DashboardViewModel {
     /// the fetch now outlives whichever view kicked it off, and a second caller
     /// awaits the same task instead of dropping its request on the floor.
     private var recentFormTasks: [Int: Task<Void, Never>] = [:]
+    /// Which request owns each window's entry in `recentFormTasks` and
+    /// `recentFormLoadingWindows`. A cancelled fetch unwinds after its
+    /// replacement has registered, so it may only clear what it still owns.
+    private var recentFormTokens: [Int: Int] = [:]
+    private var nextRecentFormToken = 0
 
     /// The window the Stats leaderboard and trend arrows read from.
     var recentWindow: RecentWindow = .fortnight
@@ -516,10 +521,13 @@ final class DashboardViewModel {
     /// season line Settings reports had already moved on. That is the whole of
     /// "the Trends side is a day behind".
     private func refreshCachedRecentFormWindows() async {
-        let held = Set(recentFormByWindow.keys)
+        // Windows still being fetched are restarted too: the cancel below
+        // would otherwise leave one with no data, no error and no request.
+        let held = Set(recentFormByWindow.keys).union(recentFormTasks.keys)
         guard !held.isEmpty else { return }
         for task in recentFormTasks.values { task.cancel() }
         recentFormTasks.removeAll()
+        recentFormTokens.removeAll()
         recentFormLoadingWindows.removeAll()
         recentFormByWindow.removeAll()
         for days in held {
@@ -535,6 +543,7 @@ final class DashboardViewModel {
         let target = window ?? recentWindow
         recentFormTasks[target.rawValue]?.cancel()
         recentFormTasks.removeValue(forKey: target.rawValue)
+        recentFormTokens.removeValue(forKey: target.rawValue)
         recentFormByWindow.removeValue(forKey: target.rawValue)
         recentFormError = nil
         await loadRecentFormIfNeeded(window: target)
@@ -555,11 +564,18 @@ final class DashboardViewModel {
         recentFormEmptyWindows.remove(target.rawValue)
         recentFormError = nil
         let season = StatScoutSeason.current
+        nextRecentFormToken += 1
+        let token = nextRecentFormToken
+        recentFormTokens[target.rawValue] = token
         let task = Task { @MainActor [weak self] in
             guard let self else { return }
             defer {
-                self.recentFormLoadingWindows.remove(target.rawValue)
-                self.recentFormTasks.removeValue(forKey: target.rawValue)
+                // A cancelled fetch gets here after its replacement registered.
+                if self.recentFormTokens[target.rawValue] == token {
+                    self.recentFormLoadingWindows.remove(target.rawValue)
+                    self.recentFormTasks.removeValue(forKey: target.rawValue)
+                    self.recentFormTokens.removeValue(forKey: target.rawValue)
+                }
             }
             do {
                 let rows = try await self.provider.fetchRecentForm(

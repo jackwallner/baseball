@@ -189,3 +189,127 @@ final class TeamInningsTests: XCTestCase {
         XCTAssertEqual(PostseasonQualifier.boxScore(263), 263, accuracy: 0.0001)
     }
 }
+
+/// A recent-form provider whose requests take a while and honor cancellation,
+/// so a test can hold a fetch in flight. Counts requests per window.
+private final class SlowRecentFormProvider: StatcastProviding, @unchecked Sendable {
+    private let base: MockProvider
+    private let lock = NSLock()
+    private var requests: [Int] = []
+    private var rollupAsOf: String
+    private var coverage: Date?
+
+    init(_ base: MockProvider, asOf: String, delay: UInt64 = 400_000_000) {
+        self.base = base
+        self.rollupAsOf = asOf
+        self.delay = delay
+    }
+
+    private let delay: UInt64
+
+    func requestCount(window: Int) -> Int { lock.withLock { requests.filter { $0 == window }.count } }
+    func moveRollup(to asOf: String, coverage: Date) {
+        lock.withLock { rollupAsOf = asOf; self.coverage = coverage }
+    }
+
+    func fetchRecentForm(season: Int, windowDays: Int) async throws -> [RecentForm] {
+        let asOf = lock.withLock { () -> String in requests.append(windowDays); return rollupAsOf }
+        try await Task.sleep(nanoseconds: delay)
+        let json = """
+        {
+          "player_id": 1, "season": \(season), "player_type": "batter",
+          "window_days": \(windowDays), "as_of": "\(asOf)", "team": "SEA",
+          "games": 10, "plate_appearances": 40, "batted_ball_events": 20,
+          "metrics": {}, "prior_metrics": {}, "delta": {}
+        }
+        """
+        return [try JSONDecoder().decode(RecentForm.self, from: Data(json.utf8))]
+    }
+
+    func fetchDataThroughDate(season: Int) async throws -> Date? { lock.withLock { coverage } }
+    func fetchPlayers() async throws -> [Player] { try await base.fetchPlayers() }
+    func fetchHistoricalPlayers() async throws -> [Player] { try await base.fetchHistoricalPlayers() }
+    func fetchCurrentPlayers() async throws -> [Player] { try await base.fetchCurrentPlayers() }
+    func fetchGameLogs(playerId: Int, season: Int, phase: SeasonPhase) async throws -> [PlayerGameLog] {
+        try await base.fetchGameLogs(playerId: playerId, season: season, phase: phase)
+    }
+    func fetchTeamGameLogs(team: String, season: Int, sinceDate: Date, phase: SeasonPhase) async throws -> [PlayerGameLog] {
+        try await base.fetchTeamGameLogs(team: team, season: season, sinceDate: sinceDate, phase: phase)
+    }
+    func fetchPostseasonThroughDate(season: Int) async throws -> Date? { try await base.fetchPostseasonThroughDate(season: season) }
+    func fetchPostseasonPlayers(season: Int) async throws -> [Player] { try await base.fetchPostseasonPlayers(season: season) }
+}
+
+@MainActor
+final class RecentFormTaskOwnershipTests: XCTestCase {
+    private let player = Player(
+        playerId: 1, name: "Live", team: "SEA", position: "RF", handedness: "R/R", imageURL: nil,
+        updatedAt: Date(), season: StatScoutSeason.current, metrics: [], standardStats: [], games: []
+    )
+
+    private func waitUntil(_ what: String, _ condition: () -> Bool) async {
+        for _ in 0..<300 where !condition() { try? await Task.sleep(nanoseconds: 10_000_000) }
+        XCTAssertTrue(condition(), what)
+    }
+
+    /// B5 (2026-11-20 audit): a reload cancels the running fetch and starts
+    /// another. The cancelled one unwound afterwards and cleared the loading
+    /// flag of the fetch that replaced it, so the board said "No movement to
+    /// rank yet" while the new request was still running.
+    func testReloadWhileFetchingKeepsTheWindowMarkedLoading() async {
+        let provider = SlowRecentFormProvider(MockProvider(), asOf: "2026-09-27")
+        let vm = DashboardViewModel(provider: provider)
+        let first = Task { await vm.loadRecentFormIfNeeded(window: .fortnight) }
+        await waitUntil("first request started") { provider.requestCount(window: 15) == 1 }
+        let second = Task { await vm.reloadRecentForm(window: .fortnight) }
+        await waitUntil("second request started") { provider.requestCount(window: 15) == 2 }
+        try? await Task.sleep(nanoseconds: 100_000_000)
+
+        XCTAssertTrue(vm.recentFormLoadingWindows.contains(15), "the replacement is still running")
+        XCTAssertTrue(vm.isRecentFormLoading)
+
+        await first.value
+        await second.value
+        XCTAssertFalse(vm.recentFormLoadingWindows.contains(15))
+        XCTAssertNotNil(vm.recentForm(for: 1, window: .fortnight))
+    }
+
+    /// B5: a caller arriving while the replacement runs joins it instead of
+    /// starting a third request.
+    func testJoiningARunningRecentFormFetchAfterAReloadDoesNotDuplicateIt() async {
+        let provider = SlowRecentFormProvider(MockProvider(), asOf: "2026-09-27")
+        let vm = DashboardViewModel(provider: provider)
+        let first = Task { await vm.loadRecentFormIfNeeded(window: .fortnight) }
+        await waitUntil("first request started") { provider.requestCount(window: 15) == 1 }
+        let second = Task { await vm.reloadRecentForm(window: .fortnight) }
+        await waitUntil("second request started") { provider.requestCount(window: 15) == 2 }
+        try? await Task.sleep(nanoseconds: 100_000_000)
+
+        await vm.loadRecentFormIfNeeded(window: .fortnight)
+
+        XCTAssertEqual(provider.requestCount(window: 15), 2)
+        await first.value
+        await second.value
+    }
+
+    /// B7: a foreground refresh that finds newer coverage cancelled every
+    /// running window fetch but only re-asked for the windows already held, so
+    /// a window opened a moment earlier ended with no data and no request.
+    func testRefreshRestartsAWindowThatWasStillLoading() async {
+        let provider = SlowRecentFormProvider(MockProvider(players: [player]), asOf: "2026-09-26", delay: 150_000_000)
+        let vm = DashboardViewModel(provider: provider)
+        await vm.loadRecentFormIfNeeded(window: .fortnight)
+        XCTAssertNotNil(vm.recentForm(for: 1, window: .fortnight))
+
+        provider.moveRollup(to: "2026-09-27", coverage: Date.fromPostgresDate("2026-09-27")!)
+        let month = Task { await vm.loadRecentFormIfNeeded(window: .month) }
+        await waitUntil("30 day request started") { provider.requestCount(window: 30) == 1 }
+        await vm.load()
+        await month.value
+
+        XCTAssertNotNil(vm.recentForm(for: 1, window: .month), "the 30 day window was restarted, not dropped")
+        XCTAssertNotNil(vm.recentForm(for: 1, window: .fortnight))
+        XCTAssertTrue(vm.recentFormLoadingWindows.isEmpty)
+        XCTAssertFalse(vm.recentFormEmptyWindows.contains(30))
+    }
+}
