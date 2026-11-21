@@ -516,7 +516,7 @@ struct PlayerProfileView: View {
             if !store.isPro {
                 RecentFormCard(
                     player: player,
-                    season: activeSeason ?? player.season ?? Calendar.current.component(.year, from: .now),
+                    season: activeSeason ?? player.season ?? StatScoutSeason.calendarYear(),
                     leaguePlayers: allPlayers,
                     fetchGameLogs: fetchGameLogs
                 )

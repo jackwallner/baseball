@@ -1,5 +1,16 @@
 import Foundation
 
+extension Calendar {
+    /// A Gregorian calendar in this calendar's time zone. Postgres dates, game
+    /// dates and season years are Gregorian; reading or building them with a
+    /// Buddhist, Japanese or Islamic device calendar lands centuries off.
+    var gregorianInSameZone: Calendar {
+        var gregorian = Calendar(identifier: .gregorian)
+        gregorian.timeZone = timeZone
+        return gregorian
+    }
+}
+
 extension Date {
     /// Parses a Postgres `date` column ("YYYY-MM-DD").
     ///
@@ -14,7 +25,7 @@ extension Date {
         parts.year = bits[0]
         parts.month = bits[1]
         parts.day = bits[2]
-        return calendar.date(from: parts)
+        return calendar.gregorianInSameZone.date(from: parts)
     }
 }
 

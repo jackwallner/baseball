@@ -121,7 +121,7 @@ struct TeamView: View {
 
     private var displaySeason: Int {
         if let viewModel { return viewModel.selectedSeason }
-        return season ?? players.compactMap(\.season).max() ?? Calendar.current.component(.year, from: Date())
+        return season ?? players.compactMap(\.season).max() ?? StatScoutSeason.calendarYear()
     }
 
     private var currentPlayers: [Player] {

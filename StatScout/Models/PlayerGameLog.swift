@@ -182,7 +182,7 @@ struct RecentFormWindow {
     ) -> [PlayerGameLog] {
         var eastern = Calendar(identifier: .gregorian)
         eastern.timeZone = PlayerGameLog.gameDateZone
-        let day = calendar.dateComponents([.year, .month, .day], from: anchor)
+        let day = calendar.gregorianInSameZone.dateComponents([.year, .month, .day], from: anchor)
         guard let anchorDay = eastern.date(from: day),
               let start = eastern.date(byAdding: .day, value: -(days - 1), to: anchorDay) else {
             return logs

@@ -48,7 +48,7 @@ enum StatScoutSeason {
     /// Year flip, when this runs ahead of `current`, can be tested at a fixed
     /// clock.
     static func calendarYear(on date: Date = .now, calendar: Calendar = .current) -> Int {
-        calendar.component(.year, from: date)
+        calendar.gregorianInSameZone.component(.year, from: date)
     }
 }
 

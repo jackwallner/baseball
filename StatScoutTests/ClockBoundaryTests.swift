@@ -208,6 +208,64 @@ final class ClockBoundaryTests: XCTestCase {
         }
     }
 
+    // MARK: Non-Gregorian device calendars
+
+    private func calendar(_ id: Calendar.Identifier, zone: String = "America/New_York") -> Calendar {
+        var calendar = Calendar(identifier: id)
+        calendar.timeZone = TimeZone(identifier: zone)!
+        return calendar
+    }
+
+    private let nonGregorian: [Calendar.Identifier] = [.buddhist, .japanese, .islamicUmmAlQura, .persian, .republicOfChina, .hebrew]
+
+    /// B4 (2026-11-20 audit): Postgres dates are Gregorian. Built in a Buddhist
+    /// or Japanese calendar, 2026-09-27 landed centuries away.
+    func testPostgresDatesStayGregorianOnNonGregorianDeviceCalendars() throws {
+        for id in nonGregorian {
+            let device = calendar(id)
+            let parsed = try XCTUnwrap(Date.fromPostgresDate("2026-09-27", calendar: device), "\(id)")
+            let parts = device.gregorianInSameZone.dateComponents([.year, .month, .day, .hour], from: parsed)
+            XCTAssertEqual([parts.year, parts.month, parts.day, parts.hour], [2026, 9, 27, 0], "\(id)")
+        }
+    }
+
+    /// B4: the opening season is the Gregorian year, 2026, never 2569.
+    func testOpeningSeasonIsTheGregorianYearOnNonGregorianDeviceCalendars() {
+        let moment = local(la, 2026, 9, 27, 12)
+        for id in nonGregorian {
+            XCTAssertEqual(StatScoutSeason.calendarYear(on: moment, calendar: calendar(id, zone: "America/Los_Angeles")), 2026, "\(id)")
+        }
+    }
+
+    /// B4: data two days old reads as two days old, not 198,320.
+    func testCoverageAgeIsInDaysOnNonGregorianDeviceCalendars() throws {
+        let twoDaysAgo = local(utc, 2026, 9, 25)
+        let now = local(utc, 2026, 9, 27, 12)
+        for id in nonGregorian {
+            let device = calendar(id, zone: "UTC")
+            let parsed = try XCTUnwrap(Date.fromPostgresDate("2026-09-25", calendar: device))
+            XCTAssertEqual(parsed, twoDaysAgo, "\(id)")
+            XCTAssertEqual(device.dateComponents([.day], from: parsed, to: now).day, 2, "\(id)")
+        }
+    }
+
+    /// B4: the 15 day profile window still holds exactly 15 dates when the
+    /// anchor is parsed on a non-Gregorian calendar.
+    func testProfileWindowHoldsNDatesOnNonGregorianDeviceCalendars() throws {
+        let dataThrough = local(utc, 2026, 9, 27)
+        let dates = (0..<20).map { offset -> String in
+            DateFormatter.iso(utc.date(byAdding: .day, value: -offset, to: dataThrough)!, utc)
+        }
+        let logs = try dates.map { try log($0) }
+        for id in nonGregorian {
+            let device = calendar(id)
+            let parsed = try XCTUnwrap(Date.fromPostgresDate("2026-09-27", calendar: device))
+            let window = RecentFormWindow.logs(logs, days: 15, endingOn: parsed, calendar: device)
+            XCTAssertEqual(window.count, 15, "\(id)")
+            XCTAssertEqual(window.map(\.gameDate).min(), try log("2026-09-13").gameDate, "\(id)")
+        }
+    }
+
     // MARK: Weekly delta
 
     func testWeeklyDeltaWindowEdge() {
