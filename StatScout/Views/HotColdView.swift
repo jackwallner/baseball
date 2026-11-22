@@ -311,6 +311,8 @@ struct HotColdView: View {
                     }
                     .blur(radius: 8)
                     .allowsHitTesting(false)
+                    // Invented placeholder rows, not data.
+                    .accessibilityHidden(true)
                 }
                 .clipped()
                 .overlay(alignment: .bottom) {

@@ -202,6 +202,7 @@ struct TeamStandardCard: View {
                 teaser
                     .blur(radius: 8)
                     .allowsHitTesting(false)
+                    .accessibilityHidden(true)
                 BlurGateUnlock(
                     headline: String(localized: "See every team's last 7 / 15 / 30 days"),
                     trigger: .teamView
