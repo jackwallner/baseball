@@ -16,5 +16,9 @@
   ],
   "persona_overrides": {},
   "slot": null,
-  "host": "local"
+  "host": "local",
+  "upgrade_build_settings": {
+    "SUPABASE_URL": "https://example.invalid",
+    "SUPABASE_ANON_KEY": "placeholder"
+  }
 }
