@@ -343,6 +343,9 @@ final class StoreService: NSObject, ObservableObject {
 
     @Published private(set) var products: [Package] = []
     @Published private(set) var currentOffering: Offering?
+    /// Metadata of RevenueCat's *current* offering (a running Experiment's
+    /// variant), not `currentOffering`, which prefers the "default" one.
+    private(set) var remoteMetadata: [String: Any]?
     @Published private(set) var customerInfo: CustomerInfo?
     #if DEBUG
     /// Local-only StatScout+ override so Pro-gated surfaces (Recent Form,
@@ -418,7 +421,7 @@ final class StoreService: NSObject, ObservableObject {
             if trigger != .winback,
                isEligibleForIntroOffer(yearly),
                let trial = yearly.introTrial {
-                return trial.startLabel
+                return trialCTAArm.title(.sentence, trial: trial)
             }
             let price = yearly.priceLabel
             return trigger == .winback
@@ -470,7 +473,7 @@ final class StoreService: NSObject, ObservableObject {
     var onboardingMonthlyCTALabel: String {
         guard let monthly = monthlyPackage else { return String(localized: "Upgrade to StatScout+") }
         if isEligibleForIntroOffer(monthly), let trial = monthly.introTrial {
-            return trial.startLabel
+            return trialCTAArm.title(.sentence, trial: trial)
         }
         let price = monthly.priceLabel
         return String(localized: "Try StatScout+ for \(price)")
@@ -552,6 +555,8 @@ final class StoreService: NSObject, ObservableObject {
         if let offering = currentOffering?.identifier {
             attributes["offering_id"] = offering
         }
+        // The wording arm this customer saw, so a test reads by attribute too.
+        attributes[TrialCTA.metadataKey] = trialCTAArm.rawValue
         Purchases.shared.attribution.setAttributes(attributes)
     }
 
@@ -605,6 +610,7 @@ final class StoreService: NSObject, ObservableObject {
             do {
                 let offerings = try await Purchases.shared.offerings()
                 let offering = offerings.paywallOffering
+                remoteMetadata = offerings.current?.metadata
                 currentOffering = offering
                 products = offering?.sortedPackages ?? []
                 lastError = nil
