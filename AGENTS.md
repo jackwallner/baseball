@@ -9,9 +9,13 @@ here and copy outward.
 
 **App Store reviews:** system `requestReview()` only, no custom rating question
 (App Review 5.6.1). `ReviewPromptTracker` gates it (2nd launch on, onboarding
-done, 30-day cooldown, Settings "Rate StatScout" row ends asks; "Send Feedback"
-never does); `RootTabView` asks ~3s after a positive moment (3rd+ player profile
-open, Pro player comparison) only if nothing is presented. App Store ID
+done, 30-day cooldown stamped when the call is made, Settings "Rate StatScout" row ends asks;
+"Send Feedback" never does). The only automatic triggers are two good moments
+(`ReviewMoment`): following a player, and a StatScout+ member building a new
+comparison matchup. `requestsReview(after:)` waits ~3s, then re-checks the view is on
+screen and nothing is presented. Remote switch `rating_prompt: off` pauses it. Wording
+tests go through RevenueCat offering metadata `trial_cta` (`my`, `your`; unset is
+control); keys a switch reads must be the same on every offering. App Store ID
 `6763945657`; feedback `jackwallner+bb@gmail.com`.
 
 ## Backend / data pipeline (Statcast)

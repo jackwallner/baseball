@@ -1,11 +1,5 @@
 import Foundation
 
-extension Notification.Name {
-    /// Posted after a satisfaction moment. The root view may request the system
-    /// rating prompt after a short delay, with no question in front of it.
-    static let statscoutPositiveMomentForReview = Notification.Name("com.jackwallner.baseball.positiveMomentForReview")
-}
-
 /// What the user did about a review. Only opening the review page ends the
 /// passive asks: someone who sent feedback can still rate.
 enum ReviewPromptOutcome: String, Sendable {
@@ -15,7 +9,8 @@ enum ReviewPromptOutcome: String, Sendable {
     case submittedFeedback
 }
 
-/// Persists launch counts, positive moments, and review-prompt eligibility.
+/// Persists launch counts and review-prompt eligibility. The only automatic
+/// triggers are the moments in `ReviewMoment`.
 @MainActor
 enum ReviewPromptTracker {
     private static let defaults = UserDefaults.standard
@@ -24,8 +19,6 @@ enum ReviewPromptTracker {
     private static let firstOpenKey = "reviewPrompt.firstAppOpenDate"
     private static let lastShownKey = "reviewPrompt.lastShownDate"
     private static let outcomeKey = "reviewPrompt.outcome"
-    private static let positiveMomentCountKey = "reviewPrompt.positiveMomentCount"
-    private static let pendingPositiveMomentKey = "reviewPrompt.pendingPositiveMoment"
 
     /// Ask early. Most installs are gone within a week, and a rating from
     /// someone on their second visit beats no rating at all. The only tenure
@@ -77,16 +70,6 @@ enum ReviewPromptTracker {
         }
     }
 
-    static var positiveMomentCount: Int {
-        get { max(defaults.integer(forKey: positiveMomentCountKey), 0) }
-        set { defaults.set(newValue, forKey: positiveMomentCountKey) }
-    }
-
-    static var hasPendingPositiveMoment: Bool {
-        get { defaults.bool(forKey: pendingPositiveMomentKey) }
-        set { defaults.set(newValue, forKey: pendingPositiveMomentKey) }
-    }
-
     /// Skip passive prompts during UI tests / Fastlane snapshot runs.
     static var isAutomationRun: Bool {
         #if DEBUG
@@ -105,19 +88,10 @@ enum ReviewPromptTracker {
         appLaunchCount += 1
     }
 
-    static func recordPositiveMoment() {
-        positiveMomentCount += 1
-        hasPendingPositiveMoment = true
-        NotificationCenter.default.post(name: .statscoutPositiveMomentForReview, object: nil)
-    }
-
-    static func consumePendingPositiveMoment() {
-        hasPendingPositiveMoment = false
-    }
-
     static func passivePromptAllowed(now: Date = .now) -> Bool {
         guard outcome != .openedWriteReview else { return false }
-        guard let last = lastShownDate else { return true }
+        // A stamp from a clock that ran ahead is no evidence of an ask.
+        guard let last = lastShownDate, last <= now else { return true }
         let cooldown = TimeInterval(cooldownDays) * 86_400
         return now.timeIntervalSince(last) >= cooldown
     }
@@ -129,17 +103,8 @@ enum ReviewPromptTracker {
         return appLaunchCount >= minimumLaunchCount
     }
 
-    static func shouldRequestAfterPositiveMoment(
-        hasCompletedOnboarding: Bool,
-        now: Date = .now
-    ) -> Bool {
-        guard hasPendingPositiveMoment else { return false }
-        return canRequestReview(hasCompletedOnboarding: hasCompletedOnboarding, now: now)
-    }
-
     static func markShown(now: Date = .now) {
         lastShownDate = now
-        consumePendingPositiveMoment()
     }
 
     /// The Settings "Rate" row. Ends the passive asks for good.
@@ -153,5 +118,21 @@ enum ReviewPromptTracker {
     static func markFeedbackSent() {
         guard outcome != .openedWriteReview else { return }
         outcome = .submittedFeedback
+    }
+}
+
+/// The good results that may ask for a rating. Nothing else asks on its own:
+/// not a launch, a view appearing, a tab switch or a count of opens.
+enum ReviewMoment {
+    /// The user just followed a player. Unfollowing is not a good result.
+    static func followFinished(nowFollowing: Bool) -> Bool {
+        nowFollowing
+    }
+
+    /// A StatScout+ member just built a new matchup on the comparison screen
+    /// (a different player, season or the sides swapped). A free member is
+    /// looking at a locked teaser, which is no result to be happy about.
+    static func comparisonBuilt(isPro: Bool, changedMatchup: Bool) -> Bool {
+        isPro && changedMatchup
     }
 }
