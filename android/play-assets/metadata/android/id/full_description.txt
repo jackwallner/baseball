@@ -1,6 +1,6 @@
 Lihat cerita bisbol di balik box score.
 
-StatScout menghadirkan persentil Statcast, statistik musim standar, dan performa terkini dalam satu aplikasi scouting bisbol MLB yang cepat. Temukan pemimpin liga, ikuti pemain favorit, dan lihat apa yang membuat seorang pemukul atau pitcher masuk kelas elite.
+StatScout menghadirkan persentil lanjutan, statistik musim standar, dan performa terkini dalam satu aplikasi scouting bisbol yang cepat. Temukan pemimpin liga, ikuti pemain favorit, dan lihat apa yang membuat seorang pemukul atau pitcher masuk kelas elite.
 
 PERSENTIL STATCAST SEKILAS
 Baca xwOBA, xBA, exit velocity, barrel rate, hard-hit rate, strikeout rate, dan lainnya sebagai bar persentil yang jelas. Merah menandai ujung atas, biru ujung bawah. Persentil lebih tinggi berarti performa lebih baik.
@@ -12,7 +12,7 @@ PEMIMPIN MUSIM INI, GRATIS
 Cari pemain dan tim, ganti metrik, atur batas kualifikasi, dan susun daftar pemain yang Anda ikuti. Buka profil pemain dengan sekali ketuk. Pemimpin musim ini, scouting tim per musim, dan fitur mengikuti pemain tersedia gratis.
 
 PASCAMUSIM DALAM KONTEKS
-Data musim reguler dan pascamusim dipisahkan. Nilai bulan Oktober ditempatkan pada kurva persentil musim reguler tahun yang sama, dengan label jelas dan kualifikasi waktu bermain ala MLB.
+Data musim reguler dan pascamusim dipisahkan. Nilai bulan Oktober ditempatkan pada kurva persentil musim reguler tahun yang sama, dengan label jelas dan kualifikasi waktu bermain standar.
 
 STATSCOUT+
 Buka seluruh perangkat scouting:
@@ -21,7 +21,7 @@ Buka seluruh perangkat scouting:
 - Bandingkan Pemain: dua pemain berdampingan di semua metrik yang tersedia
 - Antar Musim: bandingkan musim seorang pemain hingga 2015
 - Performa Tim: 7, 15, atau 30 hari terakhir untuk semua 30 klub
-- Musim Lampau: jelajahi seluruh era Statcast
+- Musim Lampau: jelajahi setiap musim sejak 2015
 
 Pilih Bulanan, Tahunan, atau Seumur Hidup. Harga paket dan kelayakan uji coba tampil di aplikasi sebelum pembelian.
 
@@ -39,4 +39,4 @@ Catatan: aplikasinya sendiri berbahasa Inggris.
 Kebijakan Privasi: https://jackwallner.github.io/baseball/android-privacy.html
 Ketentuan Penggunaan: https://jackwallner.github.io/baseball/android-terms.html
 
-StatScout bersifat independen dan tidak berafiliasi dengan, didukung, atau disponsori oleh Major League Baseball, tim mana pun, atau Baseball Savant. Nama pemain, nama tim, dan statistik digunakan untuk identifikasi dan informasi.
+StatScout bersifat independen dan tidak berafiliasi dengan, didukung, atau disponsori oleh liga bisbol profesional, tim, asosiasi pemain, atau penyedia data mana pun. Nama pemain, nama tim, dan statistik digunakan untuk identifikasi dan informasi.

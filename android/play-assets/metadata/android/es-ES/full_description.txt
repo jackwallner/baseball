@@ -1,6 +1,6 @@
 El béisbol más allá del marcador.
 
-StatScout reúne percentiles Statcast, estadísticas clásicas de la temporada y la forma reciente en una app de scouting de béisbol rápida. Encuentra a los líderes de la liga, sigue a tus jugadores y descubre qué hace élite a un bateador o a un lanzador.
+StatScout reúne percentiles avanzados, estadísticas clásicas de la temporada y la forma reciente en una app de scouting de béisbol rápida. Encuentra a los líderes de la liga, sigue a tus jugadores y descubre qué hace élite a un bateador o a un lanzador.
 
 PERCENTILES STATCAST VISUALES
 Consulta xwOBA, xBA, velocidad de salida, porcentaje de barrels, contacto fuerte, ponches y más como barras de percentil claras. El rojo marca la parte alta y el azul la baja. Un percentil más alto significa mejor rendimiento.
@@ -12,7 +12,7 @@ LÍDERES DE LA TEMPORADA ACTUAL, GRATIS
 Busca jugadores y equipos, cambia la métrica, ajusta el mínimo de calificación y crea tu lista de seguidos. Un toque abre el perfil del jugador. Los líderes de la temporada actual, el scouting de equipos de la temporada y el seguimiento de jugadores son gratis.
 
 POSTEMPORADA EN CONTEXTO
-Los datos de temporada regular y postemporada se mantienen separados. Los valores de octubre se sitúan sobre la curva de percentiles de la temporada regular del mismo año, con etiquetas claras y la calificación por tiempo de juego que usa la MLB.
+Los datos de temporada regular y postemporada se mantienen separados. Los valores de octubre se sitúan sobre la curva de percentiles de la temporada regular del mismo año, con etiquetas claras y la calificación estándar por tiempo de juego.
 
 STATSCOUT+
 Desbloquea todas las herramientas de scouting:
@@ -21,7 +21,7 @@ Desbloquea todas las herramientas de scouting:
 - Comparar jugadores: dos jugadores lado a lado en todas las métricas disponibles
 - Año contra año: compara las temporadas de un jugador hasta 2015
 - Forma de equipos: últimos 7, 15 o 30 días de los 30 clubes
-- Temporadas históricas: explora toda la era Statcast
+- Temporadas históricas: explora cada temporada desde 2015
 
 Elige Mensual, Anual o Vitalicio. Los precios y la disponibilidad de la prueba se muestran en la app antes de comprar.
 
@@ -39,4 +39,4 @@ Importante: la app en sí está en inglés.
 Privacidad: https://jackwallner.github.io/baseball/android-privacy.html
 Condiciones de uso: https://jackwallner.github.io/baseball/android-terms.html
 
-StatScout es independiente y no está afiliado, respaldado ni patrocinado por Major League Baseball, ningún equipo ni Baseball Savant. Los nombres de jugadores y equipos y las estadísticas se usan con fines de identificación e información.
+StatScout es independiente y no está afiliado, respaldado ni patrocinado por ninguna liga profesional de béisbol, equipo, asociación de jugadores ni proveedor de datos. Los nombres de jugadores y equipos y las estadísticas se usan con fines de identificación e información.

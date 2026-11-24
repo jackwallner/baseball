@@ -1,6 +1,6 @@
 El béisbol más allá del box score.
 
-StatScout junta percentiles Statcast, estadísticas de la temporada y la forma reciente en una app de scouting de béisbol rápida. Encuentra a los líderes de las Grandes Ligas, sigue a tus jugadores y ve qué hace élite a un bateador o a un lanzador.
+StatScout junta percentiles avanzados, estadísticas de la temporada y la forma reciente en una app de scouting de béisbol rápida. Encuentra a los líderes de la liga, sigue a tus jugadores y ve qué hace élite a un bateador o a un lanzador.
 
 PERCENTILES STATCAST VISUALES
 Revisa xwOBA, xBA, velocidad de salida, porcentaje de barrels, contacto fuerte, ponches y más como barras de percentil claras. El rojo marca la parte alta y el azul la baja. Un percentil más alto significa mejor rendimiento.
@@ -12,7 +12,7 @@ LÍDERES DE LA TEMPORADA ACTUAL, GRATIS
 Busca jugadores y equipos, cambia la métrica, ajusta el mínimo para calificar y arma tu lista de seguidos. Abre el perfil de un jugador con un toque. Los líderes de la temporada actual, el scouting de equipos y el seguimiento de jugadores son gratis.
 
 POSTEMPORADA EN CONTEXTO
-La temporada regular y la postemporada van por separado. Los valores de octubre se ubican sobre la curva de percentiles de la temporada regular del mismo año, con etiquetas claras y la calificación por tiempo de juego que usa la MLB.
+La temporada regular y la postemporada van por separado. Los valores de octubre se ubican sobre la curva de percentiles de la temporada regular del mismo año, con etiquetas claras y la calificación estándar por tiempo de juego.
 
 STATSCOUT+
 Desbloquea todas las herramientas:
@@ -21,7 +21,7 @@ Desbloquea todas las herramientas:
 - Comparar jugadores: dos peloteros lado a lado en cada métrica
 - Año contra año: las temporadas de un jugador hasta 2015
 - Forma de equipos: últimos 7, 15 o 30 días de los 30 equipos
-- Temporadas anteriores: toda la era Statcast
+- Temporadas anteriores: cada temporada desde 2015
 
 Elige Mensual, Anual o De por vida. Los precios y la elegibilidad para la prueba aparecen en la app antes de comprar.
 
@@ -39,4 +39,4 @@ Importante: la app en sí está en inglés.
 Privacidad: https://jackwallner.github.io/baseball/android-privacy.html
 Términos de uso: https://jackwallner.github.io/baseball/android-terms.html
 
-StatScout es independiente y no está afiliado, respaldado ni patrocinado por Major League Baseball, ningún equipo ni Baseball Savant. Los nombres de jugadores y equipos y las estadísticas se usan para identificación e información.
+StatScout es independiente y no está afiliado, respaldado ni patrocinado por ninguna liga profesional de béisbol, equipo, asociación de jugadores ni proveedor de datos. Los nombres de jugadores y equipos y las estadísticas se usan para identificación e información.

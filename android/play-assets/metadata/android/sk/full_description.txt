@@ -1,6 +1,6 @@
 Bejzbal za hranicou výsledkovej tabuľky.
 
-StatScout spája percentily Statcast, klasické štatistiky sezóny a aktuálnu formu v jednej rýchlej bejzbalovej aplikácii na scouting. Nájdite lídrov ligy, sledujte svojich hráčov a pozrite sa, čo robí pálkara alebo nadhadzovača elitným.
+StatScout spája pokročilé percentily, klasické štatistiky sezóny a aktuálnu formu v jednej rýchlej bejzbalovej aplikácii na scouting. Nájdite lídrov ligy, sledujte svojich hráčov a pozrite sa, čo robí pálkara alebo nadhadzovača elitným.
 
 PERCENTILY STATCAST NA PRVÝ POHĽAD
 Čítajte xwOBA, xBA, rýchlosť odpalu, podiel barrelov, tvrdých odpalov, strikeoutov a ďalšie ako prehľadné percentilové pruhy. Červená znamená hornú časť škály, modrá dolnú. Vyšší percentil znamená lepší výkon.
@@ -12,7 +12,7 @@ LÍDRI AKTUÁLNEJ SEZÓNY, ZADARMO
 Hľadajte hráčov a tímy, meňte metriku, upravte kvalifikačnú hranicu a zostavte si zoznam sledovaných. Jedno ťuknutie otvorí profil hráča. Lídri aktuálnej sezóny, scouting tímov a sledovanie hráčov sú zadarmo.
 
 PLAY-OFF V KONTEXTE
-Údaje zo základnej časti a z play-off zostávajú oddelené. Októbrové hodnoty sú umiestnené na percentilovú krivku základnej časti toho istého roka, s jasnými popismi a kvalifikáciou podľa herného času, akú používa MLB.
+Údaje zo základnej časti a z play-off zostávajú oddelené. Októbrové hodnoty sú umiestnené na percentilovú krivku základnej časti toho istého roka, s jasnými popismi a štandardnou kvalifikáciou podľa herného času.
 
 STATSCOUT+
 Odomknite kompletné scoutingové nástroje:
@@ -21,7 +21,7 @@ Odomknite kompletné scoutingové nástroje:
 - Porovnanie hráčov: dvaja hráči vedľa seba vo všetkých metrikách
 - Medziročné porovnanie: sezóny hráča až do roku 2015
 - Forma tímov: posledných 7, 15 alebo 30 dní pre všetkých 30 klubov
-- Minulé sezóny: celá éra Statcast
+- Minulé sezóny: každá sezóna od roku 2015
 
 Vyberte mesačný, ročný alebo doživotný plán. Ceny a nárok na skúšobné obdobie uvidíte v aplikácii pred nákupom.
 
@@ -39,4 +39,4 @@ Upozornenie: samotná aplikácia je v angličtine.
 Ochrana súkromia: https://jackwallner.github.io/baseball/android-privacy.html
 Podmienky používania: https://jackwallner.github.io/baseball/android-terms.html
 
-StatScout je nezávislý a nie je pridružený k Major League Baseball, žiadnemu tímu ani Baseball Savant, ani nimi schválený či sponzorovaný. Mená hráčov, názvy tímov a štatistiky slúžia na identifikáciu a informovanie.
+StatScout je nezávislý a nie je pridružený k žiadnej profesionálnej bejzbalovej lige, tímu, asociácii hráčov ani poskytovateľovi dát, ani nimi schválený či sponzorovaný. Mená hráčov, názvy tímov a štatistiky slúžia na identifikáciu a informovanie.

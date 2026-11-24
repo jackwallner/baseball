@@ -1,6 +1,6 @@
 Baseball tulostaulun takana.
 
-StatScout kokoaa Statcast-persentiilit, kauden perinteiset tilastot ja tuoreen vireen yhteen nopeaan baseballin scouting-sovellukseen. Löydä liigan kärkinimet, seuraa pelaajiasi ja näe, mikä tekee lyöjästä tai syöttäjästä huippuluokkaa.
+StatScout kokoaa edistyneet persentiilit, kauden perinteiset tilastot ja tuoreen vireen yhteen nopeaan baseballin scouting-sovellukseen. Löydä liigan kärkinimet, seuraa pelaajiasi ja näe, mikä tekee lyöjästä tai syöttäjästä huippuluokkaa.
 
 STATCAST-PERSENTIILIT SELKEÄSTI
 Lue xwOBA, xBA, exit velocity, barrel-osuus, kovien lyöntien osuus, strikeout-osuus ja muut selkeinä persentiilipalkkeina. Punainen on kärkipää ja sininen häntäpää. Korkeampi persentiili tarkoittaa parempaa suoritusta.
@@ -12,7 +12,7 @@ KULUVAN KAUDEN KÄRKI, ILMAINEN
 Hae pelaajia ja joukkueita, vaihda mittaria, säädä kelpoisuusrajaa ja kokoa seurattujen lista. Yksi napautus avaa pelaajaprofiilin. Kuluvan kauden kärkilistat, joukkueiden scouting ja pelaajien seuraaminen ovat ilmaisia.
 
 PUDOTUSPELIT OIKEASSA YHTEYDESSÄ
-Runkosarjan ja pudotuspelien tiedot pidetään erillään. Lokakuun arvot sijoitetaan saman vuoden runkosarjan persentiilikäyrälle selkein merkinnöin ja MLB:n peliaikarajalla.
+Runkosarjan ja pudotuspelien tiedot pidetään erillään. Lokakuun arvot sijoitetaan saman vuoden runkosarjan persentiilikäyrälle selkein merkinnöin ja vakiintuneella peliaikarajalla.
 
 STATSCOUT+
 Avaa koko scouting-työkalupakki:
@@ -21,7 +21,7 @@ Avaa koko scouting-työkalupakki:
 - Pelaajavertailu: kaksi pelaajaa rinnakkain kaikilla mittareilla
 - Vuosivertailu: pelaajan kaudet vuoteen 2015 asti
 - Joukkueiden vire: viimeiset 7, 15 tai 30 päivää kaikille 30 seuralle
-- Aiemmat kaudet: koko Statcast-aikakausi
+- Aiemmat kaudet: jokainen kausi vuodesta 2015
 
 Valitse Kuukausi, Vuosi tai Elinikäinen. Hinnat ja kokeilujakson saatavuus näkyvät sovelluksessa ennen ostoa.
 
@@ -39,4 +39,4 @@ Huomaa: itse sovellus on englanninkielinen.
 Tietosuoja: https://jackwallner.github.io/baseball/android-privacy.html
 Käyttöehdot: https://jackwallner.github.io/baseball/android-terms.html
 
-StatScout on itsenäinen eikä ole Major League Baseballin, minkään joukkueen tai Baseball Savantin kumppani, hyväksymä tai sponsoroima. Pelaajien ja joukkueiden nimiä sekä tilastoja käytetään tunnistamiseen ja tiedottamiseen.
+StatScout on itsenäinen eikä ole minkään baseballin ammattilaisliigan, joukkueen, pelaajayhdistyksen tai datantarjoajan kumppani, hyväksymä tai sponsoroima. Pelaajien ja joukkueiden nimiä sekä tilastoja käytetään tunnistamiseen ja tiedottamiseen.

@@ -1,6 +1,6 @@
 Le baseball au-delà du sommaire du match.
 
-StatScout réunit les percentiles Statcast, les statistiques de la saison et la forme récente dans une application de dépistage baseball rapide. Trouvez les meneurs du circuit, suivez vos joueurs et voyez ce qui fait un frappeur ou un lanceur d'élite.
+StatScout réunit les percentiles avancés, les statistiques de la saison et la forme récente dans une application de dépistage baseball rapide. Trouvez les meneurs du circuit, suivez vos joueurs et voyez ce qui fait un frappeur ou un lanceur d'élite.
 
 PERCENTILES STATCAST EN UN COUP D'OEIL
 xwOBA, xBA, vitesse de sortie, taux de barrels, taux de balles frappées dur, taux de retraits sur des prises et plus encore, en barres de percentiles claires. Le rouge indique le haut de l'échelle et le bleu le bas. Plus le percentile est élevé, meilleure est la performance.
@@ -12,7 +12,7 @@ MENEURS DE LA SAISON EN COURS, GRATUIT
 Cherchez des joueurs et des équipes, changez de mesure, ajustez le seuil de qualification et bâtissez votre liste de joueurs suivis. Une touche ouvre le profil. Les meneurs de la saison en cours, le dépistage des équipes et le suivi de joueurs sont gratuits.
 
 LES SÉRIES EN CONTEXTE
-Les données de la saison régulière et des séries restent séparées. Les valeurs d'octobre sont placées sur la courbe de percentiles de la saison régulière de la même année, avec des étiquettes claires et la qualification au temps de jeu utilisée par la MLB.
+Les données de la saison régulière et des séries restent séparées. Les valeurs d'octobre sont placées sur la courbe de percentiles de la saison régulière de la même année, avec des étiquettes claires et la qualification standard au temps de jeu.
 
 STATSCOUT+
 Débloquez tous les outils de dépistage :
@@ -21,7 +21,7 @@ Débloquez tous les outils de dépistage :
 - Comparaisons : deux joueurs côte à côte sur chaque mesure disponible
 - D'une année à l'autre : les saisons d'un joueur jusqu'en 2015
 - Forme des équipes : les 7, 15 ou 30 derniers jours pour les 30 clubs
-- Saisons passées : toute l'ère Statcast
+- Saisons passées : toutes les saisons depuis 2015
 
 Choisissez Mensuel, Annuel ou À vie. Les prix et l'admissibilité à l'essai s'affichent dans l'application avant l'achat.
 
@@ -39,4 +39,4 @@ Mensuel et Annuel sont des abonnements à renouvellement automatique, avec un es
 Confidentialité : https://jackwallner.github.io/baseball/android-privacy.html
 Conditions d'utilisation : https://jackwallner.github.io/baseball/android-terms.html
 
-StatScout est indépendant et n'est ni affilié, ni approuvé, ni commandité par le Baseball majeur (Major League Baseball), une équipe ou Baseball Savant. Les noms des joueurs, des équipes et les statistiques servent à l'identification et à l'information.
+StatScout est indépendant et n'est ni affilié, ni approuvé, ni commandité par une ligue professionnelle de baseball, une équipe, une association de joueurs ou un fournisseur de données. Les noms des joueurs, des équipes et les statistiques servent à l'identification et à l'information.

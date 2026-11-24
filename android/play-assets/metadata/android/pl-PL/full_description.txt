@@ -1,6 +1,6 @@
 Baseball poza samym wynikiem.
 
-StatScout łączy percentyle Statcast, klasyczne statystyki sezonu i aktualną formę w jednej szybkiej aplikacji scoutingowej do baseballu. Znajdź liderów ligi, obserwuj swoich zawodników i zobacz, co sprawia, że pałkarz lub miotacz należy do elity.
+StatScout łączy zaawansowane percentyle, klasyczne statystyki sezonu i aktualną formę w jednej szybkiej aplikacji scoutingowej do baseballu. Znajdź liderów ligi, obserwuj swoich zawodników i zobacz, co sprawia, że pałkarz lub miotacz należy do elity.
 
 PERCENTYLE STATCAST W PIGUŁCE
 Odczytuj xwOBA, xBA, prędkość wybicia, odsetek barreli, mocnych uderzeń, strikeoutów i więcej jako czytelne paski percentyli. Czerwony to górna część skali, niebieski dolna. Wyższy percentyl oznacza lepszy wynik.
@@ -12,7 +12,7 @@ LIDERZY BIEŻĄCEGO SEZONU, ZA DARMO
 Szukaj zawodników i drużyn, zmieniaj metrykę, ustaw próg kwalifikacji i twórz listę obserwowanych. Jedno dotknięcie otwiera profil zawodnika. Liderzy bieżącego sezonu, scouting drużyn i obserwowanie zawodników są bezpłatne.
 
 POSTSEASON W KONTEKŚCIE
-Dane z sezonu zasadniczego i postseasonu są rozdzielone. Wartości z października trafiają na krzywą percentyli sezonu zasadniczego z tego samego roku, z jasnymi oznaczeniami i progiem czasu gry stosowanym przez MLB.
+Dane z sezonu zasadniczego i postseasonu są rozdzielone. Wartości z października trafiają na krzywą percentyli sezonu zasadniczego z tego samego roku, z jasnymi oznaczeniami i standardowym progiem czasu gry.
 
 STATSCOUT+
 Odblokuj pełny zestaw narzędzi:
@@ -21,7 +21,7 @@ Odblokuj pełny zestaw narzędzi:
 - Porównanie zawodników: dwóch graczy obok siebie we wszystkich metrykach
 - Rok do roku: sezony zawodnika aż do 2015
 - Forma drużyn: ostatnie 7, 15 lub 30 dni dla wszystkich 30 klubów
-- Poprzednie sezony: cała era Statcast
+- Poprzednie sezony: każdy sezon od 2015 roku
 
 Wybierz plan miesięczny, roczny lub dożywotni. Ceny i dostępność okresu próbnego są widoczne w aplikacji przed zakupem.
 
@@ -39,4 +39,4 @@ Uwaga: sama aplikacja jest w języku angielskim.
 Prywatność: https://jackwallner.github.io/baseball/android-privacy.html
 Warunki korzystania: https://jackwallner.github.io/baseball/android-terms.html
 
-StatScout jest niezależny i nie jest powiązany z Major League Baseball, żadną drużyną ani Baseball Savant, ani przez nie popierany czy sponsorowany. Nazwiska zawodników, nazwy drużyn i statystyki służą identyfikacji i informacji.
+StatScout jest niezależny i nie jest powiązany z żadną profesjonalną ligą baseballu, drużyną, związkiem zawodowym graczy ani dostawcą danych, ani przez nie popierany czy sponsorowany. Nazwiska zawodników, nazwy drużyn i statystyki służą identyfikacji i informacji.

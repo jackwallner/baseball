@@ -1,6 +1,6 @@
 Baseboll bortom boxscoren.
 
-StatScout samlar Statcast-percentiler, klassisk säsongsstatistik och aktuell form i en snabb scoutingapp för baseboll. Hitta ligans ledare, följ dina spelare och se vad som gör en slagman eller pitcher till elit.
+StatScout samlar avancerade percentiler, klassisk säsongsstatistik och aktuell form i en snabb scoutingapp för baseboll. Hitta ligans ledare, följ dina spelare och se vad som gör en slagman eller pitcher till elit.
 
 STATCAST-PERCENTILER I BILD
 Läs xwOBA, xBA, exit velocity, barrel-andel, hard-hit-andel, strikeout-andel och mer som tydliga percentilstaplar. Rött är toppen och blått botten. Högre percentil betyder bättre prestation.
@@ -12,7 +12,7 @@ Slag, pitching, fältspel och löpning. Den klassiska statistikraden visas bredv
 Sök spelare och lag, byt mått, justera kvalgränsen och bygg din lista över följda spelare. Ett tryck öppnar spelarprofilen. Årets ledare, lagscouting och att följa spelare är gratis.
 
 SLUTSPELET I SITT SAMMANHANG
-Grundserie och slutspel hålls isär. Oktobervärden placeras på samma års percentilkurva för grundserien, med tydliga etiketter och den kvalgräns för speltid som MLB använder.
+Grundserie och slutspel hålls isär. Oktobervärden placeras på samma års percentilkurva för grundserien, med tydliga etiketter och den vanliga kvalgränsen för speltid.
 
 STATSCOUT+
 Lås upp hela scoutingverktyget:
@@ -21,7 +21,7 @@ Lås upp hela scoutingverktyget:
 - Jämför spelare: två spelare sida vid sida i alla tillgängliga mått
 - År mot år: en spelares säsonger tillbaka till 2015
 - Lagform: senaste 7, 15 eller 30 dagarna för alla 30 klubbar
-- Tidigare säsonger: hela Statcast-eran
+- Tidigare säsonger: varje säsong sedan 2015
 
 Välj Månadsvis, Årsvis eller Livstid. Priser och om du kan få en provperiod visas i appen före köpet.
 
@@ -39,4 +39,4 @@ Obs: själva appen är på engelska.
 Integritet: https://jackwallner.github.io/baseball/android-privacy.html
 Användarvillkor: https://jackwallner.github.io/baseball/android-terms.html
 
-StatScout är fristående och är inte knutet till, godkänt av eller sponsrat av Major League Baseball, något lag eller Baseball Savant. Spelarnamn, lagnamn och statistik används för identifiering och information.
+StatScout är fristående och är inte knutet till, godkänt av eller sponsrat av någon professionell basebolliga, något lag, någon spelarförening eller någon dataleverantör. Spelarnamn, lagnamn och statistik används för identifiering och information.

@@ -1,6 +1,6 @@
 Honkbal voorbij de boxscore.
 
-StatScout brengt Statcast-percentielen, klassieke seizoensstatistieken en recente vorm samen in één snelle scouting-app voor honkbal. Vind de koplopers van de competitie, volg je spelers en zie wat een slagman of werper tot de top maakt.
+StatScout brengt geavanceerde percentielen, klassieke seizoensstatistieken en recente vorm samen in één snelle scouting-app voor honkbal. Vind de koplopers van de competitie, volg je spelers en zie wat een slagman of werper tot de top maakt.
 
 STATCAST-PERCENTIELEN IN BEELD
 Lees xwOBA, xBA, exit velocity, barrel-percentage, hard-hit-percentage, strikeout-percentage en meer als duidelijke percentielbalken. Rood is de bovenkant, blauw de onderkant. Een hoger percentiel betekent een betere prestatie.
@@ -12,7 +12,7 @@ KOPLOPERS VAN DIT SEIZOEN, GRATIS
 Zoek spelers en teams, wissel van statistiek, pas de kwalificatiegrens aan en bouw je lijst met gevolgde spelers. Met één tik open je een spelersprofiel. Koplopers van dit seizoen, teamscouting en spelers volgen zijn gratis.
 
 POSTSEASON IN CONTEXT
-Gegevens van het reguliere seizoen en de postseason blijven gescheiden. Oktoberwaarden worden op de percentielcurve van het reguliere seizoen van hetzelfde jaar gezet, met duidelijke labels en de kwalificatie op speeltijd die de MLB gebruikt.
+Gegevens van het reguliere seizoen en de postseason blijven gescheiden. Oktoberwaarden worden op de percentielcurve van het reguliere seizoen van hetzelfde jaar gezet, met duidelijke labels en de gangbare kwalificatie op speeltijd.
 
 STATSCOUT+
 Ontgrendel de complete scoutingset:
@@ -21,7 +21,7 @@ Ontgrendel de complete scoutingset:
 - Spelers vergelijken: twee spelers naast elkaar op elke beschikbare statistiek
 - Jaar op jaar: de seizoenen van een speler terug tot 2015
 - Teamvorm: laatste 7, 15 of 30 dagen voor alle 30 clubs
-- Eerdere seizoenen: het hele Statcast-tijdperk
+- Eerdere seizoenen: elk seizoen sinds 2015
 
 Kies Maandelijks, Jaarlijks of Levenslang. Prijzen en of je een proefperiode krijgt, zie je in de app vóór de aankoop.
 
@@ -39,4 +39,4 @@ Let op: de app zelf is in het Engels.
 Privacy: https://jackwallner.github.io/baseball/android-privacy.html
 Gebruiksvoorwaarden: https://jackwallner.github.io/baseball/android-terms.html
 
-StatScout is onafhankelijk en is niet gelieerd aan, goedgekeurd door of gesponsord door Major League Baseball, een team of Baseball Savant. Namen van spelers en teams en statistieken worden gebruikt ter identificatie en informatie.
+StatScout is onafhankelijk en is niet gelieerd aan, goedgekeurd door of gesponsord door een professionele honkbalcompetitie, een team, een spelersvakbond of een dataleverancier. Namen van spelers en teams en statistieken worden gebruikt ter identificatie en informatie.

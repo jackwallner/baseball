@@ -1,6 +1,6 @@
 Xem câu chuyện bóng chày vượt ra ngoài bảng tỉ số.
 
-StatScout gom phân vị Statcast, thống kê mùa giải tiêu chuẩn và phong độ gần đây vào một ứng dụng tuyển trạch bóng chày MLB nhanh gọn. Tìm những người dẫn đầu giải, theo dõi cầu thủ của bạn và xem điều gì làm nên một tay đánh hay pitcher hàng đầu.
+StatScout gom phân vị nâng cao, thống kê mùa giải tiêu chuẩn và phong độ gần đây vào một ứng dụng tuyển trạch bóng chày nhanh gọn. Tìm những người dẫn đầu giải, theo dõi cầu thủ của bạn và xem điều gì làm nên một tay đánh hay pitcher hàng đầu.
 
 PHÂN VỊ STATCAST TRONG NHÁY MẮT
 Đọc xwOBA, xBA, tốc độ bóng bật ra, tỉ lệ barrel, tỉ lệ đánh mạnh, tỉ lệ strikeout và nhiều chỉ số khác dưới dạng thanh phân vị rõ ràng. Đỏ là đầu cao, xanh là đầu thấp. Phân vị càng cao nghĩa là thành tích càng tốt.
@@ -12,7 +12,7 @@ DẪN ĐẦU MÙA HIỆN TẠI, MIỄN PHÍ
 Tìm cầu thủ và đội, đổi chỉ số, chỉnh ngưỡng đủ điều kiện và lập danh sách theo dõi. Mở hồ sơ cầu thủ chỉ với một chạm. Bảng dẫn đầu mùa hiện tại, tuyển trạch đội theo mùa và theo dõi cầu thủ đều miễn phí.
 
 HẬU MÙA GIẢI TRONG BỐI CẢNH
-Dữ liệu mùa giải chính thức và hậu mùa giải được tách riêng. Giá trị tháng Mười được đặt trên đường phân vị của mùa giải chính thức cùng năm, có nhãn rõ ràng và ngưỡng thời gian thi đấu theo kiểu MLB.
+Dữ liệu mùa giải chính thức và hậu mùa giải được tách riêng. Giá trị tháng Mười được đặt trên đường phân vị của mùa giải chính thức cùng năm, có nhãn rõ ràng và ngưỡng thời gian thi đấu tiêu chuẩn.
 
 STATSCOUT+
 Mở khóa bộ công cụ tuyển trạch đầy đủ:
@@ -21,7 +21,7 @@ Mở khóa bộ công cụ tuyển trạch đầy đủ:
 - So sánh cầu thủ: hai cầu thủ cạnh nhau trên mọi chỉ số có sẵn
 - Qua từng năm: so sánh các mùa của một cầu thủ từ 2015
 - Phong độ đội: 7, 15 hoặc 30 ngày qua cho cả 30 câu lạc bộ
-- Mùa giải cũ: khám phá toàn bộ kỷ nguyên Statcast
+- Mùa giải cũ: khám phá mọi mùa giải từ năm 2015
 
 Chọn gói Tháng, Năm hoặc Trọn đời. Giá gói và điều kiện dùng thử hiển thị trong ứng dụng trước khi mua.
 
@@ -39,4 +39,4 @@ Lưu ý: bản thân ứng dụng dùng tiếng Anh.
 Chính sách quyền riêng tư: https://jackwallner.github.io/baseball/android-privacy.html
 Điều khoản sử dụng: https://jackwallner.github.io/baseball/android-terms.html
 
-StatScout là ứng dụng độc lập, không liên kết, không được bảo trợ hay tài trợ bởi Major League Baseball, bất kỳ đội nào hoặc Baseball Savant. Tên cầu thủ, tên đội và số liệu thống kê được dùng để nhận diện và cung cấp thông tin.
+StatScout là ứng dụng độc lập, không liên kết, không được bảo trợ hay tài trợ bởi bất kỳ giải bóng chày chuyên nghiệp, đội, hiệp hội cầu thủ hay nhà cung cấp dữ liệu nào. Tên cầu thủ, tên đội và số liệu thống kê được dùng để nhận diện và cung cấp thông tin.

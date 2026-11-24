@@ -1,6 +1,6 @@
 See the baseball story beyond the box score.
 
-StatScout brings Statcast percentiles, standard season stats, and recent form into one fast baseball scouting app. Find league leaders, follow your players, and see what makes an elite hitter or pitcher.
+StatScout brings advanced percentiles, standard season stats, and recent form into one fast baseball scouting app. Find league leaders, follow your players, and see what makes an elite hitter or pitcher.
 
 VISUAL STATCAST PERCENTILES
 Read xwOBA, xBA, exit velocity, barrel rate, hard-hit rate, strikeout rate, and more as clear percentile bars. Red marks the high end and blue the low end. Higher percentiles mean better performance.
@@ -12,7 +12,7 @@ CURRENT-SEASON LEADERS, FREE
 Search players and teams, change the metric, adjust the qualifier, and build your Following list. Open a player profile in one tap. Current-season leaders, team season scouting, and following are free.
 
 POSTSEASON IN CONTEXT
-Regular-season and postseason data stay separate. October player values are placed on the same year's regular-season percentile curve, with clear labels and MLB-style playing-time qualification.
+Regular-season and postseason data stay separate. October player values are placed on the same year's regular-season percentile curve, with clear labels and standard playing-time qualification.
 
 STATSCOUT+
 Unlock the full scouting toolkit:
@@ -21,7 +21,7 @@ Unlock the full scouting toolkit:
 - Player Comparisons: two players side by side across every available metric
 - Year-over-Year: compare a player's seasons back to 2015
 - Team Recent Form: last 7, 15, or 30 days for all 30 clubs
-- Historical Seasons: explore the full Statcast era
+- Historical Seasons: explore every season since 2015
 
 Choose Monthly, Yearly, or Lifetime. Plan prices and trial eligibility appear in the app before purchase.
 
@@ -37,4 +37,4 @@ Monthly and Yearly are auto-renewing subscriptions, with a free trial for eligib
 Privacy Policy: https://jackwallner.github.io/baseball/android-privacy.html
 Terms of Use: https://jackwallner.github.io/baseball/android-terms.html
 
-StatScout is independent and is not affiliated with, endorsed by, or sponsored by Major League Baseball, any team, or Baseball Savant. Player names, team names, and statistics are used for identification and information.
+StatScout is independent and is not affiliated with, endorsed by, or sponsored by any professional baseball league, team, players association, or data provider. Player names, team names, and statistics are used for identification and information.

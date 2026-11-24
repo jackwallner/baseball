@@ -1,6 +1,6 @@
 Bejzbol iza samog rezultata.
 
-StatScout spaja Statcast percentile, klasičnu statistiku sezone i trenutnu formu u jednoj brzoj bejzbol aplikaciji za scouting. Pronađite vodeće u ligi, pratite svoje igrače i pogledajte što udarača ili bacača čini vrhunskim.
+StatScout spaja napredne percentile, klasičnu statistiku sezone i trenutnu formu u jednoj brzoj bejzbol aplikaciji za scouting. Pronađite vodeće u ligi, pratite svoje igrače i pogledajte što udarača ili bacača čini vrhunskim.
 
 STATCAST PERCENTILI NA PRVI POGLED
 Čitajte xwOBA, xBA, brzinu odbijanja, udio barrela, jakih udaraca, strikeouta i više kao jasne percentilne trake. Crvena označava vrh ljestvice, plava dno. Viši percentil znači bolju izvedbu.
@@ -12,7 +12,7 @@ VODEĆI TEKUĆE SEZONE, BESPLATNO
 Tražite igrače i momčadi, mijenjajte metriku, prilagodite prag kvalifikacije i složite popis praćenih. Jedan dodir otvara profil igrača. Vodeći tekuće sezone, scouting momčadi i praćenje igrača su besplatni.
 
 DOIGRAVANJE U KONTEKSTU
-Podaci regularne sezone i doigravanja ostaju odvojeni. Listopadske vrijednosti smještene su na percentilnu krivulju regularne sezone iste godine, s jasnim oznakama i pragom vremena igre kakav koristi MLB.
+Podaci regularne sezone i doigravanja ostaju odvojeni. Listopadske vrijednosti smještene su na percentilnu krivulju regularne sezone iste godine, s jasnim oznakama i uobičajenim pragom vremena igre.
 
 STATSCOUT+
 Otključajte cijeli alat za scouting:
@@ -21,7 +21,7 @@ Otključajte cijeli alat za scouting:
 - Usporedba igrača: dva igrača jedan uz drugog u svim metrikama
 - Iz godine u godinu: sezone igrača sve do 2015.
 - Forma momčadi: zadnjih 7, 15 ili 30 dana za svih 30 klubova
-- Prošle sezone: cijelo Statcast razdoblje
+- Prošle sezone: svaka sezona od 2015.
 
 Odaberite mjesečni, godišnji ili doživotni paket. Cijene i pravo na probno razdoblje prikazuju se u aplikaciji prije kupnje.
 
@@ -39,4 +39,4 @@ Napomena: sama aplikacija je na engleskom jeziku.
 Privatnost: https://jackwallner.github.io/baseball/android-privacy.html
 Uvjeti korištenja: https://jackwallner.github.io/baseball/android-terms.html
 
-StatScout je neovisan i nije povezan s Major League Baseballom, nijednom momčadi ni Baseball Savantom, niti ga oni podržavaju ili sponzoriraju. Imena igrača i momčadi te statistika koriste se za identifikaciju i informiranje.
+StatScout je neovisan i nije povezan ni s jednom profesionalnom bejzbolskom ligom, momčadi, udrugom igrača ni pružateljem podataka, niti ga oni podržavaju ili sponzoriraju. Imena igrača i momčadi te statistika koriste se za identifikaciju i informiranje.
