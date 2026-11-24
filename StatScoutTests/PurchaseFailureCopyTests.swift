@@ -152,3 +152,50 @@ final class PendingUnlockActionTests: XCTestCase {
         }
     }
 }
+
+/// Ask to Buy reads as a calm wait, never an error, and the mapping from a
+/// thrown RevenueCat error to what the buyer sees is pinned here because
+/// `purchase` cannot run in the simulator.
+final class PurchaseOutcomeMappingTests: XCTestCase {
+    private func outcome(_ code: ErrorCode) -> StoreService.PurchaseErrorOutcome {
+        StoreService.purchaseErrorOutcome(for: NSError(domain: ErrorCode.errorDomain, code: code.rawValue))
+    }
+
+    func testPaymentPendingMapsToPending() {
+        XCTAssertEqual(outcome(.paymentPendingError), .pending)
+    }
+
+    func testCancelledMapsToCancelled() {
+        XCTAssertEqual(outcome(.purchaseCancelledError), .cancelled)
+        XCTAssertEqual(StoreService.purchaseErrorOutcome(for: ErrorCode.purchaseCancelledError), .cancelled)
+    }
+
+    func testAlreadyPurchasedSettlesAsRestore() {
+        XCTAssertEqual(outcome(.productAlreadyPurchasedError), .alreadyPurchased)
+        XCTAssertEqual(outcome(.receiptAlreadyInUseError), .alreadyPurchased)
+    }
+
+    func testNetworkErrorsStayFailuresWithTheReachableLine() {
+        for code in [ErrorCode.networkError, .offlineConnectionError] {
+            XCTAssertEqual(outcome(code), .failure)
+            let line = StoreService.purchaseFailureMessage(
+                for: NSError(domain: ErrorCode.errorDomain, code: code.rawValue)
+            )
+            XCTAssertEqual(line, "Couldn't reach the App Store. Check your connection and try again.")
+        }
+    }
+
+    func testOtherErrorsAreUnchanged() {
+        XCTAssertEqual(outcome(.storeProblemError), .failure)
+        XCTAssertEqual(outcome(.purchaseNotAllowedError), .failure)
+        XCTAssertEqual(StoreService.purchaseErrorOutcome(for: NSError(domain: "Other", code: 1)), .failure)
+    }
+
+    func testPendingCopyIsCalmAndNotAnError() throws {
+        try XCTSkipUnless(Locale.current.language.languageCode?.identifier == "en")
+        XCTAssertEqual(
+            StoreService.pendingApprovalMessage,
+            "Waiting for approval. Your purchase unlocks once it is approved."
+        )
+    }
+}

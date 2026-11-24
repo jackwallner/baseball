@@ -391,7 +391,8 @@ struct OnboardingCards: View {
                 // above the button shifts either.
                 Text(trialError ?? " ")
                     .font(SavantType.micro)
-                    .foregroundStyle(SavantPalette.savantRed)
+                    .foregroundStyle(trialError == StoreService.pendingApprovalMessage
+                        ? SavantPalette.inkSecondary : SavantPalette.savantRed)
                     .multilineTextAlignment(.center)
                     .frame(maxWidth: .infinity)
                     .fixedSize(horizontal: false, vertical: true)
@@ -589,7 +590,7 @@ struct OnboardingCards: View {
                 case .pending:
                     // Ask-to-Buy / deferred payment: onboarding stays up because
                     // isPro hasn't flipped, explain instead of appearing dead.
-                    trialError = String(localized: "Purchase pending approval. StatScout+ unlocks automatically once it's approved.")
+                    trialError = StoreService.pendingApprovalMessage
                 case .cancelled:
                     // Backing out of Apple's sheet is a normal choice, not an
                     // error. Showing red text here is what App Review reads as

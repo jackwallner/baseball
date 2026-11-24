@@ -671,35 +671,59 @@ final class StoreService: NSObject, ObservableObject {
             if !isPro { pendingPurchaseCount += 1 }
             return isPro ? .purchased : .pending
         } catch {
-            // RevenueCat reports a cancelled sheet as a thrown error in some
-            // StoreKit paths, not just via `userCancelled`. Cancelling is a
-            // normal outcome, never an error to show the user.
-            if let rcError = error as? RevenueCat.ErrorCode, rcError == .purchaseCancelledError {
+            // Cancelling and a deferred (Ask to Buy) purchase are normal
+            // outcomes, never errors to show the user.
+            switch Self.purchaseErrorOutcome(for: error) {
+            case .cancelled:
                 return .cancelled
-            }
-            let nsError = error as NSError
-            if nsError.domain == RevenueCat.ErrorCode.errorDomain,
-               let code = RevenueCat.ErrorCode(rawValue: nsError.code) {
-                switch code {
-                case .purchaseCancelledError:
-                    return .cancelled
-                case .paymentPendingError:
-                    pendingPurchaseCount += 1
-                    return .pending
-                case .productAlreadyPurchasedError, .receiptAlreadyInUseError:
-                    // Already entitled on this Apple ID: settle it as a restore
-                    // rather than telling the buyer their purchase failed.
-                    await updateCustomerProductStatus(fetchPolicy: .fetchCurrent)
-                    if !isPro { pendingPurchaseCount += 1 }
-                    return isPro ? .purchased : .pending
-                default:
-                    break
-                }
+            case .pending:
+                pendingPurchaseCount += 1
+                return .pending
+            case .alreadyPurchased:
+                // Already entitled on this Apple ID: settle it as a restore
+                // rather than telling the buyer their purchase failed.
+                await updateCustomerProductStatus(fetchPolicy: .fetchCurrent)
+                if !isPro { pendingPurchaseCount += 1 }
+                return isPro ? .purchased : .pending
+            case .failure:
+                break
             }
             logger.error("Purchase failed: \(String(describing: error), privacy: .public)")
             lastError = Self.purchaseFailureMessage(for: error)
             throw error
         }
+    }
+
+    /// What a thrown purchase error means for the buyer. Pure, so the mapping
+    /// is unit-testable: `purchase` itself is unreachable in the simulator.
+    enum PurchaseErrorOutcome: Equatable {
+        case cancelled
+        /// Ask to Buy or another deferred payment. Not an error.
+        case pending
+        case alreadyPurchased
+        /// Anything else; `purchaseFailureMessage(for:)` words it.
+        case failure
+    }
+
+    nonisolated static func purchaseErrorOutcome(for error: Error) -> PurchaseErrorOutcome {
+        if let rcError = error as? RevenueCat.ErrorCode, rcError == .purchaseCancelledError {
+            return .cancelled
+        }
+        let nsError = error as NSError
+        guard nsError.domain == RevenueCat.ErrorCode.errorDomain,
+              let code = RevenueCat.ErrorCode(rawValue: nsError.code) else { return .failure }
+        switch code {
+        case .purchaseCancelledError: return .cancelled
+        case .paymentPendingError: return .pending
+        case .productAlreadyPurchasedError, .receiptAlreadyInUseError: return .alreadyPurchased
+        default: return .failure
+        }
+    }
+
+    /// Shown wherever a purchase is waiting on an Ask to Buy approval. Calm,
+    /// not an error; approval unlocks through the customer-info update.
+    nonisolated static var pendingApprovalMessage: String {
+        String(localized: "Waiting for approval. Your purchase unlocks once it is approved.")
     }
 
     /// Human-readable, purchase-specific failure copy. Never generic enough to

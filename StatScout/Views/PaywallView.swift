@@ -526,7 +526,7 @@ struct PaywallView: View {
                 case .pending:
                     // Ask-to-Buy / deferred payment: nothing is unlocked yet and
                     // no error occurred, tell the user instead of going silent.
-                    restoreMessage = String(localized: "Purchase pending approval. StatScout+ unlocks automatically once it's approved.")
+                    restoreMessage = StoreService.pendingApprovalMessage
                 case .cancelled:
                     // Dismissing Apple's sheet is a choice, not a failure.
                     errorMessage = nil

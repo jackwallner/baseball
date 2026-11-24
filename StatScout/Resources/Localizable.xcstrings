@@ -25057,71 +25057,6 @@
         }
       }
     },
-    "Purchase pending approval. StatScout+ unlocks automatically once it's approved.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Purchase pending approval. StatScout+ unlocks automatically once it's approved."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Compra pendiente de aprobación. StatScout+ se desbloqueará automáticamente cuando se apruebe."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Achat en attente d’approbation. StatScout+ se débloquera automatiquement une fois l’achat approuvé."
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Acquisto in attesa di approvazione. StatScout+ si sbloccherà automaticamente dopo l’approvazione."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "購入は承認待ちです。承認されるとStatScout+が自動的に有効になります。"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Compra pendente de aprovação. O StatScout+ será liberado automaticamente quando for aprovada."
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "購買尚待核准，核准後將自動解鎖 StatScout+。"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kauf wartet auf Genehmigung. StatScout+ wird automatisch freigeschaltet, sobald sie vorliegt."
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "구매 승인 대기 중입니다. 승인되면 StatScout+가 자동으로 잠금 해제됩니다."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "购买正在等待批准。批准后 StatScout+ 会自动解锁。"
-          }
-        }
-      }
-    },
     "Purchases are turned off for this device. Check Screen Time › Content & Privacy Restrictions.": {
       "extractionState": "manual",
       "localizations": {
@@ -39419,6 +39354,71 @@
           "stringUnit": {
             "state": "translated",
             "value": "开始免费试用 1 天"
+          }
+        }
+      }
+    },
+    "Waiting for approval. Your purchase unlocks once it is approved.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waiting for approval. Your purchase unlocks once it is approved."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esperando aprobación. Tu compra se desbloquea cuando se apruebe."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En attente d’approbation. Votre achat sera débloqué une fois approuvé."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In attesa di approvazione. L’acquisto si sblocca appena viene approvato."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "承認待ちです。承認されると購入が有効になります。"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aguardando aprovação. Sua compra é liberada assim que for aprovada."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "等待核准中。核准後即會解鎖你的購買項目。"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wartet auf Genehmigung. Dein Kauf wird freigeschaltet, sobald er genehmigt ist."
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "승인을 기다리는 중입니다. 승인되면 구매가 잠금 해제됩니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在等待批准。批准后你的购买项目将解锁。"
           }
         }
       }
