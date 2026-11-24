@@ -474,7 +474,9 @@ struct PaywallView: View {
     private var ctaTitle: String {
         guard let package = selectedPackage else { return String(localized: "Continue") }
         if package.productKind == .lifetime { return String(localized: "Unlock Lifetime") }
-        if store.isEligibleForIntroOffer(package) { return String(localized: "Start Free Trial") }
+        if store.isEligibleForIntroOffer(package), let trial = package.introTrial {
+            return store.trialCTAArm.title(.titleCase, trial: trial)
+        }
         return String(localized: "Subscribe")
     }
 
