@@ -14,7 +14,7 @@ iPhone · Android · Nightly Updates · Privacy First
 
 ## What does Baseball Savvy StatScout show?
 
-Statcast-style percentile bars and nightly leaderboards for every qualified MLB player. Free with no account. StatScout+ adds year-over-year comparisons.
+Statcast-style percentile bars and nightly leaderboards for every qualified MLB player. Free with no account. StatScout+ adds trends, comparisons and past seasons.
 
 ### Visual rankings
 
@@ -30,11 +30,11 @@ Type a name and jump straight to their profile. Every qualified player in the le
 
 ### Rosters at a glance
 
-Browse all 30 MLB teams with full rosters, positions, and player percentile rankings. See how every lineup shakes out.
+Browse all 30 MLB teams with full rosters, positions, and player percentile rankings. Follow players and a favorite team for free, and switch to postseason boards once the playoffs begin.
 
-### Year-over-year
+### Trends and compare
 
-Compare player metrics across seasons to spot improvements, declines, and breakout trends with StatScout+.
+See who is heating up or cooling off over the last 7, 15 or 30 days, compare any two players or teams, and go back to 2015 with StatScout+.
 
 Included with StatScout+
 
@@ -62,11 +62,11 @@ StatScout reads nightly Statcast data, calculates percentile rankings for every 
 
 An optional upgrade for deeper analysis. Monthly, yearly, or a one-time lifetime purchase is available. Prices are shown in the app before you buy and vary by region.
 
-**Year-over-Year Comparisons.** See how a player's metrics have evolved across multiple seasons. Spot breakout candidates and decline trends at a glance.
+**Trends and Recent Form.** See which hitters and pitchers are heating up or cooling off over the last 7, 15 or 30 days, on the league board, player profiles and team rosters.
 
-**Multi-Season Trends.** Pull up any stat over the last several seasons in one chart. See the full arc of a player's development.
+**Compare.** Put any two players or any two teams side by side, or one player year over year, with the league leader and trailer on every metric in Best & Worst.
 
-**Early Access.** StatScout+ subscribers get new features first as StatScout continues to grow.
+**Past Seasons.** Every season back to 2015.
 
 ### Specs
 
@@ -110,7 +110,7 @@ The data refreshes every night, so rankings reflect games through the previous d
 
 ## Is Baseball Savvy StatScout free?
 
-Yes, the core app is a free download with percentile rankings, leaderboards and team rosters. An optional StatScout+ upgrade adds year-over-year comparisons, and prices are shown in the app before you buy and vary by region.
+Yes, the core app is a free download with percentile rankings, leaderboards and team rosters. An optional StatScout+ upgrade adds trends, comparisons and past seasons back to 2015, and prices are shown in the app before you buy and vary by region.
 
 ## Do I need an account?
 
