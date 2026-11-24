@@ -805,7 +805,8 @@ struct PlusDirectCTA: View {
             if let statusMessage {
                 Text(statusMessage)
                     .font(SavantType.micro)
-                    .foregroundStyle(SavantPalette.savantRed)
+                    .foregroundStyle(statusMessage == StoreService.pendingApprovalMessage
+                        ? SavantPalette.inkSecondary : SavantPalette.savantRed)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -873,7 +874,7 @@ struct PlusDirectCTA: View {
                 break
             case .pending:
                 // Ask-to-Buy / deferred payment: not unlocked, not an error.
-                statusMessage = String(localized: "Purchase pending approval. StatScout+ unlocks automatically once it's approved.")
+                statusMessage = StoreService.pendingApprovalMessage
             case .cancelled:
                 // Backing out of Apple's sheet is not an error to report.
                 statusMessage = nil
