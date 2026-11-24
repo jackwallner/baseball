@@ -65,7 +65,7 @@ fun StatsScreen() {
         SearchField(query, { query = it })
         Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             ChoiceMenu(category.raw, MetricCategory.entries.map { it to it.raw }, { category = it }, "category-picker")
-            ChoiceMenu(if (standard) "Standard" else "Statcast", listOf(false to "Statcast", true to "Standard"), { standard = it }, "stat-mode")
+            ChoiceMenu(if (standard) "Standard" else "Advanced", listOf(false to "Advanced", true to "Standard"), { standard = it }, "stat-mode")
             ChoiceMenu(activeLabel, labels.map { it to it }, { label = it }, "metric-picker")
             ChoiceMenu(qualifier, listOf("All", "Min Sample", "Qualified").map { it to it }, { qualifier = it }, "qualifier-picker")
             ChoiceMenu(if (position == "All positions") "Pos" else position, (listOf("All positions") + roster.map { it.displayPosition }.distinct().sorted()).map { it to it }, { position = it }, "position-picker")

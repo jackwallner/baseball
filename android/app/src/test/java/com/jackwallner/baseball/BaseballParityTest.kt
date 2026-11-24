@@ -14,6 +14,17 @@ class BaseballParityTest {
     private fun player(id: Int = 1, type: String = "batter", team: String = "NYY", metrics: List<Metric> = listOf(metric(MetricCategory.HITTING, 90)), stats: List<StandardStat> = emptyList()) = Player(id, "Bobby Witt Jr.", team, "TBD", "R/R", Instant.parse("2026-10-10T12:00:00Z"), 2026, type, "baseball_savant", metrics, stats)
     private fun stat(label: String, value: String, category: MetricCategory = MetricCategory.HITTING) = StandardStat(label, label, value, category)
 
+    @Test fun cityOnlyTeamNamesDropTheClubName() {
+        assertEquals("New York Yankees", teamDisplayName("NYY"))
+        cityOnlyTeamNames = true
+        try {
+            assertEquals("New York", teamDisplayName("NYY"))
+            assertEquals("Chicago", teamDisplayName("CHC"))
+        } finally {
+            cityOnlyTeamNames = false
+        }
+    }
+
     @Test fun overallBalancesCategoriesRatherThanCountingEveryMetric() {
         val p = player(metrics = listOf(metric(MetricCategory.HITTING, 100), metric(MetricCategory.HITTING, 100, "xBA"), metric(MetricCategory.FIELDING, 0)))
         assertEquals(50, p.overallPercentile)

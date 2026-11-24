@@ -15,7 +15,7 @@ import com.jackwallner.baseball.ui.theme.*
 fun OnboardingScreen(onComplete: () -> Unit) {
     var page by remember { mutableIntStateOf(0) }
     val titles = listOf("Who's hot\nright now.", "Any two.\nAny season.", "Every club.\nEvery angle.")
-    val details = listOf("Spot the hitters heating up and the pitchers finding their stride. Real Statcast data, updated nightly.", "Compare players head-to-head and see how their rankings changed, season by season, back to 2015.", "Scout all 30 clubs. Explore hitting, pitching, fielding, and running, with the numbers that explain the game.")
+    val details = listOf("Spot the hitters heating up and the pitchers finding their stride. Real pitch-tracking data, updated nightly.", "Compare players head-to-head and see how their rankings changed, season by season, back to 2015.", "Scout all 30 clubs. Explore hitting, pitching, fielding, and running, with the numbers that explain the game.")
     Column(Modifier.fillMaxSize().background(SavantPalette.canvas).safeDrawingPadding().padding(24.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text("STATSCOUT", style = SavantType.cardTitle, color = SavantPalette.midnight, modifier = Modifier.weight(1f))

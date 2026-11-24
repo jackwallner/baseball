@@ -56,7 +56,7 @@ fun SettingsScreen() {
                 ValueRow("Last update", dayLabel(graph.dashboard.players.filter { it.season == StatScoutSeason.CURRENT }.maxOfOrNull { it.updatedAt }))
                 ValueRow("Historical seasons", "${StatScoutSeason.EARLIEST}–${StatScoutSeason.CURRENT - 1}")
                 SettingAction("Refresh Data") { graph.dashboard.refresh() }
-                Text("Statcast data updates nightly. Postseason values use the regular-season percentile curve. Team percentiles average ranked roster players.", style = SavantType.small, color = SavantPalette.inkSecondary, modifier = Modifier.padding(16.dp))
+                Text("Data updates nightly. Postseason values use the regular-season percentile curve. Team percentiles average ranked roster players.", style = SavantType.small, color = SavantPalette.inkSecondary, modifier = Modifier.padding(16.dp))
             }
             item { SectionBar("Help & Feedback") }
             item {

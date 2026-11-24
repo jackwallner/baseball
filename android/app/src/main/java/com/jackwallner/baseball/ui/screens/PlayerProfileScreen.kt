@@ -69,7 +69,7 @@ fun PlayerProfileScreen(initial: Player) {
             }
             item { SectionBar("Standard Stats", "$season") }
             item { StandardStatsGrid(player.standardStats.orEmpty().filter { it.resolvedCategory(player.playerType) == category }) }
-            item { SectionBar("Statcast Percentiles", category.raw.uppercase()) }
+            item { SectionBar("Advanced Percentiles", category.raw.uppercase()) }
             items(player.metrics.filter { it.category == category }.sortedBy { category.metricPriorityOrder.indexOf(it.label).let { i -> if (i < 0) Int.MAX_VALUE else i } }, key = { it.id }) { metric ->
                 Box(Modifier.padding(horizontal = 16.dp).background(SavantPalette.surface)) { MetricBar(metric) { navigator.push(Route.Metric(metric.label, metric.category)) } }
             }

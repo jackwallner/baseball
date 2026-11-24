@@ -112,9 +112,17 @@ val teamNicknames = mapOf(
 
 fun normalizedTeamAbbreviation(team: String) = team.trim().uppercase().let { teamAliases[it] ?: it }
 fun teamFullName(team: String) = teamCities[normalizedTeamAbbreviation(team)] ?: team
+/**
+ * Store captures show the city alone ("Seattle"), so listing screenshots carry no club
+ * names. Only the debug launch extra `cityTeamNames` sets this.
+ */
+@Volatile
+var cityOnlyTeamNames: Boolean = false
+
 fun teamDisplayName(team: String): String {
     val abbr = normalizedTeamAbbreviation(team)
     val city = teamFullName(abbr).replace(" (AL)", "").replace(" (NL)", "")
+    if (cityOnlyTeamNames) return city
     val nickname = teamNicknames[abbr] ?: return city
     return if (nickname == city) city else "$city $nickname"
 }
