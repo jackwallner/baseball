@@ -80,6 +80,7 @@ struct PlayerProfileView: View {
     /// That is the same open, so it must not count toward the pitch or the
     /// review moment a second time.
     @State private var hasCountedOpen = false
+    @State private var followMoment = 0
 
     private let profileOpenCountKey = "profileOpenCount"
 
@@ -338,6 +339,7 @@ struct PlayerProfileView: View {
                 Task { await loadHistorical?() }
             }
         }
+        .requestsReview(after: followMoment)
         .navigationDestination(item: $comparisonRoute) { route in
             PlayerComparisonView(
                 playerA: route.playerA,
@@ -363,11 +365,6 @@ struct PlayerProfileView: View {
                 trialPitchTrigger = .playerScouting
             }
             #endif
-            // Engaged browsing: a positive moment for the system rating
-            // prompt. The tracker keeps it out of the first session.
-            if opens >= 3 {
-                ReviewPromptTracker.recordPositiveMoment()
-            }
         }
     }
 
@@ -378,6 +375,10 @@ struct PlayerProfileView: View {
         return Button {
             favorites.toggleFavorite(playerId: player.playerId)
             UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            // Following is the app's core action: a good moment to ask.
+            if ReviewMoment.followFinished(nowFollowing: favorites.isFavorite(playerId: player.playerId)) {
+                followMoment += 1
+            }
         } label: {
             Image(systemName: isFavorite ? "star.fill" : "star")
                 .foregroundStyle(isFavorite ? Color.yellow : .white)

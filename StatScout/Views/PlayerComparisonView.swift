@@ -86,8 +86,11 @@ struct PlayerComparisonView: View {
     @State private var overrideB: Player?
     @State private var picker: PickerTarget?
     @State private var note: String?
+    @State private var comparisonMoment = 0
 
     private var a: Player { overrideA ?? playerA }
+    /// Changes when either side is replaced, moved to another season or swapped.
+    private var matchupKey: String { "\(a.id)|\(b.id)" }
     private var b: Player { overrideB ?? playerB }
 
     private var comparisonMetrics: [(label: String, category: MetricCategory, a: Metric?, b: Metric?)] {
@@ -192,11 +195,14 @@ struct PlayerComparisonView: View {
                 }
             }
         }
-        .onAppear {
-            if store.isPro {
-                ReviewPromptTracker.recordPositiveMoment()
+        // A member who builds a new matchup has just got the thing StatScout+
+        // sells. Appearing on screen is no moment; only the edit is.
+        .onChange(of: matchupKey) { _, _ in
+            if ReviewMoment.comparisonBuilt(isPro: store.isPro, changedMatchup: true) {
+                comparisonMoment += 1
             }
         }
+        .requestsReview(after: comparisonMoment)
         .sheet(item: $picker) { target in
             if let catalog {
                 let side = target == .a ? a : b

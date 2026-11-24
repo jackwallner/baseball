@@ -6,20 +6,17 @@ import XCTest
 /// the simulator install where it was.
 @MainActor
 final class ReviewPromptTrackerTests: XCTestCase {
-    private var saved: (Int, Date?, Date?, ReviewPromptOutcome?, Int, Bool)!
+    private var saved: (Int, Date?, Date?, ReviewPromptOutcome?)!
 
     override func setUp() async throws {
         saved = (
             ReviewPromptTracker.appLaunchCount,
             ReviewPromptTracker.firstAppOpenDate,
             ReviewPromptTracker.lastShownDate,
-            ReviewPromptTracker.outcome,
-            ReviewPromptTracker.positiveMomentCount,
-            ReviewPromptTracker.hasPendingPositiveMoment
+            ReviewPromptTracker.outcome
         )
         ReviewPromptTracker.outcome = nil
         ReviewPromptTracker.lastShownDate = nil
-        ReviewPromptTracker.hasPendingPositiveMoment = false
     }
 
     override func tearDown() async throws {
@@ -27,8 +24,6 @@ final class ReviewPromptTrackerTests: XCTestCase {
         ReviewPromptTracker.firstAppOpenDate = saved.1
         ReviewPromptTracker.lastShownDate = saved.2
         ReviewPromptTracker.outcome = saved.3
-        ReviewPromptTracker.positiveMomentCount = saved.4
-        ReviewPromptTracker.hasPendingPositiveMoment = saved.5
     }
 
     func testAsksFromTheSecondLaunch() {
@@ -75,14 +70,28 @@ final class ReviewPromptTrackerTests: XCTestCase {
         XCTAssertFalse(ReviewPromptTracker.canRequestReview(hasCompletedOnboarding: true))
     }
 
-    /// An ask skipped because a sheet was up must leave the moment pending so
-    /// the next positive moment can still ask.
-    func testBlockedAskKeepsTheMomentPending() {
+    /// The call stamps the cooldown, so a second moment right after is blocked.
+    func testTheCallStampsTheCooldown() {
         ReviewPromptTracker.appLaunchCount = 9
-        ReviewPromptTracker.recordPositiveMoment()
-        XCTAssertTrue(ReviewPromptTracker.shouldRequestAfterPositiveMoment(hasCompletedOnboarding: true))
-        XCTAssertTrue(ReviewPromptTracker.shouldRequestAfterPositiveMoment(hasCompletedOnboarding: true))
+        XCTAssertTrue(ReviewPromptTracker.canRequestReview(hasCompletedOnboarding: true))
         ReviewPromptTracker.markShown()
-        XCTAssertFalse(ReviewPromptTracker.shouldRequestAfterPositiveMoment(hasCompletedOnboarding: true))
+        XCTAssertFalse(ReviewPromptTracker.canRequestReview(hasCompletedOnboarding: true))
+    }
+
+    func testFollowingAsksButUnfollowingDoesNot() {
+        XCTAssertTrue(ReviewMoment.followFinished(nowFollowing: true))
+        XCTAssertFalse(ReviewMoment.followFinished(nowFollowing: false))
+    }
+
+    func testOnlyAMemberBuildingAMatchupAsks() {
+        XCTAssertTrue(ReviewMoment.comparisonBuilt(isPro: true, changedMatchup: true))
+        XCTAssertFalse(ReviewMoment.comparisonBuilt(isPro: false, changedMatchup: true))
+        XCTAssertFalse(ReviewMoment.comparisonBuilt(isPro: true, changedMatchup: false))
+    }
+
+    func testAStampFromAFutureClockDoesNotHoldTheCooldownShut() {
+        ReviewPromptTracker.appLaunchCount = 9
+        ReviewPromptTracker.lastShownDate = Date.now.addingTimeInterval(90 * 86_400)
+        XCTAssertTrue(ReviewPromptTracker.canRequestReview(hasCompletedOnboarding: true))
     }
 }

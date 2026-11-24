@@ -317,18 +317,12 @@ final class StateMachineRegressionTests: XCTestCase {
     private func isolateProfileCounters() -> () -> Void {
         let d = UserDefaults.standard
         let savedOpens = d.object(forKey: openKey)
-        let savedMoments = ReviewPromptTracker.positiveMomentCount
-        let savedPending = ReviewPromptTracker.hasPendingPositiveMoment
         d.set(0, forKey: openKey)
-        ReviewPromptTracker.positiveMomentCount = 0
-        ReviewPromptTracker.hasPendingPositiveMoment = false
         // Keep the 2-per-session pitch sheet from presenting over the host.
         PaywallGate.shared.markPresented(.playerScouting)
         PaywallGate.shared.markPresented(.playerScouting)
         return {
             if let savedOpens { d.set(savedOpens, forKey: self.openKey) } else { d.removeObject(forKey: self.openKey) }
-            ReviewPromptTracker.positiveMomentCount = savedMoments
-            ReviewPromptTracker.hasPendingPositiveMoment = savedPending
         }
     }
 
@@ -354,8 +348,6 @@ final class StateMachineRegressionTests: XCTestCase {
 
         XCTAssertEqual(UserDefaults.standard.integer(forKey: openKey), 1,
                        "one profile opened once, but the counter says more")
-        XCTAssertEqual(ReviewPromptTracker.positiveMomentCount, 0,
-                       "no third profile was opened, so no review moment is due")
     }
 
     /// Control: leaving the profile and opening it again is a second open.
